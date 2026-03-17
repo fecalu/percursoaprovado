@@ -28,8 +28,8 @@ public class LocalProvaController {
     }
 
     @GetMapping("/{slug}")
-    public ResponseEntity<LocalProvaDTO.Response> buscar(@PathVariable String slug) {
-        return ResponseEntity.ok(localProvaService.buscarPorSlug(slug));
+    public ResponseEntity<LocalProvaDTO.Response> buscar(Authentication authentication, @PathVariable String slug) {
+        return ResponseEntity.ok(localProvaService.buscarPorSlug(slug, ehAdmin(authentication)));
     }
 
     @PostMapping

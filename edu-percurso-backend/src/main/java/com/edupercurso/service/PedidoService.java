@@ -2,6 +2,7 @@ package com.edupercurso.service;
 
 import com.edupercurso.dto.PedidoDTO;
 import com.edupercurso.entity.Assinatura;
+import com.edupercurso.entity.LocalProva;
 import com.edupercurso.entity.Pedido;
 import com.edupercurso.entity.Plano;
 import com.edupercurso.entity.Usuario;
@@ -25,6 +26,7 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final UsuarioLookupService usuarioLookupService;
     private final PlanoService planoService;
+    private final LocalProvaService localProvaService;
     private final AssinaturaService assinaturaService;
     private final MercadoPagoService mercadoPagoService;
 
@@ -167,6 +169,25 @@ public class PedidoService {
         if (!plano.isAtivo()) {
             throw new IllegalArgumentException("Esse plano nao esta disponivel no momento.");
         }
+
+        LocalProva localProva = plano.getLocalProva();
+        if (!localProva.isAtivo()) {
+            throw new IllegalArgumentException("Esse local de prova nao esta disponivel no momento.");
+        }
+
+        if (localProvaService.permiteCompra(localProva)) {
+            return;
+        }
+
+        if (localProva.getStatusComercial() == LocalProva.StatusComercial.EM_BREVE) {
+            throw new IllegalArgumentException("Esse local de prova ainda nao esta disponivel para compra.");
+        }
+
+        if (localProva.getStatusComercial() == LocalProva.StatusComercial.PAUSADO) {
+            throw new IllegalArgumentException("As vendas desse local de prova estao temporariamente pausadas.");
+        }
+
+        throw new IllegalArgumentException("Esse local de prova nao esta disponivel para compra.");
     }
 
     private void validarSemAcessoAtivo(Usuario usuario, Plano plano) {

@@ -36,6 +36,14 @@ public class LocalProva {
     @Builder.Default
     private boolean ativo = true;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_comercial", nullable = false)
+    @Builder.Default
+    private StatusComercial statusComercial = StatusComercial.RASCUNHO;
+
+    @Column(name = "mensagem_publica", columnDefinition = "TEXT")
+    private String mensagemPublica;
+
     @Column(name = "ordem_exibicao")
     @Builder.Default
     private Integer ordemExibicao = 0;
@@ -43,4 +51,11 @@ public class LocalProva {
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
+
+    public enum StatusComercial {
+        RASCUNHO,
+        EM_BREVE,
+        DISPONIVEL,
+        PAUSADO
+    }
 }

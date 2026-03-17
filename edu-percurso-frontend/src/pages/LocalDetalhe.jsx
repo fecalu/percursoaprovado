@@ -3,13 +3,34 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../hooks/useToast'
 import { localProvaService, pedidoService, planoService } from '../services/api'
-import { formatPlanoDuracao } from '../utils/formatters'
+import { formatPlanoDuracao, formatStatusComercialLocal } from '../utils/formatters'
 
 function fmtMoeda(centavos) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   }).format((centavos || 0) / 100)
+}
+
+function getStatusBadgeClass(statusComercial) {
+  if (statusComercial === 'DISPONIVEL') return 'badge-green'
+  if (statusComercial === 'EM_BREVE') return 'badge-warn'
+  if (statusComercial === 'PAUSADO') return 'badge-red'
+  return 'badge-gray'
+}
+
+function getMensagemDisponibilidade(local) {
+  if (local?.mensagemPublica) return local.mensagemPublica
+  if (local?.statusComercial === 'EM_BREVE') {
+    return 'Estamos finalizando os conteudos desse local. Assim que tudo estiver pronto, a compra sera liberada.'
+  }
+  if (local?.statusComercial === 'PAUSADO') {
+    return 'As vendas desse local estao temporariamente pausadas. Tente novamente em outro momento.'
+  }
+  if (local?.statusComercial === 'RASCUNHO') {
+    return 'Esse local ainda esta em rascunho e nao foi aberto ao publico.'
+  }
+  return ''
 }
 
 export default function LocalDetalhe() {
@@ -83,6 +104,9 @@ export default function LocalDetalhe() {
   if (loading) return <div className="spinner" />
   if (!local) return <div className="empty-state">Local de prova nao encontrado.</div>
 
+  const compraLiberada = local.statusComercial === 'DISPONIVEL'
+  const mensagemDisponibilidade = getMensagemDisponibilidade(local)
+
   return (
     <div className="landing-page">
       {ToastEl}
@@ -96,10 +120,16 @@ export default function LocalDetalhe() {
       <section className="hero-shell fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Local de prova</div>
+          <div style={{ marginTop: '0.9rem' }}>
+            <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
+              {formatStatusComercialLocal(local.statusComercial)}
+            </span>
+          </div>
           <h1 className="hero-title">{local.nome}</h1>
           <p className="hero-subtitle">
-            {local.descricao} Compre o acesso desse local e estude com o trajeto real,
-            simulacao completa e modulos de apoio durante toda a validade.
+            {local.descricao} {compraLiberada
+              ? 'Compre o acesso desse local e estude com o trajeto real, simulacao completa e modulos de apoio durante toda a validade.'
+              : mensagemDisponibilidade}
           </p>
           <div className="hero-actions">
             <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/register'}>
@@ -123,10 +153,33 @@ export default function LocalDetalhe() {
       </section>
 
       <section className="landing-section">
-        <div className="page-title">Planos disponiveis</div>
-        <p className="page-sub">Escolha a validade ideal para o seu momento de preparacao.</p>
+        <div className="page-title">{compraLiberada ? 'Planos disponiveis' : 'Disponibilidade do local'}</div>
+        <p className="page-sub">
+          {compraLiberada
+            ? 'Escolha a validade ideal para o seu momento de preparacao.'
+            : 'Esse local aparece no site, mas a compra fica bloqueada ate o administrador liberar as vendas.'}
+        </p>
 
-        {planos.length === 0 ? (
+        {!compraLiberada ? (
+          <div className="card">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
+                {formatStatusComercialLocal(local.statusComercial)}
+              </span>
+              <span className="table-name">Compra indisponivel no momento</span>
+            </div>
+            <div className="mini-copy" style={{ marginTop: '0.9rem' }}>
+              {mensagemDisponibilidade}
+            </div>
+            {isAdmin && (
+              <div style={{ marginTop: '1rem' }}>
+                <button className="btn btn-ghost" onClick={() => navigate('/admin/locais')}>
+                  Ajustar status do local
+                </button>
+              </div>
+            )}
+          </div>
+        ) : planos.length === 0 ? (
           <div className="empty-state">Esse local ainda nao possui planos ativos.</div>
         ) : (
           <div className="plan-grid">

@@ -2,13 +2,20 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { localProvaService, planoService } from '../services/api'
-import { formatPlanoDuracao } from '../utils/formatters'
+import { formatPlanoDuracao, formatStatusComercialLocal } from '../utils/formatters'
 
 function fmtMoeda(centavos) {
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   }).format((centavos || 0) / 100)
+}
+
+function getStatusBadgeClass(statusComercial) {
+  if (statusComercial === 'DISPONIVEL') return 'badge-green'
+  if (statusComercial === 'EM_BREVE') return 'badge-warn'
+  if (statusComercial === 'PAUSADO') return 'badge-red'
+  return 'badge-gray'
 }
 
 export default function Home() {
@@ -72,7 +79,7 @@ export default function Home() {
 
       <section className="landing-section">
         <div className="page-title">Locais de prova</div>
-        <p className="page-sub">Escolha o local onde voce vai fazer o exame e veja os planos disponiveis.</p>
+        <p className="page-sub">Escolha o local onde voce vai fazer o exame e veja o que ja esta disponivel ou em preparacao.</p>
 
         {loading ? (
           <div className="spinner" />
@@ -83,20 +90,35 @@ export default function Home() {
             {locais.map(local => {
               const planosLocal = planosPorLocal.get(local.slug) || []
               const planoInicial = planosLocal[0]
+              const estaDisponivel = local.statusComercial === 'DISPONIVEL'
+              const rodapeEsquerdo = estaDisponivel
+                ? `${planosLocal.length} ${planosLocal.length === 1 ? 'plano' : 'planos'}`
+                : formatStatusComercialLocal(local.statusComercial)
+              const rodapeDireito = estaDisponivel
+                ? planoInicial ? `A partir de ${fmtMoeda(planoInicial.precoCentavos)}` : 'Planos em breve'
+                : local.statusComercial === 'PAUSADO' ? 'Vendas pausadas' : 'Compra bloqueada'
 
               return (
                 <Link key={local.id} to={`/locais/${local.slug}`} className="spotlight-card">
                   <div className="spotlight-city">{local.cidade}</div>
+                  <div>
+                    <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
+                      {formatStatusComercialLocal(local.statusComercial)}
+                    </span>
+                  </div>
                   <div className="spotlight-title">{local.nome}</div>
                   <div className="spotlight-desc">{local.descricao}</div>
-                  {planosLocal.length > 0 && (
+                  {!estaDisponivel && local.mensagemPublica && (
+                    <div className="mini-copy">{local.mensagemPublica}</div>
+                  )}
+                  {estaDisponivel && planosLocal.length > 0 && (
                     <div className="mini-copy">
                       Planos: {planosLocal.map(plano => formatPlanoDuracao(plano.duracaoDias)).join(', ')}
                     </div>
                   )}
                   <div className="spotlight-footer">
-                    <span>{planosLocal.length} planos</span>
-                    <span>{planoInicial ? `A partir de ${fmtMoeda(planoInicial.precoCentavos)}` : 'Em breve'}</span>
+                    <span>{rodapeEsquerdo}</span>
+                    <span>{rodapeDireito}</span>
                   </div>
                 </Link>
               )

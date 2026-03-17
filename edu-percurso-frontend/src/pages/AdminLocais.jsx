@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { localProvaService } from '../services/api'
 import { useToast } from '../hooks/useToast'
+import { formatStatusComercialLocal } from '../utils/formatters'
 
 const VAZIO = {
   nome: '',
   slug: '',
   descricao: '',
   cidade: 'Sao Luis',
+  statusComercial: 'RASCUNHO',
+  mensagemPublica: '',
   ordemExibicao: 0,
   ativo: true,
 }
@@ -38,6 +41,8 @@ export default function AdminLocais() {
       slug: local.slug || '',
       descricao: local.descricao || '',
       cidade: local.cidade || 'Sao Luis',
+      statusComercial: local.statusComercial || 'RASCUNHO',
+      mensagemPublica: local.mensagemPublica || '',
       ordemExibicao: local.ordemExibicao ?? 0,
       ativo: local.ativo ?? true,
     })
@@ -88,7 +93,7 @@ export default function AdminLocais() {
     <>
       {ToastEl}
       <div className="page-title">Locais de prova</div>
-      <p className="page-sub">Cadastre os locais oficiais, cidade, slug e ordem de exibicao.</p>
+      <p className="page-sub">Cadastre os locais oficiais, defina a visibilidade comercial e controle quando cada um pode ser vendido.</p>
 
       <div className="admin-grid">
         <div className="card">
@@ -110,6 +115,26 @@ export default function AdminLocais() {
               <div className="form-group">
                 <label className="form-label">Cidade</label>
                 <input className="form-input" value={form.cidade} onChange={e => setForm(current => ({ ...current, cidade: e.target.value }))} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Status comercial</label>
+                <select className="form-select" value={form.statusComercial} onChange={e => setForm(current => ({ ...current, statusComercial: e.target.value }))}>
+                  <option value="RASCUNHO">Rascunho</option>
+                  <option value="EM_BREVE">Em breve</option>
+                  <option value="DISPONIVEL">Disponivel</option>
+                  <option value="PAUSADO">Pausado</option>
+                </select>
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Mensagem publica</label>
+                <textarea
+                  className="form-textarea"
+                  value={form.mensagemPublica}
+                  onChange={e => setForm(current => ({ ...current, mensagemPublica: e.target.value }))}
+                  placeholder="Ex.: Estamos finalizando os videos deste local."
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">Ordem</label>
@@ -138,9 +163,13 @@ export default function AdminLocais() {
                   <div>
                     <div className="table-name">{local.nome}</div>
                     <div className="mini-copy">{local.cidade} - /{local.slug}</div>
+                    {local.mensagemPublica && <div className="mini-copy">{local.mensagemPublica}</div>}
                   </div>
                   <div className="table-actions">
                     <span className={`badge ${local.ativo ? 'badge-green' : 'badge-gray'}`}>{local.ativo ? 'Ativo' : 'Inativo'}</span>
+                    <span className={`badge ${local.statusComercial === 'DISPONIVEL' ? 'badge-green' : local.statusComercial === 'EM_BREVE' ? 'badge-warn' : local.statusComercial === 'PAUSADO' ? 'badge-red' : 'badge-gray'}`}>
+                      {formatStatusComercialLocal(local.statusComercial)}
+                    </span>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 10px' }} onClick={() => editar(local)}>Editar</button>
                     <button className="btn btn-danger" style={{ fontSize: 12, padding: '6px 10px' }} onClick={() => excluir(local)}>Excluir</button>
                   </div>

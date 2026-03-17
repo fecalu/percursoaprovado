@@ -20,17 +20,23 @@ public class PlanoService {
     public List<PlanoDTO.Response> listar(String localSlug, boolean todos) {
         List<Plano> planos;
         if (localSlug != null && !localSlug.isBlank()) {
+            var localProva = localProvaService.buscarEntidadePorSlug(localSlug);
             if (todos) {
                 planos = planoRepository.findByLocalProvaIdOrderByDuracaoDiasAsc(
-                        localProvaService.buscarEntidadePorSlug(localSlug).getId()
+                        localProva.getId()
                 );
             } else {
+                if (!localProvaService.permiteCompra(localProva)) {
+                    return List.of();
+                }
                 planos = planoRepository.findByLocalProvaSlugAndAtivoTrueOrderByDuracaoDiasAsc(localSlug);
             }
         } else {
             planos = todos
                     ? planoRepository.findAll().stream().sorted((a, b) -> a.getDuracaoDias().compareTo(b.getDuracaoDias())).toList()
-                    : planoRepository.findByAtivoTrueOrderByDuracaoDiasAsc();
+                    : planoRepository.findByAtivoTrueOrderByDuracaoDiasAsc().stream()
+                    .filter(plano -> localProvaService.permiteCompra(plano.getLocalProva()))
+                    .toList();
         }
 
         return planos.stream()

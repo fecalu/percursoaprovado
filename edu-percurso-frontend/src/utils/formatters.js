@@ -77,6 +77,18 @@ export function formatOrigemAssinatura(origem) {
   return labels[origem] || origem
 }
 
+export function formatStatusComercialLocal(statusComercial) {
+  const labels = {
+    RASCUNHO: 'Rascunho',
+    EM_BREVE: 'Em breve',
+    DISPONIVEL: 'Disponivel',
+    PAUSADO: 'Pausado',
+  }
+
+  if (!statusComercial) return '-'
+  return labels[statusComercial] || statusComercial
+}
+
 export function formatDiasRestantes(dias, status) {
   if (status === 'CANCELADA') return 'Cancelado'
   if (status === 'EXPIRADA') return 'Expirado'
