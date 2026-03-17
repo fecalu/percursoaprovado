@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { percursoService, progressoService } from '../services/api'
+import ContentThumbnail from '../components/ContentThumbnail'
 
 function fmtDuracao(segundos) {
   if (!segundos) return '—'
@@ -71,14 +72,7 @@ export default function Percursos() {
                 className="percurso-card"
                 onClick={() => navigate(`/percursos/${p.id}`)}
               >
-                <div className="card-thumb">
-                  <div className="card-thumb-overlay" />
-                  <div className="play-btn">
-                    <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                      <path d="M7 5l9 5-9 5V5z" fill="#2de09a"/>
-                    </svg>
-                  </div>
-                </div>
+                <ContentThumbnail thumbnailUrl={p.thumbnailUrl} titulo={p.titulo} videoUrl={p.videoUrl} />
                 <div className="card-body">
                   {p.categoriaNome && <div className="card-tag">{p.categoriaNome}</div>}
                   <div className="card-title">{p.titulo}</div>

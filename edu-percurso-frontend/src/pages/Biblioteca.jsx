@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assinaturaService, percursoService } from '../services/api'
+import ContentThumbnail from '../components/ContentThumbnail'
 import { formatDataCurta, formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
 
 export default function Biblioteca() {
@@ -127,14 +128,7 @@ export default function Biblioteca() {
               <div className="card-grid">
                 {conteudosGerais.map(item => (
                   <div key={item.id} className="percurso-card" onClick={() => navigate(`/conteudos/${item.id}`)}>
-                    <div className="card-thumb">
-                      <div className="card-thumb-overlay" />
-                      <div className="play-btn">
-                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                          <path d="M7 5l9 5-9 5V5z" fill="#2de09a" />
-                        </svg>
-                      </div>
-                    </div>
+                    <ContentThumbnail thumbnailUrl={item.thumbnailUrl} titulo={item.titulo} videoUrl={item.videoUrl} />
                     <div className="card-body">
                       <div className="card-tag">{formatTipoConteudo(item.tipoConteudo)}</div>
                       <div className="card-title">{item.titulo}</div>
@@ -161,14 +155,7 @@ export default function Biblioteca() {
               <div className="card-grid">
                 {secao.itens.map(item => (
                   <div key={item.id} className="percurso-card" onClick={() => navigate(`/conteudos/${item.id}`)}>
-                    <div className="card-thumb">
-                      <div className="card-thumb-overlay" />
-                      <div className="play-btn">
-                        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                          <path d="M7 5l9 5-9 5V5z" fill="#2de09a" />
-                        </svg>
-                      </div>
-                    </div>
+                    <ContentThumbnail thumbnailUrl={item.thumbnailUrl} titulo={item.titulo} videoUrl={item.videoUrl} />
                     <div className="card-body">
                       <div className="card-tag">{formatTipoConteudo(item.tipoConteudo)}</div>
                       <div className="card-title">{item.titulo}</div>
