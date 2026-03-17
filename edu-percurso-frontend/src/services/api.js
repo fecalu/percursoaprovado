@@ -85,6 +85,14 @@ export const assinaturaService = {
   cancelarAdmin: (id, data) => api.post(`/admin/assinaturas/${id}/cancelar`, data).then(response => response.data),
 }
 
+export const uploadService = {
+  enviarThumbnail: file => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/uploads/thumbnails', formData).then(response => response.data)
+  },
+}
+
 export const pedidoService = {
   minhas: () => api.get('/pedidos').then(response => response.data),
   criar: data => api.post('/pedidos', data).then(response => response.data),

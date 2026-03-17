@@ -18,7 +18,9 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN addgroup --system spring && adduser --system --ingroup spring spring
+RUN addgroup --system spring && adduser --system --ingroup spring spring \
+    && mkdir -p /app/storage \
+    && chown -R spring:spring /app
 USER spring
 
 COPY --from=build /app/target/*.jar app.jar

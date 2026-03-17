@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { categoriaService, localProvaService, percursoService } from '../services/api'
+import { categoriaService, localProvaService, percursoService, uploadService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import { formatTipoConteudo } from '../utils/formatters'
 
@@ -39,6 +39,7 @@ export default function AdminPercursoForm() {
   const [locais, setLocais] = useState([])
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
+  const [enviandoThumbnail, setEnviandoThumbnail] = useState(false)
   const [erros, setErros] = useState({})
 
   useEffect(() => {
@@ -86,6 +87,24 @@ export default function AdminPercursoForm() {
     return Object.keys(novosErros).length === 0
   }
 
+  async function handleThumbnailUpload(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setEnviandoThumbnail(true)
+
+    try {
+      const resposta = await uploadService.enviarThumbnail(file)
+      set('thumbnailUrl', resposta.url)
+      show('Thumbnail enviada com sucesso.')
+    } catch (error) {
+      show(error.response?.data?.erro || 'Erro ao enviar thumbnail.', 'error')
+    } finally {
+      setEnviandoThumbnail(false)
+      event.target.value = ''
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     if (!validar()) return
@@ -125,6 +144,8 @@ export default function AdminPercursoForm() {
   }
 
   if (loading) return <div className="spinner" />
+
+  const thumbnailPreviewUrl = form.thumbnailUrl.trim()
 
   return (
     <>
@@ -223,13 +244,56 @@ export default function AdminPercursoForm() {
             </div>
 
             <div className="form-group">
-              <label className="form-label">URL da thumbnail</label>
+              <label className="form-label">Upload da thumbnail</label>
               <input
                 className="form-input"
-                placeholder="https://..."
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={handleThumbnailUpload}
+                disabled={enviandoThumbnail}
+              />
+              <div className="mini-copy">
+                Envie JPG, PNG ou WEBP com ate 2 MB.
+                {enviandoThumbnail ? ' Enviando imagem...' : ''}
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Thumbnail</label>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <input
+                className="form-input"
+                placeholder="/media/thumbnails/... ou https://..."
                 value={form.thumbnailUrl}
                 onChange={event => set('thumbnailUrl', event.target.value)}
               />
+              <div className="mini-copy">
+                O upload preenche esse campo automaticamente. Se preferir, voce pode usar uma URL externa publica.
+              </div>
+              {thumbnailPreviewUrl && (
+                <div style={{ display: 'grid', gap: 8 }}>
+                  <div className="mini-copy">Preview atual</div>
+                  <img
+                    src={thumbnailPreviewUrl}
+                    alt="Preview da thumbnail"
+                    style={{
+                      width: '100%',
+                      maxWidth: 320,
+                      aspectRatio: '16 / 9',
+                      objectFit: 'cover',
+                      borderRadius: 16,
+                      border: '1px solid rgba(15, 23, 42, 0.08)',
+                      background: 'rgba(148, 163, 184, 0.08)',
+                    }}
+                  />
+                  <div>
+                    <button className="btn btn-ghost" type="button" onClick={() => set('thumbnailUrl', '')}>
+                      Remover thumbnail
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -287,8 +351,8 @@ export default function AdminPercursoForm() {
           </div>
 
           <div className="form-actions">
-            <button className="btn btn-primary" type="submit" disabled={salvando}>
-              {salvando ? 'Salvando...' : isEdicao ? 'Salvar alteracoes' : 'Criar conteudo'}
+            <button className="btn btn-primary" type="submit" disabled={salvando || enviandoThumbnail}>
+              {salvando ? 'Salvando...' : enviandoThumbnail ? 'Aguarde o upload...' : isEdicao ? 'Salvar alteracoes' : 'Criar conteudo'}
             </button>
             <button className="btn btn-ghost" type="button" onClick={() => navigate('/admin/percursos')}>
               Cancelar

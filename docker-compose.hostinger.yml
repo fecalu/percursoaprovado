@@ -36,8 +36,11 @@ services:
       MP_PUBLIC_KEY: ${MP_PUBLIC_KEY}
       MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
       MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+      APP_STORAGE_PATH: /app/storage
     ports:
       - "127.0.0.1:8081:8080"
+    volumes:
+      - percursoaprovado_media:/app/storage
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
       interval: 15s
@@ -62,6 +65,7 @@ services:
 
 volumes:
   percursoaprovado_pgdata:
+  percursoaprovado_media:
 
 networks:
   percursoaprovado_net:
