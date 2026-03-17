@@ -11,7 +11,7 @@ export default function PrivateRoute({ children, adminOnly = false }) {
   return (
     <div className="app-shell">
       <Sidebar />
-      <main className="main-content fade-in">
+      <main className={`main-content fade-in ${adminOnly ? 'main-content-admin' : ''}`.trim()}>
         {children}
       </main>
     </div>

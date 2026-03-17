@@ -58,8 +58,15 @@ body {
 .main-content {
   flex: 1;
   overflow: auto;
-  padding: 2.5rem;
-  max-width: 1100px;
+  min-width: 0;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem clamp(1.25rem, 2vw, 2.5rem) 3rem;
+}
+
+.main-content-admin {
+  max-width: 1680px;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────────────────── */
@@ -370,7 +377,8 @@ body {
   background: var(--bg2);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .table-head {
   display: grid;
@@ -382,6 +390,8 @@ body {
   color: var(--text-3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  width: max-content;
+  min-width: 100%;
 }
 .table-row {
   display: grid;
@@ -391,6 +401,8 @@ body {
   align-items: center;
   font-size: 14px;
   transition: background var(--transition);
+  width: max-content;
+  min-width: 100%;
 }
 .table-row:hover { background: var(--bg3); }
 .table-name { font-weight: 500; color: var(--text); }
@@ -830,8 +842,8 @@ body {
 
 .admin-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+  gap: 1.25rem;
   align-items: start;
 }
 
@@ -863,18 +875,19 @@ body {
 
 .assinaturas-filter-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 0.85rem;
   margin-top: 1rem;
 }
 
 .assinaturas-table-head,
 .assinaturas-table-row {
-  grid-template-columns: 1.8fr 1.45fr 1.55fr 0.9fr 1.1fr 80px;
+  grid-template-columns: minmax(220px, 1.6fr) minmax(210px, 1.2fr) minmax(240px, 1.4fr) minmax(110px, 0.8fr) minmax(160px, 0.95fr) 90px;
 }
 
 .table-button-row {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border: none;
   background: transparent;
   color: inherit;
@@ -890,7 +903,7 @@ body {
 
 .assinatura-detail-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 0.75rem;
   margin-top: 1rem;
 }
@@ -953,6 +966,23 @@ body {
   .hero-shell,
   .admin-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1400px) {
+  .main-content-admin {
+    max-width: none;
+    margin: 0;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1180px) {
+  .assinaturas-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
