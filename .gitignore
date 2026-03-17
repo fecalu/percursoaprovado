@@ -1,0 +1,15 @@
+.env
+.env.hostinger
+.env.hostinger.homolog
+*.log
+
+# Backend
+edu-percurso-backend/target/
+
+# Frontend
+edu-percurso-frontend/node_modules/
+edu-percurso-frontend/dist/
+
+# Editor / OS
+.DS_Store
+Thumbs.db

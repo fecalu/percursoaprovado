@@ -1,0 +1,28 @@
+FROM maven:3.9.7-eclipse-temurin-17 AS build
+
+WORKDIR /app
+
+# Copy dependencies first to maximize Docker layer cache reuse.
+COPY pom.xml .
+RUN mvn dependency:go-offline -q
+
+COPY src ./src
+RUN mvn package -DskipTests -q
+
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+
+# wget is required by the Docker healthcheck declared in docker-compose.yml.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN addgroup --system spring && adduser --system --ingroup spring spring
+USER spring
+
+COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

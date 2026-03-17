@@ -1,0 +1,68 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: percursoaprovado_hml_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-percursoaprovado_homolog}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    volumes:
+      - percursoaprovado_hml_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME:-percursoaprovado_homolog}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - percursoaprovado_hml_net
+
+  backend:
+    build:
+      context: ./edu-percurso-backend
+      dockerfile: ../Dockerfile.backend
+    container_name: percursoaprovado_hml_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${DB_NAME:-percursoaprovado_homolog}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRACAO_MS: ${JWT_EXPIRACAO_MS:-86400000}
+      APP_BASE_URL: ${APP_BASE_URL}
+      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+    ports:
+      - "127.0.0.1:8082:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - percursoaprovado_hml_net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: percursoaprovado_hml_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:4301:80"
+    networks:
+      - percursoaprovado_hml_net
+
+volumes:
+  percursoaprovado_hml_pgdata:
+
+networks:
+  percursoaprovado_hml_net:
+    driver: bridge
