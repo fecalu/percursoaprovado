@@ -78,8 +78,11 @@ export const planoService = {
 export const assinaturaService = {
   minhas: () => api.get('/assinaturas/minhas').then(response => response.data),
   listarAdmin: () => api.get('/admin/assinaturas').then(response => response.data),
+  detalharAdmin: id => api.get(`/admin/assinaturas/${id}`).then(response => response.data),
   criarAdmin: data => api.post('/admin/assinaturas', data).then(response => response.data),
-  cancelarAdmin: id => api.post(`/admin/assinaturas/${id}/cancelar`),
+  atualizarAdmin: (id, data) => api.put(`/admin/assinaturas/${id}`, data).then(response => response.data),
+  prorrogarAdmin: (id, data) => api.post(`/admin/assinaturas/${id}/prorrogar`, data).then(response => response.data),
+  cancelarAdmin: (id, data) => api.post(`/admin/assinaturas/${id}/cancelar`, data).then(response => response.data),
 }
 
 export const pedidoService = {

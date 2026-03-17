@@ -8,6 +8,17 @@ export function formatDataCurta(valor) {
   return new Date(valor).toLocaleDateString('pt-BR')
 }
 
+export function formatDataHoraCurta(valor) {
+  if (!valor) return '-'
+  return new Date(valor).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export function formatPlanoDuracao(dias) {
   if (!dias || dias <= 0) return '-'
   if (dias === 30) return '1 mes'
@@ -41,6 +52,38 @@ export function formatAssinaturaStatus(status) {
 
   if (!status) return '-'
   return labels[status] || status
+}
+
+export function formatAssinaturaPagamentoStatus(status) {
+  const labels = {
+    PAGO: 'Pago',
+    PENDENTE: 'Pendente',
+    FALHOU: 'Falhou',
+    REEMBOLSADO: 'Reembolsado',
+  }
+
+  if (!status) return '-'
+  return labels[status] || status
+}
+
+export function formatOrigemAssinatura(origem) {
+  const labels = {
+    CHECKOUT: 'Checkout',
+    MANUAL: 'Manual',
+    CORTESIA: 'Cortesia',
+  }
+
+  if (!origem) return '-'
+  return labels[origem] || origem
+}
+
+export function formatDiasRestantes(dias, status) {
+  if (status === 'CANCELADA') return 'Cancelado'
+  if (status === 'EXPIRADA') return 'Expirado'
+  if (dias === null || dias === undefined) return '-'
+  if (dias === 0) return 'Vence hoje'
+  if (dias === 1) return '1 dia'
+  return `${dias} dias`
 }
 
 export function formatPagamentoStatus(status) {

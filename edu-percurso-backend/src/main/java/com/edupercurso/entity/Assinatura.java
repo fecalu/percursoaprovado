@@ -46,6 +46,22 @@ public class Assinatura {
     @Column(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Origem origem;
+
+    @Column(name = "observacao_interna", columnDefinition = "TEXT")
+    private String observacaoInterna;
+
+    @Column(name = "cancelada_em")
+    private LocalDateTime canceladaEm;
+
+    @Column(name = "cancelada_por_email")
+    private String canceladaPorEmail;
+
+    @Column(name = "motivo_cancelamento")
+    private String motivoCancelamento;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
@@ -61,5 +77,11 @@ public class Assinatura {
         PAGO,
         FALHOU,
         REEMBOLSADO
+    }
+
+    public enum Origem {
+        CHECKOUT,
+        MANUAL,
+        CORTESIA
     }
 }

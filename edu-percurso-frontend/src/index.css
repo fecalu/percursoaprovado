@@ -504,6 +504,8 @@ body {
 .badge-green { background: rgba(45,224,154,0.12); color: var(--accent); }
 .badge-gray  { background: var(--bg3); color: var(--text-2); }
 .badge-red   { background: rgba(224,85,85,0.12); color: var(--danger); }
+.badge-warn  { background: rgba(224,164,45,0.14); color: var(--warn); }
+.badge-blue  { background: rgba(77,128,255,0.16); color: #8eb1ff; }
 
 /* ── Toast ───────────────────────────────────────────────────────────────── */
 .toast {
@@ -853,6 +855,46 @@ body {
   padding-top: 0.25rem;
 }
 
+.assinatura-side-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.assinaturas-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.assinaturas-table-head,
+.assinaturas-table-row {
+  grid-template-columns: 1.8fr 1.45fr 1.55fr 0.9fr 1.1fr 80px;
+}
+
+.table-button-row {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.table-button-row.is-selected {
+  background: rgba(45,224,154,0.08);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.assinatura-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
 .mini-copy {
   margin-top: 4px;
   color: var(--text-2);
@@ -922,6 +964,11 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .assinaturas-filter-grid,
+  .assinatura-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
   .table-wrap {
     overflow: auto;
   }
@@ -929,6 +976,11 @@ body {
   .table-head,
   .table-row {
     min-width: 640px;
+  }
+
+  .assinaturas-table-head,
+  .assinaturas-table-row {
+    min-width: 980px;
   }
 
   .hero-shell {
