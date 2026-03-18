@@ -897,6 +897,7 @@ body {
   background: linear-gradient(180deg, rgba(28,35,51,0.95), rgba(21,27,38,0.95));
   color: inherit;
   text-decoration: none;
+  overflow: hidden;
   transition:
     transform var(--transition),
     border-color var(--transition),
@@ -907,8 +908,9 @@ body {
 .spotlight-card::before {
   content: '';
   position: absolute;
-  inset: 0 0 auto 0;
-  height: 4px;
+  inset: 12px 12px auto 12px;
+  height: 3px;
+  border-radius: 999px;
   background: linear-gradient(90deg, rgba(45,224,154,0.15), rgba(45,224,154,0.75), rgba(59,130,246,0.45));
 }
 
@@ -931,13 +933,13 @@ body {
 
 .spotlight-card--available {
   background:
-    radial-gradient(circle at top right, rgba(45,224,154,0.16), transparent 38%),
+    radial-gradient(circle at top right, rgba(45,224,154,0.14), transparent 34%),
     linear-gradient(180deg, rgba(28,35,51,0.98), rgba(21,27,38,0.98));
 }
 
 .spotlight-card--soon {
   background:
-    radial-gradient(circle at top right, rgba(224,164,45,0.16), transparent 38%),
+    radial-gradient(circle at top right, rgba(224,164,45,0.14), transparent 34%),
     linear-gradient(180deg, rgba(28,35,51,0.98), rgba(21,27,38,0.98));
 }
 
@@ -1002,9 +1004,11 @@ body {
 }
 
 .spotlight-accent {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
   line-height: 1.55;
 }
 
@@ -1018,14 +1022,13 @@ body {
 .spotlight-desc {
   color: var(--text-2);
   font-size: 14px;
-  line-height: 1.7;
+  line-height: 1.65;
 }
 
 .spotlight-summary {
-  color: var(--text);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.65;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .spotlight-pill-row {
@@ -1287,6 +1290,13 @@ body {
   box-shadow: 0 0 0 4px rgba(45,224,154,0.08);
 }
 
+.plan-meta-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.2rem;
+}
+
 .plan-meta {
   margin-top: 0.45rem;
   color: var(--text-3);
@@ -1407,6 +1417,22 @@ body {
   gap: 0.9rem;
   margin-top: 0.9rem;
   flex-wrap: wrap;
+}
+
+.hero-shell--local {
+  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+}
+
+.hero-shell--local .hero-panel-title {
+  max-width: 420px;
+}
+
+.hero-shell--local .hero-panel-copy {
+  max-width: 420px;
+}
+
+.landing-inline-strip--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .hero-inline-copy {
@@ -2101,6 +2127,10 @@ body {
   }
 
   .landing-inline-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-inline-strip--compact {
     grid-template-columns: 1fr;
   }
 

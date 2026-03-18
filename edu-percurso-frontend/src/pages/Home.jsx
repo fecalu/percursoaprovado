@@ -292,7 +292,7 @@ export default function Home() {
                     </div>
                     <div className="spotlight-cta">
                       <span>{getCardCta(local)}</span>
-                      <span className="spotlight-cta-arrow">→</span>
+                      <span className="spotlight-cta-arrow">{'->'}</span>
                     </div>
                   </div>
                 </RevealSection>

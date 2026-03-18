@@ -82,7 +82,7 @@ const BENEFICIOS_DO_ACESSO = [
 
 const HERO_DESTAQUES_LOCAL = [
   'Percursos mais frequentes e simulacao da prova',
-  'Baliza, embreagem e apoio para dirigir com mais controle',
+  'Baliza, embreagem e erros que mais tiram pontos',
   'Acesso por periodo com liberacao automatica apos o pagamento',
 ]
 
@@ -195,7 +195,7 @@ export default function LocalDetalhe() {
   const saibaMaisLocal = [
     {
       titulo: 'O que voce vai encontrar',
-      copy: 'O acesso desse local foi organizado para mostrar o que mais ajuda antes da prova, sem excesso de informacao aberta de uma vez.',
+      copy: 'Esse acesso foi organizado para mostrar o que mais ajuda antes da prova, sem excesso de informacao aberta de uma vez.',
       pontos: HERO_DESTAQUES_LOCAL,
     },
     {
@@ -220,7 +220,7 @@ export default function LocalDetalhe() {
         Voltar para os locais
       </Link>
 
-      <section className="hero-shell fade-in">
+      <section className="hero-shell hero-shell--local fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao por local de prova</div>
           <div className="local-hero-topline">
@@ -256,7 +256,6 @@ export default function LocalDetalhe() {
           <div className="hero-proof-grid">
             <div className="hero-proof-chip hero-proof-chip--strong">Trechos mais recorrentes desse local</div>
             <div className="hero-proof-chip">Conteudo direto para reduzir surpresa e ansiedade</div>
-            <div className="hero-proof-chip">Liberacao automatica apos confirmacao do pagamento</div>
           </div>
         </div>
 
@@ -291,46 +290,6 @@ export default function LocalDetalhe() {
       </section>
 
       <RevealSection as="section" className="landing-section" delay={40}>
-        <div className="landing-inline-strip">
-          <div className="landing-inline-chip">1 local por compra, com acesso pelo periodo escolhido.</div>
-          <div className="landing-inline-chip">Liberacao automatica assim que o pagamento e confirmado.</div>
-          <div className="landing-inline-chip">Compra unica, sem renovacao automatica ou surpresa escondida.</div>
-        </div>
-      </RevealSection>
-
-      <RevealSection as="section" className="landing-section" delay={55}>
-        <div className="section-title-row">
-          <div>
-            <div className="section-heading">Saiba mais sobre esse acesso</div>
-            <div className="section-copy">Abra apenas os detalhes que voce quiser consultar antes de escolher seu periodo.</div>
-          </div>
-        </div>
-
-        <div className="learn-more-list">
-          {saibaMaisLocal.map(item => (
-            <details key={item.titulo} className="learn-more-item">
-              <summary className="learn-more-summary">
-                <span className="learn-more-title">{item.titulo}</span>
-                <span className="learn-more-toggle">Abrir</span>
-              </summary>
-
-              <div className="learn-more-body">
-                <div className="learn-more-copy">{item.copy}</div>
-                <div className="learn-more-points">
-                  {item.pontos.map(ponto => (
-                    <div key={ponto} className="learn-more-point">
-                      <span className="learn-more-point-dot" />
-                      <span>{ponto}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </details>
-          ))}
-        </div>
-      </RevealSection>
-
-      <RevealSection as="section" className="landing-section" delay={70}>
         <div className="page-title">{compraLiberada ? 'Escolha seu periodo de acesso' : 'Disponibilidade do local'}</div>
         <p className="page-sub">
           {compraLiberada
@@ -397,9 +356,10 @@ export default function LocalDetalhe() {
                     <span>Acesso liberado durante todo o periodo escolhido</span>
                   </div>
                 </div>
-                <div className="plan-meta">Validade: {formatPlanoDuracao(plano.duracaoDias)}</div>
-                <div className="plan-meta">Pague com Pix ou cartao de credito pelo Mercado Pago.</div>
-                <div className="plan-meta">Compra unica, sem renovacao automatica.</div>
+                <div className="plan-meta-stack">
+                  <div className="plan-meta">Validade clara: {formatPlanoDuracao(plano.duracaoDias)}</div>
+                  <div className="plan-meta">Pix ou cartao pelo Mercado Pago, sem renovacao automatica.</div>
+                </div>
                 <div style={{ marginTop: '1rem' }}>
                   {renderAcaoPlano(plano)}
                 </div>
@@ -412,6 +372,45 @@ export default function LocalDetalhe() {
             )})}
           </div>
         )}
+      </RevealSection>
+
+      <RevealSection as="section" className="landing-section" delay={65}>
+        <div className="landing-inline-strip landing-inline-strip--compact">
+          <div className="landing-inline-chip">1 local por compra, com acesso pelo periodo escolhido.</div>
+          <div className="landing-inline-chip">Compra unica com liberacao automatica apos a confirmacao do pagamento.</div>
+        </div>
+      </RevealSection>
+
+      <RevealSection as="section" className="landing-section" delay={70}>
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">Saiba mais sobre esse acesso</div>
+            <div className="section-copy">Abra apenas os detalhes que voce quiser consultar depois de olhar os planos.</div>
+          </div>
+        </div>
+
+        <div className="learn-more-list">
+          {saibaMaisLocal.map(item => (
+            <details key={item.titulo} className="learn-more-item">
+              <summary className="learn-more-summary">
+                <span className="learn-more-title">{item.titulo}</span>
+                <span className="learn-more-toggle">Abrir</span>
+              </summary>
+
+              <div className="learn-more-body">
+                <div className="learn-more-copy">{item.copy}</div>
+                <div className="learn-more-points">
+                  {item.pontos.map(ponto => (
+                    <div key={ponto} className="learn-more-point">
+                      <span className="learn-more-point-dot" />
+                      <span>{ponto}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
       </RevealSection>
     </div>
   )
