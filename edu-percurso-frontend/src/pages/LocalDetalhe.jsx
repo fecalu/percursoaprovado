@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import RevealSection from '../components/RevealSection'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../hooks/useToast'
 import { localProvaService, pedidoService, planoService } from '../services/api'
@@ -39,6 +40,21 @@ function getPlanoIndicacao(duracaoDias) {
   if (duracaoDias <= 180) return 'Mais tempo para praticar, revisar e voltar quando precisar.'
   return 'Acesso mais longo para uma preparacao estendida.'
 }
+
+const COMPRA_SEGURA_ITENS = [
+  {
+    titulo: 'Compra unica',
+    descricao: 'Voce escolhe o periodo e paga uma vez, sem renovacao automatica.',
+  },
+  {
+    titulo: 'Liberacao automatica',
+    descricao: 'Assim que o pagamento e confirmado, o acesso aparece na sua conta.',
+  },
+  {
+    titulo: 'Pix ou cartao',
+    descricao: 'Pagamento pelo Mercado Pago com fluxo simples e reconhecido pelo aluno.',
+  },
+]
 
 export default function LocalDetalhe() {
   const { slug } = useParams()
@@ -80,11 +96,11 @@ export default function LocalDetalhe() {
     }
   }
 
-  function renderAcaoPlano(plano) {
+function renderAcaoPlano(plano) {
     if (!user) {
       return (
         <Link className="btn btn-primary" to="/register">
-          Criar conta para comprar
+          Criar conta e continuar
         </Link>
       )
     }
@@ -92,7 +108,7 @@ export default function LocalDetalhe() {
     if (isAdmin) {
       return (
         <button className="btn btn-ghost" onClick={() => navigate('/admin/planos')}>
-          Gerenciar plano
+          Editar plano
         </button>
       )
     }
@@ -103,7 +119,7 @@ export default function LocalDetalhe() {
         onClick={() => solicitarPlano(plano.id)}
         disabled={solicitandoId === plano.id}
       >
-        {solicitandoId === plano.id ? 'Abrindo pagamento...' : 'Comprar acesso'}
+        {solicitandoId === plano.id ? 'Abrindo pagamento...' : 'Pagar com Mercado Pago'}
       </button>
     )
   }
@@ -140,10 +156,10 @@ export default function LocalDetalhe() {
           </p>
           <div className="hero-actions">
             <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/register'}>
-              {user ? (isAdmin ? 'Abrir administracao' : 'Ir para minha biblioteca') : 'Criar conta para comprar'}
+              {user ? (isAdmin ? 'Abrir administracao' : 'Ver minha biblioteca') : 'Criar conta para comprar'}
             </Link>
             <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/pedidos' : '/meus-pedidos') : '/login'}>
-              {user ? 'Ver meus pagamentos' : 'Entrar'}
+              {user ? 'Ver meus pagamentos' : 'Ja tenho conta'}
             </Link>
           </div>
           <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
@@ -168,7 +184,25 @@ export default function LocalDetalhe() {
         </div>
       </section>
 
-      <section className="landing-section">
+      <RevealSection as="section" className="landing-section" delay={40}>
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">Compra simples e acesso claro</div>
+            <div className="section-copy">Tudo o que voce precisa saber antes de escolher o periodo de acesso.</div>
+          </div>
+        </div>
+
+        <div className="trust-grid trust-grid--compact">
+          {COMPRA_SEGURA_ITENS.map((item, index) => (
+            <RevealSection key={item.titulo} className="trust-card trust-card--compact" delay={80 + index * 70}>
+              <div className="trust-title trust-title--compact">{item.titulo}</div>
+              <div className="trust-copy">{item.descricao}</div>
+            </RevealSection>
+          ))}
+        </div>
+      </RevealSection>
+
+      <RevealSection as="section" className="landing-section" delay={70}>
         <div className="page-title">{compraLiberada ? 'Escolha seu periodo de acesso' : 'Disponibilidade do local'}</div>
         <p className="page-sub">
           {compraLiberada
@@ -215,11 +249,16 @@ export default function LocalDetalhe() {
                 <div style={{ marginTop: '1rem' }}>
                   {renderAcaoPlano(plano)}
                 </div>
+                <div className="plan-cta-copy">
+                  {user && !isAdmin
+                    ? 'O acesso e liberado automaticamente apos a confirmacao do pagamento.'
+                    : 'Escolha esse plano para continuar o preparo desse local.'}
+                </div>
               </div>
             ))}
           </div>
         )}
-      </section>
+      </RevealSection>
     </div>
   )
 }

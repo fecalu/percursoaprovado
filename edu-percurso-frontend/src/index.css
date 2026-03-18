@@ -821,6 +821,18 @@ body {
   line-height: 1.2;
 }
 
+.trust-grid--compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.trust-card--compact {
+  min-height: 0;
+}
+
+.trust-title--compact {
+  font-size: 20px;
+}
+
 .spotlight-card {
   position: relative;
   display: flex;
@@ -981,6 +993,15 @@ body {
   margin-top: 0.45rem;
   color: var(--text-3);
   font-size: 12px;
+}
+
+.plan-cta-copy {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.65;
 }
 
 .active-plan {
@@ -1237,6 +1258,10 @@ body {
     flex-wrap: wrap;
     min-width: 0;
   }
+
+  .landing-page {
+    gap: 1.75rem;
+  }
 }
 
 @media (max-width: 1400px) {
@@ -1287,6 +1312,14 @@ body {
     padding: 1.35rem;
   }
 
+  .landing-page {
+    gap: 1.5rem;
+  }
+
+  .landing-section {
+    gap: 0.35rem;
+  }
+
   .hero-actions {
     flex-direction: column;
   }
@@ -1301,6 +1334,17 @@ body {
 
   .hero-proof-grid {
     grid-template-columns: 1fr;
+  }
+
+  .hero-proof-chip,
+  .hero-list-item,
+  .trust-card,
+  .faq-card,
+  .story-card,
+  .signal-card,
+  .spotlight-card,
+  .plan-card {
+    border-radius: 18px;
   }
 
   .story-grid,
@@ -1332,7 +1376,8 @@ body {
   .page-sub,
   .spotlight-desc,
   .plan-copy,
-  .section-copy {
+  .section-copy,
+  .landing-cta-copy {
     font-size: 15px;
   }
 
@@ -1360,8 +1405,8 @@ body {
   .spotlight-footer,
   .mini-copy,
   .plan-meta,
-  .landing-cta-copy {
-    font-size: 13px;
+  .plan-cta-copy {
+    font-size: 14px;
   }
 
   .spotlight-card,
@@ -1403,6 +1448,17 @@ body {
   .section-title-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .spotlight-footer span {
+    width: 100%;
+  }
+
+  .plan-card .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 50px;
+    font-size: 15px;
   }
 
   .table-actions {

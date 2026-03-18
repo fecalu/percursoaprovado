@@ -134,11 +134,11 @@ export default function Home() {
               </Link>
             ) : (
               <a className="btn btn-primary" href="#locais-disponiveis">
-                Escolher meu local agora
+                Escolher meu local de prova
               </a>
             )}
             <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/planos' : '/meus-acessos') : '/register'}>
-              {user ? 'Ver meus acessos' : 'Criar minha conta'}
+              {user ? 'Ver meus acessos' : 'Criar conta e acompanhar'}
             </Link>
           </div>
           <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
@@ -309,11 +309,11 @@ export default function Home() {
             </Link>
           ) : (
             <a className="btn btn-primary" href="#locais-disponiveis">
-              Escolher meu local
+              Ver locais liberados
             </a>
           )}
           <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/assinaturas' : '/meus-acessos') : '/register'}>
-            {user ? (isAdmin ? 'Ver assinaturas' : 'Ver meus acessos') : 'Criar conta gratis'}
+            {user ? (isAdmin ? 'Ver assinaturas' : 'Ver meus acessos') : 'Criar conta e acompanhar'}
           </Link>
         </div>
       </RevealSection>
