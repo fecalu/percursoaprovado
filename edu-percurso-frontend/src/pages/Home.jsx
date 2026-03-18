@@ -26,6 +26,46 @@ function getSpotlightCardClass(statusComercial) {
   return 'spotlight-card--draft'
 }
 
+function getCardSignals(local, planosLocal) {
+  if (local.statusComercial === 'DISPONIVEL') {
+    const duracoes = planosLocal.slice(0, 3).map(plano => formatPlanoDuracao(plano.duracaoDias))
+    return [
+      duracoes.length > 0 ? `Acesso por ${duracoes.join(', ')}` : 'Planos ativos para esse local',
+      'Percursos mais frequentes, simulacao e modulos de apoio',
+      'Compra unica com liberacao automatica apos a confirmacao',
+    ]
+  }
+
+  if (local.statusComercial === 'EM_BREVE') {
+    return [
+      'Conteudo desse local em preparacao',
+      'Voce pode acompanhar o status pelo site',
+      'A compra sera liberada quando o preparo estiver pronto',
+    ]
+  }
+
+  if (local.statusComercial === 'PAUSADO') {
+    return [
+      'Esse local continua cadastrado na plataforma',
+      'A venda foi pausada temporariamente',
+      'Assim que reabrir, o acesso volta a ficar disponivel',
+    ]
+  }
+
+  return [
+    'Local em rascunho administrativo',
+    'Ainda nao foi aberto ao publico',
+    'A exibicao depende da configuracao do admin',
+  ]
+}
+
+function getCardCta(local) {
+  if (local.statusComercial === 'DISPONIVEL') return 'Ver planos e detalhes'
+  if (local.statusComercial === 'EM_BREVE') return 'Acompanhar esse local'
+  if (local.statusComercial === 'PAUSADO') return 'Ver status do local'
+  return 'Abrir detalhes'
+}
+
 const COMO_FUNCIONA = [
   {
     passo: '1',
@@ -214,6 +254,7 @@ export default function Home() {
               const planosLocal = planosPorLocal.get(local.slug) || []
               const planoInicial = planosLocal[0]
               const estaDisponivel = local.statusComercial === 'DISPONIVEL'
+              const sinaisCard = getCardSignals(local, planosLocal)
               const rodapeEsquerdo = estaDisponivel
                 ? `${planosLocal.length} ${planosLocal.length === 1 ? 'plano' : 'planos'}`
                 : formatStatusComercialLocal(local.statusComercial)
@@ -229,7 +270,13 @@ export default function Home() {
                     : 'Disponivel somente para administracao'
 
               return (
-                <Link key={local.id} to={`/locais/${local.slug}`} className={`spotlight-card ${getSpotlightCardClass(local.statusComercial)}`}>
+                <RevealSection
+                  key={local.id}
+                  as={Link}
+                  to={`/locais/${local.slug}`}
+                  className={`spotlight-card ${getSpotlightCardClass(local.statusComercial)}`}
+                  delay={100}
+                >
                   <div className="spotlight-top">
                     <div className="spotlight-city">{local.cidade}</div>
                     <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
@@ -243,15 +290,33 @@ export default function Home() {
                     <div className="mini-copy">{local.mensagemPublica}</div>
                   )}
                   {estaDisponivel && planosLocal.length > 0 && (
-                    <div className="mini-copy">
-                      Planos: {planosLocal.map(plano => formatPlanoDuracao(plano.duracaoDias)).join(', ')}
+                    <div className="spotlight-pill-row">
+                      {planosLocal.slice(0, 4).map(plano => (
+                        <span key={plano.id} className="spotlight-pill">
+                          {formatPlanoDuracao(plano.duracaoDias)}
+                        </span>
+                      ))}
                     </div>
                   )}
-                  <div className="spotlight-footer">
-                    <span>{rodapeEsquerdo}</span>
-                    <span>{rodapeDireito}</span>
+                  <div className="spotlight-signal-list">
+                    {sinaisCard.map(item => (
+                      <div key={item} className="spotlight-signal">
+                        <span className="spotlight-signal-dot" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
                   </div>
-                </Link>
+                  <div className="spotlight-footer">
+                    <div className="spotlight-meta-block">
+                      <span className="spotlight-meta-label">{rodapeEsquerdo}</span>
+                      <span className="spotlight-meta-value">{rodapeDireito}</span>
+                    </div>
+                    <div className="spotlight-cta">
+                      <span>{getCardCta(local)}</span>
+                      <span className="spotlight-cta-arrow">→</span>
+                    </div>
+                  </div>
+                </RevealSection>
               )
             })}
           </div>

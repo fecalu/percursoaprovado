@@ -917,6 +917,50 @@ body {
   line-height: 1.7;
 }
 
+.spotlight-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.spotlight-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.spotlight-signal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.spotlight-signal {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.spotlight-signal-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 0.42rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(45,224,154,0.75);
+  box-shadow: 0 0 0 4px rgba(45,224,154,0.08);
+}
+
 .spotlight-footer {
   display: flex;
   align-items: center;
@@ -926,6 +970,45 @@ body {
   border-top: 1px solid var(--border);
   color: var(--text-2);
   font-size: 12px;
+}
+
+.spotlight-meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.spotlight-meta-label {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.spotlight-meta-value {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.spotlight-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.spotlight-cta-arrow {
+  display: inline-flex;
+  transition: transform 0.2s ease;
+}
+
+.spotlight-card:hover .spotlight-cta-arrow {
+  transform: translateX(3px);
 }
 
 .plan-grid {
@@ -1402,6 +1485,7 @@ body {
   .trust-copy,
   .faq-answer,
   .spotlight-accent,
+  .spotlight-signal,
   .spotlight-footer,
   .mini-copy,
   .plan-meta,
@@ -1452,6 +1536,16 @@ body {
 
   .spotlight-footer span {
     width: 100%;
+  }
+
+  .spotlight-pill {
+    font-size: 12px;
+  }
+
+  .spotlight-cta {
+    width: 100%;
+    justify-content: space-between;
+    font-size: 13px;
   }
 
   .plan-card .btn {
