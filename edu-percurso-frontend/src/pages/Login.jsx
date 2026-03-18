@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BrandLogo from '../components/BrandLogo'
 
 export default function Login() {
   const { login } = useAuth()
@@ -26,7 +27,7 @@ export default function Login() {
   return (
     <div className="auth-page">
       <div className="auth-card fade-in">
-        <div className="auth-logo">EduPercurso</div>
+        <BrandLogo variant="auth" />
         <h1 className="auth-heading">Bem-vindo de volta</h1>
         <p className="auth-sub">Entre para acessar seus locais de prova e modulos de apoio.</p>
 

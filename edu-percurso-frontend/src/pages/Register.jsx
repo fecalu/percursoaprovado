@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BrandLogo from '../components/BrandLogo'
 
 function extractRegisterError(error) {
   const data = error.response?.data
@@ -56,7 +57,7 @@ export default function Register() {
   return (
     <div className="auth-page">
       <div className="auth-card fade-in">
-        <div className="auth-logo">EduPercurso</div>
+        <BrandLogo variant="auth" />
         <h1 className="auth-heading">Criar conta</h1>
         <p className="auth-sub">Crie sua conta para acompanhar o local real da sua prova.</p>
 

@@ -75,18 +75,33 @@ body {
   border-bottom: 1px solid var(--border);
   margin-bottom: 1.25rem;
 }
-.logo-name {
-  font-family: var(--font-head);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: -0.5px;
+.brand-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  color: #35d9a2;
 }
-.logo-sub {
+.brand-logo--sidebar {
+  max-width: 220px;
+  margin: 0 auto;
+}
+.brand-logo--auth {
+  max-width: min(100%, 340px);
+  margin: 0 auto 1.35rem;
+}
+.brand-logo-mark {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.brand-logo-tagline {
+  margin-top: 0.15rem;
   font-size: 11px;
+  line-height: 1.5;
   color: var(--text-3);
-  margin-top: 2px;
-  letter-spacing: 0.3px;
+  text-align: center;
+  letter-spacing: 0.35px;
 }
 
 .nav-group {
@@ -486,14 +501,6 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.5rem;
-}
-.auth-logo {
-  font-family: var(--font-head);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent);
-  letter-spacing: -0.5px;
-  margin-bottom: 0.25rem;
 }
 .auth-heading {
   font-family: var(--font-head);
@@ -971,6 +978,14 @@ body {
     padding: 1.5rem;
   }
 
+  .logo {
+    padding-bottom: 1.25rem;
+  }
+
+  .brand-logo--sidebar {
+    max-width: 260px;
+  }
+
   .hero-shell,
   .admin-grid {
     grid-template-columns: 1fr;
@@ -1023,6 +1038,19 @@ body {
 
   .hero-shell {
     padding: 1.35rem;
+  }
+
+  .auth-card {
+    padding: 2rem 1.4rem;
+  }
+
+  .brand-logo--auth {
+    max-width: min(100%, 280px);
+    margin-bottom: 1rem;
+  }
+
+  .brand-logo--sidebar {
+    max-width: 230px;
   }
 
   .hero-title {

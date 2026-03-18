@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import BrandLogo from './BrandLogo'
 
 const IconHome = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l7-5 7 5v9H13v-5H7v5H3V9z" /></svg>
 const IconLibrary = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="14" height="12" rx="2" /><path d="M7 4v12" /><path d="M11 8h3M11 11h3" /></svg>
@@ -27,8 +28,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="logo">
-        <div className="logo-name">EduPercurso</div>
-        <div className="logo-sub">Locais reais de prova pratica</div>
+        <BrandLogo variant="sidebar" showTagline />
       </div>
 
       {!isAdmin && (
