@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import RevealSection from '../components/RevealSection'
 import { useAuth } from '../context/AuthContext'
 import { localProvaService, planoService } from '../services/api'
 import { formatPlanoDuracao, formatStatusComercialLocal } from '../utils/formatters'
@@ -55,6 +56,36 @@ const GANHOS = [
   {
     titulo: 'Mais confianca ao dirigir',
     descricao: 'O foco nao e decorar rua. E dirigir com mais calma, criterio e preparo no dia do exame.',
+  },
+]
+
+const SINAIS_CONFIANCA = [
+  {
+    titulo: 'Conteudo baseado em observacao pratica',
+    descricao: 'A plataforma foi pensada para mostrar os percursos mais frequentes, nao para prometer trajeto fixo.',
+  },
+  {
+    titulo: 'Pagamento reconhecido pelo aluno',
+    descricao: 'Checkout com Mercado Pago, acesso por periodo e liberacao automatica quando o pagamento e confirmado.',
+  },
+  {
+    titulo: 'Estudo mais objetivo para a prova',
+    descricao: 'Voce foca no que mais reduz ansiedade: leitura da avaliacao, erros comuns e pontos de atencao.',
+  },
+]
+
+const PERGUNTAS_COMUNS = [
+  {
+    pergunta: 'Isso garante o trajeto exato da minha prova?',
+    resposta: 'Nao. O foco e mostrar os percursos mais frequentes observados na pratica, para voce chegar mais preparado e menos surpreso.',
+  },
+  {
+    pergunta: 'Comprei um local. Tenho acesso aos outros?',
+    resposta: 'Cada compra libera apenas um local de prova, pelo periodo escolhido. Se quiser outro local, a compra e separada.',
+  },
+  {
+    pergunta: 'O que acontece depois do pagamento?',
+    resposta: 'Assim que o Mercado Pago confirma o pagamento, o acesso e liberado automaticamente na sua conta.',
   },
 ]
 
@@ -132,7 +163,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="landing-section">
+      <RevealSection as="section" className="landing-section" delay={30}>
         <div className="section-title-row">
           <div>
             <div className="section-heading">Como funciona</div>
@@ -141,17 +172,17 @@ export default function Home() {
         </div>
 
         <div className="story-grid">
-          {COMO_FUNCIONA.map(item => (
-            <div key={item.passo} className="story-card">
+          {COMO_FUNCIONA.map((item, index) => (
+            <RevealSection key={item.passo} className="story-card" delay={90 + index * 70}>
               <div className="story-step">{item.passo}</div>
               <div className="story-title">{item.titulo}</div>
               <div className="story-copy">{item.descricao}</div>
-            </div>
+            </RevealSection>
           ))}
         </div>
-      </section>
+      </RevealSection>
 
-      <section className="landing-section">
+      <RevealSection as="section" className="landing-section" delay={60}>
         <div className="section-title-row">
           <div>
             <div className="section-heading">O que voce realmente ganha</div>
@@ -160,16 +191,16 @@ export default function Home() {
         </div>
 
         <div className="signal-grid">
-          {GANHOS.map(item => (
-            <div key={item.titulo} className="signal-card">
+          {GANHOS.map((item, index) => (
+            <RevealSection key={item.titulo} className="signal-card" delay={110 + index * 70}>
               <div className="signal-title">{item.titulo}</div>
               <div className="signal-copy">{item.descricao}</div>
-            </div>
+            </RevealSection>
           ))}
         </div>
-      </section>
+      </RevealSection>
 
-      <section className="landing-section" id="locais-disponiveis">
+      <RevealSection as="section" className="landing-section" id="locais-disponiveis" delay={80}>
         <div className="page-title">Locais de prova</div>
         <p className="page-sub">Escolha o seu local e veja o que ja esta disponivel para estudar com mais confianca.</p>
 
@@ -225,7 +256,67 @@ export default function Home() {
             })}
           </div>
         )}
-      </section>
+      </RevealSection>
+
+      <RevealSection as="section" className="landing-section" delay={100}>
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">Confianca para estudar do jeito certo</div>
+            <div className="section-copy">Sem prometer rota fixa e sem deixar voce estudar no escuro.</div>
+          </div>
+        </div>
+
+        <div className="trust-grid">
+          {SINAIS_CONFIANCA.map((item, index) => (
+            <RevealSection key={item.titulo} className="trust-card" delay={120 + index * 70}>
+              <div className="trust-title">{item.titulo}</div>
+              <div className="trust-copy">{item.descricao}</div>
+            </RevealSection>
+          ))}
+        </div>
+      </RevealSection>
+
+      <RevealSection as="section" className="landing-section" delay={120}>
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">Perguntas comuns antes da compra</div>
+            <div className="section-copy">Respostas rapidas para alinhar expectativa e dar mais seguranca antes de escolher seu local.</div>
+          </div>
+        </div>
+
+        <div className="faq-grid">
+          {PERGUNTAS_COMUNS.map((item, index) => (
+            <RevealSection key={item.pergunta} className="faq-card" delay={140 + index * 70}>
+              <div className="faq-question">{item.pergunta}</div>
+              <div className="faq-answer">{item.resposta}</div>
+            </RevealSection>
+          ))}
+        </div>
+      </RevealSection>
+
+      <RevealSection as="section" className="landing-cta" delay={150}>
+        <div>
+          <div className="landing-cta-kicker">Comece pelo seu local</div>
+          <div className="landing-cta-title">Quanto antes voce estudar o padrao da prova, mais seguro chega no dia.</div>
+          <div className="landing-cta-copy">
+            Escolha o local de prova, veja o que ja esta liberado e comece a revisar com mais criterio, menos ansiedade e mais confianca.
+          </div>
+        </div>
+        <div className="landing-cta-actions">
+          {user ? (
+            <Link className="btn btn-primary" to={isAdmin ? '/admin/locais' : '/biblioteca'}>
+              {isAdmin ? 'Gerenciar locais' : 'Abrir minha biblioteca'}
+            </Link>
+          ) : (
+            <a className="btn btn-primary" href="#locais-disponiveis">
+              Escolher meu local
+            </a>
+          )}
+          <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/assinaturas' : '/meus-acessos') : '/register'}>
+            {user ? (isAdmin ? 'Ver assinaturas' : 'Ver meus acessos') : 'Criar conta gratis'}
+          </Link>
+        </div>
+      </RevealSection>
     </div>
   )
 }
