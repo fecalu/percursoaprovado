@@ -26,37 +26,25 @@ function getSpotlightCardClass(statusComercial) {
   return 'spotlight-card--draft'
 }
 
-function getCardSignals(local, planosLocal) {
+function getCardResumo(local, planosLocal) {
   if (local.statusComercial === 'DISPONIVEL') {
-    const duracoes = planosLocal.slice(0, 3).map(plano => formatPlanoDuracao(plano.duracaoDias))
-    return [
-      duracoes.length > 0 ? `Acesso por ${duracoes.join(', ')}` : 'Planos ativos para esse local',
-      'Percursos mais frequentes, simulacao e modulos de apoio',
-      'Compra unica com liberacao automatica apos a confirmacao',
-    ]
+    if (planosLocal.length > 0) {
+      const duracaoInicial = formatPlanoDuracao(planosLocal[0].duracaoDias)
+      return `Acesso por periodo a partir de ${duracaoInicial}, com liberacao automatica apos a confirmacao do pagamento.`
+    }
+
+    return 'Conteudo desse local ja liberado para compra e estudo.'
   }
 
   if (local.statusComercial === 'EM_BREVE') {
-    return [
-      'Conteudo desse local em preparacao',
-      'Voce pode acompanhar o status pelo site',
-      'A compra sera liberada quando o preparo estiver pronto',
-    ]
+    return 'Esse local aparece no site para voce acompanhar, mas a compra so sera liberada quando o preparo estiver pronto.'
   }
 
   if (local.statusComercial === 'PAUSADO') {
-    return [
-      'Esse local continua cadastrado na plataforma',
-      'A venda foi pausada temporariamente',
-      'Assim que reabrir, o acesso volta a ficar disponivel',
-    ]
+    return 'O local continua cadastrado, mas a venda foi pausada temporariamente.'
   }
 
-  return [
-    'Local em rascunho administrativo',
-    'Ainda nao foi aberto ao publico',
-    'A exibicao depende da configuracao do admin',
-  ]
+  return 'Local em configuracao administrativa.'
 }
 
 function getCardCta(local) {
@@ -66,66 +54,59 @@ function getCardCta(local) {
   return 'Abrir detalhes'
 }
 
-const COMO_FUNCIONA = [
-  {
-    passo: '1',
-    titulo: 'Escolha seu local',
-    descricao: 'Selecione o local onde voce vai fazer a prova e veja o que ja esta liberado para estudar.',
-  },
-  {
-    passo: '2',
-    titulo: 'Entenda o padrao da prova',
-    descricao: 'Revise os percursos mais frequentes, os pontos de atencao e os erros que mais tiram pontos.',
-  },
-  {
-    passo: '3',
-    titulo: 'Chegue com mais confianca',
-    descricao: 'Use a simulacao, baliza e embreagem para reduzir ansiedade e dirigir com mais controle.',
-  },
+const FAIXA_CONFIANCA = [
+  'Percursos mais frequentes observados na pratica',
+  '1 local por compra, com acesso por periodo',
+  'Pagamento por Pix ou cartao, com liberacao automatica',
 ]
 
-const GANHOS = [
+const SAIBA_MAIS = [
   {
-    titulo: 'Menos surpresa',
-    descricao: 'Voce chega para a prova entendendo melhor como ela costuma acontecer no seu local.',
+    titulo: 'Como funciona',
+    copy: 'Voce nao precisa consumir tudo de uma vez. O fluxo foi pensado para ser simples e objetivo antes da prova.',
+    pontos: [
+      'Escolha o local onde voce vai fazer a prova.',
+      'Veja os percursos mais frequentes, os pontos de atencao e os erros que mais tiram pontos.',
+      'Use simulacao, baliza e embreagem para chegar com mais controle e menos ansiedade.',
+    ],
   },
   {
-    titulo: 'Mais leitura da avaliacao',
-    descricao: 'Aprenda a reconhecer o que costuma exigir mais atencao e o que pesa na prova.',
+    titulo: 'O que esta incluido',
+    copy: 'Cada local liberado traz um conjunto de modulos para voce revisar o que mais faz diferenca no exame.',
+    pontos: [
+      'Percurso real do local e simulacao completa da prova.',
+      'Baliza, embreagem e leitura do que costuma ser avaliado.',
+      'Apoio pratico para reduzir surpresa e estudar com mais criterio.',
+    ],
   },
   {
-    titulo: 'Mais confianca ao dirigir',
-    descricao: 'O foco nao e decorar rua. E dirigir com mais calma, criterio e preparo no dia do exame.',
-  },
-]
-
-const SINAIS_CONFIANCA = [
-  {
-    titulo: 'Conteudo baseado em observacao pratica',
-    descricao: 'A plataforma foi pensada para mostrar os percursos mais frequentes, nao para prometer trajeto fixo.',
+    titulo: 'O que voce realmente ganha',
+    copy: 'A rota chama atencao, mas o produto real e o preparo para chegar mais seguro no dia.',
+    pontos: [
+      'Menos surpresa ao entender como a prova costuma acontecer no seu local.',
+      'Mais leitura da avaliacao para saber o que exige mais atencao.',
+      'Mais confianca para dirigir com calma, criterio e preparo.',
+    ],
   },
   {
-    titulo: 'Pagamento reconhecido pelo aluno',
-    descricao: 'Checkout com Mercado Pago, acesso por periodo e liberacao automatica quando o pagamento e confirmado.',
-  },
-  {
-    titulo: 'Estudo mais objetivo para a prova',
-    descricao: 'Voce foca no que mais reduz ansiedade: leitura da avaliacao, erros comuns e pontos de atencao.',
-  },
-]
-
-const PERGUNTAS_COMUNS = [
-  {
-    pergunta: 'Isso garante o trajeto exato da minha prova?',
-    resposta: 'Nao. O foco e mostrar os percursos mais frequentes observados na pratica, para voce chegar mais preparado e menos surpreso.',
-  },
-  {
-    pergunta: 'Comprei um local. Tenho acesso aos outros?',
-    resposta: 'Cada compra libera apenas um local de prova, pelo periodo escolhido. Se quiser outro local, a compra e separada.',
-  },
-  {
-    pergunta: 'O que acontece depois do pagamento?',
-    resposta: 'Assim que o Mercado Pago confirma o pagamento, o acesso e liberado automaticamente na sua conta.',
+    titulo: 'Perguntas comuns antes da compra',
+    perguntas: [
+      {
+        pergunta: 'Isso garante o trajeto exato da minha prova?',
+        resposta:
+          'Nao. O foco e mostrar os percursos mais frequentes observados na pratica, para voce chegar mais preparado e menos surpreso.',
+      },
+      {
+        pergunta: 'Comprei um local. Tenho acesso aos outros?',
+        resposta:
+          'Cada compra libera apenas um local de prova, pelo periodo escolhido. Se quiser outro local, a compra e separada.',
+      },
+      {
+        pergunta: 'O que acontece depois do pagamento?',
+        resposta:
+          'Assim que o Mercado Pago confirma o pagamento, o acesso e liberado automaticamente na sua conta.',
+      },
+    ],
   },
 ]
 
@@ -193,52 +174,17 @@ export default function Home() {
         </div>
 
         <div className="hero-panel">
-          <div className="hero-panel-title">Dentro de cada plano voce encontra</div>
+          <div className="hero-panel-title">O acesso foi pensado para ser simples</div>
+          <div className="hero-panel-copy">
+            Escolha seu local, pague com Mercado Pago e acompanhe o estudo dentro da sua conta.
+          </div>
           <div className="hero-list">
-            <div className="hero-list-item">Percursos mais frequentes observados na pratica.</div>
-            <div className="hero-list-item">Simulacao completa para entender como a prova costuma acontecer.</div>
-            <div className="hero-list-item">Baliza, embreagem e apoio para dirigir com mais controle.</div>
-            <div className="hero-list-item">Erros que mais tiram pontos e o que costuma ser avaliado.</div>
+            <div className="hero-list-item">Videos reais do local e simulacao da prova.</div>
+            <div className="hero-list-item">Baliza, embreagem e erros que mais tiram pontos.</div>
+            <div className="hero-list-item">Acesso por periodo, sem renovacao automatica.</div>
           </div>
         </div>
       </section>
-
-      <RevealSection as="section" className="landing-section" delay={30}>
-        <div className="section-title-row">
-          <div>
-            <div className="section-heading">Como funciona</div>
-            <div className="section-copy">Um caminho simples para estudar com foco no que mais ajuda antes da prova.</div>
-          </div>
-        </div>
-
-        <div className="story-grid">
-          {COMO_FUNCIONA.map((item, index) => (
-            <RevealSection key={item.passo} className="story-card" delay={90 + index * 70}>
-              <div className="story-step">{item.passo}</div>
-              <div className="story-title">{item.titulo}</div>
-              <div className="story-copy">{item.descricao}</div>
-            </RevealSection>
-          ))}
-        </div>
-      </RevealSection>
-
-      <RevealSection as="section" className="landing-section" delay={60}>
-        <div className="section-title-row">
-          <div>
-            <div className="section-heading">O que voce realmente ganha</div>
-            <div className="section-copy">A rota chama atencao. O produto real e a confianca para chegar mais preparado.</div>
-          </div>
-        </div>
-
-        <div className="signal-grid">
-          {GANHOS.map((item, index) => (
-            <RevealSection key={item.titulo} className="signal-card" delay={110 + index * 70}>
-              <div className="signal-title">{item.titulo}</div>
-              <div className="signal-copy">{item.descricao}</div>
-            </RevealSection>
-          ))}
-        </div>
-      </RevealSection>
 
       <RevealSection as="section" className="landing-section" id="locais-disponiveis" delay={80}>
         <div className="page-title">Locais de prova</div>
@@ -254,7 +200,6 @@ export default function Home() {
               const planosLocal = planosPorLocal.get(local.slug) || []
               const planoInicial = planosLocal[0]
               const estaDisponivel = local.statusComercial === 'DISPONIVEL'
-              const sinaisCard = getCardSignals(local, planosLocal)
               const rodapeEsquerdo = estaDisponivel
                 ? `${planosLocal.length} ${planosLocal.length === 1 ? 'plano' : 'planos'}`
                 : formatStatusComercialLocal(local.statusComercial)
@@ -268,6 +213,7 @@ export default function Home() {
                   : local.statusComercial === 'PAUSADO'
                     ? 'Liberacao temporariamente pausada'
                     : 'Disponivel somente para administracao'
+              const resumoCard = getCardResumo(local, planosLocal)
 
               return (
                 <RevealSection
@@ -286,6 +232,7 @@ export default function Home() {
                   <div className="spotlight-accent">{destaqueLocal}</div>
                   <div className="spotlight-title">{local.nome}</div>
                   <div className="spotlight-desc">{local.descricao}</div>
+                  <div className="spotlight-summary">{resumoCard}</div>
                   {!estaDisponivel && local.mensagemPublica && (
                     <div className="mini-copy">{local.mensagemPublica}</div>
                   )}
@@ -298,14 +245,6 @@ export default function Home() {
                       ))}
                     </div>
                   )}
-                  <div className="spotlight-signal-list">
-                    {sinaisCard.map(item => (
-                      <div key={item} className="spotlight-signal">
-                        <span className="spotlight-signal-dot" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </div>
                   <div className="spotlight-footer">
                     <div className="spotlight-meta-block">
                       <span className="spotlight-meta-label">{rodapeEsquerdo}</span>
@@ -323,38 +262,56 @@ export default function Home() {
         )}
       </RevealSection>
 
-      <RevealSection as="section" className="landing-section" delay={100}>
-        <div className="section-title-row">
-          <div>
-            <div className="section-heading">Confianca para estudar do jeito certo</div>
-            <div className="section-copy">Sem prometer rota fixa e sem deixar voce estudar no escuro.</div>
+      <RevealSection as="section" className="landing-inline-strip" delay={100}>
+        {FAIXA_CONFIANCA.map(item => (
+          <div key={item} className="landing-inline-chip">
+            {item}
           </div>
-        </div>
-
-        <div className="trust-grid">
-          {SINAIS_CONFIANCA.map((item, index) => (
-            <RevealSection key={item.titulo} className="trust-card" delay={120 + index * 70}>
-              <div className="trust-title">{item.titulo}</div>
-              <div className="trust-copy">{item.descricao}</div>
-            </RevealSection>
-          ))}
-        </div>
+        ))}
       </RevealSection>
 
       <RevealSection as="section" className="landing-section" delay={120}>
         <div className="section-title-row">
           <div>
-            <div className="section-heading">Perguntas comuns antes da compra</div>
-            <div className="section-copy">Respostas rapidas para alinhar expectativa e dar mais seguranca antes de escolher seu local.</div>
+            <div className="section-heading">Saiba mais antes de comprar</div>
+            <div className="section-copy">Abra apenas o que voce quiser consultar e mantenha a pagina mais leve para navegar.</div>
           </div>
         </div>
 
-        <div className="faq-grid">
-          {PERGUNTAS_COMUNS.map((item, index) => (
-            <RevealSection key={item.pergunta} className="faq-card" delay={140 + index * 70}>
-              <div className="faq-question">{item.pergunta}</div>
-              <div className="faq-answer">{item.resposta}</div>
-            </RevealSection>
+        <div className="learn-more-list">
+          {SAIBA_MAIS.map(item => (
+            <details key={item.titulo} className="learn-more-item">
+              <summary className="learn-more-summary">
+                <span className="learn-more-title">{item.titulo}</span>
+                <span className="learn-more-toggle">Abrir</span>
+              </summary>
+
+              <div className="learn-more-body">
+                {item.copy && <div className="learn-more-copy">{item.copy}</div>}
+
+                {item.pontos && (
+                  <div className="learn-more-points">
+                    {item.pontos.map(ponto => (
+                      <div key={ponto} className="learn-more-point">
+                        <span className="learn-more-point-dot" />
+                        <span>{ponto}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {item.perguntas && (
+                  <div className="learn-more-faq">
+                    {item.perguntas.map(pergunta => (
+                      <div key={pergunta.pergunta} className="learn-more-faq-item">
+                        <div className="learn-more-faq-question">{pergunta.pergunta}</div>
+                        <div className="learn-more-faq-answer">{pergunta.resposta}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </details>
           ))}
         </div>
       </RevealSection>
