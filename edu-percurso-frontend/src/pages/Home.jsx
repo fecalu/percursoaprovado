@@ -154,7 +154,7 @@ export default function Home() {
   }, [planos])
 
   return (
-    <div className="landing-page">
+    <div className="landing-page landing-page--eager">
       <section className="hero-shell fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao pratica por local de prova</div>
@@ -218,7 +218,7 @@ export default function Home() {
         </div>
       </section>
 
-      <RevealSection as="section" className="landing-section" id="locais-disponiveis" delay={80}>
+      <RevealSection as="section" className="landing-section" id="locais-disponiveis" delay={80} eager>
         <div className="page-title">Locais de prova</div>
         <p className="page-sub">Escolha o seu local e veja o que ja esta disponivel para estudar com mais confianca.</p>
 
@@ -254,6 +254,7 @@ export default function Home() {
                   to={`/locais/${local.slug}`}
                   className={`spotlight-card ${getSpotlightCardClass(local.statusComercial)}`}
                   delay={100}
+                  eager
                 >
                   <div className="spotlight-top">
                     <div className="spotlight-city">{local.cidade}</div>
@@ -302,7 +303,7 @@ export default function Home() {
         )}
       </RevealSection>
 
-      <RevealSection as="section" className="landing-inline-strip" delay={100}>
+      <RevealSection as="section" className="landing-inline-strip" delay={100} eager>
         {FAIXA_CONFIANCA.map(item => (
           <div key={item} className="landing-inline-chip">
             {item}
@@ -310,7 +311,7 @@ export default function Home() {
         ))}
       </RevealSection>
 
-      <RevealSection as="section" className="landing-section" delay={120}>
+      <RevealSection as="section" className="landing-section" delay={120} eager>
         <div className="section-title-row">
           <div>
             <div className="section-heading">Saiba mais antes de comprar</div>
@@ -356,7 +357,7 @@ export default function Home() {
         </div>
       </RevealSection>
 
-      <RevealSection as="section" className="landing-cta" delay={150}>
+      <RevealSection as="section" className="landing-cta" delay={150} eager>
         <div>
           <div className="landing-cta-kicker">Comece pelo seu local</div>
           <div className="landing-cta-title">Quanto antes voce estudar o padrao da prova, mais seguro chega no dia.</div>

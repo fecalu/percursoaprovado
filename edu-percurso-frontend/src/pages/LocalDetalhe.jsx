@@ -211,7 +211,7 @@ export default function LocalDetalhe() {
   ]
 
   return (
-    <div className="landing-page">
+    <div className="landing-page landing-page--eager">
       {ToastEl}
       <Link className="back-link" to="/">
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
@@ -289,7 +289,7 @@ export default function LocalDetalhe() {
         </div>
       </section>
 
-      <RevealSection as="section" className="landing-section" delay={40}>
+      <RevealSection as="section" className="landing-section" delay={40} eager>
         <div className="page-title">{compraLiberada ? 'Escolha seu periodo de acesso' : 'Disponibilidade do local'}</div>
         <p className="page-sub">
           {compraLiberada
@@ -374,14 +374,14 @@ export default function LocalDetalhe() {
         )}
       </RevealSection>
 
-      <RevealSection as="section" className="landing-section" delay={65}>
+      <RevealSection as="section" className="landing-section" delay={65} eager>
         <div className="landing-inline-strip landing-inline-strip--compact">
           <div className="landing-inline-chip">1 local por compra, com acesso pelo periodo escolhido.</div>
           <div className="landing-inline-chip">Compra unica com liberacao automatica apos a confirmacao do pagamento.</div>
         </div>
       </RevealSection>
 
-      <RevealSection as="section" className="landing-section" delay={70}>
+      <RevealSection as="section" className="landing-section" delay={70} eager>
         <div className="section-title-row">
           <div>
             <div className="section-heading">Saiba mais sobre esse acesso</div>

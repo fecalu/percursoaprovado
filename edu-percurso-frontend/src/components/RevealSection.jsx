@@ -1,10 +1,23 @@
 import { useEffect, useRef, useState } from 'react'
 
-export default function RevealSection({ as: Tag = 'div', className = '', delay = 0, style, children, ...props }) {
+export default function RevealSection({
+  as: Tag = 'div',
+  className = '',
+  delay = 0,
+  eager = false,
+  style,
+  children,
+  ...props
+}) {
   const ref = useRef(null)
-  const [isVisible, setIsVisible] = useState(false)
+  const [isVisible, setIsVisible] = useState(eager)
 
   useEffect(() => {
+    if (eager) {
+      setIsVisible(true)
+      return undefined
+    }
+
     const element = ref.current
 
     if (!element) {
@@ -34,7 +47,7 @@ export default function RevealSection({ as: Tag = 'div', className = '', delay =
     observer.observe(element)
 
     return () => observer.disconnect()
-  }, [])
+  }, [eager])
 
   return (
     <Tag

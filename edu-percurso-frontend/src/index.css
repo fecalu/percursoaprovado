@@ -606,6 +606,12 @@ body {
   gap: 2rem;
 }
 
+.landing-page--eager .reveal-block {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 .hero-shell {
   position: relative;
   display: grid;
@@ -1562,6 +1568,13 @@ body {
   .landing-cta {
     content-visibility: auto;
     contain-intrinsic-size: 1px 680px;
+  }
+
+  .landing-page--eager .landing-section,
+  .landing-page--eager .landing-inline-strip,
+  .landing-page--eager .landing-cta {
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
   }
 }
 
