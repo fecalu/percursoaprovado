@@ -189,7 +189,6 @@ export default function Home() {
         </div>
 
         <div className="hero-panel">
-          <div className="hero-panel-kicker">Comece pelo essencial</div>
           <div className="hero-panel-title">Tudo o que voce precisa para entrar e decidir rapido.</div>
           <div className="hero-panel-copy">
             Escolha o local, veja a disponibilidade e abra os detalhes so quando quiser aprofundar.

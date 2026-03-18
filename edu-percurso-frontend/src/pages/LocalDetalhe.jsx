@@ -83,7 +83,6 @@ const BENEFICIOS_DO_ACESSO = [
 const HERO_DESTAQUES_LOCAL = [
   'Percursos mais frequentes e simulacao da prova',
   'Baliza, embreagem e erros que mais tiram pontos',
-  'Acesso por periodo com liberacao automatica apos o pagamento',
 ]
 
 function getPlanoDestaque(duracaoDias) {
@@ -220,7 +219,7 @@ export default function LocalDetalhe() {
         Voltar para os locais
       </Link>
 
-      <section className="hero-shell hero-shell--local fade-in">
+      <section className="hero-shell hero-shell--local hero-shell--single fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao por local de prova</div>
           <div className="local-hero-topline">
@@ -256,35 +255,6 @@ export default function LocalDetalhe() {
           <div className="hero-proof-grid">
             <div className="hero-proof-chip hero-proof-chip--strong">Trechos mais recorrentes desse local</div>
             <div className="hero-proof-chip">Conteudo direto para reduzir surpresa e ansiedade</div>
-          </div>
-        </div>
-
-        <div className="hero-panel">
-          <div className="hero-panel-kicker">Visao geral do acesso</div>
-          <div className="hero-panel-title">Uma pagina mais limpa para voce decidir sem excesso de informacao.</div>
-          <div className="hero-panel-copy">
-            Os detalhes profundos ficam logo abaixo em clique. Aqui entra so o essencial para comparar e seguir.
-          </div>
-          <div className="hero-panel-metrics">
-            <div className="hero-panel-metric">
-              <span className="hero-panel-metric-value">{planos.length || 0}</span>
-              <span className="hero-panel-metric-label">planos ativos</span>
-            </div>
-            <div className="hero-panel-metric">
-              <span className="hero-panel-metric-value">1</span>
-              <span className="hero-panel-metric-label">local por compra</span>
-            </div>
-            <div className="hero-panel-metric">
-              <span className="hero-panel-metric-value">Pix</span>
-              <span className="hero-panel-metric-label">ou cartao</span>
-            </div>
-          </div>
-          <div className="hero-list">
-            {HERO_DESTAQUES_LOCAL.map(item => (
-              <div key={item} className="hero-list-item">
-                {item}
-              </div>
-            ))}
           </div>
         </div>
       </section>

@@ -1429,6 +1429,14 @@ body {
   grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
 }
 
+.hero-shell--single {
+  grid-template-columns: 1fr;
+}
+
+.hero-shell--single .hero-copy {
+  max-width: 920px;
+}
+
 .hero-shell--local .hero-panel-title {
   max-width: 420px;
 }
