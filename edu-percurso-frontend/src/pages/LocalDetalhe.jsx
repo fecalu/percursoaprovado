@@ -50,6 +50,19 @@ function getPlanoIndicacao(duracaoDias) {
   return 'Acesso mais longo para uma preparacao estendida.'
 }
 
+function getPlanoPontosCurtos(duracaoDias) {
+  const horizonte =
+    duracaoDias <= 30
+      ? 'Revisao rapida antes da prova'
+      : duracaoDias <= 90
+        ? 'Mais tempo para revisar com calma'
+        : duracaoDias <= 180
+          ? 'Mais folga para repetir o conteudo'
+          : 'Preparacao estendida no seu ritmo'
+
+  return ['Percurso real e simulacao', 'Baliza, embreagem e erros comuns', horizonte]
+}
+
 const COMPRA_SEGURA_ITENS = [
   {
     titulo: 'Compra unica',
@@ -292,6 +305,7 @@ export default function LocalDetalhe() {
           <div className="plan-grid">
             {planos.map(plano => {
               const destaquePlano = getPlanoDestaque(plano.duracaoDias)
+              const pontosCurtos = getPlanoPontosCurtos(plano.duracaoDias)
 
               return (
               <div key={plano.id} className={`plan-card ${destaquePlano.recomendado ? 'plan-card--recommended' : ''}`}>
@@ -302,29 +316,21 @@ export default function LocalDetalhe() {
                 {destaquePlano.recomendado && <div className="plan-ribbon">Recomendado para a maioria dos alunos</div>}
                 <div className="plan-name">{plano.nome}</div>
                 <div className="plan-price">{fmtMoeda(plano.precoCentavos)}</div>
+                <div className="plan-price-caption">Pagamento unico pelo periodo escolhido</div>
                 <div className="plan-highlight">{getPlanoIndicacao(plano.duracaoDias)}</div>
                 <div className="plan-summary">{destaquePlano.resumo}</div>
-                <div className="plan-hero-line">
-                  <span className="plan-hero-dot" />
-                  <span>Preparo desse local com acesso liberado por {formatPlanoDuracao(plano.duracaoDias).toLowerCase()}.</span>
-                </div>
                 <div className="plan-copy">
-                  Acesso ao preparo desse local, com percursos mais frequentes, simulacao e modulos gerais
-                  para chegar com menos surpresa e mais confianca no dia da prova.
+                  Um acesso mais direto para revisar esse local com mais confianca e menos surpresa no dia da prova.
                 </div>
-                <div className="plan-checklist">
-                  <div className="plan-check-item">
-                    <span className="plan-check-dot" />
-                    <span>Percursos mais frequentes e pontos de atencao desse local</span>
-                  </div>
-                  <div className="plan-check-item">
-                    <span className="plan-check-dot" />
-                    <span>Simulacao, baliza, embreagem e leitura da avaliacao</span>
-                  </div>
-                  <div className="plan-check-item">
-                    <span className="plan-check-dot" />
-                    <span>Acesso liberado durante todo o periodo escolhido</span>
-                  </div>
+                <div className="plan-feature-grid">
+                  {pontosCurtos.map(item => (
+                    <div key={item} className="plan-feature-pill">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+                <div className="plan-footer-note">
+                  Acesso liberado automaticamente apos a confirmacao do pagamento.
                 </div>
                 <div className="plan-meta-stack">
                   <div className="plan-meta">Validade clara: {formatPlanoDuracao(plano.duracaoDias)}</div>
