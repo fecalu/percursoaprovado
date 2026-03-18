@@ -18,6 +18,46 @@ function getStatusBadgeClass(statusComercial) {
   return 'badge-gray'
 }
 
+function getSpotlightCardClass(statusComercial) {
+  if (statusComercial === 'DISPONIVEL') return 'spotlight-card--available'
+  if (statusComercial === 'EM_BREVE') return 'spotlight-card--soon'
+  if (statusComercial === 'PAUSADO') return 'spotlight-card--paused'
+  return 'spotlight-card--draft'
+}
+
+const COMO_FUNCIONA = [
+  {
+    passo: '1',
+    titulo: 'Escolha seu local',
+    descricao: 'Selecione o local onde voce vai fazer a prova e veja o que ja esta liberado para estudar.',
+  },
+  {
+    passo: '2',
+    titulo: 'Entenda o padrao da prova',
+    descricao: 'Revise os percursos mais frequentes, os pontos de atencao e os erros que mais tiram pontos.',
+  },
+  {
+    passo: '3',
+    titulo: 'Chegue com mais confianca',
+    descricao: 'Use a simulacao, baliza e embreagem para reduzir ansiedade e dirigir com mais controle.',
+  },
+]
+
+const GANHOS = [
+  {
+    titulo: 'Menos surpresa',
+    descricao: 'Voce chega para a prova entendendo melhor como ela costuma acontecer no seu local.',
+  },
+  {
+    titulo: 'Mais leitura da avaliacao',
+    descricao: 'Aprenda a reconhecer o que costuma exigir mais atencao e o que pesa na prova.',
+  },
+  {
+    titulo: 'Mais confianca ao dirigir',
+    descricao: 'O foco nao e decorar rua. E dirigir com mais calma, criterio e preparo no dia do exame.',
+  },
+]
+
 export default function Home() {
   const { user, isAdmin } = useAuth()
   const [locais, setLocais] = useState([])
@@ -92,6 +132,43 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="landing-section">
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">Como funciona</div>
+            <div className="section-copy">Um caminho simples para estudar com foco no que mais ajuda antes da prova.</div>
+          </div>
+        </div>
+
+        <div className="story-grid">
+          {COMO_FUNCIONA.map(item => (
+            <div key={item.passo} className="story-card">
+              <div className="story-step">{item.passo}</div>
+              <div className="story-title">{item.titulo}</div>
+              <div className="story-copy">{item.descricao}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section">
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">O que voce realmente ganha</div>
+            <div className="section-copy">A rota chama atencao. O produto real e a confianca para chegar mais preparado.</div>
+          </div>
+        </div>
+
+        <div className="signal-grid">
+          {GANHOS.map(item => (
+            <div key={item.titulo} className="signal-card">
+              <div className="signal-title">{item.titulo}</div>
+              <div className="signal-copy">{item.descricao}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="landing-section" id="locais-disponiveis">
         <div className="page-title">Locais de prova</div>
         <p className="page-sub">Escolha o seu local e veja o que ja esta disponivel para estudar com mais confianca.</p>
@@ -112,15 +189,23 @@ export default function Home() {
               const rodapeDireito = estaDisponivel
                 ? planoInicial ? `A partir de ${fmtMoeda(planoInicial.precoCentavos)}` : 'Planos em breve'
                 : local.statusComercial === 'PAUSADO' ? 'Vendas pausadas' : 'Compra bloqueada'
+              const destaqueLocal = estaDisponivel
+                ? 'Compra liberada agora'
+                : local.statusComercial === 'EM_BREVE'
+                  ? 'Preparacao em andamento'
+                  : local.statusComercial === 'PAUSADO'
+                    ? 'Liberacao temporariamente pausada'
+                    : 'Disponivel somente para administracao'
 
               return (
-                <Link key={local.id} to={`/locais/${local.slug}`} className="spotlight-card">
-                  <div className="spotlight-city">{local.cidade}</div>
-                  <div>
+                <Link key={local.id} to={`/locais/${local.slug}`} className={`spotlight-card ${getSpotlightCardClass(local.statusComercial)}`}>
+                  <div className="spotlight-top">
+                    <div className="spotlight-city">{local.cidade}</div>
                     <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
                       {formatStatusComercialLocal(local.statusComercial)}
                     </span>
                   </div>
+                  <div className="spotlight-accent">{destaqueLocal}</div>
                   <div className="spotlight-title">{local.nome}</div>
                   <div className="spotlight-desc">{local.descricao}</div>
                   {!estaDisponivel && local.mensagemPublica && (
