@@ -1027,6 +1027,20 @@ body {
   background: linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
 }
 
+.plan-card--recommended {
+  border-color: rgba(45,224,154,0.24);
+  box-shadow:
+    inset 0 0 0 1px rgba(45,224,154,0.1),
+    0 18px 48px rgba(10, 18, 30, 0.28);
+}
+
+.plan-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
 .plan-badge {
   display: inline-flex;
   align-items: center;
@@ -1038,6 +1052,34 @@ body {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.plan-mini-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.plan-ribbon {
+  margin-top: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.35rem 0.72rem;
+  border-radius: 999px;
+  background: rgba(45,224,154,0.12);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.45px;
   text-transform: uppercase;
 }
 
@@ -1072,6 +1114,14 @@ body {
   line-height: 1.6;
 }
 
+.plan-summary {
+  margin-top: 0.5rem;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+
 .plan-meta {
   margin-top: 0.45rem;
   color: var(--text-3);
@@ -1085,6 +1135,32 @@ body {
   color: var(--text-2);
   font-size: 12px;
   line-height: 1.65;
+}
+
+.plan-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.95rem;
+}
+
+.plan-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.plan-check-dot {
+  width: 8px;
+  height: 8px;
+  margin-top: 0.42rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(45,224,154,0.75);
+  box-shadow: 0 0 0 4px rgba(45,224,154,0.08);
 }
 
 .active-plan {
@@ -1486,6 +1562,7 @@ body {
   .faq-answer,
   .spotlight-accent,
   .spotlight-signal,
+  .plan-check-item,
   .spotlight-footer,
   .mini-copy,
   .plan-meta,
@@ -1542,10 +1619,24 @@ body {
     font-size: 12px;
   }
 
+  .plan-mini-tag,
+  .plan-ribbon {
+    font-size: 12px;
+  }
+
+  .plan-summary {
+    font-size: 14px;
+  }
+
   .spotlight-cta {
     width: 100%;
     justify-content: space-between;
     font-size: 13px;
+  }
+
+  .plan-top-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .plan-card .btn {
