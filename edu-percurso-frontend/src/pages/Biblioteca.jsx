@@ -61,7 +61,7 @@ export default function Biblioteca() {
   return (
     <>
       <div className="page-title">Minha biblioteca</div>
-      <p className="page-sub">Acesse seus locais de prova ativos e os modulos gerais de apoio.</p>
+      <p className="page-sub">Revise seus locais ativos e os modulos que ajudam voce a dirigir com mais confianca no dia da prova.</p>
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -122,7 +122,7 @@ export default function Biblioteca() {
               <div className="section-title-row">
                 <div>
                   <div className="section-heading">Modulos gerais</div>
-                  <div className="section-copy">Baliza, embreagem, erros que reprovam e o olhar do examinador.</div>
+                  <div className="section-copy">Baliza, embreagem, erros que mais tiram pontos e o que costuma ser avaliado.</div>
                 </div>
               </div>
               <div className="card-grid">
@@ -149,7 +149,7 @@ export default function Biblioteca() {
               <div className="section-title-row">
                 <div>
                   <div className="section-heading">{secao.nome}</div>
-                  <div className="section-copy">Conteudos especificos desse local de prova.</div>
+                  <div className="section-copy">Percursos mais frequentes, pontos de atencao e orientacoes praticas desse local.</div>
                 </div>
               </div>
               <div className="card-grid">

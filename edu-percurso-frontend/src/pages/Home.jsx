@@ -51,35 +51,39 @@ export default function Home() {
       <section className="hero-shell fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao pratica por local de prova</div>
-          <h1 className="hero-title">Veja o trajeto real da sua prova e estude com foco no local onde voce vai fazer o exame.</h1>
+          <h1 className="hero-title">Descubra os percursos mais frequentes da sua prova pratica.</h1>
           <p className="hero-subtitle">
-            Cada compra libera somente 1 local de prova, pela validade escolhida,
-            com videos do trajeto real, simulacao completa e modulos de apoio. Pagamento via Pix ou cartao de credito.
+            Prepare-se com mais confianca usando videos reais, simulacoes e orientacoes baseadas
+            nos trajetos mais recorrentes, nos pontos de atencao e nos erros que mais tiram pontos.
           </p>
           <div className="hero-actions">
             <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/register'}>
-              {user ? (isAdmin ? 'Abrir painel' : 'Ir para minha biblioteca') : 'Criar conta'}
+              {user ? (isAdmin ? 'Abrir painel' : 'Ir para minha biblioteca') : 'Escolher meu local de prova'}
             </Link>
             <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/planos' : '/meus-acessos') : '/login'}>
               {user ? 'Ver meus acessos' : 'Ja tenho conta'}
             </Link>
+          </div>
+          <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
+            Os conteudos sao baseados em experiencia real, observacao pratica e analise dos percursos mais frequentes.
+            O trajeto pode variar no dia da avaliacao.
           </div>
         </div>
 
         <div className="hero-panel">
           <div className="hero-panel-title">Dentro de cada plano voce encontra</div>
           <div className="hero-list">
-            <div className="hero-list-item">Percurso real gravado no local do exame.</div>
-            <div className="hero-list-item">Simulacao completa da prova pratica.</div>
-            <div className="hero-list-item">Baliza, embreagem e modulos de apoio.</div>
-            <div className="hero-list-item">Erros que reprovam e o olhar do examinador.</div>
+            <div className="hero-list-item">Percursos mais frequentes observados na pratica.</div>
+            <div className="hero-list-item">Simulacao completa para entender como a prova costuma acontecer.</div>
+            <div className="hero-list-item">Baliza, embreagem e apoio para dirigir com mais controle.</div>
+            <div className="hero-list-item">Erros que mais tiram pontos e o que costuma ser avaliado.</div>
           </div>
         </div>
       </section>
 
       <section className="landing-section">
         <div className="page-title">Locais de prova</div>
-        <p className="page-sub">Escolha o local onde voce vai fazer o exame e veja o que ja esta disponivel ou em preparacao.</p>
+        <p className="page-sub">Escolha o seu local e veja o que ja esta disponivel para estudar com mais confianca.</p>
 
         {loading ? (
           <div className="spinner" />

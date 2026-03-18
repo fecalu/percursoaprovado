@@ -119,17 +119,17 @@ export default function LocalDetalhe() {
 
       <section className="hero-shell fade-in">
         <div className="hero-copy">
-          <div className="hero-kicker">Local de prova</div>
+          <div className="hero-kicker">Preparacao por local de prova</div>
           <div style={{ marginTop: '0.9rem' }}>
             <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
               {formatStatusComercialLocal(local.statusComercial)}
             </span>
           </div>
-          <h1 className="hero-title">{local.nome}</h1>
+          <h1 className="hero-title">Prepare-se melhor para a prova em {local.nome}.</h1>
           <p className="hero-subtitle">
-            {local.descricao} {compraLiberada
-              ? 'Compre o acesso desse local e estude com o trajeto real, simulacao completa e modulos de apoio durante toda a validade.'
-              : mensagemDisponibilidade}
+            {compraLiberada
+              ? `Veja como a prova costuma acontecer nesse local, conheca os trechos mais recorrentes, os pontos de atencao e os erros que mais tiram pontos. ${local.descricao || ''}`.trim()
+              : `${local.descricao || ''} ${mensagemDisponibilidade}`.trim()}
           </p>
           <div className="hero-actions">
             <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/register'}>
@@ -139,24 +139,28 @@ export default function LocalDetalhe() {
               {user ? 'Ver meus pagamentos' : 'Entrar'}
             </Link>
           </div>
+          <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
+            Os conteudos refletem experiencia real, observacao pratica e os percursos mais frequentes desse local.
+            O trajeto da avaliacao pode variar.
+          </div>
         </div>
 
         <div className="hero-panel">
-          <div className="hero-panel-title">Esse plano inclui</div>
+          <div className="hero-panel-title">O que voce vai encontrar</div>
           <div className="hero-list">
-            <div className="hero-list-item">Percurso real do local de prova.</div>
-            <div className="hero-list-item">Simulacao completa do exame.</div>
-            <div className="hero-list-item">Modulos gerais de baliza e embreagem.</div>
-            <div className="hero-list-item">Conteudo orientado pelo olhar do examinador.</div>
+            <div className="hero-list-item">Percursos mais frequentes e pontos de atencao desse local.</div>
+            <div className="hero-list-item">Simulacao completa para entender como a prova costuma acontecer.</div>
+            <div className="hero-list-item">Baliza e embreagem para dirigir com mais controle.</div>
+            <div className="hero-list-item">Erros que mais tiram pontos e o que costuma ser avaliado.</div>
           </div>
         </div>
       </section>
 
       <section className="landing-section">
-        <div className="page-title">{compraLiberada ? 'Planos disponiveis' : 'Disponibilidade do local'}</div>
+        <div className="page-title">{compraLiberada ? 'Escolha seu periodo de acesso' : 'Disponibilidade do local'}</div>
         <p className="page-sub">
           {compraLiberada
-            ? 'Escolha a validade ideal para o seu momento de preparacao.'
+            ? 'Tenha acesso ao preparo completo desse local durante a validade escolhida.'
             : 'Esse local aparece no site, mas a compra fica bloqueada ate o administrador liberar as vendas.'}
         </p>
 
@@ -188,9 +192,13 @@ export default function LocalDetalhe() {
                 <div className="plan-badge">{formatPlanoDuracao(plano.duracaoDias)}</div>
                 <div className="plan-name">{plano.nome}</div>
                 <div className="plan-price">{fmtMoeda(plano.precoCentavos)}</div>
-                <div className="plan-copy">Acesso ao local {local.nome} e aos modulos gerais durante toda a validade escolhida.</div>
+                <div className="plan-copy">
+                  Acesso ao preparo desse local, com percursos mais frequentes, simulacao e modulos gerais
+                  para chegar com menos surpresa e mais confianca no dia da prova.
+                </div>
                 <div className="plan-meta">Validade: {formatPlanoDuracao(plano.duracaoDias)}</div>
                 <div className="plan-meta">Pague com Pix ou cartao de credito pelo Mercado Pago.</div>
+                <div className="plan-meta">Compra unica, sem renovacao automatica.</div>
                 <div style={{ marginTop: '1rem' }}>
                   {renderAcaoPlano(plano)}
                 </div>

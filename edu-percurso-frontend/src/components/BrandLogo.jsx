@@ -7,9 +7,9 @@ export default function BrandLogo({ variant = 'sidebar', showTagline = false }) 
         role="img"
         aria-label="Percurso Aprovado"
       >
-        <g fill="none" stroke="currentColor" strokeWidth="7">
-          <path d="M150 56h120" />
-          <path d="M450 56h120" />
+        <g fill="none" stroke="currentColor" strokeWidth="7" strokeLinecap="round">
+          <path d="M105 56h98" />
+          <path d="M517 56h98" />
         </g>
         <text
           x="360"
@@ -18,7 +18,7 @@ export default function BrandLogo({ variant = 'sidebar', showTagline = false }) 
           fill="currentColor"
           fontSize="38"
           fontFamily="DM Sans, Arial, sans-serif"
-          letterSpacing="7"
+          letterSpacing="6"
           fontWeight="500"
         >
           PERCURSO

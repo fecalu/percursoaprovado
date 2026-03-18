@@ -142,12 +142,12 @@ export function formatPagamentoDetalhe(detail) {
 
 export function formatTipoConteudo(tipoConteudo) {
   const labels = {
-    PERCURSO_REAL: 'Percurso real',
-    SIMULACAO_COMPLETA: 'Simulacao completa',
-    ERROS_REPROVACAO: 'Erros de reprovacao',
-    BALIZA: 'Baliza',
-    CONTROLE_EMBREAGEM: 'Controle de embreagem',
-    EXAMINADOR: 'Olhar do examinador',
+    PERCURSO_REAL: 'Percurso real do local',
+    SIMULACAO_COMPLETA: 'Simulacao completa da prova',
+    ERROS_REPROVACAO: 'Erros que mais tiram pontos',
+    BALIZA: 'Baliza com mais confianca',
+    CONTROLE_EMBREAGEM: 'Mais controle de embreagem',
+    EXAMINADOR: 'O que costuma ser avaliado',
   }
 
   if (!tipoConteudo) return 'Conteudo'
