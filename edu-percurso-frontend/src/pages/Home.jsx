@@ -26,6 +26,15 @@ function getSpotlightCardClass(statusComercial) {
   return 'spotlight-card--draft'
 }
 
+function getLocalMonograma(nome = '') {
+  return nome
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(parte => parte[0]?.toUpperCase())
+    .join('')
+}
+
 function getCardResumo(local, planosLocal) {
   if (local.statusComercial === 'DISPONIVEL') {
     if (planosLocal.length > 0) {
@@ -58,6 +67,12 @@ const FAIXA_CONFIANCA = [
   'Percursos mais frequentes observados na pratica',
   '1 local por compra, com acesso por periodo',
   'Pagamento por Pix ou cartao, com liberacao automatica',
+]
+
+const HERO_DESTAQUES = [
+  'Videos reais e simulacao da prova',
+  'Compra simples com Mercado Pago',
+  'Acesso por periodo, sem renovacao automatica',
 ]
 
 const SAIBA_MAIS = [
@@ -146,7 +161,7 @@ export default function Home() {
           <h1 className="hero-title">Descubra os percursos mais frequentes da sua prova pratica.</h1>
           <p className="hero-subtitle">
             Prepare-se com mais confianca usando videos reais, simulacoes e orientacoes baseadas
-            nos trajetos mais recorrentes, nos pontos de atencao e nos erros que mais tiram pontos.
+            nos trajetos mais recorrentes e no que mais pesa na avaliacao.
           </p>
           <div className="hero-actions">
             {user ? (
@@ -167,21 +182,38 @@ export default function Home() {
             O trajeto pode variar no dia da avaliacao.
           </div>
           <div className="hero-proof-grid">
-            <div className="hero-proof-chip">Mais confianca no dia da prova</div>
+            <div className="hero-proof-chip hero-proof-chip--strong">Mais confianca no dia da prova</div>
             <div className="hero-proof-chip">1 local por compra, com acesso por periodo</div>
             <div className="hero-proof-chip">Pagamento por Pix ou cartao</div>
           </div>
         </div>
 
         <div className="hero-panel">
-          <div className="hero-panel-title">O acesso foi pensado para ser simples</div>
+          <div className="hero-panel-kicker">Comece pelo essencial</div>
+          <div className="hero-panel-title">Tudo o que voce precisa para entrar e decidir rapido.</div>
           <div className="hero-panel-copy">
-            Escolha seu local, pague com Mercado Pago e acompanhe o estudo dentro da sua conta.
+            Escolha o local, veja a disponibilidade e abra os detalhes so quando quiser aprofundar.
+          </div>
+          <div className="hero-panel-metrics">
+            <div className="hero-panel-metric">
+              <span className="hero-panel-metric-value">1</span>
+              <span className="hero-panel-metric-label">local por compra</span>
+            </div>
+            <div className="hero-panel-metric">
+              <span className="hero-panel-metric-value">Pix</span>
+              <span className="hero-panel-metric-label">ou cartao</span>
+            </div>
+            <div className="hero-panel-metric">
+              <span className="hero-panel-metric-value">Sem</span>
+              <span className="hero-panel-metric-label">renovacao automatica</span>
+            </div>
           </div>
           <div className="hero-list">
-            <div className="hero-list-item">Videos reais do local e simulacao da prova.</div>
-            <div className="hero-list-item">Baliza, embreagem e erros que mais tiram pontos.</div>
-            <div className="hero-list-item">Acesso por periodo, sem renovacao automatica.</div>
+            {HERO_DESTAQUES.map(item => (
+              <div key={item} className="hero-list-item">
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -229,8 +261,13 @@ export default function Home() {
                       {formatStatusComercialLocal(local.statusComercial)}
                     </span>
                   </div>
-                  <div className="spotlight-accent">{destaqueLocal}</div>
-                  <div className="spotlight-title">{local.nome}</div>
+                  <div className="spotlight-brand-row">
+                    <div className="spotlight-mark">{getLocalMonograma(local.nome)}</div>
+                    <div className="spotlight-brand-copy">
+                      <div className="spotlight-accent">{destaqueLocal}</div>
+                      <div className="spotlight-title">{local.nome}</div>
+                    </div>
+                  </div>
                   <div className="spotlight-desc">{local.descricao}</div>
                   <div className="spotlight-summary">{resumoCard}</div>
                   {!estaDisponivel && local.mensagemPublica && (
@@ -238,11 +275,14 @@ export default function Home() {
                   )}
                   {estaDisponivel && planosLocal.length > 0 && (
                     <div className="spotlight-pill-row">
-                      {planosLocal.slice(0, 4).map(plano => (
+                      {planosLocal.slice(0, 3).map(plano => (
                         <span key={plano.id} className="spotlight-pill">
                           {formatPlanoDuracao(plano.duracaoDias)}
                         </span>
                       ))}
+                      {planosLocal.length > 3 && (
+                        <span className="spotlight-pill spotlight-pill--muted">+{planosLocal.length - 3} opcoes</span>
+                      )}
                     </div>
                   )}
                   <div className="spotlight-footer">

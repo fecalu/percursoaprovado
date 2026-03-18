@@ -20,6 +20,15 @@ function getStatusBadgeClass(statusComercial) {
   return 'badge-gray'
 }
 
+function getLocalMonograma(nome = '') {
+  return nome
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(parte => parte[0]?.toUpperCase())
+    .join('')
+}
+
 function getMensagemDisponibilidade(local) {
   if (local?.mensagemPublica) return local.mensagemPublica
   if (local?.statusComercial === 'EM_BREVE') {
@@ -69,6 +78,12 @@ const BENEFICIOS_DO_ACESSO = [
     titulo: 'Mais seguranca para revisar',
     descricao: 'Voce volta ao conteudo durante o periodo escolhido e revisa no seu ritmo, sem depender de memoria solta.',
   },
+]
+
+const HERO_DESTAQUES_LOCAL = [
+  'Percursos mais frequentes e simulacao da prova',
+  'Baliza, embreagem e apoio para dirigir com mais controle',
+  'Acesso por periodo com liberacao automatica apos o pagamento',
 ]
 
 function getPlanoDestaque(duracaoDias) {
@@ -143,7 +158,7 @@ export default function LocalDetalhe() {
     }
   }
 
-function renderAcaoPlano(plano) {
+  function renderAcaoPlano(plano) {
     if (!user) {
       return (
         <Link className="btn btn-primary" to="/register">
@@ -176,6 +191,24 @@ function renderAcaoPlano(plano) {
 
   const compraLiberada = local.statusComercial === 'DISPONIVEL'
   const mensagemDisponibilidade = getMensagemDisponibilidade(local)
+  const planoInicial = planos[0]
+  const saibaMaisLocal = [
+    {
+      titulo: 'O que voce vai encontrar',
+      copy: 'O acesso desse local foi organizado para mostrar o que mais ajuda antes da prova, sem excesso de informacao aberta de uma vez.',
+      pontos: HERO_DESTAQUES_LOCAL,
+    },
+    {
+      titulo: 'Como isso ajuda no dia da prova',
+      copy: 'O foco nao e decorar rua. E dirigir com mais leitura, menos surpresa e mais criterio durante a avaliacao.',
+      pontos: BENEFICIOS_DO_ACESSO.map(item => `${item.titulo}: ${item.descricao}`),
+    },
+    {
+      titulo: 'Compra e liberacao',
+      copy: 'A compra e simples e o acesso aparece automaticamente assim que o pagamento e confirmado.',
+      pontos: COMPRA_SEGURA_ITENS.map(item => `${item.titulo}: ${item.descricao}`),
+    },
+  ]
 
   return (
     <div className="landing-page">
@@ -190,15 +223,22 @@ function renderAcaoPlano(plano) {
       <section className="hero-shell fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao por local de prova</div>
-          <div style={{ marginTop: '0.9rem' }}>
-            <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
-              {formatStatusComercialLocal(local.statusComercial)}
-            </span>
+          <div className="local-hero-topline">
+            <div className="spotlight-mark spotlight-mark--hero">{getLocalMonograma(local.nome)}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem', alignItems: 'center' }}>
+              <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
+                {formatStatusComercialLocal(local.statusComercial)}
+              </span>
+              <span className="hero-inline-copy">{local.cidade}</span>
+              {compraLiberada && planoInicial && (
+                <span className="hero-inline-copy">A partir de {fmtMoeda(planoInicial.precoCentavos)}</span>
+              )}
+            </div>
           </div>
           <h1 className="hero-title">Prepare-se melhor para a prova em {local.nome}.</h1>
           <p className="hero-subtitle">
             {compraLiberada
-              ? `Veja como a prova costuma acontecer nesse local, conheca os trechos mais recorrentes, os pontos de atencao e os erros que mais tiram pontos. ${local.descricao || ''}`.trim()
+              ? `Veja como a prova costuma acontecer nesse local, conheca os trechos mais recorrentes e revise o que mais reduz surpresa no dia da avaliacao. ${local.descricao || ''}`.trim()
               : `${local.descricao || ''} ${mensagemDisponibilidade}`.trim()}
           </p>
           <div className="hero-actions">
@@ -214,73 +254,79 @@ function renderAcaoPlano(plano) {
             O trajeto da avaliacao pode variar.
           </div>
           <div className="hero-proof-grid">
-            <div className="hero-proof-chip">Trechos mais recorrentes desse local</div>
+            <div className="hero-proof-chip hero-proof-chip--strong">Trechos mais recorrentes desse local</div>
             <div className="hero-proof-chip">Conteudo direto para reduzir surpresa e ansiedade</div>
             <div className="hero-proof-chip">Liberacao automatica apos confirmacao do pagamento</div>
           </div>
         </div>
 
         <div className="hero-panel">
-          <div className="hero-panel-title">O que voce vai encontrar</div>
+          <div className="hero-panel-kicker">Visao geral do acesso</div>
+          <div className="hero-panel-title">Uma pagina mais limpa para voce decidir sem excesso de informacao.</div>
+          <div className="hero-panel-copy">
+            Os detalhes profundos ficam logo abaixo em clique. Aqui entra so o essencial para comparar e seguir.
+          </div>
+          <div className="hero-panel-metrics">
+            <div className="hero-panel-metric">
+              <span className="hero-panel-metric-value">{planos.length || 0}</span>
+              <span className="hero-panel-metric-label">planos ativos</span>
+            </div>
+            <div className="hero-panel-metric">
+              <span className="hero-panel-metric-value">1</span>
+              <span className="hero-panel-metric-label">local por compra</span>
+            </div>
+            <div className="hero-panel-metric">
+              <span className="hero-panel-metric-value">Pix</span>
+              <span className="hero-panel-metric-label">ou cartao</span>
+            </div>
+          </div>
           <div className="hero-list">
-            <div className="hero-list-item">Percursos mais frequentes e pontos de atencao desse local.</div>
-            <div className="hero-list-item">Simulacao completa para entender como a prova costuma acontecer.</div>
-            <div className="hero-list-item">Baliza e embreagem para dirigir com mais controle.</div>
-            <div className="hero-list-item">Erros que mais tiram pontos e o que costuma ser avaliado.</div>
+            {HERO_DESTAQUES_LOCAL.map(item => (
+              <div key={item} className="hero-list-item">
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       <RevealSection as="section" className="landing-section" delay={40}>
-        <div className="section-title-row">
-          <div>
-            <div className="section-heading">Compra simples e acesso claro</div>
-            <div className="section-copy">Tudo o que voce precisa saber antes de escolher o periodo de acesso.</div>
-          </div>
-        </div>
-
-        <div className="trust-grid trust-grid--compact">
-          {COMPRA_SEGURA_ITENS.map((item, index) => (
-            <RevealSection key={item.titulo} className="trust-card trust-card--compact" delay={80 + index * 70}>
-              <div className="trust-title trust-title--compact">{item.titulo}</div>
-              <div className="trust-copy">{item.descricao}</div>
-            </RevealSection>
-          ))}
+        <div className="landing-inline-strip">
+          <div className="landing-inline-chip">1 local por compra, com acesso pelo periodo escolhido.</div>
+          <div className="landing-inline-chip">Liberacao automatica assim que o pagamento e confirmado.</div>
+          <div className="landing-inline-chip">Compra unica, sem renovacao automatica ou surpresa escondida.</div>
         </div>
       </RevealSection>
 
       <RevealSection as="section" className="landing-section" delay={55}>
         <div className="section-title-row">
           <div>
-            <div className="section-heading">Como esse acesso ajuda na sua prova</div>
-            <div className="section-copy">Uma preparacao feita para voce entender melhor o padrao da avaliacao e chegar mais confiante.</div>
+            <div className="section-heading">Saiba mais sobre esse acesso</div>
+            <div className="section-copy">Abra apenas os detalhes que voce quiser consultar antes de escolher seu periodo.</div>
           </div>
         </div>
 
-        <div className="trust-grid trust-grid--compact">
-          {BENEFICIOS_DO_ACESSO.map((item, index) => (
-            <RevealSection key={item.titulo} className="trust-card trust-card--compact" delay={95 + index * 70}>
-              <div className="trust-title trust-title--compact">{item.titulo}</div>
-              <div className="trust-copy">{item.descricao}</div>
-            </RevealSection>
+        <div className="learn-more-list">
+          {saibaMaisLocal.map(item => (
+            <details key={item.titulo} className="learn-more-item">
+              <summary className="learn-more-summary">
+                <span className="learn-more-title">{item.titulo}</span>
+                <span className="learn-more-toggle">Abrir</span>
+              </summary>
+
+              <div className="learn-more-body">
+                <div className="learn-more-copy">{item.copy}</div>
+                <div className="learn-more-points">
+                  {item.pontos.map(ponto => (
+                    <div key={ponto} className="learn-more-point">
+                      <span className="learn-more-point-dot" />
+                      <span>{ponto}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
           ))}
-        </div>
-      </RevealSection>
-
-      <RevealSection as="section" className="landing-section" delay={60}>
-        <div className="access-strip">
-          <div className="access-chip">
-            <div className="access-chip-title">1 local por compra</div>
-            <div className="access-chip-copy">Cada compra libera apenas o local escolhido, pelo periodo selecionado.</div>
-          </div>
-          <div className="access-chip">
-            <div className="access-chip-title">Liberacao automatica</div>
-            <div className="access-chip-copy">Assim que o pagamento e confirmado, o acesso aparece na sua conta.</div>
-          </div>
-          <div className="access-chip">
-            <div className="access-chip-title">Sem renovacao automatica</div>
-            <div className="access-chip-copy">Compra unica, com validade clara e sem cobranca recorrente escondida.</div>
-          </div>
         </div>
       </RevealSection>
 
@@ -329,6 +375,10 @@ function renderAcaoPlano(plano) {
                 <div className="plan-price">{fmtMoeda(plano.precoCentavos)}</div>
                 <div className="plan-highlight">{getPlanoIndicacao(plano.duracaoDias)}</div>
                 <div className="plan-summary">{destaquePlano.resumo}</div>
+                <div className="plan-hero-line">
+                  <span className="plan-hero-dot" />
+                  <span>Preparo desse local com acesso liberado por {formatPlanoDuracao(plano.duracaoDias).toLowerCase()}.</span>
+                </div>
                 <div className="plan-copy">
                   Acesso ao preparo desse local, com percursos mais frequentes, simulacao e modulos gerais
                   para chegar com menos surpresa e mais confianca no dia da prova.
