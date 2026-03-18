@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import RevealSection from '../components/RevealSection'
 import { pedidoService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import {
@@ -58,29 +59,36 @@ export default function MeusPedidos() {
   return (
     <>
       {ToastEl}
-      <div className="page-title">Meus pagamentos</div>
-      <p className="page-sub">Acompanhe seus pagamentos e libere seu acesso ao local de prova.</p>
-
-      <div className="stats-grid" style={{ maxWidth: 780 }}>
-        <div className="stat-card">
-          <div className="stat-label">Aguardando pagamento</div>
-          <div className="stat-value">{pendentes.length}</div>
-          <div className="stat-sub">prontos para pagar</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Aprovados</div>
-          <div className="stat-value">{pagos.length}</div>
-          <div className="stat-sub">com acesso liberado</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Cancelados</div>
-          <div className="stat-value">{cancelados.length}</div>
-          <div className="stat-sub">sem acesso liberado</div>
-        </div>
-      </div>
+      <RevealSection className="student-shell" delay={30}>
+        <section className="student-hero">
+          <div>
+            <div className="page-title">Meus pagamentos</div>
+            <p className="page-sub" style={{ marginBottom: 0 }}>
+              Acompanhe seus pagamentos, retome pedidos pendentes e veja quando o acesso ja foi liberado.
+            </p>
+          </div>
+          <div className="student-kpi-grid">
+            <div className="student-kpi-card">
+              <div className="student-kpi-label">Aguardando pagamento</div>
+              <div className="student-kpi-value">{pendentes.length}</div>
+              <div className="student-kpi-copy">prontos para pagar</div>
+            </div>
+            <div className="student-kpi-card">
+              <div className="student-kpi-label">Aprovados</div>
+              <div className="student-kpi-value">{pagos.length}</div>
+              <div className="student-kpi-copy">com acesso liberado</div>
+            </div>
+            <div className="student-kpi-card">
+              <div className="student-kpi-label">Cancelados</div>
+              <div className="student-kpi-value">{cancelados.length}</div>
+              <div className="student-kpi-copy">sem acesso liberado</div>
+            </div>
+          </div>
+        </section>
+      </RevealSection>
 
       {pendentes.length > 0 && (
-        <div className="card" style={{ marginBottom: '1.5rem' }}>
+        <div className="student-filter-card" style={{ marginBottom: '1.5rem' }}>
           <div className="section-heading">Como liberar seu acesso</div>
           <div className="mini-copy" style={{ marginTop: '0.75rem' }}>
             1. Clique em Pagar agora no pedido pendente.
@@ -105,49 +113,48 @@ export default function MeusPedidos() {
           </div>
         </div>
       ) : (
-        <div className="table-wrap">
-          <div className="table-head" style={{ gridTemplateColumns: '1.5fr 1fr 1fr 1fr 140px' }}>
-            <span>Local / plano</span>
-            <span>Pedido</span>
-            <span>Valor</span>
-            <span>Situacao</span>
-            <span>Acoes</span>
-          </div>
+        <div className="student-stack">
           {pedidos.map(item => (
-            <div key={item.id} className="table-row" style={{ gridTemplateColumns: '1.5fr 1fr 1fr 1fr 140px' }}>
-              <div>
-                <div className="table-name">{item.localProvaNome}</div>
-                <div className="mini-copy">{item.planoNome} - {formatPlanoDuracao(item.duracaoDias)}</div>
-                <div className="mini-copy">Criado em {formatDataCurta(item.criadoEm)}</div>
-                {item.paymentStatus && (
-                  <div className="mini-copy">
-                    Pagamento no Mercado Pago: {formatPagamentoStatus(item.paymentStatus)}
-                    {item.paymentStatusDetail ? ` (${formatPagamentoDetalhe(item.paymentStatusDetail)})` : ''}
+            <RevealSection key={item.id} className="student-order-card" delay={50}>
+              <div className="student-order-main">
+                <div className="student-card-top">
+                  <span className={`badge ${item.status === 'PAGO' ? 'badge-green' : item.status === 'CANCELADO' ? 'badge-red' : 'badge-gray'}`}>
+                    {formatPedidoStatus(item.status)}
+                  </span>
+                  <span className="student-card-copy">{fmtMoeda(item.valorCentavos)}</span>
+                </div>
+                <div className="student-card-title">{item.localProvaNome}</div>
+                <div className="student-card-copy">{item.planoNome} - {formatPlanoDuracao(item.duracaoDias)}</div>
+                <div className="student-detail-list">
+                  <div className="student-detail-item">
+                    <span className="student-detail-label">Pedido</span>
+                    <span className="student-detail-value">{item.referencia}</span>
                   </div>
-                )}
+                  <div className="student-detail-item">
+                    <span className="student-detail-label">Criado em</span>
+                    <span className="student-detail-value">{formatDataCurta(item.criadoEm)}</span>
+                  </div>
+                  {item.paymentStatus && (
+                    <div className="student-detail-item">
+                      <span className="student-detail-label">Pagamento</span>
+                      <span className="student-detail-value">
+                        {formatPagamentoStatus(item.paymentStatus)}
+                        {item.paymentStatusDetail ? ` (${formatPagamentoDetalhe(item.paymentStatusDetail)})` : ''}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <span className="table-cat">{item.referencia}</span>
-              <span className="table-dur">{fmtMoeda(item.valorCentavos)}</span>
-              <span>
-                <span className={`badge ${item.status === 'PAGO' ? 'badge-green' : item.status === 'CANCELADO' ? 'badge-red' : 'badge-gray'}`}>
-                  {formatPedidoStatus(item.status)}
-                </span>
-              </span>
-              <div className="table-actions">
+              <div className="student-card-actions">
                 {item.status === 'PENDENTE' ? (
                   <>
                     {item.checkoutUrl && (
-                      <a
-                        className="btn btn-primary"
-                        style={{ fontSize: 12, padding: '5px 12px' }}
-                        href={item.checkoutUrl}
-                      >
+                      <a className="btn btn-primary" href={item.checkoutUrl}>
                         Pagar agora
                       </a>
                     )}
                     <button
                       className="btn btn-danger"
-                      style={{ fontSize: 12, padding: '5px 12px' }}
                       onClick={() => cancelarPedido(item.id)}
                       disabled={cancelandoId === item.id}
                     >
@@ -155,24 +162,16 @@ export default function MeusPedidos() {
                     </button>
                   </>
                 ) : item.status === 'PAGO' ? (
-                  <button
-                    className="btn btn-primary"
-                    style={{ fontSize: 12, padding: '5px 12px' }}
-                    onClick={() => navigate('/biblioteca')}
-                  >
+                  <button className="btn btn-primary" onClick={() => navigate('/biblioteca')}>
                     Abrir biblioteca
                   </button>
                 ) : (
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: '5px 12px' }}
-                    onClick={() => navigate(`/locais/${item.localProvaSlug}`)}
-                  >
+                  <button className="btn btn-ghost" onClick={() => navigate(`/locais/${item.localProvaSlug}`)}>
                     Ver local
                   </button>
                 )}
               </div>
-            </div>
+            </RevealSection>
           ))}
         </div>
       )}

@@ -1380,6 +1380,284 @@ body {
   font-weight: 600;
 }
 
+.student-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.student-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 1rem;
+  padding: 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(45,224,154,0.12), transparent 35%),
+    linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
+}
+
+.student-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.student-kpi-grid--compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.student-kpi-card {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.03);
+}
+
+.student-kpi-label {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.student-kpi-value {
+  margin-top: 0.45rem;
+  font-family: var(--font-head);
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.student-kpi-copy {
+  margin-top: 0.35rem;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.student-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.student-chip {
+  min-width: 200px;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(45,224,154,0.06);
+}
+
+.student-chip-title {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.student-chip-copy {
+  margin-top: 0.2rem;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.student-filter-card {
+  padding: 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg2);
+}
+
+.student-filter-title {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.student-filter-copy {
+  margin-top: 0.25rem;
+  margin-bottom: 0.85rem;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.student-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.student-card,
+.student-progress-card,
+.student-order-card,
+.student-stack-card {
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
+}
+
+.student-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.student-card-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.student-card-copy,
+.student-progress-copy {
+  margin-top: 0.45rem;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.student-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.student-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.student-detail-label {
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.student-detail-value {
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.student-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.student-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.student-stack-card,
+.student-order-card,
+.student-progress-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.student-progress-main,
+.student-order-main {
+  min-width: 0;
+}
+
+.student-progress-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.75rem;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.student-progress-bar {
+  margin-top: 0.85rem;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.student-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(45,224,154,0.75), rgba(45,224,154,1));
+}
+
+.student-progress-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.player-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+  gap: 1rem;
+  align-items: start;
+}
+
+.player-title {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 10px;
+  letter-spacing: -0.4px;
+}
+
+.player-copy {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.7;
+  max-width: 620px;
+}
+
+.player-secondary-copy {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.7;
+  max-width: 620px;
+}
+
+.player-side-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg2);
+}
+
+.player-side-title {
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.player-side-copy {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     flex-direction: column;
@@ -1408,7 +1686,9 @@ body {
 
   .hero-shell,
   .admin-grid,
-  .landing-cta {
+  .landing-cta,
+  .student-hero,
+  .player-layout {
     grid-template-columns: 1fr;
   }
 
@@ -1420,6 +1700,10 @@ body {
 
   .landing-page {
     gap: 1.75rem;
+  }
+
+  .student-kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1495,6 +1779,12 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .student-kpi-grid,
+  .student-kpi-grid--compact,
+  .student-grid {
+    grid-template-columns: 1fr;
+  }
+
   .hero-proof-chip,
   .hero-list-item,
   .trust-card,
@@ -1502,7 +1792,13 @@ body {
   .story-card,
   .signal-card,
   .spotlight-card,
-  .plan-card {
+  .plan-card,
+  .student-card,
+  .student-progress-card,
+  .student-order-card,
+  .student-stack-card,
+  .student-filter-card,
+  .player-side-card {
     border-radius: 18px;
   }
 
@@ -1536,7 +1832,8 @@ body {
   .spotlight-desc,
   .plan-copy,
   .section-copy,
-  .landing-cta-copy {
+  .landing-cta-copy,
+  .player-copy {
     font-size: 15px;
   }
 
@@ -1566,7 +1863,13 @@ body {
   .spotlight-footer,
   .mini-copy,
   .plan-meta,
-  .plan-cta-copy {
+  .plan-cta-copy,
+  .student-card-copy,
+  .student-progress-copy,
+  .student-filter-copy,
+  .student-detail-value,
+  .player-secondary-copy,
+  .player-side-copy {
     font-size: 14px;
   }
 
@@ -1576,7 +1879,13 @@ body {
   .trust-card,
   .faq-card,
   .plan-card,
-  .landing-cta {
+  .landing-cta,
+  .student-card,
+  .student-progress-card,
+  .student-order-card,
+  .student-stack-card,
+  .student-filter-card,
+  .player-side-card {
     padding: 1.15rem;
   }
 
@@ -1637,6 +1946,31 @@ body {
   .plan-top-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .student-stack-card,
+  .student-order-card,
+  .student-progress-card {
+    grid-template-columns: 1fr;
+  }
+
+  .student-progress-side,
+  .student-card-actions {
+    align-items: stretch;
+  }
+
+  .student-card-actions .btn,
+  .student-progress-side .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 50px;
+    font-size: 15px;
+  }
+
+  .student-card-title,
+  .player-title,
+  .player-side-title {
+    font-size: 21px;
   }
 
   .plan-card .btn {

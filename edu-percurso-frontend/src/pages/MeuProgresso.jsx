@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import RevealSection from '../components/RevealSection'
 import { progressoService } from '../services/api'
 import { formatDuracaoMinutos } from '../utils/formatters'
 
@@ -18,29 +19,37 @@ export default function MeuProgresso() {
 
   const concluidos = itens.filter(item => item.concluido).length
   const emAndamento = itens.filter(item => !item.concluido && item.segundosAssistidos > 0).length
+  const totalAssistido = itens.reduce((acc, item) => acc + (item.segundosAssistidos || 0), 0)
 
   return (
     <>
-      <div className="page-title">Meu progresso</div>
-      <p className="page-sub">Acompanhe os conteudos que voce iniciou ou concluiu.</p>
-
-      <div className="stats-grid" style={{ maxWidth: 500 }}>
-        <div className="stat-card">
-          <div className="stat-label">Concluidos</div>
-          <div className="stat-value">{concluidos}</div>
-          <div className="stat-sub">conteudos</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Em andamento</div>
-          <div className="stat-value">{emAndamento}</div>
-          <div className="stat-sub">conteudos</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-label">Total assistido</div>
-          <div className="stat-value">{formatDuracaoMinutos(itens.reduce((acc, item) => acc + (item.segundosAssistidos || 0), 0))}</div>
-          <div className="stat-sub">de estudo</div>
-        </div>
-      </div>
+      <RevealSection className="student-shell" delay={30}>
+        <section className="student-hero">
+          <div>
+            <div className="page-title">Meu progresso</div>
+            <p className="page-sub" style={{ marginBottom: 0 }}>
+              Acompanhe os conteudos que voce iniciou ou concluiu e volte rapidamente para o que ainda falta revisar.
+            </p>
+          </div>
+          <div className="student-kpi-grid">
+            <div className="student-kpi-card">
+              <div className="student-kpi-label">Concluidos</div>
+              <div className="student-kpi-value">{concluidos}</div>
+              <div className="student-kpi-copy">conteudos</div>
+            </div>
+            <div className="student-kpi-card">
+              <div className="student-kpi-label">Em andamento</div>
+              <div className="student-kpi-value">{emAndamento}</div>
+              <div className="student-kpi-copy">conteudos</div>
+            </div>
+            <div className="student-kpi-card">
+              <div className="student-kpi-label">Total assistido</div>
+              <div className="student-kpi-value">{formatDuracaoMinutos(totalAssistido)}</div>
+              <div className="student-kpi-copy">de estudo</div>
+            </div>
+          </div>
+        </section>
+      </RevealSection>
 
       {itens.length === 0 ? (
         <div className="empty-state">
@@ -53,42 +62,43 @@ export default function MeuProgresso() {
           </div>
         </div>
       ) : (
-        <div className="table-wrap">
-          <div className="table-head" style={{ gridTemplateColumns: '2.5fr 1fr 1fr 120px' }}>
-            <span>Conteudo</span>
-            <span>Tempo</span>
-            <span>Duracao</span>
-            <span>Status</span>
-          </div>
+        <div className="student-stack">
           {itens.map(item => {
             const pct = item.duracaoTotal
               ? Math.min(100, Math.round(item.segundosAssistidos / item.duracaoTotal * 100))
               : 0
 
             return (
-              <div
-                key={item.percursoId}
-                className="table-row"
-                style={{ gridTemplateColumns: '2.5fr 1fr 1fr 120px', cursor: 'pointer' }}
-                onClick={() => navigate(`/conteudos/${item.percursoId}`)}
-              >
-                <div>
+              <RevealSection key={item.percursoId} className="student-progress-card" delay={50}>
+                <div className="student-progress-main">
                   <div className="table-name">{item.percursoTitulo}</div>
-                  {pct > 0 && !item.concluido && (
-                    <div className="progress-wrap" style={{ maxWidth: 200, marginTop: 6 }}>
-                      <div className="progress-fill" style={{ width: `${pct}%` }} />
+                  <div className="student-progress-copy">
+                    {item.concluido
+                      ? 'Conteudo concluido. Voce pode rever quando quiser.'
+                      : pct > 0
+                        ? `Voce ja assistiu ${pct}% desse conteudo.`
+                        : 'Ainda nao iniciado.'}
+                  </div>
+                  <div className="student-progress-meta">
+                    <span>{formatDuracaoMinutos(item.segundosAssistidos)} assistidos</span>
+                    <span>{formatDuracaoMinutos(item.duracaoTotal)} no total</span>
+                  </div>
+                  {!item.concluido && pct > 0 && (
+                    <div className="student-progress-bar">
+                      <div className="student-progress-fill" style={{ width: `${pct}%` }} />
                     </div>
                   )}
                 </div>
-                <span className="table-cat">{formatDuracaoMinutos(item.segundosAssistidos)}</span>
-                <span className="table-dur">{formatDuracaoMinutos(item.duracaoTotal)}</span>
-                <span>
+                <div className="student-progress-side">
                   {item.concluido
                     ? <span className="badge badge-green">Concluido</span>
                     : <span className="badge badge-gray">{pct}%</span>
                   }
-                </span>
-              </div>
+                  <button className="btn btn-primary" onClick={() => navigate(`/conteudos/${item.percursoId}`)}>
+                    {item.concluido ? 'Rever conteudo' : pct > 0 ? 'Continuar' : 'Comecar'}
+                  </button>
+                </div>
+              </RevealSection>
             )
           })}
         </div>

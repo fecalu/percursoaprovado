@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import RevealSection from '../components/RevealSection'
 import { percursoService, progressoService } from '../services/api'
 import { formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
 
@@ -107,80 +108,89 @@ export default function Player() {
         Voltar para a biblioteca
       </button>
 
-      <div className="player-wrap">
-        {embedUrl ? (
-          <iframe
-            src={embedUrl}
-            title={percurso.titulo}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            onLoad={iniciarContagem}
-          />
-        ) : (
-          <div className="player-placeholder">
-            <div className="big-play">
-              <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
-                <path d="M7 5l9 5-9 5V5z" fill="#2de09a" />
-              </svg>
-            </div>
-            <div className="player-url">{percurso.videoUrl}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
-              URL nao reconhecida como YouTube ou Vimeo.
-            </div>
-          </div>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: 10 }}>
-            <div className="card-tag">{formatTipoConteudo(percurso.tipoConteudo)}</div>
-            {percurso.categoriaNome && <div className="card-tag">{percurso.categoriaNome}</div>}
-            <div className="card-tag">{percurso.localProvaNome || 'Modulo geral'}</div>
-          </div>
-
-          <h1 style={{ fontFamily: 'var(--font-head)', fontSize: 22, fontWeight: 700, color: 'var(--text)', marginBottom: 10, letterSpacing: '-0.4px' }}>
-            {percurso.titulo}
-          </h1>
-
-          <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.7, maxWidth: 620 }}>
-            {percurso.resumo || percurso.descricao || 'Conteudo sem resumo cadastrado.'}
-          </p>
-
-          {percurso.descricao && percurso.resumo && (
-            <p style={{ marginTop: 12, fontSize: 13, color: 'var(--text-3)', lineHeight: 1.7, maxWidth: 620 }}>
-              {percurso.descricao}
-            </p>
-          )}
-
-          <div className="player-meta-grid">
-            <div className="player-meta-card">
-              <div className="player-meta-label">Tipo</div>
-              <div className="player-meta-value">{formatTipoConteudo(percurso.tipoConteudo)}</div>
-            </div>
-            <div className="player-meta-card">
-              <div className="player-meta-label">Local</div>
-              <div className="player-meta-value">{percurso.localProvaNome || 'Geral'}</div>
-            </div>
-            <div className="player-meta-card">
-              <div className="player-meta-label">Duracao</div>
-              <div className="player-meta-value">{formatDuracaoMinutos(percurso.duracaoSegundos)}</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-          {concluido ? (
-            <span className="badge badge-green" style={{ fontSize: 13, padding: '6px 14px' }}>
-              Concluido
-            </span>
+      <RevealSection className="student-shell" delay={30}>
+        <div className="player-wrap">
+          {embedUrl ? (
+            <iframe
+              src={embedUrl}
+              title={percurso.titulo}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              onLoad={iniciarContagem}
+            />
           ) : (
-            <button className="btn btn-primary" onClick={marcarConcluido} disabled={salvando}>
-              {salvando ? 'Salvando...' : 'Marcar como concluido'}
-            </button>
+            <div className="player-placeholder">
+              <div className="big-play">
+                <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
+                  <path d="M7 5l9 5-9 5V5z" fill="#2de09a" />
+                </svg>
+              </div>
+              <div className="player-url">{percurso.videoUrl}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                URL nao reconhecida como YouTube ou Vimeo.
+              </div>
+            </div>
           )}
         </div>
-      </div>
+
+        <div className="player-layout">
+          <div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: 10 }}>
+              <div className="card-tag">{formatTipoConteudo(percurso.tipoConteudo)}</div>
+              {percurso.categoriaNome && <div className="card-tag">{percurso.categoriaNome}</div>}
+              <div className="card-tag">{percurso.localProvaNome || 'Modulo geral'}</div>
+            </div>
+
+            <h1 className="player-title">{percurso.titulo}</h1>
+
+            <p className="player-copy">
+              {percurso.resumo || percurso.descricao || 'Conteudo sem resumo cadastrado.'}
+            </p>
+
+            {percurso.descricao && percurso.resumo && (
+              <p className="player-secondary-copy">
+                {percurso.descricao}
+              </p>
+            )}
+
+            <div className="player-meta-grid">
+              <div className="player-meta-card">
+                <div className="player-meta-label">Tipo</div>
+                <div className="player-meta-value">{formatTipoConteudo(percurso.tipoConteudo)}</div>
+              </div>
+              <div className="player-meta-card">
+                <div className="player-meta-label">Local</div>
+                <div className="player-meta-value">{percurso.localProvaNome || 'Geral'}</div>
+              </div>
+              <div className="player-meta-card">
+                <div className="player-meta-label">Duracao</div>
+                <div className="player-meta-value">{formatDuracaoMinutos(percurso.duracaoSegundos)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="player-side-card">
+            <div className="player-side-title">Seu andamento</div>
+            <div className="player-side-copy">
+              {concluido
+                ? 'Esse conteudo ja foi marcado como concluido. Se quiser, voce pode rever quantas vezes precisar.'
+                : 'Quando terminar, marque como concluido para acompanhar melhor sua preparacao.'}
+            </div>
+            {concluido ? (
+              <span className="badge badge-green" style={{ fontSize: 13, padding: '6px 14px', width: 'fit-content' }}>
+                Concluido
+              </span>
+            ) : (
+              <button className="btn btn-primary" onClick={marcarConcluido} disabled={salvando}>
+                {salvando ? 'Salvando...' : 'Marcar como concluido'}
+              </button>
+            )}
+            <button className="btn btn-ghost" onClick={() => navigate('/meu-progresso')}>
+              Ver meu progresso
+            </button>
+          </div>
+        </div>
+      </RevealSection>
     </>
   )
 }
