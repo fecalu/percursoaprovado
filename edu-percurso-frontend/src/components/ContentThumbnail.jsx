@@ -21,6 +21,8 @@ export default function ContentThumbnail({ thumbnailUrl, titulo, videoUrl }) {
           src={imageSrc}
           alt={`Thumbnail de ${titulo}`}
           loading="lazy"
+          decoding="async"
+          sizes="(max-width: 720px) 100vw, (max-width: 1180px) 50vw, 320px"
           onError={() => setImageError(true)}
         />
       )}

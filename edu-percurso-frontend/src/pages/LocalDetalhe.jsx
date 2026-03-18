@@ -33,6 +33,13 @@ function getMensagemDisponibilidade(local) {
   return ''
 }
 
+function getPlanoIndicacao(duracaoDias) {
+  if (duracaoDias <= 30) return 'Ideal para quem vai fazer a prova em breve.'
+  if (duracaoDias <= 90) return 'Bom para revisar com calma nas proximas semanas.'
+  if (duracaoDias <= 180) return 'Mais tempo para praticar, revisar e voltar quando precisar.'
+  return 'Acesso mais longo para uma preparacao estendida.'
+}
+
 export default function LocalDetalhe() {
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -143,6 +150,11 @@ export default function LocalDetalhe() {
             Os conteudos refletem experiencia real, observacao pratica e os percursos mais frequentes desse local.
             O trajeto da avaliacao pode variar.
           </div>
+          <div className="hero-proof-grid">
+            <div className="hero-proof-chip">Trechos mais recorrentes desse local</div>
+            <div className="hero-proof-chip">Conteudo direto para reduzir surpresa e ansiedade</div>
+            <div className="hero-proof-chip">Liberacao automatica apos confirmacao do pagamento</div>
+          </div>
         </div>
 
         <div className="hero-panel">
@@ -192,6 +204,7 @@ export default function LocalDetalhe() {
                 <div className="plan-badge">{formatPlanoDuracao(plano.duracaoDias)}</div>
                 <div className="plan-name">{plano.nome}</div>
                 <div className="plan-price">{fmtMoeda(plano.precoCentavos)}</div>
+                <div className="plan-highlight">{getPlanoIndicacao(plano.duracaoDias)}</div>
                 <div className="plan-copy">
                   Acesso ao preparo desse local, com percursos mais frequentes, simulacao e modulos gerais
                   para chegar com menos surpresa e mais confianca no dia da prova.

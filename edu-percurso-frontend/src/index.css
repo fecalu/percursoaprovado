@@ -331,6 +331,7 @@ body {
   align-items: center;
   gap: 7px;
   padding: 9px 18px;
+  min-height: 44px;
   border-radius: var(--radius);
   font-size: 14px;
   font-weight: 500;
@@ -648,6 +649,24 @@ body {
   margin-top: 1.5rem;
 }
 
+.hero-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  max-width: 760px;
+}
+
+.hero-proof-chip {
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.03);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .hero-panel {
   position: relative;
   z-index: 1;
@@ -793,6 +812,14 @@ body {
   flex: 1;
 }
 
+.plan-highlight {
+  margin-top: 0.85rem;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
 .plan-meta {
   margin-top: 0.45rem;
   color: var(--text-3);
@@ -806,6 +833,14 @@ body {
 
 .content-section {
   margin-top: 2rem;
+}
+
+@supports (content-visibility: auto) {
+  .landing-section,
+  .content-section {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 680px;
+  }
 }
 
 .section-title-row {
@@ -1040,6 +1075,22 @@ body {
     padding: 1.35rem;
   }
 
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 50px;
+    padding: 12px 18px;
+    font-size: 15px;
+  }
+
+  .hero-proof-grid {
+    grid-template-columns: 1fr;
+  }
+
   .auth-card {
     padding: 2rem 1.4rem;
   }
@@ -1055,6 +1106,52 @@ body {
 
   .hero-title {
     letter-spacing: -1px;
+    font-size: clamp(1.85rem, 8vw, 2.6rem);
+  }
+
+  .hero-subtitle,
+  .page-sub,
+  .spotlight-desc,
+  .plan-copy,
+  .section-copy {
+    font-size: 15px;
+  }
+
+  .hero-panel-title,
+  .section-heading,
+  .plan-name {
+    font-size: 21px;
+  }
+
+  .plan-price {
+    font-size: 34px;
+  }
+
+  .hero-list-item,
+  .hero-proof-chip,
+  .spotlight-footer,
+  .mini-copy,
+  .plan-meta {
+    font-size: 13px;
+  }
+
+  .spotlight-card,
+  .plan-card {
+    padding: 1.15rem;
+  }
+
+  .card-title {
+    font-size: 15px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-size: 16px;
   }
 
   .spotlight-footer,

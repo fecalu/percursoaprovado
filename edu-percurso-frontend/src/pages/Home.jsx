@@ -57,16 +57,27 @@ export default function Home() {
             nos trajetos mais recorrentes, nos pontos de atencao e nos erros que mais tiram pontos.
           </p>
           <div className="hero-actions">
-            <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/register'}>
-              {user ? (isAdmin ? 'Abrir painel' : 'Ir para minha biblioteca') : 'Escolher meu local de prova'}
-            </Link>
-            <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/planos' : '/meus-acessos') : '/login'}>
-              {user ? 'Ver meus acessos' : 'Ja tenho conta'}
+            {user ? (
+              <Link className="btn btn-primary" to={isAdmin ? '/admin' : '/biblioteca'}>
+                {isAdmin ? 'Abrir painel' : 'Ir para minha biblioteca'}
+              </Link>
+            ) : (
+              <a className="btn btn-primary" href="#locais-disponiveis">
+                Escolher meu local agora
+              </a>
+            )}
+            <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/planos' : '/meus-acessos') : '/register'}>
+              {user ? 'Ver meus acessos' : 'Criar minha conta'}
             </Link>
           </div>
           <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
             Os conteudos sao baseados em experiencia real, observacao pratica e analise dos percursos mais frequentes.
             O trajeto pode variar no dia da avaliacao.
+          </div>
+          <div className="hero-proof-grid">
+            <div className="hero-proof-chip">Mais confianca no dia da prova</div>
+            <div className="hero-proof-chip">1 local por compra, com acesso por periodo</div>
+            <div className="hero-proof-chip">Pagamento por Pix ou cartao</div>
           </div>
         </div>
 
@@ -81,7 +92,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="landing-section">
+      <section className="landing-section" id="locais-disponiveis">
         <div className="page-title">Locais de prova</div>
         <p className="page-sub">Escolha o seu local e veja o que ja esta disponivel para estudar com mais confianca.</p>
 
