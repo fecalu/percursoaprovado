@@ -1011,13 +1011,6 @@ body {
   overflow: hidden;
 }
 
-.spotlight-mark--hero {
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
-  font-size: 20px;
-}
-
 .spotlight-mark--image {
   background: rgba(255,255,255,0.03);
 }
@@ -1499,10 +1492,6 @@ body {
 
 .hero-shell--single .hero-copy {
   max-width: 920px;
-}
-
-.hero-shell--local .hero-panel-title {
-  max-width: 420px;
 }
 
 .hero-shell--local .hero-panel-copy {

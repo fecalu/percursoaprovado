@@ -21,15 +21,6 @@ function getStatusBadgeClass(statusComercial) {
   return 'badge-gray'
 }
 
-function getLocalMonograma(nome = '') {
-  return nome
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(parte => parte[0]?.toUpperCase())
-    .join('')
-}
-
 function getMensagemDisponibilidade(local) {
   if (local?.mensagemPublica) return local.mensagemPublica
   if (local?.statusComercial === 'EM_BREVE') {
@@ -269,7 +260,6 @@ export default function LocalDetalhe() {
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao por local de prova</div>
           <div className="local-hero-topline">
-            <div className="spotlight-mark spotlight-mark--hero">{getLocalMonograma(local.nome)}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem', alignItems: 'center' }}>
               <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
                 {formatStatusComercialLocal(local.statusComercial)}
