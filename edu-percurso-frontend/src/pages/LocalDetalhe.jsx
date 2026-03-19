@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../hooks/useToast'
 import { localProvaService, pedidoService, planoService } from '../services/api'
 import { formatPlanoDuracao, formatStatusComercialLocal } from '../utils/formatters'
+import { resolveMediaUrl } from '../utils/media'
 
 function fmtMoeda(centavos) {
   return new Intl.NumberFormat('pt-BR', {
@@ -41,6 +42,20 @@ function getMensagemDisponibilidade(local) {
     return 'Esse local ainda esta em rascunho e nao foi aberto ao publico.'
   }
   return ''
+}
+
+function getTituloComercial(local) {
+  return local?.tituloComercial?.trim() || `Prepare-se melhor para a prova em ${local?.nome}.`
+}
+
+function getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade) {
+  if (local?.subtituloComercial?.trim()) return local.subtituloComercial.trim()
+
+  if (compraLiberada) {
+    return `Veja como a prova costuma acontecer nesse local, conheca os trechos mais recorrentes e revise o que mais reduz surpresa no dia da avaliacao. ${local?.descricao || ''}`.trim()
+  }
+
+  return `${local?.descricao || ''} ${mensagemDisponibilidade}`.trim()
 }
 
 function getPlanoIndicacao(duracaoDias) {
@@ -97,6 +112,20 @@ const HERO_DESTAQUES_LOCAL = [
   'Percursos mais frequentes e simulacao da prova',
   'Baliza, embreagem e erros que mais tiram pontos',
 ]
+
+function getCaixaDestaque(local) {
+  const itens = [local?.boxItem1, local?.boxItem2, local?.boxItem3]
+    .map(item => item?.trim())
+    .filter(Boolean)
+
+  return {
+    titulo: local?.boxTitulo?.trim() || 'O que voce vai encontrar neste acesso',
+    itens: itens.length > 0
+      ? itens
+      : ['Percursos mais frequentes', 'Simulacao completa da prova', 'Erros que mais tiram pontos'],
+    observacao: local?.boxObservacao?.trim() || 'Acesso liberado automaticamente apos a confirmacao do pagamento.',
+  }
+}
 
 function getPlanoDestaque(duracaoDias) {
   if (duracaoDias <= 30) {
@@ -204,6 +233,10 @@ export default function LocalDetalhe() {
   const compraLiberada = local.statusComercial === 'DISPONIVEL'
   const mensagemDisponibilidade = getMensagemDisponibilidade(local)
   const planoInicial = planos[0]
+  const tituloComercial = getTituloComercial(local)
+  const subtituloComercial = getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade)
+  const caixaDestaque = getCaixaDestaque(local)
+  const imagemPrincipal = resolveMediaUrl(local.imagemPrincipalUrl)
   const saibaMaisLocal = [
     {
       titulo: 'O que voce vai encontrar',
@@ -232,7 +265,7 @@ export default function LocalDetalhe() {
         Voltar para os locais
       </Link>
 
-      <section className="hero-shell hero-shell--local hero-shell--single fade-in">
+      <section className={`hero-shell hero-shell--local ${imagemPrincipal ? '' : 'hero-shell--single'} fade-in`}>
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao por local de prova</div>
           <div className="local-hero-topline">
@@ -247,12 +280,8 @@ export default function LocalDetalhe() {
               )}
             </div>
           </div>
-          <h1 className="hero-title">Prepare-se melhor para a prova em {local.nome}.</h1>
-          <p className="hero-subtitle">
-            {compraLiberada
-              ? `Veja como a prova costuma acontecer nesse local, conheca os trechos mais recorrentes e revise o que mais reduz surpresa no dia da avaliacao. ${local.descricao || ''}`.trim()
-              : `${local.descricao || ''} ${mensagemDisponibilidade}`.trim()}
-          </p>
+          <h1 className="hero-title">{tituloComercial}</h1>
+          <p className="hero-subtitle">{subtituloComercial}</p>
           <div className="hero-actions">
             <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/register'}>
               {user ? (isAdmin ? 'Abrir administracao' : 'Ver minha biblioteca') : 'Criar conta para comprar'}
@@ -270,6 +299,18 @@ export default function LocalDetalhe() {
             <div className="hero-proof-chip">Conteudo direto para reduzir surpresa e ansiedade</div>
           </div>
         </div>
+        {imagemPrincipal && (
+          <div className="local-hero-visual">
+            <img src={imagemPrincipal} alt={`Imagem do local ${local.nome}`} className="local-hero-image" />
+            <div className="local-hero-visual-overlay" />
+            <div className="local-hero-badge">
+              <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
+                {formatStatusComercialLocal(local.statusComercial)}
+              </span>
+              <span className="local-hero-badge-copy">{local.cidade}</span>
+            </div>
+          </div>
+        )}
       </section>
 
       <RevealSection as="section" className="landing-section" delay={40} eager>
@@ -302,50 +343,72 @@ export default function LocalDetalhe() {
         ) : planos.length === 0 ? (
           <div className="empty-state">Esse local ainda nao possui planos ativos.</div>
         ) : (
-          <div className="plan-grid">
-            {planos.map(plano => {
-              const destaquePlano = getPlanoDestaque(plano.duracaoDias)
-              const pontosCurtos = getPlanoPontosCurtos(plano.duracaoDias)
+          <div className="local-offer-layout">
+            <div className="plan-grid">
+              {planos.map(plano => {
+                const destaquePlano = getPlanoDestaque(plano.duracaoDias)
+                const pontosCurtos = getPlanoPontosCurtos(plano.duracaoDias)
 
-              return (
-              <div key={plano.id} className={`plan-card ${destaquePlano.recomendado ? 'plan-card--recommended' : ''}`}>
-                <div className="plan-top-row">
-                  <div className="plan-badge">{formatPlanoDuracao(plano.duracaoDias)}</div>
-                  <div className="plan-mini-tag">{destaquePlano.selo}</div>
+                return (
+                <div key={plano.id} className={`plan-card ${destaquePlano.recomendado ? 'plan-card--recommended' : ''}`}>
+                  <div className="plan-top-row">
+                    <div className="plan-badge">{formatPlanoDuracao(plano.duracaoDias)}</div>
+                    <div className="plan-mini-tag">{destaquePlano.selo}</div>
+                  </div>
+                  {destaquePlano.recomendado && <div className="plan-ribbon">Recomendado para a maioria dos alunos</div>}
+                  <div className="plan-name">{plano.nome}</div>
+                  <div className="plan-price">{fmtMoeda(plano.precoCentavos)}</div>
+                  <div className="plan-price-caption">Pagamento unico pelo periodo escolhido</div>
+                  <div className="plan-highlight">{getPlanoIndicacao(plano.duracaoDias)}</div>
+                  <div className="plan-summary">{destaquePlano.resumo}</div>
+                  <div className="plan-copy">
+                    Um acesso mais direto para revisar esse local com mais confianca e menos surpresa no dia da prova.
+                  </div>
+                  <div className="plan-feature-grid">
+                    {pontosCurtos.map(item => (
+                      <div key={item} className="plan-feature-pill">
+                        {item}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="plan-footer-note">
+                    Acesso liberado automaticamente apos a confirmacao do pagamento.
+                  </div>
+                  <div className="plan-meta-stack">
+                    <div className="plan-meta">Validade clara: {formatPlanoDuracao(plano.duracaoDias)}</div>
+                    <div className="plan-meta">Pix ou cartao pelo Mercado Pago, sem renovacao automatica.</div>
+                  </div>
+                  <div style={{ marginTop: '1rem' }}>
+                    {renderAcaoPlano(plano)}
+                  </div>
+                  <div className="plan-cta-copy">
+                    {user && !isAdmin
+                      ? 'O acesso e liberado automaticamente apos a confirmacao do pagamento.'
+                      : 'Escolha esse plano para continuar o preparo desse local.'}
+                  </div>
                 </div>
-                {destaquePlano.recomendado && <div className="plan-ribbon">Recomendado para a maioria dos alunos</div>}
-                <div className="plan-name">{plano.nome}</div>
-                <div className="plan-price">{fmtMoeda(plano.precoCentavos)}</div>
-                <div className="plan-price-caption">Pagamento unico pelo periodo escolhido</div>
-                <div className="plan-highlight">{getPlanoIndicacao(plano.duracaoDias)}</div>
-                <div className="plan-summary">{destaquePlano.resumo}</div>
-                <div className="plan-copy">
-                  Um acesso mais direto para revisar esse local com mais confianca e menos surpresa no dia da prova.
-                </div>
-                <div className="plan-feature-grid">
-                  {pontosCurtos.map(item => (
-                    <div key={item} className="plan-feature-pill">
-                      {item}
-                    </div>
-                  ))}
-                </div>
-                <div className="plan-footer-note">
-                  Acesso liberado automaticamente apos a confirmacao do pagamento.
-                </div>
-                <div className="plan-meta-stack">
-                  <div className="plan-meta">Validade clara: {formatPlanoDuracao(plano.duracaoDias)}</div>
-                  <div className="plan-meta">Pix ou cartao pelo Mercado Pago, sem renovacao automatica.</div>
-                </div>
-                <div style={{ marginTop: '1rem' }}>
-                  {renderAcaoPlano(plano)}
-                </div>
-                <div className="plan-cta-copy">
-                  {user && !isAdmin
-                    ? 'O acesso e liberado automaticamente apos a confirmacao do pagamento.'
-                    : 'Escolha esse plano para continuar o preparo desse local.'}
-                </div>
+              )})}
+            </div>
+            <aside className="local-offer-box">
+              {imagemPrincipal && (
+                <img
+                  src={imagemPrincipal}
+                  alt={`Destaque visual do local ${local.nome}`}
+                  className="local-offer-box-image"
+                />
+              )}
+              <div className="local-offer-box-kicker">Mais clareza antes da prova</div>
+              <div className="local-offer-box-title">{caixaDestaque.titulo}</div>
+              <div className="local-offer-box-list">
+                {caixaDestaque.itens.map(item => (
+                  <div key={item} className="local-offer-box-item">
+                    <span className="local-offer-box-dot" />
+                    <span>{item}</span>
+                  </div>
+                ))}
               </div>
-            )})}
+              <div className="local-offer-box-note">{caixaDestaque.observacao}</div>
+            </aside>
           </div>
         )}
       </RevealSection>

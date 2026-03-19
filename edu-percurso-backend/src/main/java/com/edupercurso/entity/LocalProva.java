@@ -44,6 +44,30 @@ public class LocalProva {
     @Column(name = "mensagem_publica", columnDefinition = "TEXT")
     private String mensagemPublica;
 
+    @Column(name = "imagem_principal_url", length = 500)
+    private String imagemPrincipalUrl;
+
+    @Column(name = "titulo_comercial")
+    private String tituloComercial;
+
+    @Column(name = "subtitulo_comercial", columnDefinition = "TEXT")
+    private String subtituloComercial;
+
+    @Column(name = "box_titulo")
+    private String boxTitulo;
+
+    @Column(name = "box_item_1")
+    private String boxItem1;
+
+    @Column(name = "box_item_2")
+    private String boxItem2;
+
+    @Column(name = "box_item_3")
+    private String boxItem3;
+
+    @Column(name = "box_observacao", columnDefinition = "TEXT")
+    private String boxObservacao;
+
     @Column(name = "ordem_exibicao")
     @Builder.Default
     private Integer ordemExibicao = 0;

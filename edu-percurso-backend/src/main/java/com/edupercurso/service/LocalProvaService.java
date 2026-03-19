@@ -57,6 +57,14 @@ public class LocalProvaService {
                 .ativo(request.isAtivo())
                 .statusComercial(normalizarStatusComercial(request.getStatusComercial()))
                 .mensagemPublica(normalizarTexto(request.getMensagemPublica()))
+                .imagemPrincipalUrl(normalizarTexto(request.getImagemPrincipalUrl()))
+                .tituloComercial(normalizarTexto(request.getTituloComercial()))
+                .subtituloComercial(normalizarTexto(request.getSubtituloComercial()))
+                .boxTitulo(normalizarTexto(request.getBoxTitulo()))
+                .boxItem1(normalizarTexto(request.getBoxItem1()))
+                .boxItem2(normalizarTexto(request.getBoxItem2()))
+                .boxItem3(normalizarTexto(request.getBoxItem3()))
+                .boxObservacao(normalizarTexto(request.getBoxObservacao()))
                 .ordemExibicao(request.getOrdemExibicao() == null ? 0 : request.getOrdemExibicao())
                 .build();
 
@@ -77,6 +85,14 @@ public class LocalProvaService {
         localProva.setAtivo(request.isAtivo());
         localProva.setStatusComercial(normalizarStatusComercial(request.getStatusComercial()));
         localProva.setMensagemPublica(normalizarTexto(request.getMensagemPublica()));
+        localProva.setImagemPrincipalUrl(normalizarTexto(request.getImagemPrincipalUrl()));
+        localProva.setTituloComercial(normalizarTexto(request.getTituloComercial()));
+        localProva.setSubtituloComercial(normalizarTexto(request.getSubtituloComercial()));
+        localProva.setBoxTitulo(normalizarTexto(request.getBoxTitulo()));
+        localProva.setBoxItem1(normalizarTexto(request.getBoxItem1()));
+        localProva.setBoxItem2(normalizarTexto(request.getBoxItem2()));
+        localProva.setBoxItem3(normalizarTexto(request.getBoxItem3()));
+        localProva.setBoxObservacao(normalizarTexto(request.getBoxObservacao()));
         localProva.setOrdemExibicao(request.getOrdemExibicao() == null ? 0 : request.getOrdemExibicao());
 
         return LocalProvaDTO.Response.from(localProvaRepository.save(localProva));

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { localProvaService } from '../services/api'
+import { localProvaService, uploadService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import { formatStatusComercialLocal } from '../utils/formatters'
+import { resolveMediaUrl } from '../utils/media'
 
 const VAZIO = {
   nome: '',
@@ -10,6 +11,14 @@ const VAZIO = {
   cidade: 'Sao Luis',
   statusComercial: 'RASCUNHO',
   mensagemPublica: '',
+  imagemPrincipalUrl: '',
+  tituloComercial: '',
+  subtituloComercial: '',
+  boxTitulo: '',
+  boxItem1: '',
+  boxItem2: '',
+  boxItem3: '',
+  boxObservacao: '',
   ordemExibicao: 0,
   ativo: true,
 }
@@ -20,6 +29,7 @@ export default function AdminLocais() {
   const [edicaoId, setEdicaoId] = useState(null)
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
+  const [enviandoImagem, setEnviandoImagem] = useState(false)
   const { show, ToastEl } = useToast()
 
   useEffect(() => {
@@ -43,6 +53,14 @@ export default function AdminLocais() {
       cidade: local.cidade || 'Sao Luis',
       statusComercial: local.statusComercial || 'RASCUNHO',
       mensagemPublica: local.mensagemPublica || '',
+      imagemPrincipalUrl: local.imagemPrincipalUrl || '',
+      tituloComercial: local.tituloComercial || '',
+      subtituloComercial: local.subtituloComercial || '',
+      boxTitulo: local.boxTitulo || '',
+      boxItem1: local.boxItem1 || '',
+      boxItem2: local.boxItem2 || '',
+      boxItem3: local.boxItem3 || '',
+      boxObservacao: local.boxObservacao || '',
       ordemExibicao: local.ordemExibicao ?? 0,
       ativo: local.ativo ?? true,
     })
@@ -51,6 +69,23 @@ export default function AdminLocais() {
   function resetar() {
     setEdicaoId(null)
     setForm(VAZIO)
+  }
+
+  async function enviarImagemPrincipal(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setEnviandoImagem(true)
+    try {
+      const uploaded = await uploadService.enviarThumbnail(file)
+      setForm(current => ({ ...current, imagemPrincipalUrl: uploaded.url }))
+      show('Imagem principal enviada com sucesso.')
+    } catch (error) {
+      show(error.response?.data?.erro || 'Nao foi possivel enviar a imagem.', 'error')
+    } finally {
+      setEnviandoImagem(false)
+      event.target.value = ''
+    }
   }
 
   async function salvar(event) {
@@ -111,6 +146,57 @@ export default function AdminLocais() {
               <label className="form-label">Descricao</label>
               <textarea className="form-textarea" value={form.descricao} onChange={e => setForm(current => ({ ...current, descricao: e.target.value }))} />
             </div>
+            <div className="section-title-row" style={{ marginBottom: '0.75rem' }}>
+              <div>
+                <div className="section-heading" style={{ fontSize: 18 }}>Apresentacao do local</div>
+                <div className="section-copy">Defina a imagem e os textos que aparecem na vitrine publica desse local.</div>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Upload da imagem principal</label>
+              <input
+                className="form-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={enviarImagemPrincipal}
+                disabled={enviandoImagem}
+              />
+              <div className="mini-copy">
+                {enviandoImagem ? 'Enviando imagem...' : 'Use uma imagem horizontal para acompanhar a apresentacao do local.'}
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">URL da imagem principal</label>
+              <input
+                className="form-input"
+                value={form.imagemPrincipalUrl}
+                onChange={e => setForm(current => ({ ...current, imagemPrincipalUrl: e.target.value }))}
+                placeholder="/media/thumbnails/... ou https://..."
+              />
+            </div>
+            {form.imagemPrincipalUrl && (
+              <div className="admin-image-preview">
+                <img src={resolveMediaUrl(form.imagemPrincipalUrl)} alt={`Preview de ${form.nome || 'local de prova'}`} />
+              </div>
+            )}
+            <div className="form-group">
+              <label className="form-label">Titulo comercial</label>
+              <input
+                className="form-input"
+                value={form.tituloComercial}
+                onChange={e => setForm(current => ({ ...current, tituloComercial: e.target.value }))}
+                placeholder="Ex.: Prepare-se melhor para a prova no Cohatrac"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Subtitulo comercial</label>
+              <textarea
+                className="form-textarea"
+                value={form.subtituloComercial}
+                onChange={e => setForm(current => ({ ...current, subtituloComercial: e.target.value }))}
+                placeholder="Ex.: Veja os percursos mais frequentes, pontos de atencao e erros que mais tiram pontos nesse local."
+              />
+            </div>
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Cidade</label>
@@ -141,6 +227,59 @@ export default function AdminLocais() {
                 <input className="form-input" type="number" value={form.ordemExibicao} onChange={e => setForm(current => ({ ...current, ordemExibicao: e.target.value }))} />
               </div>
             </div>
+            <div className="section-title-row" style={{ marginBottom: '0.75rem' }}>
+              <div>
+                <div className="section-heading" style={{ fontSize: 18 }}>Caixa ao lado dos planos</div>
+                <div className="section-copy">Essa caixa ajuda a explicar o valor do acesso quando o aluno estiver escolhendo um plano.</div>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Titulo da caixa</label>
+              <input
+                className="form-input"
+                value={form.boxTitulo}
+                onChange={e => setForm(current => ({ ...current, boxTitulo: e.target.value }))}
+                placeholder="Ex.: O que voce vai encontrar neste acesso"
+              />
+            </div>
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Item 1</label>
+                <input
+                  className="form-input"
+                  value={form.boxItem1}
+                  onChange={e => setForm(current => ({ ...current, boxItem1: e.target.value }))}
+                  placeholder="Ex.: Percursos mais frequentes"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Item 2</label>
+                <input
+                  className="form-input"
+                  value={form.boxItem2}
+                  onChange={e => setForm(current => ({ ...current, boxItem2: e.target.value }))}
+                  placeholder="Ex.: Simulacao completa da prova"
+                />
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Item 3</label>
+              <input
+                className="form-input"
+                value={form.boxItem3}
+                onChange={e => setForm(current => ({ ...current, boxItem3: e.target.value }))}
+                placeholder="Ex.: Erros que mais tiram pontos"
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Observacao da caixa</label>
+              <textarea
+                className="form-textarea"
+                value={form.boxObservacao}
+                onChange={e => setForm(current => ({ ...current, boxObservacao: e.target.value }))}
+                placeholder="Ex.: Acesso liberado automaticamente apos a confirmacao do pagamento."
+              />
+            </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: '1rem' }}>
               <input type="checkbox" checked={form.ativo} onChange={e => setForm(current => ({ ...current, ativo: e.target.checked }))} style={{ width: 16, height: 16, accentColor: 'var(--accent)' }} />
               <span className="form-label" style={{ margin: 0 }}>Local ativo</span>
@@ -164,6 +303,7 @@ export default function AdminLocais() {
                     <div className="table-name">{local.nome}</div>
                     <div className="mini-copy">{local.cidade} - /{local.slug}</div>
                     {local.mensagemPublica && <div className="mini-copy">{local.mensagemPublica}</div>}
+                    {local.tituloComercial && <div className="mini-copy">{local.tituloComercial}</div>}
                   </div>
                   <div className="table-actions">
                     <span className={`badge ${local.ativo ? 'badge-green' : 'badge-gray'}`}>{local.ativo ? 'Ativo' : 'Inativo'}</span>

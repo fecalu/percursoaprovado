@@ -19,6 +19,14 @@ public class LocalProvaDTO {
         private boolean ativo = true;
         private String statusComercial = "RASCUNHO";
         private String mensagemPublica;
+        private String imagemPrincipalUrl;
+        private String tituloComercial;
+        private String subtituloComercial;
+        private String boxTitulo;
+        private String boxItem1;
+        private String boxItem2;
+        private String boxItem3;
+        private String boxObservacao;
         private Integer ordemExibicao = 0;
     }
 
@@ -32,6 +40,14 @@ public class LocalProvaDTO {
         private boolean ativo;
         private String statusComercial;
         private String mensagemPublica;
+        private String imagemPrincipalUrl;
+        private String tituloComercial;
+        private String subtituloComercial;
+        private String boxTitulo;
+        private String boxItem1;
+        private String boxItem2;
+        private String boxItem3;
+        private String boxObservacao;
         private Integer ordemExibicao;
         private LocalDateTime criadoEm;
 
@@ -45,6 +61,14 @@ public class LocalProvaDTO {
             response.ativo = localProva.isAtivo();
             response.statusComercial = localProva.getStatusComercial().name();
             response.mensagemPublica = localProva.getMensagemPublica();
+            response.imagemPrincipalUrl = localProva.getImagemPrincipalUrl();
+            response.tituloComercial = localProva.getTituloComercial();
+            response.subtituloComercial = localProva.getSubtituloComercial();
+            response.boxTitulo = localProva.getBoxTitulo();
+            response.boxItem1 = localProva.getBoxItem1();
+            response.boxItem2 = localProva.getBoxItem2();
+            response.boxItem3 = localProva.getBoxItem3();
+            response.boxObservacao = localProva.getBoxObservacao();
             response.ordemExibicao = localProva.getOrdemExibicao();
             response.criadoEm = localProva.getCriadoEm();
             return response;
