@@ -8,9 +8,10 @@ import {
   formatDataHoraCurta,
   formatPagamentoDetalhe,
   formatPagamentoStatus,
-  formatPedidoStatus,
+  formatSituacaoPedido,
   formatPlanoDuracao,
   formatSolicitacaoCancelamentoStatus,
+  getSituacaoPedidoBadgeClass,
 } from '../utils/formatters'
 
 const MOTIVOS_CANCELAMENTO = [
@@ -178,8 +179,8 @@ export default function MeusPedidos() {
             <RevealSection key={item.id} className="student-order-card" delay={50}>
               <div className="student-order-main">
                 <div className="student-card-top">
-                  <span className={`badge ${item.status === 'PAGO' ? 'badge-green' : item.status === 'CANCELADO' ? 'badge-red' : 'badge-gray'}`}>
-                    {formatPedidoStatus(item.status)}
+                  <span className={`badge ${getSituacaoPedidoBadgeClass(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}`}>
+                    {formatSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}
                   </span>
                   <span className="student-card-copy">{fmtMoeda(item.valorCentavos)}</span>
                 </div>
@@ -223,15 +224,13 @@ export default function MeusPedidos() {
                   </div>
                 )}
 
-                {item.solicitacaoCancelamentoStatus && (
+                {item.solicitacaoCancelamentoStatus === 'ABERTA' && (
                   <div className="request-inline-status" style={{ marginTop: '0.9rem' }}>
                     <span className={`badge ${getSolicitacaoBadgeClass(item.solicitacaoCancelamentoStatus)}`}>
                       {formatSolicitacaoCancelamentoStatus(item.solicitacaoCancelamentoStatus)}
                     </span>
                     <div className="mini-copy">
-                      {item.solicitacaoCancelamentoStatus === 'ABERTA' && 'Sua solicitacao foi enviada e agora esta em analise.'}
-                      {item.solicitacaoCancelamentoStatus === 'APROVADA' && 'Sua solicitacao foi aprovada e o acesso desse local foi encerrado.'}
-                      {item.solicitacaoCancelamentoStatus === 'NEGADA' && 'Sua solicitacao foi analisada e nao foi aprovada.'}
+                      Sua solicitacao foi enviada e agora esta em analise.
                     </div>
                   </div>
                 )}

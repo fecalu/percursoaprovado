@@ -6,9 +6,10 @@ import {
   formatDataHoraCurta,
   formatPagamentoDetalhe,
   formatPagamentoStatus,
-  formatPedidoStatus,
+  formatSituacaoPedido,
   formatPlanoDuracao,
   formatSolicitacaoCancelamentoStatus,
+  getSituacaoPedidoBadgeClass,
 } from '../utils/formatters'
 
 function fmtMoeda(centavos) {
@@ -49,6 +50,7 @@ export default function AdminPedidos() {
   const [solicitacaoAtiva, setSolicitacaoAtiva] = useState(null)
   const [acaoSolicitacao, setAcaoSolicitacao] = useState('APROVAR')
   const [observacaoAdmin, setObservacaoAdmin] = useState('')
+  const [historicoVisivel, setHistoricoVisivel] = useState(false)
 
   useEffect(() => {
     carregar()
@@ -125,9 +127,16 @@ export default function AdminPedidos() {
   const pendentes = useMemo(() => pedidos.filter(item => item.status === 'PENDENTE'), [pedidos])
   const pagos = useMemo(() => pedidos.filter(item => item.status === 'PAGO'), [pedidos])
   const cancelados = useMemo(() => pedidos.filter(item => item.status === 'CANCELADO'), [pedidos])
-  const solicitacoesAbertas = useMemo(() => solicitacoes.filter(item => item.status === 'ABERTA'), [solicitacoes])
+  const solicitacoesAbertas = useMemo(
+    () => solicitacoes.filter(item => item.status === 'ABERTA' || item.status === 'ERRO_PROCESSAMENTO'),
+    [solicitacoes]
+  )
   const solicitacoesAprovadas = useMemo(() => solicitacoes.filter(item => item.status === 'APROVADA'), [solicitacoes])
   const solicitacoesNegadas = useMemo(() => solicitacoes.filter(item => item.status === 'NEGADA'), [solicitacoes])
+  const historicoSolicitacoes = useMemo(
+    () => solicitacoes.filter(item => item.status === 'APROVADA' || item.status === 'NEGADA'),
+    [solicitacoes]
+  )
 
   return (
     <>
@@ -183,14 +192,16 @@ export default function AdminPedidos() {
             </div>
           </div>
 
-          {solicitacoes.length === 0 ? (
-            <div className="empty-state" style={{ marginBottom: '1.5rem' }}>
-              <div className="empty-state-icon">+</div>
-              Nenhuma solicitacao de cancelamento recebida ainda.
+          {solicitacoesAbertas.length === 0 ? (
+            <div className="student-filter-card request-empty-card" style={{ marginBottom: '1.5rem' }}>
+              <div className="section-heading">Solicitacoes pendentes</div>
+              <div className="mini-copy" style={{ marginTop: '0.7rem' }}>
+                Nenhuma solicitacao pendente no momento.
+              </div>
             </div>
           ) : (
             <div className="request-admin-grid" style={{ marginBottom: '1.75rem' }}>
-              {solicitacoes.map(item => (
+              {solicitacoesAbertas.map(item => (
                 <div key={item.id} className="request-admin-card">
                   <div className="student-card-top">
                     <span className={`badge ${getSolicitacaoBadgeClass(item.status)}`}>
@@ -268,6 +279,48 @@ export default function AdminPedidos() {
             </div>
           )}
 
+          {historicoSolicitacoes.length > 0 && (
+            <div className="student-filter-card" style={{ marginBottom: '1.5rem' }}>
+              <div className="request-history-head">
+                <div>
+                  <div className="section-heading">Historico de solicitacoes</div>
+                  <div className="mini-copy" style={{ marginTop: '0.45rem' }}>
+                    Solicitações já processadas saem da fila principal e ficam registradas aqui.
+                  </div>
+                </div>
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  onClick={() => setHistoricoVisivel(valor => !valor)}
+                >
+                  {historicoVisivel ? 'Ocultar historico' : 'Ver historico'}
+                </button>
+              </div>
+
+              {historicoVisivel && (
+                <div className="request-history-list">
+                  {historicoSolicitacoes.map(item => (
+                    <div key={item.id} className="request-history-row">
+                      <div>
+                        <div className="table-name">{item.localProvaNome}</div>
+                        <div className="mini-copy">{item.usuarioNome} - {item.usuarioEmail}</div>
+                        <div className="mini-copy">Pedido {item.pedidoReferencia}{item.paymentId ? ` | ID ${item.paymentId}` : ''}</div>
+                      </div>
+                      <div className="request-history-meta">
+                        <span className={`badge ${getSolicitacaoBadgeClass(item.status)}`}>
+                          {formatSolicitacaoCancelamentoStatus(item.status)}
+                        </span>
+                        <div className="mini-copy">
+                          {item.processadoEm ? `Processado em ${formatDataHoraCurta(item.processadoEm)}` : 'Sem data de processamento'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {pedidos.length === 0 ? (
             <div className="empty-state">
               <div className="empty-state-icon">+</div>
@@ -304,8 +357,8 @@ export default function AdminPedidos() {
                   <span className="table-cat">{item.referencia}</span>
                   <span className="table-dur">{fmtMoeda(item.valorCentavos)}</span>
                   <span>
-                    <span className={`badge ${item.status === 'PAGO' ? 'badge-green' : item.status === 'CANCELADO' ? 'badge-red' : 'badge-gray'}`}>
-                      {formatPedidoStatus(item.status)}
+                    <span className={`badge ${getSituacaoPedidoBadgeClass(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}`}>
+                      {formatSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}
                     </span>
                   </span>
                   <div className="table-actions">

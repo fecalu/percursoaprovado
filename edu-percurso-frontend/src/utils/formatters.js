@@ -43,6 +43,43 @@ export function formatPedidoStatus(status) {
   return labels[status] || status
 }
 
+export function resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus) {
+  if (paymentStatus === 'refunded') return 'REEMBOLSADO'
+  if (paymentStatus === 'charged_back') return 'ESTORNADO'
+  if (status === 'CANCELADO') return 'PEDIDO_CANCELADO'
+  if (status === 'PENDENTE') return 'AGUARDANDO_PAGAMENTO'
+  if (solicitacaoStatus === 'ABERTA') return 'SOLICITACAO_EM_ANALISE'
+  if (solicitacaoStatus === 'APROVADA') return 'CANCELAMENTO_APROVADO'
+  if (solicitacaoStatus === 'NEGADA') return 'PAGAMENTO_MANTIDO'
+  if (status === 'PAGO') return 'ACESSO_LIBERADO'
+  return status || '-'
+}
+
+export function formatSituacaoPedido(status, solicitacaoStatus, paymentStatus) {
+  const situacao = resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus)
+  const labels = {
+    AGUARDANDO_PAGAMENTO: 'Aguardando pagamento',
+    ACESSO_LIBERADO: 'Acesso liberado',
+    SOLICITACAO_EM_ANALISE: 'Solicitacao em analise',
+    CANCELAMENTO_APROVADO: 'Cancelamento aprovado',
+    PAGAMENTO_MANTIDO: 'Pagamento mantido',
+    PEDIDO_CANCELADO: 'Pedido cancelado',
+    REEMBOLSADO: 'Reembolsado',
+    ESTORNADO: 'Estornado',
+  }
+
+  return labels[situacao] || situacao
+}
+
+export function getSituacaoPedidoBadgeClass(status, solicitacaoStatus, paymentStatus) {
+  const situacao = resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus)
+  if (situacao === 'ACESSO_LIBERADO' || situacao === 'PAGAMENTO_MANTIDO') return 'badge-green'
+  if (situacao === 'SOLICITACAO_EM_ANALISE') return 'badge-warn'
+  if (situacao === 'CANCELAMENTO_APROVADO' || situacao === 'REEMBOLSADO' || situacao === 'ESTORNADO') return 'badge-blue'
+  if (situacao === 'PEDIDO_CANCELADO') return 'badge-red'
+  return 'badge-gray'
+}
+
 export function formatSolicitacaoCancelamentoStatus(status) {
   const labels = {
     ABERTA: 'Em analise',
