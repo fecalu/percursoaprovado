@@ -203,3 +203,45 @@ export function formatTipoConteudo(tipoConteudo) {
   if (!tipoConteudo) return 'Conteudo'
   return labels[tipoConteudo] || tipoConteudo.replaceAll('_', ' ').toLowerCase()
 }
+
+export function formatTemaQuestao(tema) {
+  const labels = {
+    PLACAS: 'Placas',
+    LEGISLACAO: 'Legislacao',
+    DIRECAO_DEFENSIVA: 'Direcao defensiva',
+    PRIMEIROS_SOCORROS: 'Primeiros socorros',
+    MECANICA_BASICA: 'Mecanica basica',
+    MEIO_AMBIENTE_CIDADANIA: 'Meio ambiente e cidadania',
+  }
+
+  if (!tema) return '-'
+  return labels[tema] || tema
+}
+
+export function formatDificuldadeQuestao(dificuldade) {
+  const labels = {
+    FACIL: 'Facil',
+    MEDIA: 'Media',
+    DIFICIL: 'Dificil',
+  }
+
+  if (!dificuldade) return '-'
+  return labels[dificuldade] || dificuldade
+}
+
+export function formatStatusQuestao(status) {
+  const labels = {
+    RASCUNHO: 'Rascunho',
+    PUBLICADA: 'Publicada',
+    ARQUIVADA: 'Arquivada',
+  }
+
+  if (!status) return '-'
+  return labels[status] || status
+}
+
+export function getStatusQuestaoBadgeClass(status) {
+  if (status === 'PUBLICADA') return 'badge-green'
+  if (status === 'ARQUIVADA') return 'badge-gray'
+  return 'badge-warn'
+}

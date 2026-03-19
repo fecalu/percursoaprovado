@@ -18,6 +18,8 @@ import AdminDashboard from './pages/AdminDashboard'
 import AdminPedidos from './pages/AdminPedidos'
 import AdminPercursos from './pages/AdminPercursos'
 import AdminPercursoForm from './pages/AdminPercursoForm'
+import AdminQuestoes from './pages/AdminQuestoes'
+import AdminQuestaoForm from './pages/AdminQuestaoForm'
 import AdminLocais from './pages/AdminLocais'
 import AdminPlanos from './pages/AdminPlanos'
 import AdminAssinaturas from './pages/AdminAssinaturas'
@@ -48,6 +50,9 @@ export default function App() {
           <Route path="/admin/percursos" element={<PrivateRoute adminOnly><AdminPercursos /></PrivateRoute>} />
           <Route path="/admin/percursos/novo" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
           <Route path="/admin/percursos/:id/editar" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
+          <Route path="/admin/questoes" element={<PrivateRoute adminOnly><AdminQuestoes /></PrivateRoute>} />
+          <Route path="/admin/questoes/nova" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
+          <Route path="/admin/questoes/:id/editar" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
           <Route path="/admin/locais" element={<PrivateRoute adminOnly><AdminLocais /></PrivateRoute>} />
           <Route path="/admin/planos" element={<PrivateRoute adminOnly><AdminPlanos /></PrivateRoute>} />
           <Route path="/admin/assinaturas" element={<PrivateRoute adminOnly><AdminAssinaturas /></PrivateRoute>} />

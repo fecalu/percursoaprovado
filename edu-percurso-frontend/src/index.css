@@ -455,6 +455,56 @@ body {
 .table-cat { color: var(--text-2); font-size: 13px; }
 .table-dur { color: var(--text-3); font-size: 13px; }
 .table-actions { display: flex; gap: 6px; }
+.question-row-title {
+  line-height: 1.45;
+}
+.question-inline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
+}
+.question-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(180px, 0.8fr)) auto auto;
+  gap: 0.85rem;
+  align-items: center;
+}
+.question-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.question-option-card {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+.question-option-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+.question-option-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.question-correct-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+}
+.question-correct-toggle input {
+  accent-color: var(--accent);
+}
 
 /* ── Player ──────────────────────────────────────────────────────────────── */
 .player-wrap {
@@ -2709,6 +2759,11 @@ body {
   }
 
   .student-filter-card--inline {
+    grid-template-columns: 1fr;
+  }
+
+  .question-filters,
+  .question-option-grid {
     grid-template-columns: 1fr;
   }
 

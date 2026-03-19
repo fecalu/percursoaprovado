@@ -52,6 +52,16 @@ export const percursoService = {
   excluir: id => api.delete(`/percursos/${id}`),
 }
 
+export const questaoService = {
+  listarAdmin: params => api.get(`/admin/questoes${toSearchParams(params)}`).then(response => response.data),
+  buscarAdmin: id => api.get(`/admin/questoes/${id}`).then(response => response.data),
+  criarAdmin: data => api.post('/admin/questoes', data).then(response => response.data),
+  atualizarAdmin: (id, data) => api.put(`/admin/questoes/${id}`, data).then(response => response.data),
+  publicarAdmin: id => api.post(`/admin/questoes/${id}/publicar`).then(response => response.data),
+  arquivarAdmin: id => api.post(`/admin/questoes/${id}/arquivar`).then(response => response.data),
+  excluirAdmin: id => api.delete(`/admin/questoes/${id}`),
+}
+
 export const categoriaService = {
   listar: () => api.get('/categorias').then(response => response.data),
   criar: data => api.post('/categorias', data).then(response => response.data),

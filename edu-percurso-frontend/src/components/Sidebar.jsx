@@ -11,6 +11,7 @@ const IconMap = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
 const IconPrice = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 6h10l-1 8H6L5 6z" /><path d="M7 6V4h6v2" /></svg>
 const IconList = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 6h12M4 10h12M4 14h8" /></svg>
 const IconPlus = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="10" r="7" /><path d="M10 7v6M7 10h6" /></svg>
+const IconQuiz = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 4h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2z" /><path d="M8 8a2 2 0 1 1 3.2 1.6c-.7.5-1.2.9-1.2 1.9" /><circle cx="10" cy="13.8" r=".8" fill="currentColor" stroke="none" /></svg>
 
 export default function Sidebar() {
   const { user, logout, isAdmin } = useAuth()
@@ -57,6 +58,9 @@ export default function Sidebar() {
           </NavLink>
           <NavLink to="/admin/percursos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <IconList /> Conteudos
+          </NavLink>
+          <NavLink to="/admin/questoes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconQuiz /> Banco de questoes
           </NavLink>
           <NavLink to="/admin/locais" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <IconMap /> Locais
