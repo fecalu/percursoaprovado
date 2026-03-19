@@ -2007,6 +2007,10 @@ body {
   gap: 1.4rem;
 }
 
+.student-shell--compact {
+  gap: 1rem;
+}
+
 .student-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
@@ -2017,6 +2021,51 @@ body {
   background:
     radial-gradient(circle at top left, rgba(45,224,154,0.12), transparent 35%),
     linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
+}
+
+.student-library-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: start;
+  padding: 1.05rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(45,224,154,0.1), transparent 34%),
+    linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
+}
+
+.student-kpi-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.student-kpi-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+}
+
+.student-kpi-pill-value {
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text);
+}
+
+.student-kpi-pill-label {
+  color: var(--text-2);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 
 .student-kpi-grid {
@@ -2065,6 +2114,10 @@ body {
   gap: 0.8rem;
 }
 
+.student-chip-grid--compact {
+  gap: 0.65rem;
+}
+
 .student-chip {
   min-width: 200px;
   padding: 0.95rem 1rem;
@@ -2084,11 +2137,29 @@ body {
   font-size: 12px;
 }
 
+.student-chip--compact {
+  min-width: 0;
+  padding: 0.7rem 0.9rem;
+  background: rgba(45,224,154,0.05);
+}
+
 .student-filter-card {
   padding: 1.15rem;
   border: 1px solid var(--border);
   border-radius: 18px;
   background: var(--bg2);
+}
+
+.student-filter-card--inline {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 0.95rem 1rem;
+}
+
+.student-filter-copy-wrap {
+  min-width: 0;
 }
 
 .student-filter-title {
@@ -2101,6 +2172,48 @@ body {
   margin-bottom: 0.85rem;
   color: var(--text-2);
   font-size: 13px;
+}
+
+.library-section-card {
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
+  overflow: hidden;
+}
+
+.library-section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.library-section-heading {
+  min-width: 0;
+}
+
+.library-section-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.library-section-toggle-label {
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.library-section-body {
+  padding: 0 1.1rem 1.1rem;
 }
 
 .student-grid {
@@ -2466,6 +2579,7 @@ body {
   .admin-grid,
   .landing-cta,
   .student-hero,
+  .student-library-head,
   .player-layout,
   .local-offer-layout {
     grid-template-columns: 1fr;
@@ -2483,6 +2597,10 @@ body {
 
   .student-kpi-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .student-kpi-strip {
+    justify-content: flex-start;
   }
 }
 
@@ -2556,6 +2674,25 @@ body {
 
   .hero-proof-grid {
     grid-template-columns: 1fr;
+  }
+
+  .student-kpi-strip,
+  .library-section-meta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .student-kpi-pill {
+    justify-content: space-between;
+  }
+
+  .student-filter-card--inline {
+    grid-template-columns: 1fr;
+  }
+
+  .library-section-toggle {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .landing-topbar {

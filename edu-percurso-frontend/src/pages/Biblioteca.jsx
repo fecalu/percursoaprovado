@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import RevealSection from '../components/RevealSection'
 import { assinaturaService, percursoService } from '../services/api'
 import ContentThumbnail from '../components/ContentThumbnail'
 import { formatDataCurta, formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
@@ -11,6 +10,7 @@ export default function Biblioteca() {
   const [assinaturas, setAssinaturas] = useState([])
   const [filtro, setFiltro] = useState('')
   const [loading, setLoading] = useState(true)
+  const [secoesAbertas, setSecoesAbertas] = useState({ geral: true })
 
   useEffect(() => {
     Promise.all([percursoService.listar(), assinaturaService.minhas()])
@@ -41,57 +41,137 @@ export default function Biblioteca() {
     )
   }, [conteudos, filtro])
 
-  const conteudosGerais = filtrados.filter(item => !item.localProvaId)
-  const conteudosPorLocal = filtrados
-    .filter(item => item.localProvaId)
-    .reduce((acc, item) => {
-      if (!acc[item.localProvaSlug]) {
-        acc[item.localProvaSlug] = {
+  const { conteudosGerais, secoesLocais } = useMemo(() => {
+    const gerais = []
+    const agrupados = {}
+
+    filtrados.forEach(item => {
+      if (!item.localProvaId) {
+        gerais.push(item)
+        return
+      }
+
+      if (!agrupados[item.localProvaSlug]) {
+        agrupados[item.localProvaSlug] = {
           slug: item.localProvaSlug,
           nome: item.localProvaNome,
           itens: [],
         }
       }
 
-      acc[item.localProvaSlug].itens.push(item)
-      return acc
-    }, {})
+      agrupados[item.localProvaSlug].itens.push(item)
+    })
+
+    return {
+      conteudosGerais: gerais,
+      secoesLocais: Object.values(agrupados),
+    }
+  }, [filtrados])
+
+  const filtroAtivo = filtro.trim().length > 0
+
+  useEffect(() => {
+    const chavesAtivas = new Set(['geral', ...secoesLocais.map(secao => `local-${secao.slug}`)])
+
+    setSecoesAbertas(prev => {
+      const proximo = {}
+      chavesAtivas.forEach(chave => {
+        proximo[chave] = chave in prev ? prev[chave] : chave === 'geral'
+      })
+      return proximo
+    })
+  }, [secoesLocais])
+
+  function alternarSecao(chave) {
+    setSecoesAbertas(prev => ({ ...prev, [chave]: !prev[chave] }))
+  }
+
+  function secaoEstaAberta(chave) {
+    if (filtroAtivo) return true
+    return Boolean(secoesAbertas[chave])
+  }
+
+  function renderConteudoCards(itens) {
+    return (
+      <div className="card-grid">
+        {itens.map(item => (
+          <div key={item.id} className="percurso-card" onClick={() => navigate(`/conteudos/${item.id}`)}>
+            <ContentThumbnail thumbnailUrl={item.thumbnailUrl} titulo={item.titulo} videoUrl={item.videoUrl} />
+            <div className="card-body">
+              <div className="card-tag">{formatTipoConteudo(item.tipoConteudo)}</div>
+              <div className="card-title">{item.titulo}</div>
+              <div className="card-desc">{item.resumo || item.descricao}</div>
+            </div>
+            <div className="card-footer">
+              <span className="card-dur">{formatDuracaoMinutos(item.duracaoSegundos)}</span>
+              <span className="card-arrow">Abrir modulo</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  function renderSecao({ chave, titulo, subtitulo, itens, destaque = 'modulos' }) {
+    const aberta = secaoEstaAberta(chave)
+
+    return (
+      <section key={chave} className="library-section-card">
+        <button
+          type="button"
+          className="library-section-toggle"
+          onClick={() => alternarSecao(chave)}
+          aria-expanded={aberta}
+        >
+          <div className="library-section-heading">
+            <div className="section-heading">{titulo}</div>
+            <div className="section-copy">{subtitulo}</div>
+          </div>
+
+          <div className="library-section-meta">
+            <span className="badge badge-blue">{itens.length} {destaque}</span>
+            <span className="library-section-toggle-label">{aberta ? 'Fechar' : 'Abrir'}</span>
+          </div>
+        </button>
+
+        {aberta && <div className="library-section-body">{renderConteudoCards(itens)}</div>}
+      </section>
+    )
+  }
 
   if (loading) return <div className="spinner" />
 
   return (
     <>
-      <RevealSection className="student-shell" delay={30}>
-        <section className="student-hero">
+      <div className="student-shell student-shell--compact">
+        <section className="student-library-head">
           <div>
             <div className="page-title">Minha biblioteca</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Revise seus locais ativos e os modulos que ajudam voce a dirigir com mais confianca no dia da prova.
+              Acesse seus locais e os modulos liberados para revisar com mais criterio.
             </p>
           </div>
-          <div className="student-kpi-grid">
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Locais ativos</div>
-              <div className="student-kpi-value">{assinaturasAtivas.length}</div>
-              <div className="student-kpi-copy">planos em vigor</div>
+
+          <div className="student-kpi-strip">
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{assinaturasAtivas.length}</span>
+              <span className="student-kpi-pill-label">Locais ativos</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Modulos gerais</div>
-              <div className="student-kpi-value">{conteudosGerais.length}</div>
-              <div className="student-kpi-copy">disponiveis agora</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{conteudosGerais.length}</span>
+              <span className="student-kpi-pill-label">Modulos gerais</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Conteudos liberados</div>
-              <div className="student-kpi-value">{filtrados.length}</div>
-              <div className="student-kpi-copy">na biblioteca</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{filtrados.length}</span>
+              <span className="student-kpi-pill-label">Conteudo liberado</span>
             </div>
           </div>
         </section>
 
         {assinaturasAtivas.length > 0 && (
-          <div className="student-chip-grid">
+          <div className="student-chip-grid student-chip-grid--compact">
             {assinaturasAtivas.map(item => (
-              <div key={item.id} className="student-chip">
+              <div key={item.id} className="student-chip student-chip--compact">
                 <div className="student-chip-title">{item.localProvaNome}</div>
                 <div className="student-chip-copy">Ativo ate {formatDataCurta(item.fimEm)}</div>
               </div>
@@ -99,9 +179,11 @@ export default function Biblioteca() {
           </div>
         )}
 
-        <div className="student-filter-card">
-          <div className="student-filter-title">Buscar na biblioteca</div>
-          <div className="student-filter-copy">Procure por titulo, tipo de conteudo, categoria ou local de prova.</div>
+        <div className="student-filter-card student-filter-card--inline">
+          <div className="student-filter-copy-wrap">
+            <div className="student-filter-title">Buscar modulos</div>
+            <div className="student-filter-copy">Procure por titulo, tipo de conteudo, categoria ou local de prova.</div>
+          </div>
           <input
             className="form-input"
             placeholder="Buscar por titulo, local, tipo ou categoria..."
@@ -109,7 +191,7 @@ export default function Biblioteca() {
             onChange={event => setFiltro(event.target.value)}
           />
         </div>
-      </RevealSection>
+      </div>
 
       {assinaturasAtivas.length === 0 ? (
         <div className="empty-state">
@@ -129,59 +211,22 @@ export default function Biblioteca() {
       ) : (
         <>
           {conteudosGerais.length > 0 && (
-            <RevealSection as="section" className="content-section" delay={60}>
-              <div className="section-title-row">
-                <div>
-                  <div className="section-heading">Modulos gerais</div>
-                  <div className="section-copy">Baliza, embreagem, erros que mais tiram pontos e o que costuma ser avaliado.</div>
-                </div>
-                <span className="badge badge-blue">{conteudosGerais.length} modulos</span>
-              </div>
-              <div className="card-grid">
-                {conteudosGerais.map(item => (
-                  <div key={item.id} className="percurso-card" onClick={() => navigate(`/conteudos/${item.id}`)}>
-                    <ContentThumbnail thumbnailUrl={item.thumbnailUrl} titulo={item.titulo} videoUrl={item.videoUrl} />
-                    <div className="card-body">
-                      <div className="card-tag">{formatTipoConteudo(item.tipoConteudo)}</div>
-                      <div className="card-title">{item.titulo}</div>
-                      <div className="card-desc">{item.resumo || item.descricao}</div>
-                    </div>
-                    <div className="card-footer">
-                      <span className="card-dur">{formatDuracaoMinutos(item.duracaoSegundos)}</span>
-                      <span className="card-arrow">Assistir -&gt;</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </RevealSection>
+            renderSecao({
+              chave: 'geral',
+              titulo: 'Modulos gerais',
+              subtitulo: 'Baliza, embreagem, erros que mais tiram pontos e o que costuma ser avaliado.',
+              itens: conteudosGerais,
+            })
           )}
 
-          {Object.values(conteudosPorLocal).map(secao => (
-            <RevealSection key={secao.slug} as="section" className="content-section" delay={80}>
-              <div className="section-title-row">
-                <div>
-                  <div className="section-heading">{secao.nome}</div>
-                  <div className="section-copy">Percursos mais frequentes, pontos de atencao e orientacoes praticas desse local.</div>
-                </div>
-                <span className="badge badge-blue">{secao.itens.length} conteudos</span>
-              </div>
-              <div className="card-grid">
-                {secao.itens.map(item => (
-                  <div key={item.id} className="percurso-card" onClick={() => navigate(`/conteudos/${item.id}`)}>
-                    <ContentThumbnail thumbnailUrl={item.thumbnailUrl} titulo={item.titulo} videoUrl={item.videoUrl} />
-                    <div className="card-body">
-                      <div className="card-tag">{formatTipoConteudo(item.tipoConteudo)}</div>
-                      <div className="card-title">{item.titulo}</div>
-                      <div className="card-desc">{item.resumo || item.descricao}</div>
-                    </div>
-                    <div className="card-footer">
-                      <span className="card-dur">{formatDuracaoMinutos(item.duracaoSegundos)}</span>
-                      <span className="card-arrow">Assistir -&gt;</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </RevealSection>
+          {secoesLocais.map(secao => (
+            renderSecao({
+              chave: `local-${secao.slug}`,
+              titulo: secao.nome,
+              subtitulo: 'Percursos mais frequentes, pontos de atencao e orientacoes praticas desse local.',
+              itens: secao.itens,
+              destaque: 'conteudos',
+            })
           ))}
         </>
       )}
