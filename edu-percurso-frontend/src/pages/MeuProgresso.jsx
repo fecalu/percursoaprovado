@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import RevealSection from '../components/RevealSection'
 import { progressoService } from '../services/api'
 import { formatDuracaoMinutos } from '../utils/formatters'
 
@@ -23,33 +22,31 @@ export default function MeuProgresso() {
 
   return (
     <>
-      <RevealSection className="student-shell" delay={30}>
-        <section className="student-hero">
+      <div className="student-shell student-shell--compact">
+        <section className="student-library-head">
           <div>
             <div className="page-title">Meu progresso</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Acompanhe os conteudos que voce iniciou ou concluiu e volte rapidamente para o que ainda falta revisar.
+              Acompanhe o que voce iniciou, concluiu e o que ainda falta revisar com mais calma.
             </p>
           </div>
-          <div className="student-kpi-grid">
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Concluidos</div>
-              <div className="student-kpi-value">{concluidos}</div>
-              <div className="student-kpi-copy">conteudos</div>
+
+          <div className="student-kpi-strip">
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{concluidos}</span>
+              <span className="student-kpi-pill-label">Concluidos</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Em andamento</div>
-              <div className="student-kpi-value">{emAndamento}</div>
-              <div className="student-kpi-copy">conteudos</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{emAndamento}</span>
+              <span className="student-kpi-pill-label">Em andamento</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Total assistido</div>
-              <div className="student-kpi-value">{formatDuracaoMinutos(totalAssistido)}</div>
-              <div className="student-kpi-copy">de estudo</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{formatDuracaoMinutos(totalAssistido)}</span>
+              <span className="student-kpi-pill-label">Total assistido</span>
             </div>
           </div>
         </section>
-      </RevealSection>
+      </div>
 
       {itens.length === 0 ? (
         <div className="empty-state">
@@ -62,14 +59,22 @@ export default function MeuProgresso() {
           </div>
         </div>
       ) : (
-        <div className="student-stack">
+        <section className="content-section">
+          <div className="section-title-row">
+            <div>
+              <div className="section-heading">Conteudos acompanhados</div>
+              <div className="section-copy">Volte rapidamente para o que ainda falta revisar ou reveja o que ja concluiu.</div>
+            </div>
+          </div>
+
+          <div className="student-stack">
           {itens.map(item => {
             const pct = item.duracaoTotal
               ? Math.min(100, Math.round(item.segundosAssistidos / item.duracaoTotal * 100))
               : 0
 
             return (
-              <RevealSection key={item.percursoId} className="student-progress-card" delay={50}>
+              <div key={item.percursoId} className="student-progress-card">
                 <div className="student-progress-main">
                   <div className="table-name">{item.percursoTitulo}</div>
                   <div className="student-progress-copy">
@@ -98,10 +103,11 @@ export default function MeuProgresso() {
                     {item.concluido ? 'Rever conteudo' : pct > 0 ? 'Continuar' : 'Comecar'}
                   </button>
                 </div>
-              </RevealSection>
+              </div>
             )
           })}
-        </div>
+          </div>
+        </section>
       )}
     </>
   )
