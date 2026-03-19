@@ -27,15 +27,6 @@ function getSpotlightCardClass(statusComercial) {
   return 'spotlight-card--draft'
 }
 
-function getLocalMonograma(nome = '') {
-  return nome
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(parte => parte[0]?.toUpperCase())
-    .join('')
-}
-
 function getCardResumo(local, planosLocal) {
   if (local.statusComercial === 'DISPONIVEL') {
     if (planosLocal.length > 0) {
@@ -245,7 +236,7 @@ export default function Home() {
                     ? 'Liberacao temporariamente pausada'
                     : 'Disponivel somente para administracao'
               const resumoCard = getCardResumo(local, planosLocal)
-              const imagemLocal = resolveMediaUrl(local.imagemPrincipalUrl)
+              const imagemLocal = resolveMediaUrl(local.imagemCardUrl || local.imagemPrincipalUrl)
 
               return (
                 <RevealSection
@@ -262,22 +253,20 @@ export default function Home() {
                       {formatStatusComercialLocal(local.statusComercial)}
                     </span>
                   </div>
-                  <div className="spotlight-brand-row">
-                    <div className={`spotlight-mark ${imagemLocal ? 'spotlight-mark--image' : ''}`}>
-                      {imagemLocal ? (
-                        <img
-                          src={imagemLocal}
-                          alt={`Imagem do local ${local.nome}`}
-                          className="spotlight-mark-image"
-                        />
-                      ) : (
-                        getLocalMonograma(local.nome)
-                      )}
-                    </div>
-                    <div className="spotlight-brand-copy">
-                      <div className="spotlight-accent">{destaqueLocal}</div>
-                      <div className="spotlight-title">{local.nome}</div>
-                    </div>
+                  <div className={`spotlight-mark ${imagemLocal ? 'spotlight-mark--image' : 'spotlight-mark--empty'}`}>
+                    {imagemLocal ? (
+                      <img
+                        src={imagemLocal}
+                        alt={`Imagem do local ${local.nome}`}
+                        className="spotlight-mark-image"
+                      />
+                    ) : (
+                      <div className="spotlight-mark-fallback">{local.nome}</div>
+                    )}
+                  </div>
+                  <div className="spotlight-brand-copy">
+                    <div className="spotlight-accent">{destaqueLocal}</div>
+                    <div className="spotlight-title">{local.nome}</div>
                   </div>
                   <div className="spotlight-desc">{local.descricao}</div>
                   <div className="spotlight-summary">{resumoCard}</div>

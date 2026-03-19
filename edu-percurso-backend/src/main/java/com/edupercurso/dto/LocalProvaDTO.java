@@ -20,6 +20,7 @@ public class LocalProvaDTO {
         private String statusComercial = "RASCUNHO";
         private String mensagemPublica;
         private String imagemPrincipalUrl;
+        private String imagemCardUrl;
         private String tituloComercial;
         private String subtituloComercial;
         private String boxTitulo;
@@ -41,6 +42,7 @@ public class LocalProvaDTO {
         private String statusComercial;
         private String mensagemPublica;
         private String imagemPrincipalUrl;
+        private String imagemCardUrl;
         private String tituloComercial;
         private String subtituloComercial;
         private String boxTitulo;
@@ -62,6 +64,7 @@ public class LocalProvaDTO {
             response.statusComercial = localProva.getStatusComercial().name();
             response.mensagemPublica = localProva.getMensagemPublica();
             response.imagemPrincipalUrl = localProva.getImagemPrincipalUrl();
+            response.imagemCardUrl = localProva.getImagemCardUrl();
             response.tituloComercial = localProva.getTituloComercial();
             response.subtituloComercial = localProva.getSubtituloComercial();
             response.boxTitulo = localProva.getBoxTitulo();

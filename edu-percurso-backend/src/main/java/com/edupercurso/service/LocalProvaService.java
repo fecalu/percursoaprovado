@@ -58,6 +58,7 @@ public class LocalProvaService {
                 .statusComercial(normalizarStatusComercial(request.getStatusComercial()))
                 .mensagemPublica(normalizarTexto(request.getMensagemPublica()))
                 .imagemPrincipalUrl(normalizarTexto(request.getImagemPrincipalUrl()))
+                .imagemCardUrl(normalizarTexto(request.getImagemCardUrl()))
                 .tituloComercial(normalizarTexto(request.getTituloComercial()))
                 .subtituloComercial(normalizarTexto(request.getSubtituloComercial()))
                 .boxTitulo(normalizarTexto(request.getBoxTitulo()))
@@ -86,6 +87,7 @@ public class LocalProvaService {
         localProva.setStatusComercial(normalizarStatusComercial(request.getStatusComercial()));
         localProva.setMensagemPublica(normalizarTexto(request.getMensagemPublica()));
         localProva.setImagemPrincipalUrl(normalizarTexto(request.getImagemPrincipalUrl()));
+        localProva.setImagemCardUrl(normalizarTexto(request.getImagemCardUrl()));
         localProva.setTituloComercial(normalizarTexto(request.getTituloComercial()));
         localProva.setSubtituloComercial(normalizarTexto(request.getSubtituloComercial()));
         localProva.setBoxTitulo(normalizarTexto(request.getBoxTitulo()));

@@ -12,6 +12,7 @@ const VAZIO = {
   statusComercial: 'RASCUNHO',
   mensagemPublica: '',
   imagemPrincipalUrl: '',
+  imagemCardUrl: '',
   tituloComercial: '',
   subtituloComercial: '',
   boxTitulo: '',
@@ -54,6 +55,7 @@ export default function AdminLocais() {
       statusComercial: local.statusComercial || 'RASCUNHO',
       mensagemPublica: local.mensagemPublica || '',
       imagemPrincipalUrl: local.imagemPrincipalUrl || '',
+      imagemCardUrl: local.imagemCardUrl || '',
       tituloComercial: local.tituloComercial || '',
       subtituloComercial: local.subtituloComercial || '',
       boxTitulo: local.boxTitulo || '',
@@ -82,6 +84,23 @@ export default function AdminLocais() {
       show('Imagem principal enviada com sucesso.')
     } catch (error) {
       show(error.response?.data?.erro || 'Nao foi possivel enviar a imagem.', 'error')
+    } finally {
+      setEnviandoImagem(false)
+      event.target.value = ''
+    }
+  }
+
+  async function enviarImagemCard(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setEnviandoImagem(true)
+    try {
+      const uploaded = await uploadService.enviarThumbnail(file)
+      setForm(current => ({ ...current, imagemCardUrl: uploaded.url }))
+      show('Imagem do card enviada com sucesso.')
+    } catch (error) {
+      show(error.response?.data?.erro || 'Nao foi possivel enviar a imagem do card.', 'error')
     } finally {
       setEnviandoImagem(false)
       event.target.value = ''
@@ -177,6 +196,33 @@ export default function AdminLocais() {
             {form.imagemPrincipalUrl && (
               <div className="admin-image-preview">
                 <img src={resolveMediaUrl(form.imagemPrincipalUrl)} alt={`Preview de ${form.nome || 'local de prova'}`} />
+              </div>
+            )}
+            <div className="form-group">
+              <label className="form-label">Upload da imagem do card da home</label>
+              <input
+                className="form-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={enviarImagemCard}
+                disabled={enviandoImagem}
+              />
+              <div className="mini-copy">
+                Use uma imagem horizontal so para o card de Escolha o seu local.
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">URL da imagem do card da home</label>
+              <input
+                className="form-input"
+                value={form.imagemCardUrl}
+                onChange={e => setForm(current => ({ ...current, imagemCardUrl: e.target.value }))}
+                placeholder="/media/thumbnails/... ou https://..."
+              />
+            </div>
+            {form.imagemCardUrl && (
+              <div className="admin-image-preview">
+                <img src={resolveMediaUrl(form.imagemCardUrl)} alt={`Preview do card de ${form.nome || 'local de prova'}`} />
               </div>
             )}
             <div className="form-group">

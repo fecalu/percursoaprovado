@@ -47,6 +47,9 @@ public class LocalProva {
     @Column(name = "imagem_principal_url", length = 500)
     private String imagemPrincipalUrl;
 
+    @Column(name = "imagem_card_url", length = 500)
+    private String imagemCardUrl;
+
     @Column(name = "titulo_comercial")
     private String tituloComercial;
 
