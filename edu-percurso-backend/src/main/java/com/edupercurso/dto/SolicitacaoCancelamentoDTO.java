@@ -51,6 +51,8 @@ public class SolicitacaoCancelamentoDTO {
         private String processadoPorEmail;
         private LocalDateTime criadoEm;
         private LocalDateTime processadoEm;
+        private String reembolsadoPorEmail;
+        private LocalDateTime reembolsadoEm;
 
         public static Response from(SolicitacaoCancelamento solicitacao) {
             Pedido pedido = solicitacao.getPedido();
@@ -78,6 +80,8 @@ public class SolicitacaoCancelamentoDTO {
             response.processadoPorEmail = solicitacao.getProcessadoPorEmail();
             response.criadoEm = solicitacao.getCriadoEm();
             response.processadoEm = solicitacao.getProcessadoEm();
+            response.reembolsadoPorEmail = solicitacao.getReembolsadoPorEmail();
+            response.reembolsadoEm = solicitacao.getReembolsadoEm();
             return response;
         }
     }

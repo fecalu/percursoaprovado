@@ -51,6 +51,12 @@ public class SolicitacaoCancelamento {
     @Column(name = "processado_em")
     private LocalDateTime processadoEm;
 
+    @Column(name = "reembolsado_por_email")
+    private String reembolsadoPorEmail;
+
+    @Column(name = "reembolsado_em")
+    private LocalDateTime reembolsadoEm;
+
     public enum Status {
         ABERTA,
         APROVADA,

@@ -109,6 +109,7 @@ export const cancelamentoService = {
   listarAdmin: () => api.get('/admin/cancelamentos').then(response => response.data),
   aprovar: (id, data) => api.post(`/admin/cancelamentos/${id}/aprovar`, data).then(response => response.data),
   negar: (id, data) => api.post(`/admin/cancelamentos/${id}/negar`, data).then(response => response.data),
+  marcarReembolsado: (id, data) => api.post(`/admin/cancelamentos/${id}/marcar-reembolsado`, data).then(response => response.data),
 }
 
 export default api

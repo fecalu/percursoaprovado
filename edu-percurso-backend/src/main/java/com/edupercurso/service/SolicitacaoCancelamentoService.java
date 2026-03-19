@@ -125,6 +125,26 @@ public class SolicitacaoCancelamentoService {
         return SolicitacaoCancelamentoDTO.Response.from(solicitacaoRepository.save(solicitacao));
     }
 
+    @Transactional
+    public SolicitacaoCancelamentoDTO.Response marcarReembolsado(UUID id, String actorEmail, SolicitacaoCancelamentoDTO.ProcessRequest request) {
+        SolicitacaoCancelamento solicitacao = buscarEntidade(id);
+        validarMarcacaoReembolso(solicitacao);
+
+        Pedido pedido = solicitacao.getPedido();
+        pedido.setPaymentStatus("refunded");
+        pedido.setPaymentStatusDetail("manual_refund_confirmed");
+        pedidoRepository.save(pedido);
+
+        solicitacao.setObservacaoAdmin(concatenarObservacao(
+                solicitacao.getObservacaoAdmin(),
+                normalizarTexto(request == null ? null : request.getObservacaoAdmin())
+        ));
+        solicitacao.setReembolsadoPorEmail(actorEmail);
+        solicitacao.setReembolsadoEm(LocalDateTime.now());
+
+        return SolicitacaoCancelamentoDTO.Response.from(solicitacaoRepository.save(solicitacao));
+    }
+
     public SolicitacaoCancelamento buscarEntidade(UUID id) {
         return solicitacaoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Solicitacao de cancelamento nao encontrada."));
@@ -148,6 +168,15 @@ public class SolicitacaoCancelamentoService {
         }
     }
 
+    private void validarMarcacaoReembolso(SolicitacaoCancelamento solicitacao) {
+        if (solicitacao.getStatus() != SolicitacaoCancelamento.Status.APROVADA) {
+            throw new IllegalArgumentException("A solicitacao precisa estar aprovada antes de marcar o reembolso.");
+        }
+        if (solicitacao.getReembolsadoEm() != null || "refunded".equalsIgnoreCase(solicitacao.getPedido().getPaymentStatus())) {
+            throw new IllegalArgumentException("Esse pedido ja esta marcado como reembolsado.");
+        }
+    }
+
     private String montarObservacaoInterna(SolicitacaoCancelamento solicitacao) {
         StringBuilder builder = new StringBuilder("Cancelada apos solicitacao do aluno.");
         builder.append(" Motivo: ").append(solicitacao.getMotivo()).append(".");
@@ -162,5 +191,15 @@ public class SolicitacaoCancelamentoService {
             return null;
         }
         return valor.trim();
+    }
+
+    private String concatenarObservacao(String atual, String nova) {
+        if (!StringUtils.hasText(atual)) {
+            return nova;
+        }
+        if (!StringUtils.hasText(nova)) {
+            return atual;
+        }
+        return atual + System.lineSeparator() + nova;
     }
 }

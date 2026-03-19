@@ -40,4 +40,12 @@ public class AdminSolicitacaoCancelamentoController {
             @Valid @RequestBody(required = false) SolicitacaoCancelamentoDTO.ProcessRequest request) {
         return ResponseEntity.ok(solicitacaoCancelamentoService.negar(id, email, request));
     }
+
+    @PostMapping("/{id}/marcar-reembolsado")
+    public ResponseEntity<SolicitacaoCancelamentoDTO.Response> marcarReembolsado(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal String email,
+            @Valid @RequestBody(required = false) SolicitacaoCancelamentoDTO.ProcessRequest request) {
+        return ResponseEntity.ok(solicitacaoCancelamentoService.marcarReembolsado(id, email, request));
+    }
 }

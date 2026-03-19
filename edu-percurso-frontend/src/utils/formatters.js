@@ -166,6 +166,7 @@ export function formatPagamentoStatus(status) {
 export function formatPagamentoDetalhe(detail) {
   const labels = {
     accredited: 'pagamento aprovado',
+    manual_refund_confirmed: 'reembolso confirmado manualmente',
     pending_waiting_payment: 'aguardando pagamento',
     pending_contingency: 'aguardando confirmacao',
     pending_review_manual: 'em analise manual',

@@ -71,6 +71,20 @@ function formatResumoAdminPedido(item) {
   return 'Sem acao disponivel.'
 }
 
+function formatResumoHistorico(item) {
+  if (item.reembolsadoEm) {
+    return `Reembolsado em ${formatDataHoraCurta(item.reembolsadoEm)}`
+  }
+  if (item.processadoEm) {
+    return `Processado em ${formatDataHoraCurta(item.processadoEm)}`
+  }
+  return 'Sem data de processamento'
+}
+
+function podeMarcarReembolsado(item) {
+  return item.status === 'APROVADA' && item.paymentStatus !== 'refunded' && item.paymentStatus !== 'charged_back'
+}
+
 export default function AdminPedidos() {
   const { show, ToastEl } = useToast()
   const [pedidos, setPedidos] = useState([])
@@ -132,9 +146,12 @@ export default function AdminPedidos() {
       if (acaoSolicitacao === 'APROVAR') {
         await cancelamentoService.aprovar(solicitacaoAtiva.id, { observacaoAdmin })
         show('Solicitacao aprovada. O acesso desse local foi encerrado no sistema.')
-      } else {
+      } else if (acaoSolicitacao === 'NEGAR') {
         await cancelamentoService.negar(solicitacaoAtiva.id, { observacaoAdmin })
         show('Solicitacao negada com sucesso.')
+      } else {
+        await cancelamentoService.marcarReembolsado(solicitacaoAtiva.id, { observacaoAdmin })
+        show('Reembolso marcado como concluido no sistema.')
       }
       fecharProcessamentoSolicitacao()
       await carregar()
@@ -357,9 +374,16 @@ export default function AdminPedidos() {
                         <span className={`badge ${getResultadoSolicitacaoBadgeClass(item)}`}>
                           {formatResultadoSolicitacao(item)}
                         </span>
-                        <div className="mini-copy">
-                          {item.processadoEm ? `Processado em ${formatDataHoraCurta(item.processadoEm)}` : 'Sem data de processamento'}
-                        </div>
+                        <div className="mini-copy">{formatResumoHistorico(item)}</div>
+                        {podeMarcarReembolsado(item) && (
+                          <button
+                            className="btn btn-ghost"
+                            type="button"
+                            onClick={() => abrirProcessamentoSolicitacao(item, 'REEMBOLSAR')}
+                          >
+                            Marcar reembolsado
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -434,7 +458,11 @@ export default function AdminPedidos() {
           <div className="request-modal-card" onClick={event => event.stopPropagation()}>
             <div className="request-kind">Solicitacao de cancelamento/reembolso</div>
             <div className="section-heading">
-              {acaoSolicitacao === 'APROVAR' ? 'Aprovar solicitacao' : 'Negar solicitacao'}
+              {acaoSolicitacao === 'APROVAR'
+                ? 'Aprovar solicitacao'
+                : acaoSolicitacao === 'NEGAR'
+                  ? 'Negar solicitacao'
+                  : 'Marcar reembolso concluido'}
             </div>
             <div className="mini-copy" style={{ marginTop: '0.6rem' }}>
               {solicitacaoAtiva.usuarioNome} - {solicitacaoAtiva.localProvaNome}
@@ -447,12 +475,23 @@ export default function AdminPedidos() {
                 Ao aprovar, o acesso desse local sera cancelado no sistema. Em seguida, faca o reembolso manual no Mercado Pago usando o ID do pagamento acima.
               </div>
             )}
+            {acaoSolicitacao === 'REEMBOLSAR' && (
+              <div className="mini-copy">
+                Use esta opcao depois de concluir a devolucao no Mercado Pago. Isso atualiza o pedido para o status Reembolsado no sistema.
+              </div>
+            )}
 
             <label className="form-group" style={{ marginTop: '1rem' }}>
               <span className="form-label">Observacao interna</span>
               <textarea
                 rows="4"
-                placeholder={acaoSolicitacao === 'APROVAR' ? 'Ex.: reembolso combinado pelo atendimento.' : 'Explique resumidamente por que a solicitacao foi negada.'}
+                placeholder={
+                  acaoSolicitacao === 'APROVAR'
+                    ? 'Ex.: reembolso combinado pelo atendimento.'
+                    : acaoSolicitacao === 'NEGAR'
+                      ? 'Explique resumidamente por que a solicitacao foi negada.'
+                      : 'Ex.: reembolso feito no Mercado Pago em 19/03 as 11:30.'
+                }
                 value={observacaoAdmin}
                 onChange={event => setObservacaoAdmin(event.target.value)}
               />
@@ -464,7 +503,7 @@ export default function AdminPedidos() {
                 Fechar
               </button>
               <button
-                className={acaoSolicitacao === 'APROVAR' ? 'btn btn-primary' : 'btn btn-danger'}
+                className={acaoSolicitacao === 'NEGAR' ? 'btn btn-danger' : 'btn btn-primary'}
                 onClick={processarSolicitacao}
                 disabled={processandoId === solicitacaoAtiva.id}
               >
@@ -472,7 +511,9 @@ export default function AdminPedidos() {
                   ? 'Processando...'
                   : acaoSolicitacao === 'APROVAR'
                     ? 'Confirmar aprovacao'
-                    : 'Confirmar negativa'}
+                    : acaoSolicitacao === 'NEGAR'
+                      ? 'Confirmar negativa'
+                      : 'Confirmar reembolso'}
               </button>
             </div>
           </div>
