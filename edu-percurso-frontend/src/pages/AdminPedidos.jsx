@@ -172,7 +172,7 @@ export default function AdminPedidos() {
       ) : (
         <>
           <div className="student-filter-card" style={{ marginBottom: '1.5rem' }}>
-            <div className="section-heading">Solicitacoes de cancelamento</div>
+            <div className="section-heading">Solicitacoes de cancelamento e reembolso</div>
             <div className="mini-copy" style={{ marginTop: '0.75rem' }}>
               O aluno so consegue abrir a solicitacao em ate 7 dias apos a confirmacao do pagamento. A aprovacao aqui cancela o acesso no sistema; o reembolso do gateway continua manual por enquanto.
             </div>
@@ -194,7 +194,7 @@ export default function AdminPedidos() {
 
           {solicitacoesAbertas.length === 0 ? (
             <div className="student-filter-card request-empty-card" style={{ marginBottom: '1.5rem' }}>
-              <div className="section-heading">Solicitacoes pendentes</div>
+              <div className="section-heading">Solicitacoes pendentes de cancelamento</div>
               <div className="mini-copy" style={{ marginTop: '0.7rem' }}>
                 Nenhuma solicitacao pendente no momento.
               </div>
@@ -203,6 +203,7 @@ export default function AdminPedidos() {
             <div className="request-admin-grid" style={{ marginBottom: '1.75rem' }}>
               {solicitacoesAbertas.map(item => (
                 <div key={item.id} className="request-admin-card">
+                  <div className="request-kind">Solicitacao de cancelamento/reembolso</div>
                   <div className="student-card-top">
                     <span className={`badge ${getSolicitacaoBadgeClass(item.status)}`}>
                       {formatSolicitacaoCancelamentoStatus(item.status)}
@@ -303,6 +304,7 @@ export default function AdminPedidos() {
                     <div key={item.id} className="request-history-row">
                       <div>
                         <div className="table-name">{item.localProvaNome}</div>
+                        <div className="request-kind request-kind--inline">Solicitacao de cancelamento/reembolso</div>
                         <div className="mini-copy">{item.usuarioNome} - {item.usuarioEmail}</div>
                         <div className="mini-copy">Pedido {item.pedidoReferencia}{item.paymentId ? ` | ID ${item.paymentId}` : ''}</div>
                       </div>
@@ -350,7 +352,7 @@ export default function AdminPedidos() {
                     )}
                     {item.solicitacaoCancelamentoStatus && (
                       <div className="mini-copy">
-                        Solicitacao: {formatSolicitacaoCancelamentoStatus(item.solicitacaoCancelamentoStatus)}
+                        Solicitacao de cancelamento/reembolso: {formatSolicitacaoCancelamentoStatus(item.solicitacaoCancelamentoStatus)}
                       </div>
                     )}
                   </div>
@@ -387,6 +389,7 @@ export default function AdminPedidos() {
       {solicitacaoAtiva && (
         <div className="request-modal-backdrop" onClick={fecharProcessamentoSolicitacao}>
           <div className="request-modal-card" onClick={event => event.stopPropagation()}>
+            <div className="request-kind">Solicitacao de cancelamento/reembolso</div>
             <div className="section-heading">
               {acaoSolicitacao === 'APROVAR' ? 'Aprovar solicitacao' : 'Negar solicitacao'}
             </div>
