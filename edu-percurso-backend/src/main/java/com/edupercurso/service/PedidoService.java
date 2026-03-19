@@ -5,6 +5,7 @@ import com.edupercurso.entity.Assinatura;
 import com.edupercurso.entity.LocalProva;
 import com.edupercurso.entity.Pedido;
 import com.edupercurso.entity.Plano;
+import com.edupercurso.entity.SolicitacaoCancelamento;
 import com.edupercurso.entity.Usuario;
 import com.edupercurso.repository.PedidoRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,20 +30,15 @@ public class PedidoService {
     private final LocalProvaService localProvaService;
     private final AssinaturaService assinaturaService;
     private final MercadoPagoService mercadoPagoService;
+    private final SolicitacaoCancelamentoService solicitacaoCancelamentoService;
 
     public List<PedidoDTO.Response> listarMeus(String email) {
         Usuario usuario = usuarioLookupService.buscarPorEmail(email);
-        return pedidoRepository.findByUsuarioIdOrderByCriadoEmDesc(usuario.getId())
-                .stream()
-                .map(PedidoDTO.Response::from)
-                .toList();
+        return montarRespostas(pedidoRepository.findByUsuarioIdOrderByCriadoEmDesc(usuario.getId()));
     }
 
     public List<PedidoDTO.Response> listarTodos() {
-        return pedidoRepository.findAllByOrderByCriadoEmDesc()
-                .stream()
-                .map(PedidoDTO.Response::from)
-                .toList();
+        return montarRespostas(pedidoRepository.findAllByOrderByCriadoEmDesc());
     }
 
     @Transactional
@@ -163,6 +159,29 @@ public class PedidoService {
         }
         pedido.setStatus(Pedido.Status.CANCELADO);
         pedidoRepository.save(pedido);
+    }
+
+    private List<PedidoDTO.Response> montarRespostas(List<Pedido> pedidos) {
+        if (pedidos.isEmpty()) {
+            return List.of();
+        }
+
+        LocalDateTime agora = LocalDateTime.now();
+        var solicitacoesPorPedido = solicitacaoCancelamentoService.mapearPorPedidoIds(
+                pedidos.stream().map(Pedido::getId).toList()
+        );
+
+        return pedidos.stream()
+                .map(pedido -> {
+                    SolicitacaoCancelamento solicitacao = solicitacoesPorPedido.get(pedido.getId());
+                    return PedidoDTO.Response.from(
+                            pedido,
+                            solicitacao,
+                            solicitacaoCancelamentoService.podeSolicitarCancelamento(pedido, solicitacao, agora),
+                            solicitacaoCancelamentoService.calcularPrazoCancelamento(pedido)
+                    );
+                })
+                .toList();
     }
 
     private void validarPlanoDisponivel(Plano plano) {

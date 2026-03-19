@@ -1,7 +1,9 @@
 package com.edupercurso.controller;
 
 import com.edupercurso.dto.PedidoDTO;
+import com.edupercurso.dto.SolicitacaoCancelamentoDTO;
 import com.edupercurso.service.PedidoService;
+import com.edupercurso.service.SolicitacaoCancelamentoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,7 @@ import java.util.UUID;
 public class PedidoController {
 
     private final PedidoService pedidoService;
+    private final SolicitacaoCancelamentoService solicitacaoCancelamentoService;
 
     @GetMapping
     public ResponseEntity<List<PedidoDTO.Response>> listarMeus(@AuthenticationPrincipal String email) {
@@ -46,5 +49,14 @@ public class PedidoController {
             @PathVariable UUID id) {
         pedidoService.cancelarMeu(email, id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/solicitar-cancelamento")
+    public ResponseEntity<SolicitacaoCancelamentoDTO.Response> solicitarCancelamento(
+            @AuthenticationPrincipal String email,
+            @PathVariable UUID id,
+            @Valid @RequestBody SolicitacaoCancelamentoDTO.CreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(solicitacaoCancelamentoService.solicitar(email, id, request));
     }
 }

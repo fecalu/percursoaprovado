@@ -146,14 +146,23 @@ public class AssinaturaService {
     @Transactional
     public AssinaturaDTO.Response cancelar(UUID id, String actorEmail, AssinaturaDTO.CancelRequest request) {
         Assinatura assinatura = buscarEntidade(id);
-        if (assinatura.getStatus() == Assinatura.Status.CANCELADA) {
-            throw new IllegalArgumentException("Essa assinatura ja esta cancelada.");
-        }
-        assinatura.setStatus(Assinatura.Status.CANCELADA);
-        assinatura.setCanceladaEm(LocalDateTime.now());
-        assinatura.setCanceladaPorEmail(actorEmail);
-        assinatura.setMotivoCancelamento(normalizarTexto(request == null ? null : request.getMotivoCancelamento()));
+        cancelarEntidade(
+                assinatura,
+                actorEmail,
+                request == null ? null : request.getMotivoCancelamento(),
+                null
+        );
         return montarResposta(assinaturaRepository.save(assinatura), buscarPedidoDaAssinatura(assinatura.getId()));
+    }
+
+    @Transactional
+    public Assinatura cancelarPorSolicitacao(
+            Assinatura assinatura,
+            String actorEmail,
+            String motivoCancelamento,
+            String observacaoInterna) {
+        cancelarEntidade(assinatura, actorEmail, motivoCancelamento, observacaoInterna);
+        return assinaturaRepository.save(assinatura);
     }
 
     @Transactional
@@ -262,5 +271,33 @@ public class AssinaturaService {
 
     private String normalizarTexto(String valor) {
         return StringUtils.hasText(valor) ? valor.trim() : null;
+    }
+
+    private void cancelarEntidade(
+            Assinatura assinatura,
+            String actorEmail,
+            String motivoCancelamento,
+            String observacaoInterna) {
+        if (assinatura.getStatus() == Assinatura.Status.CANCELADA) {
+            throw new IllegalArgumentException("Essa assinatura ja esta cancelada.");
+        }
+        assinatura.setStatus(Assinatura.Status.CANCELADA);
+        assinatura.setCanceladaEm(LocalDateTime.now());
+        assinatura.setCanceladaPorEmail(actorEmail);
+        assinatura.setMotivoCancelamento(normalizarTexto(motivoCancelamento));
+        if (StringUtils.hasText(observacaoInterna)) {
+            assinatura.setObservacaoInterna(concatenarObservacao(assinatura.getObservacaoInterna(), observacaoInterna));
+        }
+    }
+
+    private String concatenarObservacao(String atual, String novaObservacao) {
+        String nova = normalizarTexto(novaObservacao);
+        if (!StringUtils.hasText(atual)) {
+            return nova;
+        }
+        if (!StringUtils.hasText(nova)) {
+            return atual;
+        }
+        return atual + System.lineSeparator() + nova;
     }
 }

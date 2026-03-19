@@ -100,8 +100,15 @@ export const pedidoService = {
   criar: data => api.post('/pedidos', data).then(response => response.data),
   sincronizarRetorno: data => api.post('/pedidos/sincronizar-retorno', data).then(response => response.data),
   cancelar: id => api.post(`/pedidos/${id}/cancelar`),
+  solicitarCancelamento: (id, data) => api.post(`/pedidos/${id}/solicitar-cancelamento`, data).then(response => response.data),
   listarAdmin: () => api.get('/admin/pedidos').then(response => response.data),
   cancelarAdmin: id => api.post(`/admin/pedidos/${id}/cancelar`),
+}
+
+export const cancelamentoService = {
+  listarAdmin: () => api.get('/admin/cancelamentos').then(response => response.data),
+  aprovar: (id, data) => api.post(`/admin/cancelamentos/${id}/aprovar`, data).then(response => response.data),
+  negar: (id, data) => api.post(`/admin/cancelamentos/${id}/negar`, data).then(response => response.data),
 }
 
 export default api

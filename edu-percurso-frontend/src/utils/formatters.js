@@ -43,6 +43,18 @@ export function formatPedidoStatus(status) {
   return labels[status] || status
 }
 
+export function formatSolicitacaoCancelamentoStatus(status) {
+  const labels = {
+    ABERTA: 'Em analise',
+    APROVADA: 'Aprovada',
+    NEGADA: 'Negada',
+    ERRO_PROCESSAMENTO: 'Erro no processamento',
+  }
+
+  if (!status) return '-'
+  return labels[status] || status
+}
+
 export function formatAssinaturaStatus(status) {
   const labels = {
     ATIVA: 'Ativo',
