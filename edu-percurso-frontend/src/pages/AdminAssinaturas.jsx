@@ -305,283 +305,7 @@ export default function AdminAssinaturas() {
         </div>
       </div>
 
-      <div className="admin-grid">
-        <div className="assinatura-side-stack">
-          <div className="card">
-            <div className="section-heading">Liberar acesso</div>
-            <p className="section-copy">Crie um acesso manual ou de cortesia para um aluno ja cadastrado.</p>
-
-            <form onSubmit={liberarAcesso} style={{ marginTop: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">E-mail do aluno</label>
-                <input
-                  className="form-input"
-                  type="email"
-                  value={form.usuarioEmail}
-                  onChange={event => setForm(current => ({ ...current, usuarioEmail: event.target.value }))}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Plano</label>
-                <select
-                  className="form-select"
-                  value={form.planoId}
-                  onChange={event => setForm(current => ({ ...current, planoId: event.target.value }))}
-                  required
-                >
-                  <option value="">Selecione um plano</option>
-                  {planos.map(plano => (
-                    <option key={plano.id} value={plano.id}>
-                      {plano.localProvaNome} - {plano.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label className="form-label">Inicio do acesso</label>
-                  <input
-                    className="form-input"
-                    type="datetime-local"
-                    value={form.inicioEm}
-                    onChange={event => setForm(current => ({ ...current, inicioEm: event.target.value }))}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Origem</label>
-                  <select
-                    className="form-select"
-                    value={form.origem}
-                    onChange={event => setForm(current => ({ ...current, origem: event.target.value }))}
-                  >
-                    <option value="MANUAL">Manual</option>
-                    <option value="CORTESIA">Cortesia</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Observacao interna</label>
-                <textarea
-                  className="form-textarea"
-                  placeholder="Ex.: liberado pelo suporte para reposicao de prazo."
-                  value={form.observacaoInterna}
-                  onChange={event => setForm(current => ({ ...current, observacaoInterna: event.target.value }))}
-                />
-              </div>
-
-              <button className="btn btn-primary" type="submit" disabled={salvando}>
-                {salvando ? 'Liberando...' : 'Liberar acesso'}
-              </button>
-            </form>
-          </div>
-
-          <div className="card">
-            <div className="section-title-row">
-              <div>
-                <div className="section-heading">Detalhes do acesso</div>
-                <p className="section-copy">Ajuste validade, acompanhe pagamento e registre observacoes.</p>
-              </div>
-              {selectedId && (
-                <button className="btn btn-ghost" type="button" onClick={() => carregarDetalhe(selectedId)}>
-                  Atualizar
-                </button>
-              )}
-            </div>
-
-            {!selectedId ? (
-              <div className="empty-state" style={{ padding: '2.5rem 1rem 1rem' }}>
-                Selecione um acesso na lista para ver os detalhes.
-              </div>
-            ) : detalheLoading ? (
-              <div className="spinner" />
-            ) : detalhe ? (
-              <>
-                <div className="assinatura-detail-grid">
-                  <div className="player-meta-card">
-                    <div className="player-meta-label">Aluno</div>
-                    <div className="player-meta-value">{detalhe.usuarioNome || 'Aluno sem nome'}</div>
-                    <div className="mini-copy">{detalhe.usuarioEmail}</div>
-                  </div>
-                  <div className="player-meta-card">
-                    <div className="player-meta-label">Local e plano</div>
-                    <div className="player-meta-value">{detalhe.localProvaNome}</div>
-                    <div className="mini-copy">
-                      {detalhe.planoNome} - {formatPlanoDuracao(detalhe.duracaoDias)}
-                    </div>
-                  </div>
-                  <div className="player-meta-card">
-                    <div className="player-meta-label">Validade</div>
-                    <div className="player-meta-value">{formatDataHoraCurta(detalhe.fimEm)}</div>
-                    <div className="mini-copy">
-                      Inicio em {formatDataHoraCurta(detalhe.inicioEm)} - {formatDiasRestantes(detalhe.diasRestantes, detalhe.status)}
-                    </div>
-                  </div>
-                  <div className="player-meta-card">
-                    <div className="player-meta-label">Situacao</div>
-                    <div className="player-meta-value" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                      <span className={`badge ${getStatusBadgeClass(detalhe.status)}`}>
-                        {formatAssinaturaStatus(detalhe.status)}
-                      </span>
-                      <span className={`badge ${getPagamentoBadgeClass(detalhe.paymentStatus)}`}>
-                        {formatAssinaturaPagamentoStatus(detalhe.paymentStatus)}
-                      </span>
-                    </div>
-                    <div className="mini-copy">
-                      Origem {formatOrigemAssinatura(detalhe.origem)}
-                    </div>
-                  </div>
-                  <div className="player-meta-card">
-                    <div className="player-meta-label">Pedido vinculado</div>
-                    <div className="player-meta-value">
-                      {detalhe.pedidoReferencia || detalhe.pedidoId || 'Sem pedido vinculado'}
-                    </div>
-                    <div className="mini-copy">
-                      {detalhe.pedidoStatus ? formatPedidoStatus(detalhe.pedidoStatus) : 'Criado manualmente'}
-                    </div>
-                  </div>
-                  <div className="player-meta-card">
-                    <div className="player-meta-label">Gateway</div>
-                    <div className="player-meta-value">{detalhe.paymentId || 'Sem payment ID'}</div>
-                    <div className="mini-copy">
-                      {detalhe.gatewayPaymentStatus || 'Sem atualizacao do gateway'}
-                      {detalhe.gatewayPaymentStatusDetail ? ` - ${detalhe.gatewayPaymentStatusDetail}` : ''}
-                    </div>
-                  </div>
-                </div>
-
-                {detalhe.canceladaEm && (
-                  <div className="mini-copy" style={{ marginTop: '1rem' }}>
-                    Cancelada em {formatDataHoraCurta(detalhe.canceladaEm)}
-                    {detalhe.canceladaPorEmail ? ` por ${detalhe.canceladaPorEmail}` : ''}
-                    {detalhe.motivoCancelamento ? ` - ${detalhe.motivoCancelamento}` : ''}
-                  </div>
-                )}
-
-                <form onSubmit={salvarDetalhes} style={{ marginTop: '1.25rem' }}>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label className="form-label">Nova data final</label>
-                      <input
-                        className="form-input"
-                        type="datetime-local"
-                        value={detalheForm.fimEm}
-                        onChange={event => setDetalheForm(current => ({ ...current, fimEm: event.target.value }))}
-                        disabled={detalhe.status === 'CANCELADA'}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label className="form-label">Origem do acesso</label>
-                      <select
-                        className="form-select"
-                        value={detalheForm.origem}
-                        onChange={event => setDetalheForm(current => ({ ...current, origem: event.target.value }))}
-                      >
-                        <option value="CHECKOUT">Checkout</option>
-                        <option value="MANUAL">Manual</option>
-                        <option value="CORTESIA">Cortesia</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label className="form-label">Observacao interna</label>
-                    <textarea
-                      className="form-textarea"
-                      placeholder="Informacoes de suporte, cortesia, ajuste de prazo ou contexto financeiro."
-                      value={detalheForm.observacaoInterna}
-                      onChange={event => setDetalheForm(current => ({ ...current, observacaoInterna: event.target.value }))}
-                    />
-                  </div>
-
-                  <div className="form-actions">
-                    <button className="btn btn-primary" type="submit" disabled={salvandoDetalhe}>
-                      {salvandoDetalhe ? 'Salvando...' : 'Salvar detalhes'}
-                    </button>
-                  </div>
-                </form>
-
-                <div className="card" style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg3)' }}>
-                  <div className="section-heading" style={{ fontSize: 16 }}>Validade</div>
-                  <p className="section-copy">Prorrogue rapidamente ou informe uma quantidade personalizada de dias.</p>
-
-                  <div className="form-actions" style={{ marginTop: '1rem', flexWrap: 'wrap' }}>
-                    {ACOES_RAPIDAS.map(dias => (
-                      <button
-                        key={dias}
-                        className="btn btn-ghost"
-                        type="button"
-                        disabled={prorrogando || detalhe.status === 'CANCELADA'}
-                        onClick={() => prorrogarAcesso(dias)}
-                      >
-                        +{dias} dias
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="form-row" style={{ marginTop: '1rem' }}>
-                    <div className="form-group">
-                      <label className="form-label">Prorrogar manualmente</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        min="1"
-                        value={detalheForm.prorrogarDias}
-                        onChange={event => setDetalheForm(current => ({ ...current, prorrogarDias: event.target.value }))}
-                        disabled={detalhe.status === 'CANCELADA'}
-                      />
-                    </div>
-                    <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
-                      <button
-                        className="btn btn-primary"
-                        type="button"
-                        disabled={prorrogando || detalhe.status === 'CANCELADA'}
-                        onClick={() => prorrogarAcesso()}
-                      >
-                        {prorrogando ? 'Prorrogando...' : 'Aplicar prorroga'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card" style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(224,85,85,0.08)' }}>
-                  <div className="section-heading" style={{ fontSize: 16 }}>Cancelar acesso</div>
-                  <p className="section-copy">Encerre o acesso manualmente e registre o motivo para o historico interno.</p>
-
-                  <div className="form-group" style={{ marginTop: '1rem' }}>
-                    <label className="form-label">Motivo do cancelamento</label>
-                    <textarea
-                      className="form-textarea"
-                      placeholder="Ex.: reembolso aprovado, duplicidade de acesso, erro operacional."
-                      value={detalheForm.motivoCancelamento}
-                      onChange={event => setDetalheForm(current => ({ ...current, motivoCancelamento: event.target.value }))}
-                      disabled={detalhe.status === 'CANCELADA'}
-                    />
-                  </div>
-
-                  <button
-                    className="btn btn-danger"
-                    type="button"
-                    disabled={cancelando || detalhe.status === 'CANCELADA'}
-                    onClick={cancelarAcesso}
-                  >
-                    {cancelando ? 'Cancelando...' : detalhe.status === 'CANCELADA' ? 'Acesso cancelado' : 'Cancelar acesso'}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="empty-state" style={{ padding: '2.5rem 1rem 1rem' }}>
-                Nao foi possivel carregar os detalhes deste acesso.
-              </div>
-            )}
-          </div>
-        </div>
-
+      <div className="admin-stack-layout">
         <div className="card">
           <div className="section-title-row">
             <div>
@@ -724,6 +448,280 @@ export default function AdminAssinaturas() {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="card">
+          <div className="section-title-row">
+            <div>
+              <div className="section-heading">Detalhes do acesso</div>
+              <p className="section-copy">Ajuste validade, acompanhe pagamento e registre observacoes.</p>
+            </div>
+            {selectedId && (
+              <button className="btn btn-ghost" type="button" onClick={() => carregarDetalhe(selectedId)}>
+                Atualizar
+              </button>
+            )}
+          </div>
+
+          {!selectedId ? (
+            <div className="empty-state" style={{ padding: '2.5rem 1rem 1rem' }}>
+              Selecione um acesso na lista para ver os detalhes.
+            </div>
+          ) : detalheLoading ? (
+            <div className="spinner" />
+          ) : detalhe ? (
+            <>
+              <div className="assinatura-detail-grid">
+                <div className="player-meta-card">
+                  <div className="player-meta-label">Aluno</div>
+                  <div className="player-meta-value">{detalhe.usuarioNome || 'Aluno sem nome'}</div>
+                  <div className="mini-copy">{detalhe.usuarioEmail}</div>
+                </div>
+                <div className="player-meta-card">
+                  <div className="player-meta-label">Local e plano</div>
+                  <div className="player-meta-value">{detalhe.localProvaNome}</div>
+                  <div className="mini-copy">
+                    {detalhe.planoNome} - {formatPlanoDuracao(detalhe.duracaoDias)}
+                  </div>
+                </div>
+                <div className="player-meta-card">
+                  <div className="player-meta-label">Validade</div>
+                  <div className="player-meta-value">{formatDataHoraCurta(detalhe.fimEm)}</div>
+                  <div className="mini-copy">
+                    Inicio em {formatDataHoraCurta(detalhe.inicioEm)} - {formatDiasRestantes(detalhe.diasRestantes, detalhe.status)}
+                  </div>
+                </div>
+                <div className="player-meta-card">
+                  <div className="player-meta-label">Situacao</div>
+                  <div className="player-meta-value" style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <span className={`badge ${getStatusBadgeClass(detalhe.status)}`}>
+                      {formatAssinaturaStatus(detalhe.status)}
+                    </span>
+                    <span className={`badge ${getPagamentoBadgeClass(detalhe.paymentStatus)}`}>
+                      {formatAssinaturaPagamentoStatus(detalhe.paymentStatus)}
+                    </span>
+                  </div>
+                  <div className="mini-copy">
+                    Origem {formatOrigemAssinatura(detalhe.origem)}
+                  </div>
+                </div>
+                <div className="player-meta-card">
+                  <div className="player-meta-label">Pedido vinculado</div>
+                  <div className="player-meta-value">
+                    {detalhe.pedidoReferencia || detalhe.pedidoId || 'Sem pedido vinculado'}
+                  </div>
+                  <div className="mini-copy">
+                    {detalhe.pedidoStatus ? formatPedidoStatus(detalhe.pedidoStatus) : 'Criado manualmente'}
+                  </div>
+                </div>
+                <div className="player-meta-card">
+                  <div className="player-meta-label">Gateway</div>
+                  <div className="player-meta-value">{detalhe.paymentId || 'Sem payment ID'}</div>
+                  <div className="mini-copy">
+                    {detalhe.gatewayPaymentStatus || 'Sem atualizacao do gateway'}
+                    {detalhe.gatewayPaymentStatusDetail ? ` - ${detalhe.gatewayPaymentStatusDetail}` : ''}
+                  </div>
+                </div>
+              </div>
+
+              {detalhe.canceladaEm && (
+                <div className="mini-copy" style={{ marginTop: '1rem' }}>
+                  Cancelada em {formatDataHoraCurta(detalhe.canceladaEm)}
+                  {detalhe.canceladaPorEmail ? ` por ${detalhe.canceladaPorEmail}` : ''}
+                  {detalhe.motivoCancelamento ? ` - ${detalhe.motivoCancelamento}` : ''}
+                </div>
+              )}
+
+              <form onSubmit={salvarDetalhes} style={{ marginTop: '1.25rem' }}>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Nova data final</label>
+                    <input
+                      className="form-input"
+                      type="datetime-local"
+                      value={detalheForm.fimEm}
+                      onChange={event => setDetalheForm(current => ({ ...current, fimEm: event.target.value }))}
+                      disabled={detalhe.status === 'CANCELADA'}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Origem do acesso</label>
+                    <select
+                      className="form-select"
+                      value={detalheForm.origem}
+                      onChange={event => setDetalheForm(current => ({ ...current, origem: event.target.value }))}
+                    >
+                      <option value="CHECKOUT">Checkout</option>
+                      <option value="MANUAL">Manual</option>
+                      <option value="CORTESIA">Cortesia</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Observacao interna</label>
+                  <textarea
+                    className="form-textarea"
+                    placeholder="Informacoes de suporte, cortesia, ajuste de prazo ou contexto financeiro."
+                    value={detalheForm.observacaoInterna}
+                    onChange={event => setDetalheForm(current => ({ ...current, observacaoInterna: event.target.value }))}
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button className="btn btn-primary" type="submit" disabled={salvandoDetalhe}>
+                    {salvandoDetalhe ? 'Salvando...' : 'Salvar detalhes'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="card" style={{ marginTop: '1rem', padding: '1rem', background: 'var(--bg3)' }}>
+                <div className="section-heading" style={{ fontSize: 16 }}>Validade</div>
+                <p className="section-copy">Prorrogue rapidamente ou informe uma quantidade personalizada de dias.</p>
+
+                <div className="form-actions" style={{ marginTop: '1rem', flexWrap: 'wrap' }}>
+                  {ACOES_RAPIDAS.map(dias => (
+                    <button
+                      key={dias}
+                      className="btn btn-ghost"
+                      type="button"
+                      disabled={prorrogando || detalhe.status === 'CANCELADA'}
+                      onClick={() => prorrogarAcesso(dias)}
+                    >
+                      +{dias} dias
+                    </button>
+                  ))}
+                </div>
+
+                <div className="form-row" style={{ marginTop: '1rem' }}>
+                  <div className="form-group">
+                    <label className="form-label">Prorrogar manualmente</label>
+                    <input
+                      className="form-input"
+                      type="number"
+                      min="1"
+                      value={detalheForm.prorrogarDias}
+                      onChange={event => setDetalheForm(current => ({ ...current, prorrogarDias: event.target.value }))}
+                      disabled={detalhe.status === 'CANCELADA'}
+                    />
+                  </div>
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <button
+                      className="btn btn-primary"
+                      type="button"
+                      disabled={prorrogando || detalhe.status === 'CANCELADA'}
+                      onClick={() => prorrogarAcesso()}
+                    >
+                      {prorrogando ? 'Prorrogando...' : 'Aplicar prorroga'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card" style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(224,85,85,0.08)' }}>
+                <div className="section-heading" style={{ fontSize: 16 }}>Cancelar acesso</div>
+                <p className="section-copy">Encerre o acesso manualmente e registre o motivo para o historico interno.</p>
+
+                <div className="form-group" style={{ marginTop: '1rem' }}>
+                  <label className="form-label">Motivo do cancelamento</label>
+                  <textarea
+                    className="form-textarea"
+                    placeholder="Ex.: reembolso aprovado, duplicidade de acesso, erro operacional."
+                    value={detalheForm.motivoCancelamento}
+                    onChange={event => setDetalheForm(current => ({ ...current, motivoCancelamento: event.target.value }))}
+                    disabled={detalhe.status === 'CANCELADA'}
+                  />
+                </div>
+
+                <button
+                  className="btn btn-danger"
+                  type="button"
+                  disabled={cancelando || detalhe.status === 'CANCELADA'}
+                  onClick={cancelarAcesso}
+                >
+                  {cancelando ? 'Cancelando...' : detalhe.status === 'CANCELADA' ? 'Acesso cancelado' : 'Cancelar acesso'}
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="empty-state" style={{ padding: '2.5rem 1rem 1rem' }}>
+              Nao foi possivel carregar os detalhes deste acesso.
+            </div>
+          )}
+        </div>
+
+        <div className="card">
+          <div className="section-heading">Liberar acesso</div>
+          <p className="section-copy">Crie um acesso manual ou de cortesia para um aluno ja cadastrado.</p>
+
+          <form onSubmit={liberarAcesso} style={{ marginTop: '1rem' }}>
+            <div className="form-group">
+              <label className="form-label">E-mail do aluno</label>
+              <input
+                className="form-input"
+                type="email"
+                value={form.usuarioEmail}
+                onChange={event => setForm(current => ({ ...current, usuarioEmail: event.target.value }))}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Plano</label>
+              <select
+                className="form-select"
+                value={form.planoId}
+                onChange={event => setForm(current => ({ ...current, planoId: event.target.value }))}
+                required
+              >
+                <option value="">Selecione um plano</option>
+                {planos.map(plano => (
+                  <option key={plano.id} value={plano.id}>
+                    {plano.localProvaNome} - {plano.nome}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Inicio do acesso</label>
+                <input
+                  className="form-input"
+                  type="datetime-local"
+                  value={form.inicioEm}
+                  onChange={event => setForm(current => ({ ...current, inicioEm: event.target.value }))}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Origem</label>
+                <select
+                  className="form-select"
+                  value={form.origem}
+                  onChange={event => setForm(current => ({ ...current, origem: event.target.value }))}
+                >
+                  <option value="MANUAL">Manual</option>
+                  <option value="CORTESIA">Cortesia</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Observacao interna</label>
+              <textarea
+                className="form-textarea"
+                placeholder="Ex.: liberado pelo suporte para reposicao de prazo."
+                value={form.observacaoInterna}
+                onChange={event => setForm(current => ({ ...current, observacaoInterna: event.target.value }))}
+              />
+            </div>
+
+            <button className="btn btn-primary" type="submit" disabled={salvando}>
+              {salvando ? 'Liberando...' : 'Liberar acesso'}
+            </button>
+          </form>
         </div>
       </div>
     </>
