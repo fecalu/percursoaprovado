@@ -12,6 +12,7 @@ import {
   formatPlanoDuracao,
   formatSolicitacaoCancelamentoStatus,
   getSituacaoPedidoBadgeClass,
+  resolveSituacaoPedido,
 } from '../utils/formatters'
 
 const MOTIVOS_CANCELAMENTO = [
@@ -33,6 +34,27 @@ function getSolicitacaoBadgeClass(status) {
   if (status === 'APROVADA') return 'badge-blue'
   if (status === 'NEGADA') return 'badge-red'
   return 'badge-gray'
+}
+
+function formatResumoAluno(item) {
+  const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+
+  if (situacao === 'SOLICITACAO_EM_ANALISE') {
+    return 'Sua solicitacao foi enviada e esta em analise.'
+  }
+  if (situacao === 'REEMBOLSO_PENDENTE') {
+    return 'Sua solicitacao foi aprovada. O acesso foi encerrado e o reembolso esta em andamento.'
+  }
+  if (situacao === 'REEMBOLSADO') {
+    return 'O valor foi devolvido ao seu meio de pagamento.'
+  }
+  if (situacao === 'ESTORNADO') {
+    return 'O pagamento foi estornado pelo meio de pagamento.'
+  }
+  if (situacao === 'PAGAMENTO_MANTIDO') {
+    return 'Sua solicitacao foi negada e o acesso continua ativo.'
+  }
+  return ''
 }
 
 export default function MeusPedidos() {
@@ -102,13 +124,27 @@ export default function MeusPedidos() {
     }
   }
 
-  const pendentes = useMemo(() => pedidos.filter(item => item.status === 'PENDENTE'), [pedidos])
-  const pagos = useMemo(() => pedidos.filter(item => item.status === 'PAGO'), [pedidos])
-  const cancelados = useMemo(() => pedidos.filter(item => item.status === 'CANCELADO'), [pedidos])
-  const solicitacoesEmAnalise = useMemo(
-    () => pedidos.filter(item => item.solicitacaoCancelamentoStatus === 'ABERTA'),
-    [pedidos]
-  )
+  const resumoOperacional = useMemo(() => {
+    return pedidos.reduce((acc, item) => {
+      const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+
+      if (situacao === 'AGUARDANDO_PAGAMENTO') acc.aguardandoPagamento += 1
+      if (situacao === 'ACESSO_LIBERADO' || situacao === 'PAGAMENTO_MANTIDO') acc.acessoAtivo += 1
+      if (situacao === 'SOLICITACAO_EM_ANALISE') acc.emAnalise += 1
+      if (situacao === 'REEMBOLSO_PENDENTE' || situacao === 'REEMBOLSADO' || situacao === 'ESTORNADO') {
+        acc.reembolso += 1
+      }
+      if (situacao === 'PEDIDO_CANCELADO') acc.cancelados += 1
+
+      return acc
+    }, {
+      aguardandoPagamento: 0,
+      acessoAtivo: 0,
+      emAnalise: 0,
+      reembolso: 0,
+      cancelados: 0,
+    })
+  }, [pedidos])
 
   if (loading) return <div className="spinner" />
 
@@ -126,29 +162,29 @@ export default function MeusPedidos() {
           <div className="student-kpi-grid">
             <div className="student-kpi-card">
               <div className="student-kpi-label">Aguardando pagamento</div>
-              <div className="student-kpi-value">{pendentes.length}</div>
+              <div className="student-kpi-value">{resumoOperacional.aguardandoPagamento}</div>
               <div className="student-kpi-copy">prontos para pagar</div>
             </div>
             <div className="student-kpi-card">
-              <div className="student-kpi-label">Aprovados</div>
-              <div className="student-kpi-value">{pagos.length}</div>
-              <div className="student-kpi-copy">com acesso liberado</div>
+              <div className="student-kpi-label">Com acesso ativo</div>
+              <div className="student-kpi-value">{resumoOperacional.acessoAtivo}</div>
+              <div className="student-kpi-copy">sem cancelamento aprovado</div>
             </div>
             <div className="student-kpi-card">
               <div className="student-kpi-label">Cancelados</div>
-              <div className="student-kpi-value">{cancelados.length}</div>
+              <div className="student-kpi-value">{resumoOperacional.cancelados}</div>
               <div className="student-kpi-copy">sem acesso liberado</div>
             </div>
             <div className="student-kpi-card">
-              <div className="student-kpi-label">Solicitacoes abertas</div>
-              <div className="student-kpi-value">{solicitacoesEmAnalise.length}</div>
-              <div className="student-kpi-copy">em analise</div>
+              <div className="student-kpi-label">Reembolso</div>
+              <div className="student-kpi-value">{resumoOperacional.reembolso + resumoOperacional.emAnalise}</div>
+              <div className="student-kpi-copy">em analise ou em andamento</div>
             </div>
           </div>
         </section>
       </RevealSection>
 
-      {pendentes.length > 0 && (
+      {resumoOperacional.aguardandoPagamento > 0 && (
         <div className="student-filter-card" style={{ marginBottom: '1.5rem' }}>
           <div className="section-heading">Como liberar seu acesso</div>
           <div className="mini-copy" style={{ marginTop: '0.75rem' }}>
@@ -224,14 +260,14 @@ export default function MeusPedidos() {
                   </div>
                 )}
 
-                {item.solicitacaoCancelamentoStatus === 'ABERTA' && (
+                {formatResumoAluno(item) && (
                   <div className="request-inline-status" style={{ marginTop: '0.9rem' }}>
-                    <span className={`badge ${getSolicitacaoBadgeClass(item.solicitacaoCancelamentoStatus)}`}>
-                      {formatSolicitacaoCancelamentoStatus(item.solicitacaoCancelamentoStatus)}
-                    </span>
-                    <div className="mini-copy">
-                      Sua solicitacao foi enviada e agora esta em analise.
-                    </div>
+                    {item.solicitacaoCancelamentoStatus && (
+                      <span className={`badge ${getSolicitacaoBadgeClass(item.solicitacaoCancelamentoStatus)}`}>
+                        {formatSolicitacaoCancelamentoStatus(item.solicitacaoCancelamentoStatus)}
+                      </span>
+                    )}
+                    <div className="mini-copy">{formatResumoAluno(item)}</div>
                   </div>
                 )}
               </div>

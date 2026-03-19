@@ -10,6 +10,7 @@ import {
   formatPlanoDuracao,
   formatSolicitacaoCancelamentoStatus,
   getSituacaoPedidoBadgeClass,
+  resolveSituacaoPedido,
 } from '../utils/formatters'
 
 function fmtMoeda(centavos) {
@@ -39,6 +40,35 @@ function CopyPaymentButton({ paymentId, onCopy }) {
       Copiar ID
     </button>
   )
+}
+
+function formatResultadoSolicitacao(item) {
+  if (item.paymentStatus === 'refunded') return 'Reembolsado'
+  if (item.paymentStatus === 'charged_back') return 'Estornado'
+  if (item.status === 'APROVADA') return 'Reembolso pendente'
+  if (item.status === 'NEGADA') return 'Solicitacao negada'
+  return formatSolicitacaoCancelamentoStatus(item.status)
+}
+
+function getResultadoSolicitacaoBadgeClass(item) {
+  if (item.paymentStatus === 'refunded' || item.paymentStatus === 'charged_back') return 'badge-blue'
+  if (item.status === 'APROVADA') return 'badge-blue'
+  if (item.status === 'NEGADA') return 'badge-red'
+  return getSolicitacaoBadgeClass(item.status)
+}
+
+function formatResumoAdminPedido(item) {
+  const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+
+  if (situacao === 'AGUARDANDO_PAGAMENTO') return 'Pedido ainda aguardando pagamento.'
+  if (situacao === 'ACESSO_LIBERADO') return `Acesso liberado em ${formatDataCurta(item.pagoEm)}.`
+  if (situacao === 'SOLICITACAO_EM_ANALISE') return 'Aguardando decisao do atendimento.'
+  if (situacao === 'REEMBOLSO_PENDENTE') return 'Proximo passo: fazer o reembolso manual no Mercado Pago.'
+  if (situacao === 'REEMBOLSADO') return 'Valor devolvido ao cliente.'
+  if (situacao === 'ESTORNADO') return 'Pagamento estornado pelo gateway.'
+  if (situacao === 'PAGAMENTO_MANTIDO') return 'Solicitacao negada; acesso mantido.'
+  if (situacao === 'PEDIDO_CANCELADO') return 'Pedido encerrado antes do pagamento.'
+  return 'Sem acao disponivel.'
 }
 
 export default function AdminPedidos() {
@@ -124,19 +154,34 @@ export default function AdminPedidos() {
     }
   }
 
-  const pendentes = useMemo(() => pedidos.filter(item => item.status === 'PENDENTE'), [pedidos])
-  const pagos = useMemo(() => pedidos.filter(item => item.status === 'PAGO'), [pedidos])
-  const cancelados = useMemo(() => pedidos.filter(item => item.status === 'CANCELADO'), [pedidos])
   const solicitacoesAbertas = useMemo(
     () => solicitacoes.filter(item => item.status === 'ABERTA' || item.status === 'ERRO_PROCESSAMENTO'),
     [solicitacoes]
   )
-  const solicitacoesAprovadas = useMemo(() => solicitacoes.filter(item => item.status === 'APROVADA'), [solicitacoes])
   const solicitacoesNegadas = useMemo(() => solicitacoes.filter(item => item.status === 'NEGADA'), [solicitacoes])
   const historicoSolicitacoes = useMemo(
     () => solicitacoes.filter(item => item.status === 'APROVADA' || item.status === 'NEGADA'),
     [solicitacoes]
   )
+  const resumoOperacional = useMemo(() => {
+    return pedidos.reduce((acc, item) => {
+      const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+
+      if (situacao === 'AGUARDANDO_PAGAMENTO') acc.aguardandoPagamento += 1
+      if (situacao === 'ACESSO_LIBERADO' || situacao === 'PAGAMENTO_MANTIDO') acc.acessoAtivo += 1
+      if (situacao === 'SOLICITACAO_EM_ANALISE') acc.emAnalise += 1
+      if (situacao === 'REEMBOLSO_PENDENTE') acc.reembolsoPendente += 1
+      if (situacao === 'REEMBOLSADO' || situacao === 'ESTORNADO') acc.finalizadosNoGateway += 1
+
+      return acc
+    }, {
+      aguardandoPagamento: 0,
+      acessoAtivo: 0,
+      emAnalise: 0,
+      reembolsoPendente: 0,
+      finalizadosNoGateway: 0,
+    })
+  }, [pedidos])
 
   return (
     <>
@@ -147,23 +192,23 @@ export default function AdminPedidos() {
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-label">Aguardando pagamento</div>
-          <div className="stat-value">{pendentes.length}</div>
+          <div className="stat-value">{resumoOperacional.aguardandoPagamento}</div>
           <div className="stat-sub">checkout iniciado</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Pagos</div>
-          <div className="stat-value">{pagos.length}</div>
-          <div className="stat-sub">com acesso liberado</div>
+          <div className="stat-label">Com acesso ativo</div>
+          <div className="stat-value">{resumoOperacional.acessoAtivo}</div>
+          <div className="stat-sub">sem reembolso em andamento</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Cancelados</div>
-          <div className="stat-value">{cancelados.length}</div>
-          <div className="stat-sub">pedidos encerrados</div>
+          <div className="stat-label">Em analise</div>
+          <div className="stat-value">{resumoOperacional.emAnalise}</div>
+          <div className="stat-sub">aguardando decisao</div>
         </div>
         <div className="stat-card">
-          <div className="stat-label">Solicitacoes abertas</div>
-          <div className="stat-value">{solicitacoesAbertas.length}</div>
-          <div className="stat-sub">aguardando analise</div>
+          <div className="stat-label">Reembolso pendente</div>
+          <div className="stat-value">{resumoOperacional.reembolsoPendente}</div>
+          <div className="stat-sub">aprovado no sistema</div>
         </div>
       </div>
 
@@ -174,7 +219,7 @@ export default function AdminPedidos() {
           <div className="student-filter-card" style={{ marginBottom: '1.5rem' }}>
             <div className="section-heading">Solicitacoes de cancelamento e reembolso</div>
             <div className="mini-copy" style={{ marginTop: '0.75rem' }}>
-              O aluno so consegue abrir a solicitacao em ate 7 dias apos a confirmacao do pagamento. A aprovacao aqui cancela o acesso no sistema; o reembolso do gateway continua manual por enquanto.
+              O aluno so consegue abrir a solicitacao em ate 7 dias apos a confirmacao do pagamento. Ao aprovar aqui, o acesso e encerrado no sistema. Depois, use o ID do pagamento para fazer o reembolso manual no Mercado Pago.
             </div>
             <div className="student-kpi-grid student-kpi-grid--compact" style={{ marginTop: '1rem' }}>
               <div className="student-kpi-card">
@@ -182,8 +227,8 @@ export default function AdminPedidos() {
                 <div className="student-kpi-value">{solicitacoesAbertas.length}</div>
               </div>
               <div className="student-kpi-card">
-                <div className="student-kpi-label">Aprovadas</div>
-                <div className="student-kpi-value">{solicitacoesAprovadas.length}</div>
+                <div className="student-kpi-label">Reembolso pendente</div>
+                <div className="student-kpi-value">{resumoOperacional.reembolsoPendente}</div>
               </div>
               <div className="student-kpi-card">
                 <div className="student-kpi-label">Negadas</div>
@@ -286,7 +331,7 @@ export default function AdminPedidos() {
                 <div>
                   <div className="section-heading">Historico de solicitacoes</div>
                   <div className="mini-copy" style={{ marginTop: '0.45rem' }}>
-                    Solicitações já processadas saem da fila principal e ficam registradas aqui.
+                    Solicitacoes ja processadas saem da fila principal e ficam registradas aqui.
                   </div>
                 </div>
                 <button
@@ -309,8 +354,8 @@ export default function AdminPedidos() {
                         <div className="mini-copy">Pedido {item.pedidoReferencia}{item.paymentId ? ` | ID ${item.paymentId}` : ''}</div>
                       </div>
                       <div className="request-history-meta">
-                        <span className={`badge ${getSolicitacaoBadgeClass(item.status)}`}>
-                          {formatSolicitacaoCancelamentoStatus(item.status)}
+                        <span className={`badge ${getResultadoSolicitacaoBadgeClass(item)}`}>
+                          {formatResultadoSolicitacao(item)}
                         </span>
                         <div className="mini-copy">
                           {item.processadoEm ? `Processado em ${formatDataHoraCurta(item.processadoEm)}` : 'Sem data de processamento'}
@@ -374,9 +419,7 @@ export default function AdminPedidos() {
                         {processandoId === item.id ? 'Processando...' : 'Cancelar'}
                       </button>
                     ) : (
-                      <span className="mini-copy">
-                        {item.status === 'PAGO' ? `Acesso liberado em ${formatDataCurta(item.pagoEm)}` : 'Sem acao disponivel'}
-                      </span>
+                      <span className="mini-copy">{formatResumoAdminPedido(item)}</span>
                     )}
                   </div>
                 </div>
@@ -401,7 +444,7 @@ export default function AdminPedidos() {
             <div className="mini-copy">Motivo informado: {solicitacaoAtiva.motivo}</div>
             {acaoSolicitacao === 'APROVAR' && (
               <div className="mini-copy">
-                Ao aprovar, o acesso desse local sera cancelado no sistema e o reembolso segue para tratamento manual.
+                Ao aprovar, o acesso desse local sera cancelado no sistema. Em seguida, faca o reembolso manual no Mercado Pago usando o ID do pagamento acima.
               </div>
             )}
 
