@@ -36,7 +36,7 @@ Acesse: **http://localhost**
 
 | Perfil | E-mail                  | Senha    |
 |--------|-------------------------|----------|
-| Admin  | admin@edupercurso.com   | admin123 |
+| Admin  | suporte@percursoaprovado.com.br | admin123 |
 | Aluno  | crie uma conta nova     | —        |
 
 ---
