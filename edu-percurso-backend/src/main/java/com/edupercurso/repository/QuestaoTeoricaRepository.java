@@ -17,4 +17,10 @@ public interface QuestaoTeoricaRepository extends JpaRepository<QuestaoTeorica, 
     @Override
     @EntityGraph(attributePaths = "alternativas")
     Optional<QuestaoTeorica> findById(UUID id);
+
+    @EntityGraph(attributePaths = "alternativas")
+    List<QuestaoTeorica> findByStatus(QuestaoTeorica.Status status);
+
+    @EntityGraph(attributePaths = "alternativas")
+    List<QuestaoTeorica> findByStatusAndTema(QuestaoTeorica.Status status, QuestaoTeorica.Tema tema);
 }

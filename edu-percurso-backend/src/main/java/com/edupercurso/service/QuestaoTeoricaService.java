@@ -1,22 +1,30 @@
 package com.edupercurso.service;
 
+import com.edupercurso.dto.QuestaoAlunoDTO;
 import com.edupercurso.dto.QuestaoDTO;
 import com.edupercurso.entity.QuestaoAlternativa;
 import com.edupercurso.entity.QuestaoTeorica;
+import com.edupercurso.entity.RespostaQuestaoAluno;
+import com.edupercurso.entity.Usuario;
 import com.edupercurso.repository.QuestaoTeoricaRepository;
+import com.edupercurso.repository.RespostaQuestaoAlunoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class QuestaoTeoricaService {
 
     private final QuestaoTeoricaRepository questaoTeoricaRepository;
+    private final RespostaQuestaoAlunoRepository respostaQuestaoAlunoRepository;
+    private final UsuarioLookupService usuarioLookupService;
 
     public List<QuestaoDTO.Response> listarAdmin(String busca,
                                                  QuestaoTeorica.Tema tema,
@@ -31,6 +39,29 @@ public class QuestaoTeoricaService {
                         .comparing(QuestaoTeorica::getOrdemExibicao, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(QuestaoTeorica::getCriadoEm, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(QuestaoDTO.Response::from)
+                .toList();
+    }
+
+    public List<QuestaoAlunoDTO.TemaResumoResponse> listarTemasDisponiveis() {
+        Map<QuestaoTeorica.Tema, Long> totais = questaoTeoricaRepository.findByStatus(QuestaoTeorica.Status.PUBLICADA).stream()
+                .collect(Collectors.groupingBy(QuestaoTeorica::getTema, Collectors.counting()));
+
+        return totais.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> QuestaoAlunoDTO.TemaResumoResponse.from(entry.getKey(), entry.getValue()))
+                .toList();
+    }
+
+    public List<QuestaoAlunoDTO.QuestaoTreinoResponse> listarTreino(QuestaoTeorica.Tema tema) {
+        List<QuestaoTeorica> questoes = tema == null
+                ? questaoTeoricaRepository.findByStatus(QuestaoTeorica.Status.PUBLICADA)
+                : questaoTeoricaRepository.findByStatusAndTema(QuestaoTeorica.Status.PUBLICADA, tema);
+
+        return questoes.stream()
+                .sorted(Comparator
+                        .comparing(QuestaoTeorica::getOrdemExibicao, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(QuestaoTeorica::getCriadoEm, Comparator.nullsLast(Comparator.reverseOrder())))
+                .map(QuestaoAlunoDTO.QuestaoTreinoResponse::from)
                 .toList();
     }
 
@@ -77,6 +108,42 @@ public class QuestaoTeoricaService {
     public QuestaoTeorica buscarEntidadePorId(UUID id) {
         return questaoTeoricaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Questao nao encontrada."));
+    }
+
+    @Transactional
+    public QuestaoAlunoDTO.ResponderResponse responder(String email, UUID questaoId, QuestaoAlunoDTO.ResponderRequest request) {
+        Usuario usuario = usuarioLookupService.buscarPorEmail(email);
+        QuestaoTeorica questao = buscarQuestaoPublicada(questaoId);
+
+        QuestaoAlternativa alternativaSelecionada = questao.getAlternativas().stream()
+                .filter(item -> item.getId().equals(request.getAlternativaId()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Alternativa nao encontrada para essa questao."));
+
+        QuestaoAlternativa alternativaCorreta = questao.getAlternativas().stream()
+                .filter(QuestaoAlternativa::isCorreta)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Questao sem alternativa correta cadastrada."));
+
+        boolean correta = alternativaSelecionada.getId().equals(alternativaCorreta.getId());
+
+        respostaQuestaoAlunoRepository.save(RespostaQuestaoAluno.builder()
+                .usuario(usuario)
+                .questao(questao)
+                .alternativa(alternativaSelecionada)
+                .correta(correta)
+                .build());
+
+        QuestaoAlunoDTO.ResponderResponse response = new QuestaoAlunoDTO.ResponderResponse();
+        response.setQuestaoId(questao.getId());
+        response.setCorreta(correta);
+        response.setAlternativaSelecionadaId(alternativaSelecionada.getId());
+        response.setAlternativaCorretaId(alternativaCorreta.getId());
+        response.setExplicacaoCurta(questao.getExplicacaoCurta());
+        response.setExplicacaoDetalhada(questao.getExplicacaoDetalhada());
+        response.setVideoUrl(questao.getVideoUrl());
+        response.setAlternativaCorretaTexto(alternativaCorreta.getTexto());
+        return response;
     }
 
     private boolean correspondeBusca(QuestaoTeorica questao, String termo) {
@@ -130,5 +197,13 @@ public class QuestaoTeoricaService {
 
         String texto = valor.trim();
         return texto.isBlank() ? null : texto;
+    }
+
+    private QuestaoTeorica buscarQuestaoPublicada(UUID id) {
+        QuestaoTeorica questao = buscarEntidadePorId(id);
+        if (questao.getStatus() != QuestaoTeorica.Status.PUBLICADA) {
+            throw new IllegalArgumentException("Essa questao nao esta disponivel no momento.");
+        }
+        return questao;
     }
 }

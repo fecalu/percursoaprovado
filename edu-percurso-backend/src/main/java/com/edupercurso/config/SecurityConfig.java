@@ -53,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/admin/assinaturas/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/percursos/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/categorias").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/questoes/**").hasRole("ALUNO")
+                        .requestMatchers(HttpMethod.POST, "/questoes/**").hasRole("ALUNO")
                         .requestMatchers(HttpMethod.POST, "/percursos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/percursos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/percursos/**").hasRole("ADMIN")

@@ -38,6 +38,9 @@ export default function Sidebar() {
           <NavLink to="/biblioteca" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <IconLibrary /> Biblioteca
           </NavLink>
+          <NavLink to="/simulado" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconQuiz /> Simulado teorico
+          </NavLink>
           <NavLink to="/meus-acessos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             <IconPass /> Meus acessos
           </NavLink>
