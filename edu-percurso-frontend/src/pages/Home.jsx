@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import RevealSection from '../components/RevealSection'
 import { useAuth } from '../context/AuthContext'
 import { localProvaService, planoService } from '../services/api'
-import { formatPlanoDuracao, formatStatusComercialLocal } from '../utils/formatters'
+import { formatStatusComercialLocal } from '../utils/formatters'
+import { resolveMediaUrl } from '../utils/media'
 
 function fmtMoeda(centavos) {
   return new Intl.NumberFormat('pt-BR', {
@@ -38,8 +39,7 @@ function getLocalMonograma(nome = '') {
 function getCardResumo(local, planosLocal) {
   if (local.statusComercial === 'DISPONIVEL') {
     if (planosLocal.length > 0) {
-      const duracaoInicial = formatPlanoDuracao(planosLocal[0].duracaoDias)
-      return `Acesso por periodo a partir de ${duracaoInicial}, com liberacao automatica apos a confirmacao do pagamento.`
+      return 'Veja os detalhes desse local, escolha seu plano e libere o acesso automaticamente apos o pagamento.'
     }
 
     return 'Conteudo desse local ja liberado para compra e estudo.'
@@ -245,6 +245,7 @@ export default function Home() {
                     ? 'Liberacao temporariamente pausada'
                     : 'Disponivel somente para administracao'
               const resumoCard = getCardResumo(local, planosLocal)
+              const imagemLocal = resolveMediaUrl(local.imagemPrincipalUrl)
 
               return (
                 <RevealSection
@@ -262,7 +263,17 @@ export default function Home() {
                     </span>
                   </div>
                   <div className="spotlight-brand-row">
-                    <div className="spotlight-mark">{getLocalMonograma(local.nome)}</div>
+                    <div className={`spotlight-mark ${imagemLocal ? 'spotlight-mark--image' : ''}`}>
+                      {imagemLocal ? (
+                        <img
+                          src={imagemLocal}
+                          alt={`Imagem do local ${local.nome}`}
+                          className="spotlight-mark-image"
+                        />
+                      ) : (
+                        getLocalMonograma(local.nome)
+                      )}
+                    </div>
                     <div className="spotlight-brand-copy">
                       <div className="spotlight-accent">{destaqueLocal}</div>
                       <div className="spotlight-title">{local.nome}</div>
@@ -272,18 +283,6 @@ export default function Home() {
                   <div className="spotlight-summary">{resumoCard}</div>
                   {!estaDisponivel && local.mensagemPublica && (
                     <div className="mini-copy">{local.mensagemPublica}</div>
-                  )}
-                  {estaDisponivel && planosLocal.length > 0 && (
-                    <div className="spotlight-pill-row">
-                      {planosLocal.slice(0, 3).map(plano => (
-                        <span key={plano.id} className="spotlight-pill">
-                          {formatPlanoDuracao(plano.duracaoDias)}
-                        </span>
-                      ))}
-                      {planosLocal.length > 3 && (
-                        <span className="spotlight-pill spotlight-pill--muted">+{planosLocal.length - 3} opcoes</span>
-                      )}
-                    </div>
                   )}
                   <div className="spotlight-footer">
                     <div className="spotlight-meta-block">
