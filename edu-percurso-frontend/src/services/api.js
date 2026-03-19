@@ -106,6 +106,11 @@ export const uploadService = {
     formData.append('file', file)
     return api.post('/uploads/thumbnails', formData).then(response => response.data)
   },
+  enviarImagem: file => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/uploads/thumbnails', formData).then(response => response.data)
+  },
 }
 
 export const pedidoService = {

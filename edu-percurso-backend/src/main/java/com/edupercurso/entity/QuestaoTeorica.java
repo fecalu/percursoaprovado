@@ -39,6 +39,9 @@ public class QuestaoTeorica {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String enunciado;
 
+    @Column(name = "imagem_url", columnDefinition = "TEXT")
+    private String imagemUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 40)
     private Tema tema;

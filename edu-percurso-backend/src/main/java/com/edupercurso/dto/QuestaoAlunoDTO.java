@@ -29,12 +29,14 @@ public class QuestaoAlunoDTO {
     public static class AlternativaResponse {
         private UUID id;
         private String texto;
+        private String imagemUrl;
         private Integer ordem;
 
         public static AlternativaResponse from(QuestaoAlternativa alternativa) {
             AlternativaResponse response = new AlternativaResponse();
             response.id = alternativa.getId();
             response.texto = alternativa.getTexto();
+            response.imagemUrl = alternativa.getImagemUrl();
             response.ordem = alternativa.getOrdem();
             return response;
         }
@@ -44,6 +46,7 @@ public class QuestaoAlunoDTO {
     public static class QuestaoTreinoResponse {
         private UUID id;
         private String enunciado;
+        private String imagemUrl;
         private String tema;
         private String temaLabel;
         private String dificuldade;
@@ -55,6 +58,7 @@ public class QuestaoAlunoDTO {
             QuestaoTreinoResponse response = new QuestaoTreinoResponse();
             response.id = questao.getId();
             response.enunciado = questao.getEnunciado();
+            response.imagemUrl = questao.getImagemUrl();
             response.tema = questao.getTema().name();
             response.temaLabel = formatTema(questao.getTema());
             response.dificuldade = questao.getDificuldade().name();
@@ -83,6 +87,7 @@ public class QuestaoAlunoDTO {
         private String explicacaoDetalhada;
         private String videoUrl;
         private String alternativaCorretaTexto;
+        private String alternativaCorretaLabel;
     }
 
     private static String formatTema(QuestaoTeorica.Tema tema) {

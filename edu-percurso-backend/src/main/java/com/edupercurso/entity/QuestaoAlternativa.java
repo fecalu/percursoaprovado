@@ -34,8 +34,11 @@ public class QuestaoAlternativa {
     @JoinColumn(name = "questao_id", nullable = false)
     private QuestaoTeorica questao;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String texto;
+
+    @Column(name = "imagem_url", columnDefinition = "TEXT")
+    private String imagemUrl;
 
     @Column(nullable = false)
     private Integer ordem;

@@ -17,8 +17,8 @@ public class QuestaoDTO {
 
     @Data
     public static class AlternativaRequest {
-        @NotBlank
         private String texto;
+        private String imagemUrl;
         private Integer ordem;
         private boolean correta;
     }
@@ -27,6 +27,8 @@ public class QuestaoDTO {
     public static class Request {
         @NotBlank
         private String enunciado;
+
+        private String imagemUrl;
 
         @NotNull
         private QuestaoTeorica.Tema tema;
@@ -54,6 +56,7 @@ public class QuestaoDTO {
     public static class AlternativaResponse {
         private UUID id;
         private String texto;
+        private String imagemUrl;
         private Integer ordem;
         private boolean correta;
 
@@ -61,6 +64,7 @@ public class QuestaoDTO {
             AlternativaResponse response = new AlternativaResponse();
             response.id = alternativa.getId();
             response.texto = alternativa.getTexto();
+            response.imagemUrl = alternativa.getImagemUrl();
             response.ordem = alternativa.getOrdem();
             response.correta = alternativa.isCorreta();
             return response;
@@ -71,6 +75,7 @@ public class QuestaoDTO {
     public static class Response {
         private UUID id;
         private String enunciado;
+        private String imagemUrl;
         private String tema;
         private String dificuldade;
         private String status;
@@ -85,6 +90,7 @@ public class QuestaoDTO {
             Response response = new Response();
             response.id = questao.getId();
             response.enunciado = questao.getEnunciado();
+            response.imagemUrl = questao.getImagemUrl();
             response.tema = questao.getTema().name();
             response.dificuldade = questao.getDificuldade().name();
             response.status = questao.getStatus().name();

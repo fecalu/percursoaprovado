@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { questaoService } from '../services/api'
+import { questaoService, uploadService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import {
   formatDificuldadeQuestao,
@@ -24,6 +24,7 @@ const LETRAS = ['A', 'B', 'C', 'D']
 function criarAlternativasVazias() {
   return LETRAS.map((_, index) => ({
     texto: '',
+    imagemUrl: '',
     correta: index === 0,
     ordem: index,
   }))
@@ -31,6 +32,7 @@ function criarAlternativasVazias() {
 
 const VAZIO = {
   enunciado: '',
+  imagemUrl: '',
   tema: 'LEGISLACAO',
   dificuldade: 'MEDIA',
   status: 'RASCUNHO',
@@ -51,6 +53,7 @@ export default function AdminQuestaoForm() {
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const [erros, setErros] = useState({})
+  const [uploadingField, setUploadingField] = useState('')
 
   useEffect(() => {
     if (!isEdicao) {
@@ -64,12 +67,14 @@ export default function AdminQuestaoForm() {
           .sort((a, b) => a.ordem - b.ordem)
           .map(item => ({
             texto: item.texto || '',
+            imagemUrl: item.imagemUrl || '',
             correta: item.correta,
             ordem: item.ordem,
           }))
 
         setForm({
           enunciado: response.enunciado || '',
+          imagemUrl: response.imagemUrl || '',
           tema: response.tema || 'LEGISLACAO',
           dificuldade: response.dificuldade || 'MEDIA',
           status: response.status || 'RASCUNHO',
@@ -120,13 +125,50 @@ export default function AdminQuestaoForm() {
     if (!form.enunciado.trim()) novosErros.enunciado = 'Campo obrigatorio'
     if (!form.explicacaoCurta.trim()) novosErros.explicacaoCurta = 'Campo obrigatorio'
 
-    const alternativasInvalidas = form.alternativas.some(item => !item.texto.trim())
+    const alternativasInvalidas = form.alternativas.some(item => !item.texto.trim() && !item.imagemUrl.trim())
     if (alternativasInvalidas || respostaCorretaIndex < 0) {
-      novosErros.alternativas = 'Preencha as quatro alternativas e escolha a correta.'
+      novosErros.alternativas = 'Cada alternativa precisa ter texto, imagem ou os dois. Escolha tambem a correta.'
     }
 
     setErros(novosErros)
     return Object.keys(novosErros).length === 0
+  }
+
+  async function enviarImagem(file, onSuccess, fieldKey, successMessage) {
+    if (!file) return
+
+    setUploadingField(fieldKey)
+    try {
+      const response = await uploadService.enviarImagem(file)
+      onSuccess(response.url)
+      show(successMessage)
+    } catch (error) {
+      show(error.response?.data?.erro || 'Erro ao enviar imagem.', 'error')
+    } finally {
+      setUploadingField('')
+    }
+  }
+
+  async function handleUploadQuestao(event) {
+    const file = event.target.files?.[0]
+    await enviarImagem(
+      file,
+      url => set('imagemUrl', url),
+      'questao',
+      'Imagem da questao enviada com sucesso.'
+    )
+    event.target.value = ''
+  }
+
+  async function handleUploadAlternativa(index, event) {
+    const file = event.target.files?.[0]
+    await enviarImagem(
+      file,
+      url => setAlternativa(index, 'imagemUrl', url),
+      `alternativa-${index}`,
+      `Imagem da alternativa ${LETRAS[index]} enviada com sucesso.`
+    )
+    event.target.value = ''
   }
 
   async function handleSubmit(event) {
@@ -137,6 +179,7 @@ export default function AdminQuestaoForm() {
 
     const payload = {
       enunciado: form.enunciado.trim(),
+      imagemUrl: form.imagemUrl.trim() || null,
       tema: form.tema,
       dificuldade: form.dificuldade,
       status: form.status,
@@ -145,7 +188,8 @@ export default function AdminQuestaoForm() {
       videoUrl: form.videoUrl.trim() || null,
       ordemExibicao: Number(form.ordemExibicao) || 0,
       alternativas: form.alternativas.map((item, index) => ({
-        texto: item.texto.trim(),
+        texto: item.texto.trim() || null,
+        imagemUrl: item.imagemUrl.trim() || null,
         correta: item.correta,
         ordem: index,
       })),
@@ -196,6 +240,41 @@ export default function AdminQuestaoForm() {
               onChange={event => set('enunciado', event.target.value)}
             />
             {erros.enunciado && <div className="form-error">{erros.enunciado}</div>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Imagem da questao</label>
+            <div className="question-media-stack">
+              <input
+                className="form-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={handleUploadQuestao}
+                disabled={uploadingField === 'questao'}
+              />
+              <input
+                className="form-input"
+                placeholder="/media/... ou URL publica da imagem"
+                value={form.imagemUrl}
+                onChange={event => set('imagemUrl', event.target.value)}
+              />
+              <div className="mini-copy">
+                Upload recomendado para imagens de placas e ilustracoes da pergunta.
+                {uploadingField === 'questao' ? ' Enviando imagem...' : ''}
+              </div>
+              {form.imagemUrl && (
+                <div className="question-media-preview-wrap">
+                  <img
+                    src={form.imagemUrl}
+                    alt="Preview da questao"
+                    className="question-media-preview"
+                  />
+                  <button className="btn btn-ghost" type="button" onClick={() => set('imagemUrl', '')}>
+                    Remover imagem
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="form-row">
@@ -301,6 +380,42 @@ export default function AdminQuestaoForm() {
                     value={alternativa.texto}
                     onChange={event => setAlternativa(index, 'texto', event.target.value)}
                   />
+
+                  <div className="question-media-stack question-media-stack--option">
+                    <input
+                      className="form-input"
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={event => handleUploadAlternativa(index, event)}
+                      disabled={uploadingField === `alternativa-${index}`}
+                    />
+                    <input
+                      className="form-input"
+                      placeholder={`Imagem da alternativa ${LETRAS[index]} (opcional)`}
+                      value={alternativa.imagemUrl}
+                      onChange={event => setAlternativa(index, 'imagemUrl', event.target.value)}
+                    />
+                    <div className="mini-copy">
+                      Use quando a resposta depender de placa, sinalizacao ou figura.
+                      {uploadingField === `alternativa-${index}` ? ' Enviando imagem...' : ''}
+                    </div>
+                    {alternativa.imagemUrl && (
+                      <div className="question-media-preview-wrap">
+                        <img
+                          src={alternativa.imagemUrl}
+                          alt={`Preview da alternativa ${LETRAS[index]}`}
+                          className="question-media-preview question-media-preview--option"
+                        />
+                        <button
+                          className="btn btn-ghost"
+                          type="button"
+                          onClick={() => setAlternativa(index, 'imagemUrl', '')}
+                        >
+                          Remover imagem
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

@@ -37,6 +37,7 @@ export default function SimuladoTeorico() {
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
   const [videoAberto, setVideoAberto] = useState(false)
+  const [imagemExpandida, setImagemExpandida] = useState(null)
 
   useEffect(() => {
     let ativo = true
@@ -77,6 +78,7 @@ export default function SimuladoTeorico() {
     setRespostaAtual(null)
     setRespostasSessao({})
     setVideoAberto(false)
+    setImagemExpandida(null)
 
     questaoService.listarTreinoAluno({ tema: temaAtivo })
       .then(response => {
@@ -116,6 +118,7 @@ export default function SimuladoTeorico() {
     setRespostaAtual(null)
     setRespostasSessao({})
     setVideoAberto(false)
+    setImagemExpandida(null)
     setErro('')
   }
 
@@ -154,6 +157,7 @@ export default function SimuladoTeorico() {
     setAlternativaSelecionadaId('')
     setRespostaAtual(null)
     setVideoAberto(false)
+    setImagemExpandida(null)
     setErro('')
   }
 
@@ -166,6 +170,15 @@ export default function SimuladoTeorico() {
     if (alternativa.id === respostaAtual.alternativaSelecionadaId && !respostaAtual.correta) return 'is-incorrect'
     return ''
   }
+
+  function abrirImagem(src, alt) {
+    setImagemExpandida({ src, alt })
+  }
+
+  const alternativaCorretaAtual = useMemo(
+    () => questaoAtual?.alternativas?.find(item => item.id === respostaAtual?.alternativaCorretaId) || null,
+    [questaoAtual, respostaAtual]
+  )
 
   if (loadingTemas) return <div className="spinner" />
 
@@ -294,6 +307,21 @@ export default function SimuladoTeorico() {
 
                 <p className="student-card-copy simulado-question-copy">{questaoAtual?.enunciado}</p>
 
+                {questaoAtual?.imagemUrl && (
+                  <button
+                    type="button"
+                    className="simulado-image-button simulado-image-button--question"
+                    onClick={() => abrirImagem(questaoAtual.imagemUrl, `Imagem da questao ${indiceAtual + 1}`)}
+                  >
+                    <img
+                      src={questaoAtual.imagemUrl}
+                      alt={`Imagem da questao ${indiceAtual + 1}`}
+                      className="simulado-question-image"
+                    />
+                    <span className="simulado-image-caption">Clique para ampliar</span>
+                  </button>
+                )}
+
                 <div className="simulado-progress-head">
                   <span className="student-inline-note">Progresso no tema</span>
                   <span className="student-inline-note">{progressoPercentual}% concluido</span>
@@ -312,7 +340,31 @@ export default function SimuladoTeorico() {
                       disabled={Boolean(respostaAtual)}
                     >
                       <span className="simulado-option-label">{getAlternativaLabel(alternativa.ordem, index)}</span>
-                      <span className="simulado-option-text">{alternativa.texto}</span>
+                      <span className="simulado-option-body">
+                        {alternativa.imagemUrl && (
+                          <img
+                            src={alternativa.imagemUrl}
+                            alt={`Imagem da alternativa ${getAlternativaLabel(alternativa.ordem, index)}`}
+                            className="simulado-option-image"
+                            onClick={event => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              abrirImagem(
+                                alternativa.imagemUrl,
+                                `Imagem da alternativa ${getAlternativaLabel(alternativa.ordem, index)}`
+                              )
+                            }}
+                          />
+                        )}
+                        {alternativa.texto && (
+                          <span className="simulado-option-text">{alternativa.texto}</span>
+                        )}
+                        {!alternativa.texto && alternativa.imagemUrl && (
+                          <span className="simulado-option-text simulado-option-text--muted">
+                            Alternativa em imagem
+                          </span>
+                        )}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -322,7 +374,8 @@ export default function SimuladoTeorico() {
                     <strong>{respostaAtual.correta ? 'Resposta correta.' : 'Resposta incorreta.'}</strong>
                     {!respostaAtual.correta && (
                       <span>
-                        Alternativa correta: {respostaAtual.alternativaCorretaTexto}
+                        Alternativa correta: {respostaAtual.alternativaCorretaLabel}
+                        {alternativaCorretaAtual?.texto ? ` - ${alternativaCorretaAtual.texto}` : ''}
                       </span>
                     )}
                   </div>
@@ -421,6 +474,21 @@ export default function SimuladoTeorico() {
               </div>
             </div>
           </aside>
+        </div>
+      )}
+
+      {imagemExpandida && (
+        <div className="simulado-image-modal" onClick={() => setImagemExpandida(null)}>
+          <div className="simulado-image-modal-dialog" onClick={event => event.stopPropagation()}>
+            <button
+              type="button"
+              className="simulado-image-modal-close"
+              onClick={() => setImagemExpandida(null)}
+            >
+              Fechar
+            </button>
+            <img src={imagemExpandida.src} alt={imagemExpandida.alt} className="simulado-image-modal-img" />
+          </div>
         </div>
       )}
     </div>

@@ -143,6 +143,7 @@ public class QuestaoTeoricaService {
         response.setExplicacaoDetalhada(questao.getExplicacaoDetalhada());
         response.setVideoUrl(questao.getVideoUrl());
         response.setAlternativaCorretaTexto(alternativaCorreta.getTexto());
+        response.setAlternativaCorretaLabel(formatAlternativaLabel(alternativaCorreta.getOrdem()));
         return response;
     }
 
@@ -156,6 +157,7 @@ public class QuestaoTeoricaService {
         validarAlternativas(request.getAlternativas());
 
         questao.setEnunciado(request.getEnunciado().trim());
+        questao.setImagemUrl(normalizarTexto(request.getImagemUrl()));
         questao.setTema(request.getTema());
         questao.setDificuldade(request.getDificuldade() == null ? QuestaoTeorica.Dificuldade.MEDIA : request.getDificuldade());
         questao.setStatus(request.getStatus() == null ? QuestaoTeorica.Status.RASCUNHO : request.getStatus());
@@ -169,7 +171,8 @@ public class QuestaoTeoricaService {
     private List<QuestaoAlternativa> montarAlternativas(List<QuestaoDTO.AlternativaRequest> alternativas) {
         return alternativas.stream()
                 .map(item -> QuestaoAlternativa.builder()
-                        .texto(item.getTexto().trim())
+                        .texto(normalizarTexto(item.getTexto()))
+                        .imagemUrl(normalizarTexto(item.getImagemUrl()))
                         .ordem(item.getOrdem())
                         .correta(item.isCorreta())
                         .build())
@@ -187,6 +190,10 @@ public class QuestaoTeoricaService {
             if (alternativa.getOrdem() == null) {
                 alternativa.setOrdem(i);
             }
+
+            if (normalizarTexto(alternativa.getTexto()) == null && normalizarTexto(alternativa.getImagemUrl()) == null) {
+                throw new IllegalArgumentException("Cada alternativa precisa ter texto, imagem ou os dois.");
+            }
         }
     }
 
@@ -197,6 +204,11 @@ public class QuestaoTeoricaService {
 
         String texto = valor.trim();
         return texto.isBlank() ? null : texto;
+    }
+
+    private String formatAlternativaLabel(Integer ordem) {
+        int indice = ordem == null ? 0 : ordem;
+        return String.valueOf((char) ('A' + indice));
     }
 
     private QuestaoTeorica buscarQuestaoPublicada(UUID id) {
