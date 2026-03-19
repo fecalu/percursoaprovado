@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import RevealSection from '../components/RevealSection'
 import { percursoService, progressoService } from '../services/api'
 import { formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
 
@@ -108,7 +107,7 @@ export default function Player() {
         Voltar para a biblioteca
       </button>
 
-      <RevealSection className="student-shell" delay={30}>
+      <div className="student-shell student-shell--compact">
         <div className="player-wrap">
           {embedUrl ? (
             <iframe
@@ -190,7 +189,7 @@ export default function Player() {
             </button>
           </div>
         </div>
-      </RevealSection>
+      </div>
     </>
   )
 }

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import RevealSection from '../components/RevealSection'
 import { pedidoService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import {
@@ -151,50 +150,46 @@ export default function MeusPedidos() {
   return (
     <>
       {ToastEl}
-      <RevealSection className="student-shell" delay={30}>
-        <section className="student-hero">
+      <div className="student-shell student-shell--compact">
+        <section className="student-library-head">
           <div>
             <div className="page-title">Meus pagamentos</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Acompanhe seus pagamentos, retome pedidos pendentes e envie solicitacoes de cancelamento dentro do prazo de 7 dias.
+              Acompanhe seus pedidos, retome pagamentos pendentes e envie solicitacoes de cancelamento dentro do prazo.
             </p>
           </div>
-          <div className="student-kpi-grid">
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Aguardando pagamento</div>
-              <div className="student-kpi-value">{resumoOperacional.aguardandoPagamento}</div>
-              <div className="student-kpi-copy">prontos para pagar</div>
+
+          <div className="student-kpi-strip">
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{resumoOperacional.aguardandoPagamento}</span>
+              <span className="student-kpi-pill-label">Aguardando pagamento</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Com acesso ativo</div>
-              <div className="student-kpi-value">{resumoOperacional.acessoAtivo}</div>
-              <div className="student-kpi-copy">sem cancelamento aprovado</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{resumoOperacional.acessoAtivo}</span>
+              <span className="student-kpi-pill-label">Com acesso ativo</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Cancelados</div>
-              <div className="student-kpi-value">{resumoOperacional.cancelados}</div>
-              <div className="student-kpi-copy">sem acesso liberado</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{resumoOperacional.cancelados}</span>
+              <span className="student-kpi-pill-label">Cancelados</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Reembolso</div>
-              <div className="student-kpi-value">{resumoOperacional.reembolso + resumoOperacional.emAnalise}</div>
-              <div className="student-kpi-copy">em analise ou em andamento</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{resumoOperacional.reembolso + resumoOperacional.emAnalise}</span>
+              <span className="student-kpi-pill-label">Reembolso</span>
             </div>
           </div>
         </section>
-      </RevealSection>
+      </div>
 
       {resumoOperacional.aguardandoPagamento > 0 && (
-        <div className="student-filter-card" style={{ marginBottom: '1.5rem' }}>
-          <div className="section-heading">Como liberar seu acesso</div>
-          <div className="mini-copy" style={{ marginTop: '0.75rem' }}>
-            1. Clique em Pagar agora no pedido pendente.
+        <div className="student-filter-card student-filter-card--inline" style={{ marginBottom: '1.5rem' }}>
+          <div className="student-filter-copy-wrap">
+            <div className="student-filter-title">Como liberar seu acesso</div>
+            <div className="student-filter-copy">Se houver pedido pendente, o caminho continua simples e automatico.</div>
           </div>
-          <div className="mini-copy">
-            2. Finalize o checkout no Mercado Pago usando Pix ou cartao de credito.
-          </div>
-          <div className="mini-copy">
-            3. Depois da confirmacao do pagamento, seu acesso aparece automaticamente em Meus acessos e na Biblioteca.
+          <div className="student-help-steps">
+            <div className="student-help-step">1. Clique em Pagar agora no pedido pendente.</div>
+            <div className="student-help-step">2. Finalize o checkout no Mercado Pago usando Pix ou cartao.</div>
+            <div className="student-help-step">3. Depois da confirmacao, seu acesso aparece em Meus acessos e na Biblioteca.</div>
           </div>
         </div>
       )}
@@ -212,7 +207,7 @@ export default function MeusPedidos() {
       ) : (
         <div className="student-stack">
           {pedidos.map(item => (
-            <RevealSection key={item.id} className="student-order-card" delay={50}>
+            <div key={item.id} className="student-order-card">
               <div className="student-order-main">
                 <div className="student-card-top">
                   <span className={`badge ${getSituacaoPedidoBadgeClass(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}`}>
@@ -316,7 +311,7 @@ export default function MeusPedidos() {
                   </button>
                 )}
               </div>
-            </RevealSection>
+            </div>
           ))}
         </div>
       )}

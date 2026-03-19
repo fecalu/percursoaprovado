@@ -2174,6 +2174,18 @@ body {
   font-size: 13px;
 }
 
+.student-help-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.student-help-step {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
 .library-section-card {
   border: 1px solid var(--border);
   border-radius: 20px;
