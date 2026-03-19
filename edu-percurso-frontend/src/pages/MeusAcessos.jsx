@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import RevealSection from '../components/RevealSection'
 import { assinaturaService } from '../services/api'
 import { formatAssinaturaStatus, formatDataCurta, formatPlanoDuracao } from '../utils/formatters'
 import { formatarDiasRestantes } from '../utils/student'
@@ -9,6 +8,7 @@ export default function MeusAcessos() {
   const navigate = useNavigate()
   const [assinaturas, setAssinaturas] = useState([])
   const [loading, setLoading] = useState(true)
+  const [historicoAberto, setHistoricoAberto] = useState(false)
 
   useEffect(() => {
     assinaturaService.minhas()
@@ -30,28 +30,27 @@ export default function MeusAcessos() {
 
   return (
     <>
-      <RevealSection className="student-shell" delay={30}>
-        <section className="student-hero">
+      <div className="student-shell student-shell--compact">
+        <section className="student-library-head">
           <div>
             <div className="page-title">Meus acessos</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Veja quais locais de prova estao liberados, ate quando sua validade vai e o que voce pode abrir agora.
+              Veja quais locais estao liberados, ate quando sua validade vai e o que voce pode abrir agora.
             </p>
           </div>
-          <div className="student-kpi-grid student-kpi-grid--compact">
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Acessos ativos</div>
-              <div className="student-kpi-value">{ativas.length}</div>
-              <div className="student-kpi-copy">liberados agora</div>
+
+          <div className="student-kpi-strip">
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{ativas.length}</span>
+              <span className="student-kpi-pill-label">Acessos ativos</span>
             </div>
-            <div className="student-kpi-card">
-              <div className="student-kpi-label">Acessos encerrados</div>
-              <div className="student-kpi-value">{historico.length}</div>
-              <div className="student-kpi-copy">compras anteriores</div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{historico.length}</span>
+              <span className="student-kpi-pill-label">Acessos encerrados</span>
             </div>
           </div>
         </section>
-      </RevealSection>
+      </div>
 
       {ativas.length === 0 ? (
         <div className="empty-state">
@@ -67,9 +66,17 @@ export default function MeusAcessos() {
           </div>
         </div>
       ) : (
-        <div className="student-grid" style={{ marginBottom: '2rem' }}>
+        <section className="content-section" style={{ marginBottom: '2rem' }}>
+          <div className="section-title-row">
+            <div>
+              <div className="section-heading">Acessos ativos</div>
+              <div className="section-copy">Abra a biblioteca do local e acompanhe o que ainda vale revisar.</div>
+            </div>
+          </div>
+
+          <div className="student-access-grid">
           {ativas.map(item => (
-            <RevealSection key={item.id} className="student-card active-plan" delay={70}>
+            <div key={item.id} className="student-card student-access-card active-plan">
               <div className="student-card-top">
                 <span className="badge badge-green">Ativo</span>
                 <span className="student-card-copy">{formatarDiasRestantes(item.fimEm)}</span>
@@ -98,38 +105,54 @@ export default function MeusAcessos() {
                   Ver progresso
                 </button>
               </div>
-            </RevealSection>
+            </div>
           ))}
-        </div>
+          </div>
+        </section>
       )}
 
       {historico.length > 0 && (
-        <section className="content-section">
-          <div className="section-title-row">
-            <div>
+        <section className="library-section-card">
+          <button
+            type="button"
+            className="library-section-toggle"
+            onClick={() => setHistoricoAberto(prev => !prev)}
+            aria-expanded={historicoAberto}
+          >
+            <div className="library-section-heading">
               <div className="section-heading">Acessos encerrados</div>
               <div className="section-copy">Historico de acessos que ja terminaram ou foram cancelados.</div>
             </div>
-          </div>
-          <div className="student-stack">
-            {historico.map(item => (
-              <div key={item.id} className="student-stack-card">
-                <div>
-                  <div className="table-name">{item.localProvaNome}</div>
-                  <div className="mini-copy">{item.planoNome}</div>
-                </div>
-                <div className="student-detail-item">
-                  <span className="student-detail-label">Validade final</span>
-                  <span className="student-detail-value">{formatDataCurta(item.fimEm)}</span>
-                </div>
-                <div>
-                  <span className={`badge ${item.status === 'CANCELADA' ? 'badge-red' : 'badge-gray'}`}>
-                    {formatAssinaturaStatus(item.status)}
-                  </span>
-                </div>
+
+            <div className="library-section-meta">
+              <span className="badge badge-blue">{historico.length} acessos</span>
+              <span className="library-section-toggle-label">{historicoAberto ? 'Fechar' : 'Abrir'}</span>
+            </div>
+          </button>
+
+          {historicoAberto && (
+            <div className="library-section-body">
+              <div className="student-stack">
+                {historico.map(item => (
+                  <div key={item.id} className="student-stack-card">
+                    <div>
+                      <div className="table-name">{item.localProvaNome}</div>
+                      <div className="mini-copy">{item.planoNome}</div>
+                    </div>
+                    <div className="student-detail-item">
+                      <span className="student-detail-label">Validade final</span>
+                      <span className="student-detail-value">{formatDataCurta(item.fimEm)}</span>
+                    </div>
+                    <div>
+                      <span className={`badge ${item.status === 'CANCELADA' ? 'badge-red' : 'badge-gray'}`}>
+                        {formatAssinaturaStatus(item.status)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </section>
       )}
     </>

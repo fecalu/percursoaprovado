@@ -2222,6 +2222,16 @@ body {
   gap: 1rem;
 }
 
+.student-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.student-access-card {
+  padding: 1rem 1.05rem;
+}
+
 .student-card,
 .student-progress-card,
 .student-order-card,
