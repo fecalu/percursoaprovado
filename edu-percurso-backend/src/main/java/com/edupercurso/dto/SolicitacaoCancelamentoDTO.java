@@ -41,6 +41,8 @@ public class SolicitacaoCancelamentoDTO {
         private UUID planoId;
         private String planoNome;
         private Integer valorCentavos;
+        private String paymentId;
+        private String paymentStatus;
         private LocalDateTime pagoEm;
         private String motivo;
         private String observacaoAluno;
@@ -66,6 +68,8 @@ public class SolicitacaoCancelamentoDTO {
             response.planoId = pedido.getPlano().getId();
             response.planoNome = pedido.getPlano().getNome();
             response.valorCentavos = pedido.getValorCentavos();
+            response.paymentId = pedido.getPaymentId();
+            response.paymentStatus = pedido.getPaymentStatus();
             response.pagoEm = pedido.getPagoEm();
             response.motivo = solicitacao.getMotivo();
             response.observacaoAluno = solicitacao.getObservacaoAluno();

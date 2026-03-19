@@ -25,6 +25,21 @@ function getSolicitacaoBadgeClass(status) {
   return 'badge-gray'
 }
 
+function CopyPaymentButton({ paymentId, onCopy }) {
+  if (!paymentId) return null
+
+  return (
+    <button
+      className="btn btn-ghost"
+      style={{ padding: '6px 10px', fontSize: 12 }}
+      onClick={() => onCopy(paymentId)}
+      type="button"
+    >
+      Copiar ID
+    </button>
+  )
+}
+
 export default function AdminPedidos() {
   const { show, ToastEl } = useToast()
   const [pedidos, setPedidos] = useState([])
@@ -95,6 +110,15 @@ export default function AdminPedidos() {
       show(error.response?.data?.erro || 'Erro ao processar solicitacao.', 'error')
     } finally {
       setProcessandoId('')
+    }
+  }
+
+  async function copiarPaymentId(paymentId) {
+    try {
+      await navigator.clipboard.writeText(paymentId)
+      show('ID do pagamento copiado.')
+    } catch {
+      show('Nao foi possivel copiar o ID do pagamento.', 'error')
     }
   }
 
@@ -186,6 +210,22 @@ export default function AdminPedidos() {
                       <span className="student-detail-value">{item.motivo}</span>
                     </div>
                     <div className="student-detail-item">
+                      <span className="student-detail-label">Pedido</span>
+                      <span className="student-detail-value">{item.pedidoReferencia}</span>
+                    </div>
+                    {item.paymentId && (
+                      <div className="student-detail-item">
+                        <span className="student-detail-label">ID do pagamento</span>
+                        <span className="student-detail-value">{item.paymentId}</span>
+                      </div>
+                    )}
+                    {item.paymentStatus && (
+                      <div className="student-detail-item">
+                        <span className="student-detail-label">Status do pagamento</span>
+                        <span className="student-detail-value">{formatPagamentoStatus(item.paymentStatus)}</span>
+                      </div>
+                    )}
+                    <div className="student-detail-item">
                       <span className="student-detail-label">Pago em</span>
                       <span className="student-detail-value">{formatDataHoraCurta(item.pagoEm)}</span>
                     </div>
@@ -209,6 +249,7 @@ export default function AdminPedidos() {
                   <div className="student-card-actions">
                     {item.status === 'ABERTA' ? (
                       <>
+                        <CopyPaymentButton paymentId={item.paymentId} onCopy={copiarPaymentId} />
                         <button className="btn btn-primary" onClick={() => abrirProcessamentoSolicitacao(item, 'APROVAR')}>
                           Aprovar
                         </button>
@@ -299,6 +340,8 @@ export default function AdminPedidos() {
             <div className="mini-copy" style={{ marginTop: '0.6rem' }}>
               {solicitacaoAtiva.usuarioNome} - {solicitacaoAtiva.localProvaNome}
             </div>
+            <div className="mini-copy">Pedido: {solicitacaoAtiva.pedidoReferencia}</div>
+            {solicitacaoAtiva.paymentId && <div className="mini-copy">ID do pagamento: {solicitacaoAtiva.paymentId}</div>}
             <div className="mini-copy">Motivo informado: {solicitacaoAtiva.motivo}</div>
             {acaoSolicitacao === 'APROVAR' && (
               <div className="mini-copy">
@@ -317,6 +360,7 @@ export default function AdminPedidos() {
             </label>
 
             <div className="request-modal-actions">
+              <CopyPaymentButton paymentId={solicitacaoAtiva.paymentId} onCopy={copiarPaymentId} />
               <button className="btn btn-ghost" onClick={fecharProcessamentoSolicitacao}>
                 Fechar
               </button>
