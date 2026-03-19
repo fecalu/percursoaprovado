@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import BrandLogo from '../components/BrandLogo'
 import RevealSection from '../components/RevealSection'
 import { useAuth } from '../context/AuthContext'
 import { localProvaService, planoService } from '../services/api'
@@ -140,6 +141,34 @@ export default function Home() {
 
   return (
     <div className="landing-page landing-page--eager">
+      <section className="landing-topbar fade-in">
+        <Link className="landing-topbar-brand" to="/">
+          <BrandLogo variant="landing" showTagline />
+        </Link>
+
+        <div className="landing-topbar-actions">
+          {user ? (
+            <>
+              <Link className="btn btn-ghost btn-sm" to={isAdmin ? '/admin/pedidos' : '/meus-acessos'}>
+                {isAdmin ? 'Pedidos' : 'Meus acessos'}
+              </Link>
+              <Link className="btn btn-primary btn-sm" to={isAdmin ? '/admin' : '/biblioteca'}>
+                {isAdmin ? 'Abrir painel' : 'Minha biblioteca'}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="btn btn-ghost btn-sm" to="/login">
+                Entrar
+              </Link>
+              <Link className="btn btn-primary btn-sm" to="/register">
+                Criar conta
+              </Link>
+            </>
+          )}
+        </div>
+      </section>
+
       <section className="hero-shell hero-shell--single fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao pratica por local de prova</div>
@@ -149,18 +178,12 @@ export default function Home() {
             nos trajetos mais recorrentes e no que mais pesa na avaliacao.
           </p>
           <div className="hero-actions">
-            {user ? (
-              <Link className="btn btn-primary" to={isAdmin ? '/admin' : '/biblioteca'}>
-                {isAdmin ? 'Abrir painel' : 'Ir para minha biblioteca'}
-              </Link>
-            ) : (
-              <a className="btn btn-primary" href="#locais-disponiveis">
-                Escolher meu local de prova
-              </a>
-            )}
-            <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/planos' : '/meus-acessos') : '/register'}>
-              {user ? 'Ver meus acessos' : 'Criar conta e acompanhar'}
-            </Link>
+            <a className="btn btn-primary" href="#locais-disponiveis">
+              Escolher meu local de prova
+            </a>
+            <a className="btn btn-ghost" href="#saiba-mais">
+              Ver como funciona
+            </a>
           </div>
           <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
             Os conteudos sao baseados em experiencia real, observacao pratica e analise dos percursos mais frequentes.
@@ -264,7 +287,7 @@ export default function Home() {
         ))}
       </RevealSection>
 
-      <RevealSection as="section" className="landing-section" delay={120} eager>
+      <RevealSection as="section" className="landing-section" id="saiba-mais" delay={120} eager>
         <div className="section-title-row">
           <div>
             <div className="section-heading">Saiba mais antes de comprar</div>
