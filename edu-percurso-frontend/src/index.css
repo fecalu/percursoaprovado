@@ -2068,6 +2068,55 @@ body {
   gap: 1rem;
 }
 
+.request-summary-card {
+  padding-block: 1rem;
+}
+
+.request-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.request-summary-copy {
+  max-width: 720px;
+  margin-top: 0.45rem;
+}
+
+.request-summary-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.request-summary-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.02);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.request-summary-pill strong {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.request-summary-pill-label {
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
 .request-admin-card {
   padding: 1.15rem;
   border: 1px solid var(--border);
@@ -2391,6 +2440,15 @@ body {
   .student-kpi-grid--compact,
   .student-grid {
     grid-template-columns: 1fr;
+  }
+
+  .request-summary-head {
+    flex-direction: column;
+  }
+
+  .request-summary-metrics {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .landing-inline-strip {

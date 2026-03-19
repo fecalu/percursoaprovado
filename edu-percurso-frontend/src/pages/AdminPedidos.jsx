@@ -233,23 +233,27 @@ export default function AdminPedidos() {
         <div className="spinner" />
       ) : (
         <>
-          <div className="student-filter-card" style={{ marginBottom: '1.5rem' }}>
-            <div className="section-heading">Solicitacoes de cancelamento e reembolso</div>
-            <div className="mini-copy" style={{ marginTop: '0.75rem' }}>
-              O aluno so consegue abrir a solicitacao em ate 7 dias apos a confirmacao do pagamento. Ao aprovar aqui, o acesso e encerrado no sistema. Depois, use o ID do pagamento para fazer o reembolso manual no Mercado Pago.
-            </div>
-            <div className="student-kpi-grid student-kpi-grid--compact" style={{ marginTop: '1rem' }}>
-              <div className="student-kpi-card">
-                <div className="student-kpi-label">Em analise</div>
-                <div className="student-kpi-value">{solicitacoesAbertas.length}</div>
+          <div className="student-filter-card request-summary-card" style={{ marginBottom: '1.5rem' }}>
+            <div className="request-summary-head">
+              <div>
+                <div className="section-heading">Solicitacoes de cancelamento e reembolso</div>
+                <div className="mini-copy request-summary-copy">
+                  Aprovar encerra o acesso no sistema. Depois, use o ID do pagamento para devolver o valor no Mercado Pago.
+                </div>
               </div>
-              <div className="student-kpi-card">
-                <div className="student-kpi-label">Reembolso pendente</div>
-                <div className="student-kpi-value">{resumoOperacional.reembolsoPendente}</div>
-              </div>
-              <div className="student-kpi-card">
-                <div className="student-kpi-label">Negadas</div>
-                <div className="student-kpi-value">{solicitacoesNegadas.length}</div>
+              <div className="request-summary-metrics">
+                <div className="request-summary-pill">
+                  <span className="request-summary-pill-label">Em analise</span>
+                  <strong>{solicitacoesAbertas.length}</strong>
+                </div>
+                <div className="request-summary-pill">
+                  <span className="request-summary-pill-label">Reembolso pendente</span>
+                  <strong>{resumoOperacional.reembolsoPendente}</strong>
+                </div>
+                <div className="request-summary-pill">
+                  <span className="request-summary-pill-label">Negadas</span>
+                  <strong>{solicitacoesNegadas.length}</strong>
+                </div>
               </div>
             </div>
           </div>
