@@ -265,7 +265,7 @@ export default function LocalDetalhe() {
         Voltar para os locais
       </Link>
 
-      <section className={`hero-shell hero-shell--local ${imagemPrincipal ? '' : 'hero-shell--single'} fade-in`}>
+      <section className="hero-shell hero-shell--local hero-shell--single fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao por local de prova</div>
           <div className="local-hero-topline">
@@ -299,18 +299,6 @@ export default function LocalDetalhe() {
             <div className="hero-proof-chip">Conteudo direto para reduzir surpresa e ansiedade</div>
           </div>
         </div>
-        {imagemPrincipal && (
-          <div className="local-hero-visual">
-            <img src={imagemPrincipal} alt={`Imagem do local ${local.nome}`} className="local-hero-image" />
-            <div className="local-hero-visual-overlay" />
-            <div className="local-hero-badge">
-              <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
-                {formatStatusComercialLocal(local.statusComercial)}
-              </span>
-              <span className="local-hero-badge-copy">{local.cidade}</span>
-            </div>
-          </div>
-        )}
       </section>
 
       <RevealSection as="section" className="landing-section" delay={40} eager>

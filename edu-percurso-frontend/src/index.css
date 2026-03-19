@@ -1511,55 +1511,6 @@ body {
   max-width: 420px;
 }
 
-.local-hero-visual {
-  position: relative;
-  min-height: 320px;
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at top right, rgba(45,224,154,0.12), transparent 28%),
-    linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
-  box-shadow: var(--shadow);
-}
-
-.local-hero-image {
-  width: 100%;
-  height: 100%;
-  min-height: 320px;
-  object-fit: cover;
-  display: block;
-}
-
-.local-hero-visual-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(11,15,23,0.12), rgba(11,15,23,0.55));
-}
-
-.local-hero-badge {
-  position: absolute;
-  left: 1rem;
-  right: 1rem;
-  bottom: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 18px;
-  background: rgba(14,17,23,0.72);
-  backdrop-filter: blur(10px);
-}
-
-.local-hero-badge-copy {
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  text-align: right;
-}
-
 .landing-inline-strip--compact {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -2473,23 +2424,6 @@ body {
   .spotlight-brand-row,
   .local-hero-topline {
     align-items: flex-start;
-  }
-
-  .local-hero-visual {
-    min-height: 240px;
-  }
-
-  .local-hero-image {
-    min-height: 240px;
-  }
-
-  .local-hero-badge {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .local-hero-badge-copy {
-    text-align: left;
   }
 
   .local-offer-box {
