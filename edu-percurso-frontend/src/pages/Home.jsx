@@ -60,12 +60,6 @@ const FAIXA_CONFIANCA = [
   'Pagamento por Pix ou cartao, com liberacao automatica',
 ]
 
-const HERO_DESTAQUES = [
-  'Videos reais e simulacao da prova',
-  'Compra simples com Mercado Pago',
-  'Acesso por periodo, sem renovacao automatica',
-]
-
 const SAIBA_MAIS = [
   {
     titulo: 'Como funciona',
@@ -146,7 +140,7 @@ export default function Home() {
 
   return (
     <div className="landing-page landing-page--eager">
-      <section className="hero-shell fade-in">
+      <section className="hero-shell hero-shell--single fade-in">
         <div className="hero-copy">
           <div className="hero-kicker">Preparacao pratica por local de prova</div>
           <h1 className="hero-title">Descubra os percursos mais frequentes da sua prova pratica.</h1>
@@ -176,33 +170,6 @@ export default function Home() {
             <div className="hero-proof-chip hero-proof-chip--strong">Mais confianca no dia da prova</div>
             <div className="hero-proof-chip">1 local por compra, com acesso por periodo</div>
             <div className="hero-proof-chip">Pagamento por Pix ou cartao</div>
-          </div>
-        </div>
-
-        <div className="hero-panel">
-          <div className="hero-panel-copy">
-            Escolha o local, veja a disponibilidade e abra os detalhes so quando quiser aprofundar.
-          </div>
-          <div className="hero-panel-metrics">
-            <div className="hero-panel-metric">
-              <span className="hero-panel-metric-value">1</span>
-              <span className="hero-panel-metric-label">local por compra</span>
-            </div>
-            <div className="hero-panel-metric">
-              <span className="hero-panel-metric-value">Pix</span>
-              <span className="hero-panel-metric-label">ou cartao</span>
-            </div>
-            <div className="hero-panel-metric">
-              <span className="hero-panel-metric-value">Sem</span>
-              <span className="hero-panel-metric-label">renovacao automatica</span>
-            </div>
-          </div>
-          <div className="hero-list">
-            {HERO_DESTAQUES.map(item => (
-              <div key={item} className="hero-list-item">
-                {item}
-              </div>
-            ))}
           </div>
         </div>
       </section>
