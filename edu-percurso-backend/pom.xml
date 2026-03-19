@@ -94,6 +94,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- E-mail -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Actuator (healthcheck Docker) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

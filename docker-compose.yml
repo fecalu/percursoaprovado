@@ -36,6 +36,14 @@ services:
       JWT_SECRET:                 ${JWT_SECRET:-edu-percurso-chave-secreta-minimo-32-chars}
       JWT_EXPIRACAO_MS:           ${JWT_EXPIRACAO_MS:-86400000}
       APP_BASE_URL:               ${APP_BASE_URL:-http://localhost}
+      MAIL_HOST:                  ${MAIL_HOST:-}
+      MAIL_PORT:                  ${MAIL_PORT:-465}
+      MAIL_USERNAME:              ${MAIL_USERNAME:-}
+      MAIL_PASSWORD:              ${MAIL_PASSWORD:-}
+      MAIL_FROM:                  ${MAIL_FROM:-}
+      MAIL_SSL_ENABLED:           ${MAIL_SSL_ENABLED:-true}
+      MAIL_STARTTLS_ENABLED:      ${MAIL_STARTTLS_ENABLED:-false}
+      PASSWORD_RESET_EXPIRATION_MINUTES: ${PASSWORD_RESET_EXPIRATION_MINUTES:-30}
       MP_PUBLIC_KEY:              ${MP_PUBLIC_KEY:-}
       MP_ACCESS_TOKEN:            ${MP_ACCESS_TOKEN:-}
       MP_WEBHOOK_SECRET:          ${MP_WEBHOOK_SECRET:-}

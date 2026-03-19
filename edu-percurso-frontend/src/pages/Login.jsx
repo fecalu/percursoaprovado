@@ -56,6 +56,12 @@ export default function Login() {
             />
           </div>
 
+          <div className="auth-meta-row">
+            <Link className="auth-inline-link" to="/forgot-password">
+              Esqueci minha senha
+            </Link>
+          </div>
+
           {erro && <div className="form-error" style={{ marginBottom: '1rem' }}>{erro}</div>}
 
           <button

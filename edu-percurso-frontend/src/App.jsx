@@ -7,6 +7,8 @@ import LocalDetalhe from './pages/LocalDetalhe'
 import CheckoutResultado from './pages/CheckoutResultado'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Biblioteca from './pages/Biblioteca'
 import Player from './pages/Player'
 import MeusAcessos from './pages/MeusAcessos'
@@ -30,6 +32,8 @@ export default function App() {
           <Route path="/checkout/:status" element={<CheckoutResultado />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/biblioteca" element={<PrivateRoute><Biblioteca /></PrivateRoute>} />
           <Route path="/percursos" element={<Navigate to="/biblioteca" replace />} />

@@ -6,10 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.UUID;
-
-// ── Auth ──────────────────────────────────────────────────────────────────────
-
 public class AuthDTO {
 
     @Data
@@ -33,6 +29,31 @@ public class AuthDTO {
 
         @NotBlank(message = "Informe sua senha.")
         private String senha;
+    }
+
+    @Data
+    public static class ForgotPasswordRequest {
+        @NotBlank(message = "Informe seu e-mail.")
+        @Email(message = "Informe um e-mail valido.")
+        private String email;
+    }
+
+    @Data
+    public static class ResetPasswordRequest {
+        @NotBlank(message = "Informe o token de redefinicao.")
+        private String token;
+
+        @Size(min = 6, message = "A nova senha deve ter pelo menos 6 caracteres.")
+        private String novaSenha;
+    }
+
+    @Data
+    public static class MessageResponse {
+        private String mensagem;
+
+        public MessageResponse(String mensagem) {
+            this.mensagem = mensagem;
+        }
     }
 
     @Data

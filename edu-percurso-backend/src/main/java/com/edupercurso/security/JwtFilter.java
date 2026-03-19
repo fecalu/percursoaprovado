@@ -1,5 +1,7 @@
 package com.edupercurso.security;
 
+import com.edupercurso.entity.Usuario;
+import com.edupercurso.repository.UsuarioRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -19,6 +23,7 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req,
@@ -31,16 +36,32 @@ public class JwtFilter extends OncePerRequestFilter {
             String token = header.substring(7);
             if (jwtUtil.valido(token)) {
                 String email = jwtUtil.extrairEmail(token);
-                String role  = jwtUtil.extrairRole(token);
+                Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
 
-                var auth = new UsernamePasswordAuthenticationToken(
-                        email, null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + role))
-                );
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                if (usuario != null && tokenAindaValidoDepoisDaSenha(token, usuario)) {
+                    var auth = new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRole().name()))
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                }
             }
         }
 
         chain.doFilter(req, res);
+    }
+
+    private boolean tokenAindaValidoDepoisDaSenha(String token, Usuario usuario) {
+        if (usuario.getSenhaAlteradaEm() == null) {
+            return true;
+        }
+
+        LocalDateTime emitidoEm = LocalDateTime.ofInstant(
+                jwtUtil.extrairEmitidoEm(token).toInstant(),
+                ZoneId.systemDefault()
+        );
+
+        return !emitidoEm.isBefore(usuario.getSenhaAlteradaEm());
     }
 }

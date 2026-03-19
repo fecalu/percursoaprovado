@@ -29,6 +29,9 @@ public class Usuario {
     @Column(nullable = false)
     private Role role;
 
+    @Column(name = "senha_alterada_em")
+    private LocalDateTime senhaAlteradaEm;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;

@@ -23,4 +23,18 @@ public class AuthController {
     public ResponseEntity<AuthDTO.LoginResponse> login(@Valid @RequestBody AuthDTO.LoginRequest req) {
         return ResponseEntity.ok(authService.login(req));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<AuthDTO.MessageResponse> forgotPassword(@Valid @RequestBody AuthDTO.ForgotPasswordRequest req) {
+        authService.solicitarRedefinicao(req);
+        return ResponseEntity.ok(new AuthDTO.MessageResponse(
+                "Se esse e-mail estiver cadastrado, enviaremos as instrucoes para redefinir sua senha."
+        ));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<AuthDTO.MessageResponse> resetPassword(@Valid @RequestBody AuthDTO.ResetPasswordRequest req) {
+        authService.redefinirSenha(req);
+        return ResponseEntity.ok(new AuthDTO.MessageResponse("Senha atualizada com sucesso."));
+    }
 }

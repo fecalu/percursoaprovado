@@ -15,10 +15,11 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final PasswordResetService passwordResetService;
 
     public AuthDTO.LoginResponse registrar(AuthDTO.RegisterRequest req) {
         if (usuarioRepository.existsByEmail(req.getEmail())) {
-            throw new IllegalArgumentException("E-mail já cadastrado.");
+            throw new IllegalArgumentException("E-mail ja cadastrado.");
         }
 
         Usuario usuario = Usuario.builder()
@@ -36,13 +37,21 @@ public class AuthService {
 
     public AuthDTO.LoginResponse login(AuthDTO.LoginRequest req) {
         Usuario usuario = usuarioRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
+                .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas."));
 
         if (!passwordEncoder.matches(req.getSenha(), usuario.getSenhaHash())) {
-            throw new IllegalArgumentException("Credenciais inválidas.");
+            throw new IllegalArgumentException("Credenciais invalidas.");
         }
 
         String token = jwtUtil.gerar(usuario.getEmail(), usuario.getRole().name());
         return new AuthDTO.LoginResponse(token, usuario.getNome(), usuario.getRole());
+    }
+
+    public void solicitarRedefinicao(AuthDTO.ForgotPasswordRequest req) {
+        passwordResetService.solicitarRedefinicao(req.getEmail());
+    }
+
+    public void redefinirSenha(AuthDTO.ResetPasswordRequest req) {
+        passwordResetService.redefinirSenha(req.getToken(), req.getNovaSenha());
     }
 }

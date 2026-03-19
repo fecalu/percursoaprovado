@@ -1,6 +1,8 @@
 package com.edupercurso.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -37,6 +39,10 @@ public class JwtUtil {
 
     public String extrairRole(String token) {
         return claims(token).get("role", String.class);
+    }
+
+    public Date extrairEmitidoEm(String token) {
+        return claims(token).getIssuedAt();
     }
 
     public boolean valido(String token) {
