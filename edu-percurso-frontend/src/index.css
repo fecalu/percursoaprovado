@@ -722,6 +722,89 @@ body {
   background: rgba(45,224,154,0.1);
 }
 
+.landing-section--tight {
+  gap: 0.2rem;
+}
+
+.checkout-watch-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(45,224,154,0.14), transparent 30%),
+    linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
+  box-shadow: var(--shadow);
+}
+
+.checkout-watch-card--success {
+  border-color: rgba(45,224,154,0.24);
+}
+
+.checkout-watch-card--danger {
+  border-color: rgba(255,107,107,0.24);
+  background:
+    radial-gradient(circle at top left, rgba(255,107,107,0.12), transparent 30%),
+    linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
+}
+
+.checkout-watch-kicker {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.75px;
+  text-transform: uppercase;
+}
+
+.checkout-watch-title {
+  margin-top: 0.45rem;
+  font-family: var(--font-head);
+  font-size: 25px;
+  line-height: 1.08;
+  letter-spacing: -0.7px;
+}
+
+.checkout-watch-text {
+  margin-top: 0.55rem;
+  max-width: 720px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.checkout-watch-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.95rem;
+}
+
+.checkout-watch-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.checkout-watch-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.checkout-watch-actions .btn {
+  min-height: 48px;
+}
+
 .hero-panel {
   position: relative;
   z-index: 1;
@@ -2430,6 +2513,21 @@ body {
 
   .hero-proof-grid {
     grid-template-columns: 1fr;
+  }
+
+  .checkout-watch-card {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .checkout-watch-actions {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .checkout-watch-actions .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .hero-panel-metrics {

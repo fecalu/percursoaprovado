@@ -2,6 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { pedidoService } from '../services/api'
+import {
+  createCheckoutMonitor,
+  loadCheckoutMonitor,
+  mergeCheckoutMonitor,
+  notifyCheckoutMonitor,
+  saveCheckoutMonitor,
+} from '../utils/checkoutMonitor'
 
 function useQuery() {
   const { search } = useLocation()
@@ -36,10 +43,53 @@ export default function CheckoutResultado() {
   const mensagem = MENSAGENS[status] || MENSAGENS.falha
 
   useEffect(() => {
+    if (!externalReference) return
+
+    const monitorAtual = loadCheckoutMonitor()
+    const mesmaCompra =
+      (monitorAtual?.referencia && monitorAtual.referencia === externalReference)
+      || (paymentId && monitorAtual?.paymentId === paymentId)
+
+    if (mesmaCompra) {
+      const proximoMonitor = mergeCheckoutMonitor(monitorAtual, {
+        paymentId: paymentId || monitorAtual.paymentId,
+      })
+      saveCheckoutMonitor(proximoMonitor)
+    }
+
+    notifyCheckoutMonitor({
+      referencia: externalReference,
+      paymentId,
+      localSlug: monitorAtual?.localSlug || '',
+      statusHint: status,
+    })
+  }, [externalReference, paymentId, status])
+
+  useEffect(() => {
     if (!user || !paymentId || !externalReference || status !== 'sucesso') return
 
     setLoading(true)
     pedidoService.sincronizarRetorno({ paymentId, externalReference })
+      .then(pedidoAtualizado => {
+        const monitorAtual = loadCheckoutMonitor()
+        const proximoMonitor = mergeCheckoutMonitor(
+          monitorAtual,
+          createCheckoutMonitor(
+            pedidoAtualizado,
+            monitorAtual?.localSlug || pedidoAtualizado?.localProvaSlug || ''
+          )
+        )
+
+        saveCheckoutMonitor(proximoMonitor)
+        notifyCheckoutMonitor({
+          pedidoId: pedidoAtualizado.id,
+          referencia: pedidoAtualizado.referencia || externalReference,
+          localSlug: pedidoAtualizado.localProvaSlug || monitorAtual?.localSlug || '',
+          paymentId: pedidoAtualizado.paymentId || paymentId,
+          paymentStatus: pedidoAtualizado.paymentStatus,
+          status: pedidoAtualizado.status,
+        })
+      })
       .catch(error => {
         setErro(error.response?.data?.erro || 'Ainda estamos aguardando a confirmacao do pagamento.')
       })

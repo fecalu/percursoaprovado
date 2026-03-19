@@ -1,10 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import RevealSection from '../components/RevealSection'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../hooks/useToast'
 import { localProvaService, pedidoService, planoService } from '../services/api'
-import { formatPlanoDuracao, formatStatusComercialLocal } from '../utils/formatters'
+import {
+  formatDataHoraCurta,
+  formatPagamentoStatus,
+  formatPlanoDuracao,
+  formatSituacaoPedido,
+  formatStatusComercialLocal,
+  getSituacaoPedidoBadgeClass,
+} from '../utils/formatters'
+import {
+  clearCheckoutMonitor,
+  createCheckoutMonitor,
+  getCheckoutMonitorStage,
+  loadCheckoutMonitor,
+  mergeCheckoutMonitor,
+  notifyCheckoutMonitor,
+  saveCheckoutMonitor,
+  subscribeCheckoutMonitor,
+} from '../utils/checkoutMonitor'
 import { resolveMediaUrl } from '../utils/media'
 
 function fmtMoeda(centavos) {
@@ -104,6 +121,8 @@ const HERO_DESTAQUES_LOCAL = [
   'Baliza, embreagem e erros que mais tiram pontos',
 ]
 
+const CHECKOUT_POLLING_MS = 5000
+
 function getCaixaDestaque(local) {
   const itens = [local?.boxItem1, local?.boxItem2, local?.boxItem3]
     .map(item => item?.trim())
@@ -150,6 +169,46 @@ function getPlanoDestaque(duracaoDias) {
   }
 }
 
+function isCheckoutDoLocal(monitor, slug) {
+  return Boolean(monitor?.localSlug) && monitor.localSlug === slug
+}
+
+function isMesmoPedido(monitor, pedido) {
+  if (!monitor || !pedido) return false
+  if (monitor.pedidoId && pedido.id && monitor.pedidoId === pedido.id) return true
+  if (monitor.referencia && pedido.referencia && monitor.referencia === pedido.referencia) return true
+  return false
+}
+
+function getCheckoutAcompanhamento(monitor) {
+  const etapa = getCheckoutMonitorStage(monitor)
+
+  if (etapa === 'SUCCESS') {
+    return {
+      variant: 'success',
+      kicker: 'Pagamento confirmado',
+      titulo: 'Pagamento concluido com sucesso',
+      texto: 'O Mercado Pago confirmou esse pagamento. Seu acesso deve aparecer automaticamente na sua conta.',
+    }
+  }
+
+  if (etapa === 'FAILED') {
+    return {
+      variant: 'danger',
+      kicker: 'Pagamento nao concluido',
+      titulo: 'Ainda nao conseguimos confirmar esse pagamento',
+      texto: 'Confira o status em Meus pagamentos. Se precisar, voce pode retomar ou iniciar uma nova tentativa.',
+    }
+  }
+
+  return {
+    variant: 'pending',
+    kicker: 'Pagamento em andamento',
+    titulo: 'Estamos aguardando a confirmacao do Mercado Pago',
+    texto: 'Finalize o checkout na outra aba. Assim que a confirmacao chegar, esta tela se atualiza automaticamente.',
+  }
+}
+
 export default function LocalDetalhe() {
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -159,6 +218,13 @@ export default function LocalDetalhe() {
   const [planos, setPlanos] = useState([])
   const [loading, setLoading] = useState(true)
   const [solicitandoId, setSolicitandoId] = useState('')
+  const [checkoutMonitor, setCheckoutMonitor] = useState(null)
+  const [sincronizandoCheckout, setSincronizandoCheckout] = useState(false)
+  const checkoutMonitorRef = useRef(null)
+
+  useEffect(() => {
+    checkoutMonitorRef.current = checkoutMonitor
+  }, [checkoutMonitor])
 
   useEffect(() => {
     Promise.all([localProvaService.buscar(slug), planoService.listar({ localSlug: slug })])
@@ -169,17 +235,144 @@ export default function LocalDetalhe() {
       .finally(() => setLoading(false))
   }, [slug])
 
+  useEffect(() => {
+    const monitorSalvo = loadCheckoutMonitor()
+    if (isCheckoutDoLocal(monitorSalvo, slug)) {
+      setCheckoutMonitor(monitorSalvo)
+      return
+    }
+    setCheckoutMonitor(null)
+  }, [slug])
+
+  async function atualizarCheckoutMonitor({ manual = false } = {}) {
+    const monitorAtual = checkoutMonitorRef.current || loadCheckoutMonitor()
+    if (!isCheckoutDoLocal(monitorAtual, slug)) return
+
+    if (manual) {
+      setSincronizandoCheckout(true)
+    }
+
+    try {
+      const pedidos = await pedidoService.minhas()
+      const pedidoAtualizado = pedidos.find(item => isMesmoPedido(monitorAtual, item))
+
+      if (!pedidoAtualizado) return
+
+      const proximoMonitor = mergeCheckoutMonitor(
+        monitorAtual,
+        createCheckoutMonitor(pedidoAtualizado, monitorAtual.localSlug || slug)
+      )
+      const etapaAnterior = getCheckoutMonitorStage(monitorAtual)
+      const proximaEtapa = getCheckoutMonitorStage(proximoMonitor)
+
+      saveCheckoutMonitor(proximoMonitor)
+      setCheckoutMonitor(proximoMonitor)
+
+      if (etapaAnterior !== proximaEtapa) {
+        if (proximaEtapa === 'SUCCESS') {
+          show('Pagamento confirmado. Seu acesso ja deve aparecer na sua conta.')
+        }
+        if (proximaEtapa === 'FAILED') {
+          show('O Mercado Pago ainda nao confirmou esse pagamento.', 'error')
+        }
+      }
+    } catch (error) {
+      if (manual) {
+        show(error.response?.data?.erro || 'Nao foi possivel atualizar o status do pagamento.', 'error')
+      }
+    } finally {
+      if (manual) {
+        setSincronizandoCheckout(false)
+      }
+    }
+  }
+
+  useEffect(() => {
+    if (!isCheckoutDoLocal(checkoutMonitor, slug) || getCheckoutMonitorStage(checkoutMonitor) !== 'PENDING') return
+
+    let ativo = true
+
+    async function sincronizarSilenciosamente() {
+      if (!ativo) return
+      await atualizarCheckoutMonitor()
+    }
+
+    sincronizarSilenciosamente()
+    const intervalo = window.setInterval(sincronizarSilenciosamente, CHECKOUT_POLLING_MS)
+
+    return () => {
+      ativo = false
+      window.clearInterval(intervalo)
+    }
+  }, [checkoutMonitor?.pedidoId, checkoutMonitor?.referencia, checkoutMonitor?.status, checkoutMonitor?.paymentStatus, checkoutMonitor?.localSlug, slug])
+
+  useEffect(() => {
+    if (!isCheckoutDoLocal(checkoutMonitor, slug) || getCheckoutMonitorStage(checkoutMonitor) !== 'PENDING') return
+
+    function atualizarAoVoltar() {
+      if (document.visibilityState === 'hidden') return
+      atualizarCheckoutMonitor()
+    }
+
+    window.addEventListener('focus', atualizarAoVoltar)
+    document.addEventListener('visibilitychange', atualizarAoVoltar)
+
+    return () => {
+      window.removeEventListener('focus', atualizarAoVoltar)
+      document.removeEventListener('visibilitychange', atualizarAoVoltar)
+    }
+  }, [checkoutMonitor?.pedidoId, checkoutMonitor?.referencia, checkoutMonitor?.status, checkoutMonitor?.paymentStatus, checkoutMonitor?.localSlug, slug])
+
+  useEffect(() => {
+    return subscribeCheckoutMonitor(message => {
+      const monitorSalvo = loadCheckoutMonitor()
+      const monitorAtual = checkoutMonitorRef.current || monitorSalvo
+      const mesmoPedido =
+        (message?.pedidoId && monitorAtual?.pedidoId === message.pedidoId)
+        || (message?.referencia && monitorAtual?.referencia === message.referencia)
+      const mesmoLocal = message?.localSlug && message.localSlug === slug
+
+      if (!mesmoPedido && !mesmoLocal) return
+
+      if (isCheckoutDoLocal(monitorSalvo, slug)) {
+        setCheckoutMonitor(monitorSalvo)
+      }
+
+      atualizarCheckoutMonitor()
+    })
+  }, [slug])
+
   async function solicitarPlano(planoId) {
+    const abaCheckout = window.open('', '_blank')
     setSolicitandoId(planoId)
     try {
       const pedido = await pedidoService.criar({ planoId })
+      const monitor = createCheckoutMonitor(pedido, slug)
+      saveCheckoutMonitor(monitor)
+      setCheckoutMonitor(monitor)
+      notifyCheckoutMonitor({
+        pedidoId: monitor.pedidoId,
+        referencia: monitor.referencia,
+        localSlug: monitor.localSlug,
+      })
+
       if (pedido.checkoutUrl) {
+        if (abaCheckout) {
+          abaCheckout.opener = null
+          abaCheckout.location.href = pedido.checkoutUrl
+          show('Checkout aberto em outra aba. Vamos acompanhar a confirmacao por aqui.')
+          return
+        }
+
+        show('Seu navegador bloqueou a nova aba. Vamos abrir o checkout nesta mesma pagina.')
         window.location.href = pedido.checkoutUrl
         return
       }
+      if (abaCheckout) abaCheckout.close()
       show('Pedido criado com sucesso.')
       setTimeout(() => navigate('/meus-pedidos'), 600)
     } catch (error) {
+      if (abaCheckout) abaCheckout.close()
       const mensagem = error.response?.data?.erro || 'Nao foi possivel iniciar a compra.'
       show(mensagem, 'error')
       if (mensagem.includes('pedido pendente')) {
@@ -188,6 +381,11 @@ export default function LocalDetalhe() {
     } finally {
       setSolicitandoId('')
     }
+  }
+
+  function fecharAcompanhamentoCheckout() {
+    clearCheckoutMonitor()
+    setCheckoutMonitor(null)
   }
 
   function renderAcaoPlano(plano) {
@@ -228,6 +426,14 @@ export default function LocalDetalhe() {
   const subtituloComercial = getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade)
   const caixaDestaque = getCaixaDestaque(local)
   const imagemPrincipal = resolveMediaUrl(local.imagemPrincipalUrl)
+  const checkoutAcompanhamento = checkoutMonitor ? getCheckoutAcompanhamento(checkoutMonitor) : null
+  const checkoutSituacao = checkoutMonitor
+    ? formatSituacaoPedido(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
+    : ''
+  const checkoutBadgeClass = checkoutMonitor
+    ? getSituacaoPedidoBadgeClass(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
+    : 'badge-gray'
+  const checkoutEtapa = checkoutMonitor ? getCheckoutMonitorStage(checkoutMonitor) : 'IDLE'
   const saibaMaisLocal = [
     {
       titulo: 'O que voce vai encontrar',
@@ -290,6 +496,89 @@ export default function LocalDetalhe() {
           </div>
         </div>
       </section>
+
+      {checkoutMonitor && (
+        <RevealSection as="section" className="landing-section landing-section--tight" delay={20} eager>
+          <div className={`checkout-watch-card checkout-watch-card--${checkoutAcompanhamento.variant}`}>
+            <div className="checkout-watch-copy">
+              <div className="checkout-watch-kicker">{checkoutAcompanhamento.kicker}</div>
+              <div className="checkout-watch-title">{checkoutAcompanhamento.titulo}</div>
+              <div className="checkout-watch-text">{checkoutAcompanhamento.texto}</div>
+              <div className="checkout-watch-meta">
+                <span className={`badge ${checkoutBadgeClass}`}>{checkoutSituacao}</span>
+                {checkoutMonitor.referencia && (
+                  <span className="checkout-watch-pill">Pedido {checkoutMonitor.referencia}</span>
+                )}
+                {checkoutMonitor.paymentId && (
+                  <span className="checkout-watch-pill">Pagamento {checkoutMonitor.paymentId}</span>
+                )}
+                {checkoutMonitor.paymentStatus && (
+                  <span className="checkout-watch-pill">
+                    Mercado Pago: {formatPagamentoStatus(checkoutMonitor.paymentStatus)}
+                  </span>
+                )}
+              </div>
+              {checkoutMonitor.pagoEm && (
+                <div className="mini-copy" style={{ marginTop: '0.65rem' }}>
+                  Confirmado em {formatDataHoraCurta(checkoutMonitor.pagoEm)}.
+                </div>
+              )}
+            </div>
+
+            <div className="checkout-watch-actions">
+              {checkoutEtapa === 'PENDING' ? (
+                <>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => atualizarCheckoutMonitor({ manual: true })}
+                    disabled={sincronizandoCheckout}
+                  >
+                    {sincronizandoCheckout ? 'Atualizando...' : 'Atualizar agora'}
+                  </button>
+                  {checkoutMonitor.checkoutUrl && (
+                    <a
+                      className="btn btn-ghost"
+                      href={checkoutMonitor.checkoutUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Abrir checkout
+                    </a>
+                  )}
+                  <button className="btn btn-ghost" onClick={() => navigate('/meus-pedidos')}>
+                    Ver meus pagamentos
+                  </button>
+                </>
+              ) : (
+                <>
+                  {checkoutEtapa === 'SUCCESS' ? (
+                    <button className="btn btn-primary" onClick={() => navigate('/meus-acessos')}>
+                      Ir para meus acessos
+                    </button>
+                  ) : (
+                    <button className="btn btn-primary" onClick={() => navigate('/meus-pedidos')}>
+                      Ver meus pagamentos
+                    </button>
+                  )}
+                  {checkoutMonitor.checkoutUrl && checkoutEtapa === 'FAILED' && (
+                    <a
+                      className="btn btn-ghost"
+                      href={checkoutMonitor.checkoutUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Abrir checkout novamente
+                    </a>
+                  )}
+                  <button className="btn btn-ghost" onClick={fecharAcompanhamentoCheckout}>
+                    Fechar aviso
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </RevealSection>
+      )}
 
       <RevealSection as="section" className="landing-section" delay={40} eager>
         <div className="page-title">{compraLiberada ? 'Escolha seu periodo de acesso' : 'Disponibilidade do local'}</div>
