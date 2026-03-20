@@ -8,7 +8,9 @@ const VAZIO = {
   titulo: '',
   descricao: '',
   resumo: '',
+  videoProvider: 'YOUTUBE',
   videoUrl: '',
+  videoAssetId: '',
   thumbnailUrl: '',
   duracaoSegundos: '',
   categoriaId: '',
@@ -29,6 +31,7 @@ const TIPOS_CONTEUDO = [
   'EXAMINADOR',
 ]
 
+const VIDEO_PROVIDERS = ['YOUTUBE', 'VIMEO', 'BUNNY']
 const TIPOS_PONTO_ATENCAO = [
   'DICA_IMPORTANTE',
   'ERRO_COMUM',
@@ -88,6 +91,17 @@ function formatarModoPonto(modo) {
   }
 }
 
+function formatarVideoProvider(provider) {
+  switch (provider) {
+    case 'VIMEO':
+      return 'Vimeo'
+    case 'BUNNY':
+      return 'Bunny Stream'
+    default:
+      return 'YouTube'
+  }
+}
+
 export default function AdminPercursoForm() {
   const { id } = useParams()
   const isEdicao = Boolean(id)
@@ -119,7 +133,9 @@ export default function AdminPercursoForm() {
           titulo: percursoResp.titulo || '',
           descricao: percursoResp.descricao || '',
           resumo: percursoResp.resumo || '',
+          videoProvider: percursoResp.videoProvider || 'YOUTUBE',
           videoUrl: percursoResp.videoUrl || '',
+          videoAssetId: percursoResp.videoAssetId || '',
           thumbnailUrl: percursoResp.thumbnailUrl || '',
           duracaoSegundos: percursoResp.duracaoSegundos ? String(Math.floor(percursoResp.duracaoSegundos / 60)) : '',
           categoriaId: percursoResp.categoriaId || '',
@@ -179,7 +195,13 @@ export default function AdminPercursoForm() {
     const novosErros = {}
 
     if (!form.titulo.trim()) novosErros.titulo = 'Campo obrigatorio'
-    if (!form.videoUrl.trim()) novosErros.videoUrl = 'Campo obrigatorio'
+    if (form.videoProvider === 'BUNNY') {
+      if (!form.videoAssetId.trim() && !form.videoUrl.trim()) {
+        novosErros.videoAssetId = 'Informe o Video ID do Bunny ou a URL de embed.'
+      }
+    } else if (!form.videoUrl.trim()) {
+      novosErros.videoUrl = 'Campo obrigatorio'
+    }
 
     setErros(novosErros)
     return Object.keys(novosErros).length === 0
@@ -231,7 +253,9 @@ export default function AdminPercursoForm() {
       titulo: form.titulo.trim(),
       descricao: form.descricao.trim() || null,
       resumo: form.resumo.trim() || null,
+      videoProvider: form.videoProvider,
       videoUrl: form.videoUrl.trim(),
+      videoAssetId: form.videoProvider === 'BUNNY' ? (form.videoAssetId.trim() || null) : null,
       thumbnailUrl: form.thumbnailUrl.trim() || null,
       duracaoSegundos: form.duracaoSegundos ? Number(form.duracaoSegundos) * 60 : null,
       categoriaId: form.categoriaId || null,
@@ -350,6 +374,21 @@ export default function AdminPercursoForm() {
             </div>
 
             <div className="form-group">
+              <label className="form-label">Provedor do video</label>
+              <select
+                className="form-select"
+                value={form.videoProvider}
+                onChange={event => set('videoProvider', event.target.value)}
+              >
+                {VIDEO_PROVIDERS.map(provider => (
+                  <option key={provider} value={provider}>{formatarVideoProvider(provider)}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
               <label className="form-label">Duracao (minutos)</label>
               <input
                 className="form-input"
@@ -360,9 +399,7 @@ export default function AdminPercursoForm() {
                 onChange={event => set('duracaoSegundos', event.target.value)}
               />
             </div>
-          </div>
 
-          <div className="form-row">
             <div className="form-group">
               <label className="form-label">Ordem de exibicao</label>
               <input
@@ -373,7 +410,9 @@ export default function AdminPercursoForm() {
                 onChange={event => set('ordemExibicao', event.target.value)}
               />
             </div>
+          </div>
 
+          <div className="form-row">
             <div className="form-group">
               <label className="form-label">Upload da thumbnail</label>
               <input
@@ -388,6 +427,8 @@ export default function AdminPercursoForm() {
                 {enviandoThumbnail ? ' Enviando imagem...' : ''}
               </div>
             </div>
+
+            <div className="form-group" />
           </div>
 
           <div className="form-group">
@@ -448,16 +489,47 @@ export default function AdminPercursoForm() {
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">URL do video * (YouTube ou Vimeo)</label>
-            <input
-              className="form-input"
-              placeholder="https://youtube.com/watch?v=..."
-              value={form.videoUrl}
-              onChange={event => set('videoUrl', event.target.value)}
-            />
-            {erros.videoUrl && <div className="form-error">{erros.videoUrl}</div>}
-          </div>
+          {form.videoProvider === 'BUNNY' ? (
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Video ID do Bunny *</label>
+                <input
+                  className="form-input"
+                  placeholder="GUID do video no Bunny Stream"
+                  value={form.videoAssetId}
+                  onChange={event => set('videoAssetId', event.target.value)}
+                />
+                {erros.videoAssetId && <div className="form-error">{erros.videoAssetId}</div>}
+                <div className="mini-copy">
+                  Informe o ID do video no Bunny. O servidor monta o embed automaticamente quando a library estiver configurada.
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">URL de embed do Bunny</label>
+                <input
+                  className="form-input"
+                  placeholder="https://iframe.mediadelivery.net/embed/..."
+                  value={form.videoUrl}
+                  onChange={event => set('videoUrl', event.target.value)}
+                />
+                <div className="mini-copy">
+                  Opcional. Use apenas se quiser sobrescrever manualmente a URL de embed.
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="form-group">
+              <label className="form-label">URL do video * ({formatarVideoProvider(form.videoProvider)})</label>
+              <input
+                className="form-input"
+                placeholder={form.videoProvider === 'VIMEO' ? 'https://vimeo.com/...' : 'https://youtube.com/watch?v=...'}
+                value={form.videoUrl}
+                onChange={event => set('videoUrl', event.target.value)}
+              />
+              {erros.videoUrl && <div className="form-error">{erros.videoUrl}</div>}
+            </div>
+          )}
 
           <div className="form-group">
             <div className="section-heading">Pontos de atencao</div>

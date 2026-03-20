@@ -9,6 +9,7 @@ import com.edupercurso.entity.Usuario;
 import com.edupercurso.repository.CategoriaRepository;
 import com.edupercurso.repository.PercursoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class PercursoService {
+
+    @Value("${app.video.bunny.library-id:}")
+    private String bunnyLibraryId;
 
     private final PercursoRepository percursoRepository;
     private final CategoriaRepository categoriaRepository;
@@ -66,10 +70,13 @@ public class PercursoService {
 
     @Transactional
     public PercursoDTO.Response criar(PercursoDTO.Request request) {
+        Percurso.VideoProvider videoProvider = resolverVideoProvider(request);
         Percurso percurso = Percurso.builder()
                 .titulo(request.getTitulo())
                 .descricao(request.getDescricao())
-                .videoUrl(request.getVideoUrl())
+                .videoUrl(resolverVideoUrl(request, videoProvider))
+                .videoProvider(videoProvider)
+                .videoAssetId(resolverVideoAssetId(request, videoProvider))
                 .duracaoSegundos(request.getDuracaoSegundos())
                 .ativo(request.isAtivo())
                 .categoria(resolverCategoria(request.getCategoriaId()))
@@ -88,10 +95,13 @@ public class PercursoService {
     @Transactional
     public PercursoDTO.Response atualizar(UUID id, PercursoDTO.Request request) {
         Percurso percurso = buscarEntidadePorId(id);
+        Percurso.VideoProvider videoProvider = resolverVideoProvider(request);
 
         percurso.setTitulo(request.getTitulo());
         percurso.setDescricao(request.getDescricao());
-        percurso.setVideoUrl(request.getVideoUrl());
+        percurso.setVideoUrl(resolverVideoUrl(request, videoProvider));
+        percurso.setVideoProvider(videoProvider);
+        percurso.setVideoAssetId(resolverVideoAssetId(request, videoProvider));
         percurso.setDuracaoSegundos(request.getDuracaoSegundos());
         percurso.setAtivo(request.isAtivo());
         percurso.setCategoria(resolverCategoria(request.getCategoriaId()));
@@ -199,5 +209,78 @@ public class PercursoService {
 
         String texto = valor.trim();
         return texto.isBlank() ? null : texto;
+    }
+
+    private Percurso.VideoProvider resolverVideoProvider(PercursoDTO.Request request) {
+        if (request.getVideoProvider() != null) {
+            return request.getVideoProvider();
+        }
+
+        String videoUrl = normalizarTexto(request.getVideoUrl());
+        if (videoUrl == null) {
+            return Percurso.VideoProvider.YOUTUBE;
+        }
+
+        if (videoUrl.contains("mediadelivery.net/embed/") || videoUrl.contains("video.bunnycdn.com")) {
+            return Percurso.VideoProvider.BUNNY;
+        }
+        if (videoUrl.contains("vimeo.com")) {
+            return Percurso.VideoProvider.VIMEO;
+        }
+        return Percurso.VideoProvider.YOUTUBE;
+    }
+
+    private String resolverVideoUrl(PercursoDTO.Request request, Percurso.VideoProvider videoProvider) {
+        String videoUrl = normalizarTexto(request.getVideoUrl());
+
+        if (videoProvider == Percurso.VideoProvider.BUNNY) {
+            String videoAssetId = resolverVideoAssetId(request, videoProvider);
+
+            if (videoUrl != null) {
+                return videoUrl;
+            }
+            if (videoAssetId == null) {
+                throw new IllegalArgumentException("Informe o video do Bunny pelo ID ou pela URL de embed.");
+            }
+            if (bunnyLibraryId == null || bunnyLibraryId.isBlank()) {
+                throw new IllegalArgumentException("BUNNY_STREAM_LIBRARY_ID nao configurado no servidor.");
+            }
+
+            return "https://iframe.mediadelivery.net/embed/" + bunnyLibraryId.trim() + "/" + videoAssetId;
+        }
+
+        if (videoUrl == null) {
+            throw new IllegalArgumentException("A URL do video e obrigatoria para esse provedor.");
+        }
+
+        return videoUrl;
+    }
+
+    private String resolverVideoAssetId(PercursoDTO.Request request, Percurso.VideoProvider videoProvider) {
+        if (videoProvider != Percurso.VideoProvider.BUNNY) {
+            return null;
+        }
+
+        String videoAssetId = normalizarTexto(request.getVideoAssetId());
+        if (videoAssetId != null) {
+            return videoAssetId;
+        }
+
+        return extrairBunnyVideoAssetId(request.getVideoUrl());
+    }
+
+    private String extrairBunnyVideoAssetId(String videoUrl) {
+        String valor = normalizarTexto(videoUrl);
+        if (valor == null) {
+            return null;
+        }
+
+        String[] partes = valor.split("/");
+        if (partes.length == 0) {
+            return null;
+        }
+
+        String ultimaParte = partes[partes.length - 1].trim();
+        return ultimaParte.isBlank() ? null : ultimaParte;
     }
 }

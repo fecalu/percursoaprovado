@@ -58,13 +58,52 @@ function extrairVimeoId(url = '') {
   return match?.[1] || ''
 }
 
-function resolverFontePlyr(url = '') {
-  const youtubeId = extrairYoutubeId(url)
+function extrairBunnyVideoId(url = '') {
+  const match = String(url).match(/mediadelivery\.net\/embed\/[^/]+\/([^/?#]+)/)
+  return match?.[1] || ''
+}
+
+function carregarBunnyPlayerJs() {
+  if (typeof window === 'undefined') return Promise.reject(new Error('Janela indisponivel'))
+  if (window.playerjs) return Promise.resolve(window.playerjs)
+
+  return new Promise((resolve, reject) => {
+    const existente = document.querySelector('script[data-bunny-playerjs="true"]')
+    if (existente) {
+      existente.addEventListener('load', () => resolve(window.playerjs), { once: true })
+      existente.addEventListener('error', reject, { once: true })
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://assets.mediadelivery.net/playerjs/playerjs-latest.min.js'
+    script.async = true
+    script.dataset.bunnyPlayerjs = 'true'
+    script.onload = () => resolve(window.playerjs)
+    script.onerror = reject
+    document.head.appendChild(script)
+  })
+}
+
+function resolverFontePlayer({ videoProvider, videoUrl, videoAssetId }) {
+  const provider = String(videoProvider || '').toUpperCase()
+  const normalizedUrl = String(videoUrl || '').trim()
+
+  if (provider === 'BUNNY' || normalizedUrl.includes('mediadelivery.net/embed/')) {
+    if (!normalizedUrl) return null
+    return {
+      provider: 'bunny',
+      embedId: videoAssetId || extrairBunnyVideoId(normalizedUrl),
+      embedUrl: normalizedUrl,
+    }
+  }
+
+  const youtubeId = extrairYoutubeId(normalizedUrl)
   if (youtubeId) {
     return { provider: 'youtube', embedId: youtubeId }
   }
 
-  const vimeoId = extrairVimeoId(url)
+  const vimeoId = extrairVimeoId(normalizedUrl)
   if (vimeoId) {
     return { provider: 'vimeo', embedId: vimeoId }
   }
@@ -198,7 +237,11 @@ export default function Player() {
 
   const pontoAtencaoAtivo = pontosAtencaoAtivos.find(item => item.id === pontoAtencaoAtivoId) || null
   const pontoEmPrompt = pontosAtencaoAtivos.find(item => item.id === promptPontoId) || null
-  const fontePlayer = useMemo(() => resolverFontePlyr(percurso?.videoUrl), [percurso?.videoUrl])
+  const fontePlayer = useMemo(() => resolverFontePlayer({
+    videoProvider: percurso?.videoProvider,
+    videoUrl: percurso?.videoUrl,
+    videoAssetId: percurso?.videoAssetId,
+  }), [percurso?.videoAssetId, percurso?.videoProvider, percurso?.videoUrl])
   const playerPodeReproduzir = Boolean(fontePlayer)
   const duracaoBase = durationSegundos || percurso?.duracaoSegundos || (pontosAtencaoAtivos.at(-1)?.timestampSegundos || 0) + 30
 
@@ -342,12 +385,89 @@ export default function Player() {
 
     let cancelled = false
     let player = null
+    const usarFullscreenNativoNoMobile = isMobileViewport
 
     setPlayerReady(false)
     setPlayerErro(false)
 
     ;(async () => {
       try {
+        if (cancelled || !playerMountRef.current) return
+
+        if (fontePlayer.provider === 'bunny') {
+          const playerjs = await carregarBunnyPlayerJs()
+          if (cancelled || !playerMountRef.current) return
+
+          const bunnyPlayer = new playerjs.Player(playerMountRef.current)
+          let ultimoTempo = 0
+          let ultimoDuration = 0
+
+          const handleReady = () => {
+            setPlayerReady(true)
+            bunnyPlayer.getDuration(duration => {
+              const numericDuration = Number(duration || 0)
+              ultimoDuration = numericDuration
+              setDurationSegundos(numericDuration)
+            })
+
+            if (secondsRef.current > 0) {
+              bunnyPlayer.setCurrentTime(secondsRef.current)
+              setCurrentTime(secondsRef.current)
+            }
+          }
+
+          const handleTime = data => {
+            const tempoAtual = Number(
+              data?.seconds ??
+              data?.currentTime ??
+              data?.data?.seconds ??
+              data?.data?.currentTime ??
+              ultimoTempo
+            )
+
+            if (Number.isFinite(tempoAtual)) {
+              ultimoTempo = tempoAtual
+              handleTimeUpdate(tempoAtual)
+            }
+
+            const proximaDuracao = Number(data?.duration ?? data?.data?.duration ?? ultimoDuration)
+            if (Number.isFinite(proximaDuracao) && proximaDuracao > 0) {
+              ultimoDuration = proximaDuracao
+              setDurationSegundos(proximaDuracao)
+            }
+          }
+
+          const handlePause = () => {}
+          const handleError = () => setPlayerErro(true)
+
+          bunnyPlayer.on('ready', handleReady)
+          bunnyPlayer.on('timeupdate', handleTime)
+          bunnyPlayer.on('pause', handlePause)
+          bunnyPlayer.on('error', handleError)
+
+          player = {
+            pause: () => bunnyPlayer.pause(),
+            play: () => bunnyPlayer.play(),
+            destroy: () => {
+              if (typeof bunnyPlayer.off === 'function') {
+                bunnyPlayer.off('ready', handleReady)
+                bunnyPlayer.off('timeupdate', handleTime)
+                bunnyPlayer.off('pause', handlePause)
+                bunnyPlayer.off('error', handleError)
+              }
+            },
+            set currentTime(value) {
+              bunnyPlayer.setCurrentTime(Math.max(0, Number(value) || 0))
+            },
+            get currentTime() {
+              return ultimoTempo
+            },
+          }
+
+          playerRef.current = player
+          return
+        }
+
         const [{ default: Plyr }] = await Promise.all([
           import('plyr'),
           import('plyr/dist/plyr.css'),
@@ -380,8 +500,8 @@ export default function Player() {
           },
           fullscreen: {
             enabled: true,
-            fallback: true,
-            iosNative: false,
+            fallback: !usarFullscreenNativoNoMobile,
+            iosNative: usarFullscreenNativoNoMobile,
           },
           youtube: {
             rel: 0,
@@ -473,7 +593,7 @@ export default function Player() {
       }
       playerRef.current = null
     }
-  }, [fontePlayer, id, playerPodeReproduzir])
+  }, [fontePlayer, id, isMobileViewport, playerPodeReproduzir])
 
   async function marcarConcluido() {
     setSalvando(true)
@@ -600,7 +720,18 @@ export default function Player() {
           <div className="player-wrap">
             {playerPodeReproduzir ? (
               <>
-                <div ref={playerMountRef} className="player-react" />
+                {fontePlayer?.provider === 'bunny' ? (
+                  <iframe
+                    ref={playerMountRef}
+                    className="player-react"
+                    src={fontePlayer.embedUrl}
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                    title={percurso.titulo}
+                  />
+                ) : (
+                  <div ref={playerMountRef} className="player-react" />
+                )}
 
                 {pontoEmPrompt && !isMobileViewport && (
                   <div className="attention-overlay-card">

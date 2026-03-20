@@ -31,6 +31,14 @@ public class Percurso {
     @Column(name = "video_url", nullable = false)
     private String videoUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "video_provider", nullable = false)
+    @Builder.Default
+    private VideoProvider videoProvider = VideoProvider.YOUTUBE;
+
+    @Column(name = "video_asset_id")
+    private String videoAssetId;
+
     @Column(name = "duracao_segundos")
     private Integer duracaoSegundos;
 
@@ -91,5 +99,11 @@ public class Percurso {
         BALIZA,
         CONTROLE_EMBREAGEM,
         EXAMINADOR
+    }
+
+    public enum VideoProvider {
+        YOUTUBE,
+        VIMEO,
+        BUNNY
     }
 }

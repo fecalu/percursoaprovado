@@ -4,7 +4,6 @@ import com.edupercurso.entity.Percurso;
 import com.edupercurso.entity.PontoAtencaoPercurso;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,8 +18,9 @@ public class PercursoDTO {
         @NotBlank
         private String titulo;
         private String descricao;
-        @NotBlank
         private String videoUrl;
+        private Percurso.VideoProvider videoProvider = Percurso.VideoProvider.YOUTUBE;
+        private String videoAssetId;
         private Integer duracaoSegundos;
         private UUID categoriaId;
         private UUID localProvaId;
@@ -90,6 +90,8 @@ public class PercursoDTO {
         private String titulo;
         private String descricao;
         private String videoUrl;
+        private String videoProvider;
+        private String videoAssetId;
         private Integer duracaoSegundos;
         private boolean ativo;
         private UUID categoriaId;
@@ -111,6 +113,8 @@ public class PercursoDTO {
             response.titulo = percurso.getTitulo();
             response.descricao = percurso.getDescricao();
             response.videoUrl = percurso.getVideoUrl();
+            response.videoProvider = percurso.getVideoProvider().name();
+            response.videoAssetId = percurso.getVideoAssetId();
             response.duracaoSegundos = percurso.getDuracaoSegundos();
             response.ativo = percurso.isAtivo();
             response.tipoConteudo = percurso.getTipoConteudo().name();
