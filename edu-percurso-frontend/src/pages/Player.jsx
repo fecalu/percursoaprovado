@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import ReactPlayer from 'react-player'
 import { percursoService, progressoService } from '../services/api'
 import { formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
 
@@ -37,16 +36,6 @@ function formatarModoPonto(modo) {
   }
 }
 
-function extrairNumeroEvento(valor, chave) {
-  if (typeof valor === 'number' && Number.isFinite(valor)) return valor
-  if (valor && typeof valor[chave] === 'number' && Number.isFinite(valor[chave])) return valor[chave]
-  if (valor?.target && typeof valor.target[chave] === 'number' && Number.isFinite(valor.target[chave])) return valor.target[chave]
-  if (valor?.currentTarget && typeof valor.currentTarget[chave] === 'number' && Number.isFinite(valor.currentTarget[chave])) {
-    return valor.currentTarget[chave]
-  }
-  return null
-}
-
 function clampPercentual(segundos, duracaoSegundos) {
   if (!duracaoSegundos || duracaoSegundos <= 0) return 0
   return Math.max(0, Math.min(100, (Number(segundos || 0) / duracaoSegundos) * 100))
@@ -57,9 +46,52 @@ function detectarMobile() {
   return window.innerWidth <= 720
 }
 
+function extrairYoutubeId(url = '') {
+  const match = String(url).match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+  )
+  return match?.[1] || ''
+}
+
+function extrairVimeoId(url = '') {
+  const match = String(url).match(/vimeo\.com\/(?:video\/)?(\d+)/)
+  return match?.[1] || ''
+}
+
+function resolverFontePlyr(url = '') {
+  const youtubeId = extrairYoutubeId(url)
+  if (youtubeId) {
+    return { provider: 'youtube', embedId: youtubeId }
+  }
+
+  const vimeoId = extrairVimeoId(url)
+  if (vimeoId) {
+    return { provider: 'vimeo', embedId: vimeoId }
+  }
+
+  return null
+}
+
+const PLYR_CONTROLS = [
+  'play-large',
+  'play',
+  'progress',
+  'current-time',
+  'duration',
+  'mute',
+  'volume',
+  'settings',
+  'fullscreen',
+]
+
+const PLYR_SETTINGS = ['quality', 'speed']
+const PLYR_SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2]
+const PLYR_QUALITY_OPTIONS = [2160, 1440, 1080, 720, 576, 480, 360, 240]
+
 export default function Player() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const playerMountRef = useRef(null)
   const playerRef = useRef(null)
   const attentionDetailRef = useRef(null)
   const previousTimeRef = useRef(0)
@@ -73,7 +105,6 @@ export default function Player() {
   const [salvando, setSalvando] = useState(false)
   const [playerReady, setPlayerReady] = useState(false)
   const [playerErro, setPlayerErro] = useState(false)
-  const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [durationSegundos, setDurationSegundos] = useState(0)
   const [pontoAtencaoAtivoId, setPontoAtencaoAtivoId] = useState(null)
@@ -115,7 +146,6 @@ export default function Player() {
     setConcluido(false)
     setPlayerReady(false)
     setPlayerErro(false)
-    setPlaying(false)
     setCurrentTime(0)
     setDurationSegundos(0)
     setPontoAtencaoAtivoId(null)
@@ -168,22 +198,29 @@ export default function Player() {
 
   const pontoAtencaoAtivo = pontosAtencaoAtivos.find(item => item.id === pontoAtencaoAtivoId) || null
   const pontoEmPrompt = pontosAtencaoAtivos.find(item => item.id === promptPontoId) || null
-  const playerPodeReproduzir = Boolean(percurso?.videoUrl && ReactPlayer.canPlay(percurso.videoUrl))
+  const fontePlayer = useMemo(() => resolverFontePlyr(percurso?.videoUrl), [percurso?.videoUrl])
+  const playerPodeReproduzir = Boolean(fontePlayer)
   const duracaoBase = durationSegundos || percurso?.duracaoSegundos || (pontosAtencaoAtivos.at(-1)?.timestampSegundos || 0) + 30
 
   function pausarVideo() {
-    setPlaying(false)
     if (playerRef.current?.pause) {
-      const resultado = playerRef.current.pause()
-      if (resultado?.catch) resultado.catch(() => {})
+      try {
+        const resultado = playerRef.current.pause()
+        if (resultado?.catch) resultado.catch(() => {})
+      } catch (_) {
+        // ignora pausa em estados intermediarios do provedor
+      }
     }
   }
 
   function iniciarVideo() {
-    setPlaying(true)
     if (playerRef.current?.play) {
-      const resultado = playerRef.current.play()
-      if (resultado?.catch) resultado.catch(() => {})
+      try {
+        const resultado = playerRef.current.play()
+        if (resultado?.catch) resultado.catch(() => {})
+      } catch (_) {
+        // ignora autoplay bloqueado pelo navegador/provedor
+      }
     }
   }
 
@@ -257,9 +294,8 @@ export default function Player() {
     setPromptPontoId(ponto.id)
   }
 
-  function handleTimeUpdate(evento) {
-    const tempoAtual = extrairNumeroEvento(evento, 'currentTime')
-    if (tempoAtual === null) return
+  function handleTimeUpdate(tempoAtual) {
+    if (typeof tempoAtual !== 'number' || !Number.isFinite(tempoAtual)) return
 
     const tempoArredondado = Number(tempoAtual)
     setCurrentTime(tempoArredondado)
@@ -283,7 +319,7 @@ export default function Player() {
       return
     }
 
-    if (tempoAtual < 2 && tempoAnterior > 10) {
+    if (tempoArredondado < 2 && tempoAnterior > 10) {
       setDisparadosIds([])
       disparadosIdsRef.current = new Set()
       setPromptPontoId(null)
@@ -301,12 +337,143 @@ export default function Player() {
     }
   }
 
-  function handleDurationChange(evento) {
-    const valor = extrairNumeroEvento(evento, 'duration')
-    if (valor !== null) {
-      setDurationSegundos(Number(valor))
+  useEffect(() => {
+    if (!playerPodeReproduzir || !playerMountRef.current || !fontePlayer) return
+
+    let cancelled = false
+    let player = null
+
+    setPlayerReady(false)
+    setPlayerErro(false)
+
+    ;(async () => {
+      try {
+        const [{ default: Plyr }] = await Promise.all([
+          import('plyr'),
+          import('plyr/dist/plyr.css'),
+        ])
+
+        if (cancelled || !playerMountRef.current) return
+
+        playerMountRef.current.innerHTML = ''
+        playerMountRef.current.setAttribute('data-plyr-provider', fontePlayer.provider)
+        playerMountRef.current.setAttribute('data-plyr-embed-id', fontePlayer.embedId)
+
+        player = new Plyr(playerMountRef.current, {
+          controls: PLYR_CONTROLS,
+          settings: PLYR_SETTINGS,
+          speed: {
+            selected: 1,
+            options: PLYR_SPEED_OPTIONS,
+          },
+          quality: {
+            default: 1080,
+            options: PLYR_QUALITY_OPTIONS,
+          },
+          keyboard: {
+            focused: true,
+            global: false,
+          },
+          tooltips: {
+            controls: true,
+            seek: true,
+          },
+          fullscreen: {
+            enabled: true,
+            fallback: true,
+            iosNative: false,
+          },
+          youtube: {
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            iv_load_policy: 3,
+            noCookie: true,
+          },
+          vimeo: {
+            byline: false,
+            portrait: false,
+            title: false,
+            transparent: false,
+          },
+        })
+
+        if (cancelled) {
+          player.destroy()
+          return
+        }
+
+        playerRef.current = player
+
+        const handleReady = () => {
+          setPlayerReady(true)
+          setDurationSegundos(Number(player.duration || 0))
+
+          try {
+            player.quality = 1080
+          } catch (_) {
+            // qualidade segue automatica se o provedor nao aceitar troca imediata
+          }
+
+          try {
+            if (typeof player.embed?.setPlaybackQuality === 'function') {
+              player.embed.setPlaybackQuality('hd1080')
+            }
+          } catch (_) {
+            // fallback silencioso para embeds que nao expoem esse controle
+          }
+
+          if (secondsRef.current > 0) {
+            setTimeout(() => {
+              try {
+                player.currentTime = secondsRef.current
+                setCurrentTime(secondsRef.current)
+              } catch (_) {
+                // ignora restauracao falha de tempo
+              }
+            }, 150)
+          }
+        }
+
+        const handleTime = () => handleTimeUpdate(Number(player.currentTime || 0))
+        const handleDuration = () => setDurationSegundos(Number(player.duration || 0))
+        const handleError = () => setPlayerErro(true)
+
+        player.on('ready', handleReady)
+        player.on('timeupdate', handleTime)
+        player.on('seeking', handleTime)
+        player.on('seeked', handleTime)
+        player.on('durationchange', handleDuration)
+        player.on('loadedmetadata', handleDuration)
+        player.on('error', handleError)
+
+        player._customCleanup = () => {
+          player.off('ready', handleReady)
+          player.off('timeupdate', handleTime)
+          player.off('seeking', handleTime)
+          player.off('seeked', handleTime)
+          player.off('durationchange', handleDuration)
+          player.off('loadedmetadata', handleDuration)
+          player.off('error', handleError)
+        }
+      } catch (_) {
+        if (!cancelled) {
+          setPlayerErro(true)
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      if (player?._customCleanup) {
+        player._customCleanup()
+      }
+      if (player) {
+        player.destroy()
+      }
+      playerRef.current = null
     }
-  }
+  }, [fontePlayer, id, playerPodeReproduzir])
 
   async function marcarConcluido() {
     setSalvando(true)
@@ -433,36 +600,7 @@ export default function Player() {
           <div className="player-wrap">
             {playerPodeReproduzir ? (
               <>
-                <ReactPlayer
-                  ref={playerRef}
-                  className="player-react"
-                  src={percurso.videoUrl}
-                  width="100%"
-                  height="100%"
-                  controls
-                  playsInline
-                  playing={playing}
-                  onReady={() => setPlayerReady(true)}
-                  onPlay={() => setPlaying(true)}
-                  onPause={() => setPlaying(false)}
-                  onTimeUpdate={handleTimeUpdate}
-                  onDurationChange={handleDurationChange}
-                  onError={() => setPlayerErro(true)}
-                  config={{
-                    youtube: {
-                      rel: 0,
-                      modestbranding: 1,
-                      playsinline: 1,
-                      iv_load_policy: 3,
-                      fs: 0,
-                      color: 'white',
-                    },
-                    vimeo: {
-                      controls: true,
-                      responsive: true,
-                    },
-                  }}
-                />
+                <div ref={playerMountRef} className="player-react" />
 
                 {pontoEmPrompt && !isMobileViewport && (
                   <div className="attention-overlay-card">

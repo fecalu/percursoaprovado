@@ -575,15 +575,27 @@ body {
 }
 
 /* ── Player ──────────────────────────────────────────────────────────────── */
-.player-guided-bar {
-  display: none;
-}
-
 .player-stage-shell {
   position: relative;
 }
 
 .player-wrap {
+  --plyr-color-main: var(--accent);
+  --plyr-video-background: #000;
+  --plyr-menu-background: rgba(12, 18, 28, 0.96);
+  --plyr-menu-color: rgba(241, 245, 249, 0.96);
+  --plyr-tooltip-background: rgba(8, 15, 22, 0.92);
+  --plyr-tooltip-color: rgba(241, 245, 249, 0.96);
+  --plyr-control-radius: 999px;
+  --plyr-control-icon-size: 15px;
+  --plyr-control-spacing: 10px;
+  --plyr-control-padding: 8px;
+  --plyr-range-thumb-background: var(--accent);
+  --plyr-range-fill-background: var(--accent);
+  --plyr-video-controls-background: linear-gradient(180deg, transparent, rgba(3, 8, 16, 0.92));
+  --plyr-video-control-color: rgba(255,255,255,0.86);
+  --plyr-video-control-color-hover: #07140f;
+  --plyr-video-control-background-hover: rgba(45,224,154,0.96);
   background: #000;
   border-radius: var(--radius-lg);
   aspect-ratio: 16/9;
@@ -602,7 +614,37 @@ body {
   height: 100%;
 }
 
+.player-wrap .plyr {
+  width: 100%;
+  height: 100%;
+}
+
+.player-wrap .plyr--video {
+  height: 100%;
+  border-radius: inherit;
+  background: #000;
+}
+
+.player-wrap .plyr__video-wrapper,
+.player-wrap .plyr__poster,
+.player-wrap .plyr iframe {
+  background: #000;
+}
+
+.player-wrap .plyr__control {
+  backdrop-filter: blur(10px);
+}
+
+.player-wrap .plyr__control--overlaid {
+  box-shadow: 0 24px 54px rgba(3, 8, 16, 0.34);
+}
+
+.player-wrap .plyr__controls {
+  padding: 0.9rem 1rem 1rem;
+}
+
 .player-react > div,
+.player-react .plyr,
 .player-react video,
 .player-react iframe {
   width: 100% !important;
@@ -3722,13 +3764,6 @@ body {
   color: rgba(255,255,255,0.92);
 }
 
-.player-guided-topbar,
-.guided-rotate-hint,
-.guided-attention-prompt,
-.guided-panel {
-  display: none;
-}
-
 @media (max-width: 960px) {
   .app-shell {
     flex-direction: column;
@@ -3793,197 +3828,6 @@ body {
     flex-direction: row;
     flex-wrap: wrap;
     min-width: 0;
-  }
-
-  .player-guided-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding: 0.95rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    background: linear-gradient(180deg, rgba(21,27,38,0.98), rgba(14,17,23,0.98));
-  }
-
-  .player-guided-bar-copy {
-    display: grid;
-    gap: 0.2rem;
-    color: var(--text-2);
-    font-size: 13px;
-    line-height: 1.55;
-  }
-
-  .player-guided-bar-copy strong {
-    color: var(--text);
-    font-size: 14px;
-  }
-
-  .player-stage-shell.is-guided {
-    position: fixed;
-    inset: 0;
-    z-index: 120;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding:
-      max(0.75rem, env(safe-area-inset-top))
-      0.75rem
-      max(0.75rem, env(safe-area-inset-bottom))
-      0.75rem;
-    background:
-      radial-gradient(circle at top, rgba(26, 173, 118, 0.12), transparent 38%),
-      rgba(6, 12, 18, 0.98);
-    backdrop-filter: blur(12px);
-  }
-
-  .player-guided-topbar {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .player-guided-topbar .btn {
-    min-height: 40px;
-    padding: 0.65rem 0.9rem;
-  }
-
-  .player-guided-topbar-title {
-    min-width: 0;
-    display: grid;
-    gap: 0.12rem;
-    text-align: center;
-  }
-
-  .player-guided-topbar-title strong {
-    color: var(--text);
-    font-size: 13px;
-  }
-
-  .player-guided-topbar-title span {
-    color: var(--text-2);
-    font-size: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .player-wrap--guided {
-    margin-bottom: 0;
-    flex: 1;
-    min-height: 0;
-    aspect-ratio: auto;
-  }
-
-  .attention-timeline-shell--guided {
-    margin-bottom: 0;
-  }
-
-  .guided-rotate-hint {
-    display: grid;
-    gap: 0.25rem;
-    padding: 0.95rem 1rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px;
-    background: rgba(255,255,255,0.04);
-    color: var(--text-2);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  .guided-rotate-hint strong {
-    color: var(--text);
-    font-size: 14px;
-  }
-
-  .guided-attention-prompt {
-    position: absolute;
-    inset: auto 0.75rem 1rem 0.75rem;
-    z-index: 6;
-    display: block;
-  }
-
-  .guided-attention-prompt .attention-mobile-sheet-card {
-    border-color: rgba(255,255,255,0.12);
-    background: linear-gradient(180deg, rgba(12,20,28,0.92), rgba(8,15,22,0.96));
-    color: white;
-    box-shadow: 0 28px 80px rgba(2, 8, 23, 0.46);
-  }
-
-  .guided-attention-prompt .attention-overlay-title {
-    color: white;
-  }
-
-  .guided-attention-prompt .attention-overlay-copy {
-    color: rgba(226, 232, 240, 0.92);
-  }
-
-  .guided-attention-prompt .attention-overlay-meta .card-tag {
-    background: rgba(255, 255, 255, 0.12);
-    color: rgba(255,255,255,0.92);
-  }
-
-  .guided-panel {
-    position: absolute;
-    z-index: 7;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 22px;
-    background: linear-gradient(180deg, rgba(15,21,30,0.98), rgba(8,13,20,0.98));
-    box-shadow: 0 28px 80px rgba(2, 8, 23, 0.46);
-    overflow: hidden;
-    transition: transform 0.22s ease, opacity 0.22s ease;
-  }
-
-  .guided-panel.is-portrait {
-    inset: auto 0.75rem 0.75rem 0.75rem;
-    max-height: min(56vh, 520px);
-    transform: translateY(calc(100% + 1rem));
-    opacity: 0;
-  }
-
-  .guided-panel.is-landscape {
-    inset: auto 0.75rem 0.75rem 0.75rem;
-    max-height: min(62vh, 420px);
-    transform: translateY(calc(100% + 1rem));
-    opacity: 0;
-  }
-
-  .guided-panel.is-open {
-    opacity: 1;
-  }
-
-  .guided-panel.is-portrait.is-open {
-    transform: translateY(0);
-  }
-
-  .guided-panel.is-landscape.is-open {
-    transform: translateY(0);
-  }
-
-  .guided-panel-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.9rem;
-    padding: 1rem 1rem 0;
-  }
-
-  .guided-panel-body {
-    display: grid;
-    gap: 0.75rem;
-    padding: 0 1rem 1rem;
-    overflow: auto;
-  }
-
-  .player-stage-shell.is-guided.is-landscape .guided-attention-prompt {
-    right: 0.85rem;
-    left: 0.85rem;
-    bottom: 1.1rem;
   }
 
   .landing-page {
@@ -4293,16 +4137,6 @@ body {
   .attention-point-detail {
     padding: 0.9rem;
     border-radius: 18px;
-  }
-
-  .player-guided-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .player-guided-bar .btn {
-    width: 100%;
-    justify-content: center;
   }
 
   .library-section-toggle {
