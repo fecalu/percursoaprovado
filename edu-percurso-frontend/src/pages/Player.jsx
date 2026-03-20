@@ -111,6 +111,24 @@ function resolverFontePlayer({ videoProvider, videoUrl, videoAssetId }) {
   return null
 }
 
+async function tentarTravarLandscape() {
+  if (!screen.orientation?.lock) return
+  try {
+    await screen.orientation.lock('landscape')
+  } catch (_) {
+    // alguns browsers mobile bloqueiam orientation lock mesmo com gesto
+  }
+}
+
+function liberarOrientationLock() {
+  if (!screen.orientation?.unlock) return
+  try {
+    screen.orientation.unlock()
+  } catch (_) {
+    // safari/ios podem nao permitir unlock explicito
+  }
+}
+
 const PLYR_CONTROLS = [
   'play-large',
   'play',
@@ -130,6 +148,7 @@ const PLYR_QUALITY_OPTIONS = [2160, 1440, 1080, 720, 576, 480, 360, 240]
 export default function Player() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const playerShellRef = useRef(null)
   const playerMountRef = useRef(null)
   const playerRef = useRef(null)
   const attentionDetailRef = useRef(null)
@@ -150,6 +169,7 @@ export default function Player() {
   const [promptPontoId, setPromptPontoId] = useState(null)
   const [disparadosIds, setDisparadosIds] = useState([])
   const [isMobileViewport, setIsMobileViewport] = useState(detectarMobile())
+  const [isPlayerFullscreen, setIsPlayerFullscreen] = useState(false)
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -159,6 +179,22 @@ export default function Player() {
     return () => {
       window.removeEventListener('resize', atualizarViewport)
       window.removeEventListener('orientationchange', atualizarViewport)
+    }
+  }, [])
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+      setIsPlayerFullscreen(Boolean(fullscreenElement && fullscreenElement === playerShellRef.current))
+
+      if (!fullscreenElement) liberarOrientationLock()
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
     }
   }, [])
 
@@ -385,7 +421,7 @@ export default function Player() {
 
     let cancelled = false
     let player = null
-    const usarFullscreenNativoNoMobile = isMobileViewport
+    const usarFullscreenNativoNoMobile = detectarMobile()
 
     setPlayerReady(false)
     setPlayerErro(false)
@@ -558,6 +594,14 @@ export default function Player() {
         const handleTime = () => handleTimeUpdate(Number(player.currentTime || 0))
         const handleDuration = () => setDurationSegundos(Number(player.duration || 0))
         const handleError = () => setPlayerErro(true)
+        const handleEnterFullscreen = async () => {
+          setIsPlayerFullscreen(true)
+          await tentarTravarLandscape()
+        }
+        const handleExitFullscreen = () => {
+          setIsPlayerFullscreen(false)
+          liberarOrientationLock()
+        }
 
         player.on('ready', handleReady)
         player.on('timeupdate', handleTime)
@@ -566,6 +610,8 @@ export default function Player() {
         player.on('durationchange', handleDuration)
         player.on('loadedmetadata', handleDuration)
         player.on('error', handleError)
+        player.on('enterfullscreen', handleEnterFullscreen)
+        player.on('exitfullscreen', handleExitFullscreen)
 
         player._customCleanup = () => {
           player.off('ready', handleReady)
@@ -575,6 +621,8 @@ export default function Player() {
           player.off('durationchange', handleDuration)
           player.off('loadedmetadata', handleDuration)
           player.off('error', handleError)
+          player.off('enterfullscreen', handleEnterFullscreen)
+          player.off('exitfullscreen', handleExitFullscreen)
         }
       } catch (_) {
         if (!cancelled) {
@@ -593,7 +641,7 @@ export default function Player() {
       }
       playerRef.current = null
     }
-  }, [fontePlayer, id, isMobileViewport, playerPodeReproduzir])
+  }, [fontePlayer, id, playerPodeReproduzir])
 
   async function marcarConcluido() {
     setSalvando(true)
@@ -616,6 +664,33 @@ export default function Player() {
       return 'Esse detalhe foi aberto automaticamente porque merece mais cuidado neste trecho.'
     }
     return ponto.descricaoCurta || 'Esse trecho tem um detalhe importante para revisar.'
+  }
+
+  async function togglePlayerFullscreen() {
+    const shell = playerShellRef.current
+    if (!shell) return
+
+    try {
+      const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+      if (fullscreenElement === shell) {
+        if (document.exitFullscreen) {
+          await document.exitFullscreen()
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen()
+        }
+        return
+      }
+
+      if (shell.requestFullscreen) {
+        await shell.requestFullscreen({ navigationUI: 'hide' })
+      } else if (shell.webkitRequestFullscreen) {
+        shell.webkitRequestFullscreen()
+      }
+
+      await tentarTravarLandscape()
+    } catch (_) {
+      // falha silenciosa; o fallback continua sendo o fullscreen do provedor
+    }
   }
 
   function renderPainelPontos() {
@@ -716,8 +791,17 @@ export default function Player() {
       </button>
 
       <div className="student-shell student-shell--compact">
-        <div className="player-stage-shell">
+        <div ref={playerShellRef} className={`player-stage-shell${isPlayerFullscreen ? ' is-fullscreen' : ''}`}>
           <div className="player-wrap">
+            {playerPodeReproduzir && fontePlayer?.provider === 'bunny' && (
+              <button
+                type="button"
+                className="player-fullscreen-toggle"
+                onClick={togglePlayerFullscreen}
+              >
+                {isPlayerFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+              </button>
+            )}
             {playerPodeReproduzir ? (
               <>
                 {fontePlayer?.provider === 'bunny' ? (
@@ -725,7 +809,7 @@ export default function Player() {
                     ref={playerMountRef}
                     className="player-react"
                     src={fontePlayer.embedUrl}
-                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                    allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
                     allowFullScreen
                     title={percurso.titulo}
                   />
