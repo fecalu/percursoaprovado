@@ -111,6 +111,12 @@ export const uploadService = {
     formData.append('file', file)
     return api.post('/uploads/thumbnails', formData).then(response => response.data)
   },
+  enviarVideoBunny: (file, title) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (title) formData.append('title', title)
+    return api.post('/uploads/videos/bunny', formData).then(response => response.data)
+  },
 }
 
 export const pedidoService = {

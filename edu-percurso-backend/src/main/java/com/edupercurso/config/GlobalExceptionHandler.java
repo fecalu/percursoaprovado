@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<Map<String, String>> handleMaxUpload(MaxUploadSizeExceededException ex) {
-        return ResponseEntity.badRequest().body(erro("Arquivo muito grande. Envie uma imagem de ate 2 MB."));
+        return ResponseEntity.badRequest().body(erro("Arquivo muito grande. Revise o limite configurado para uploads de imagens ou videos."));
     }
 
     private Map<String, String> erro(String mensagem) {

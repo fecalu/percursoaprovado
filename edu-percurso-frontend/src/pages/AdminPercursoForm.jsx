@@ -114,6 +114,7 @@ export default function AdminPercursoForm() {
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const [enviandoThumbnail, setEnviandoThumbnail] = useState(false)
+  const [enviandoVideoBunny, setEnviandoVideoBunny] = useState(false)
   const [uploadingPointField, setUploadingPointField] = useState('')
   const [erros, setErros] = useState({})
 
@@ -239,6 +240,34 @@ export default function AdminPercursoForm() {
       show(error.response?.data?.erro || 'Erro ao enviar imagem do ponto.', 'error')
     } finally {
       setUploadingPointField('')
+      event.target.value = ''
+    }
+  }
+
+  async function handleBunnyVideoUpload(event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setEnviandoVideoBunny(true)
+
+    try {
+      const resposta = await uploadService.enviarVideoBunny(file, form.titulo.trim() || undefined)
+      setForm(current => ({
+        ...current,
+        videoProvider: 'BUNNY',
+        videoAssetId: resposta.videoId || '',
+        videoUrl: resposta.embedUrl || '',
+      }))
+      setErros(current => ({
+        ...current,
+        videoAssetId: undefined,
+        videoUrl: undefined,
+      }))
+      show('Video enviado para o Bunny com sucesso. O processamento pode levar alguns minutos.')
+    } catch (error) {
+      show(error.response?.data?.erro || 'Erro ao enviar video para o Bunny.', 'error')
+    } finally {
+      setEnviandoVideoBunny(false)
       event.target.value = ''
     }
   }
@@ -490,34 +519,51 @@ export default function AdminPercursoForm() {
           </div>
 
           {form.videoProvider === 'BUNNY' ? (
-            <div className="form-row">
+            <>
               <div className="form-group">
-                <label className="form-label">Video ID do Bunny *</label>
+                <label className="form-label">Enviar video para o Bunny</label>
                 <input
                   className="form-input"
-                  placeholder="GUID do video no Bunny Stream"
-                  value={form.videoAssetId}
-                  onChange={event => set('videoAssetId', event.target.value)}
+                  type="file"
+                  accept="video/mp4,video/quicktime,video/webm,video/x-m4v,video/x-msvideo,video/x-matroska"
+                  onChange={handleBunnyVideoUpload}
+                  disabled={enviandoVideoBunny}
                 />
-                {erros.videoAssetId && <div className="form-error">{erros.videoAssetId}</div>}
                 <div className="mini-copy">
-                  Informe o ID do video no Bunny. O servidor monta o embed automaticamente quando a library estiver configurada.
+                  Envie o arquivo direto por aqui para preencher o Video ID e a URL de embed automaticamente.
+                  {enviandoVideoBunny ? ' Enviando video para o Bunny...' : ''}
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">URL de embed do Bunny</label>
-                <input
-                  className="form-input"
-                  placeholder="https://iframe.mediadelivery.net/embed/..."
-                  value={form.videoUrl}
-                  onChange={event => set('videoUrl', event.target.value)}
-                />
-                <div className="mini-copy">
-                  Opcional. Use apenas se quiser sobrescrever manualmente a URL de embed.
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Video ID do Bunny *</label>
+                  <input
+                    className="form-input"
+                    placeholder="GUID do video no Bunny Stream"
+                    value={form.videoAssetId}
+                    onChange={event => set('videoAssetId', event.target.value)}
+                  />
+                  {erros.videoAssetId && <div className="form-error">{erros.videoAssetId}</div>}
+                  <div className="mini-copy">
+                    O upload acima preenche esse campo automaticamente. Se preferir, voce pode informar o ID manualmente.
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">URL de embed do Bunny</label>
+                  <input
+                    className="form-input"
+                    placeholder="https://iframe.mediadelivery.net/embed/..."
+                    value={form.videoUrl}
+                    onChange={event => set('videoUrl', event.target.value)}
+                  />
+                  <div className="mini-copy">
+                    Opcional. Use apenas se quiser sobrescrever manualmente a URL de embed.
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           ) : (
             <div className="form-group">
               <label className="form-label">URL do video * ({formatarVideoProvider(form.videoProvider)})</label>
@@ -745,8 +791,8 @@ export default function AdminPercursoForm() {
           </div>
 
           <div className="form-actions">
-            <button className="btn btn-primary" type="submit" disabled={salvando || enviandoThumbnail}>
-              {salvando ? 'Salvando...' : enviandoThumbnail ? 'Aguarde o upload...' : isEdicao ? 'Salvar alteracoes' : 'Criar conteudo'}
+            <button className="btn btn-primary" type="submit" disabled={salvando || enviandoThumbnail || enviandoVideoBunny}>
+              {salvando ? 'Salvando...' : (enviandoThumbnail || enviandoVideoBunny) ? 'Aguarde o upload...' : isEdicao ? 'Salvar alteracoes' : 'Criar conteudo'}
             </button>
             <button className="btn btn-ghost" type="button" onClick={() => navigate('/admin/percursos')}>
               Cancelar

@@ -9,7 +9,6 @@ import com.edupercurso.entity.Usuario;
 import com.edupercurso.repository.CategoriaRepository;
 import com.edupercurso.repository.PercursoRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +21,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PercursoService {
 
-    @Value("${app.video.bunny.library-id:}")
-    private String bunnyLibraryId;
-
     private final PercursoRepository percursoRepository;
     private final CategoriaRepository categoriaRepository;
     private final LocalProvaService localProvaService;
     private final UsuarioLookupService usuarioLookupService;
     private final AssinaturaService assinaturaService;
     private final AcessoConteudoService acessoConteudoService;
+    private final BunnyStreamService bunnyStreamService;
 
     @Transactional(readOnly = true)
     public List<PercursoDTO.Response> listar(String email,
@@ -242,11 +239,7 @@ public class PercursoService {
             if (videoAssetId == null) {
                 throw new IllegalArgumentException("Informe o video do Bunny pelo ID ou pela URL de embed.");
             }
-            if (bunnyLibraryId == null || bunnyLibraryId.isBlank()) {
-                throw new IllegalArgumentException("BUNNY_STREAM_LIBRARY_ID nao configurado no servidor.");
-            }
-
-            return "https://iframe.mediadelivery.net/embed/" + bunnyLibraryId.trim() + "/" + videoAssetId;
+            return bunnyStreamService.buildEmbedUrl(videoAssetId);
         }
 
         if (videoUrl == null) {
@@ -266,21 +259,6 @@ public class PercursoService {
             return videoAssetId;
         }
 
-        return extrairBunnyVideoAssetId(request.getVideoUrl());
-    }
-
-    private String extrairBunnyVideoAssetId(String videoUrl) {
-        String valor = normalizarTexto(videoUrl);
-        if (valor == null) {
-            return null;
-        }
-
-        String[] partes = valor.split("/");
-        if (partes.length == 0) {
-            return null;
-        }
-
-        String ultimaParte = partes[partes.length - 1].trim();
-        return ultimaParte.isBlank() ? null : ultimaParte;
+        return bunnyStreamService.extractVideoId(request.getVideoUrl());
     }
 }
