@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { assinaturaService, percursoService } from '../services/api'
+import { assinaturaService, percursoService, progressoService } from '../services/api'
 import ContentThumbnail from '../components/ContentThumbnail'
 import { formatDataCurta, formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
 
@@ -8,15 +8,17 @@ export default function Biblioteca() {
   const navigate = useNavigate()
   const [conteudos, setConteudos] = useState([])
   const [assinaturas, setAssinaturas] = useState([])
+  const [progresso, setProgresso] = useState([])
   const [filtro, setFiltro] = useState('')
   const [loading, setLoading] = useState(true)
-  const [secoesAbertas, setSecoesAbertas] = useState({ geral: true })
+  const [secoesAbertas, setSecoesAbertas] = useState({})
 
   useEffect(() => {
-    Promise.all([percursoService.listar(), assinaturaService.minhas()])
-      .then(([conteudosResp, assinaturasResp]) => {
+    Promise.all([percursoService.listar(), assinaturaService.minhas(), progressoService.meu()])
+      .then(([conteudosResp, assinaturasResp, progressoResp]) => {
         setConteudos(conteudosResp)
         setAssinaturas(assinaturasResp)
+        setProgresso(progressoResp)
       })
       .finally(() => setLoading(false))
   }, [])
@@ -40,6 +42,14 @@ export default function Biblioteca() {
       (item.tipoConteudo || '').toLowerCase().includes(termo)
     )
   }, [conteudos, filtro])
+
+  const progressoMap = useMemo(() => {
+    const map = new Map()
+    progresso.forEach(item => {
+      map.set(item.percursoId, item)
+    })
+    return map
+  }, [progresso])
 
   const { conteudosGerais, secoesLocais } = useMemo(() => {
     const gerais = []
@@ -76,7 +86,7 @@ export default function Biblioteca() {
     setSecoesAbertas(prev => {
       const proximo = {}
       chavesAtivas.forEach(chave => {
-        proximo[chave] = chave in prev ? prev[chave] : chave === 'geral'
+        proximo[chave] = chave in prev ? prev[chave] : false
       })
       return proximo
     })
@@ -91,50 +101,124 @@ export default function Biblioteca() {
     return Boolean(secoesAbertas[chave])
   }
 
-  function renderConteudoCards(itens) {
+  function resolverStatusAula(item) {
+    const progressoItem = progressoMap.get(item.id)
+    if (!progressoItem) {
+      return {
+        label: 'Nao iniciado',
+        toneClass: 'is-neutral',
+        concluido: false,
+        progressoPercentual: 0,
+      }
+    }
+
+    if (progressoItem.concluido) {
+      return {
+        label: 'Concluido',
+        toneClass: 'is-complete',
+        concluido: true,
+        progressoPercentual: 100,
+      }
+    }
+
+    const duracaoTotal = progressoItem.duracaoTotal || item.duracaoSegundos || 0
+    const progressoPercentual = duracaoTotal > 0
+      ? Math.min(100, Math.round(((progressoItem.segundosAssistidos || 0) / duracaoTotal) * 100))
+      : 0
+
+    return {
+      label: progressoPercentual > 0 ? 'Em andamento' : 'Nao iniciado',
+      toneClass: progressoPercentual > 0 ? 'is-active' : 'is-neutral',
+      concluido: false,
+      progressoPercentual,
+    }
+  }
+
+  function renderAulas(itens) {
     return (
-      <div className="card-grid">
-        {itens.map(item => (
-          <div key={item.id} className="percurso-card" onClick={() => navigate(`/conteudos/${item.id}`)}>
-            <ContentThumbnail thumbnailUrl={item.thumbnailUrl} titulo={item.titulo} videoUrl={item.videoUrl} />
-            <div className="card-body">
-              <div className="card-tag">{formatTipoConteudo(item.tipoConteudo)}</div>
-              <div className="card-title">{item.titulo}</div>
-              <div className="card-desc">{item.resumo || item.descricao}</div>
-            </div>
-            <div className="card-footer">
-              <span className="card-dur">{formatDuracaoMinutos(item.duracaoSegundos)}</span>
-              <span className="card-arrow">Abrir modulo</span>
-            </div>
-          </div>
-        ))}
+      <div className="library-lesson-list">
+        {itens.map(item => {
+          const status = resolverStatusAula(item)
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`library-lesson-row${status.concluido ? ' is-concluded' : ''}`}
+              onClick={() => navigate(`/conteudos/${item.id}`)}
+            >
+              <div className="library-lesson-thumb">
+                <ContentThumbnail thumbnailUrl={item.thumbnailUrl} titulo={item.titulo} videoUrl={item.videoUrl} />
+                <span className="library-lesson-duration">{formatDuracaoMinutos(item.duracaoSegundos)}</span>
+                {status.concluido && <span className="library-lesson-check">{'\u2713'}</span>}
+              </div>
+
+              <div className="library-lesson-body">
+                <div className="library-lesson-topline">
+                  <span className="card-tag">{formatTipoConteudo(item.tipoConteudo)}</span>
+                  <span className={`library-lesson-status ${status.toneClass}`}>
+                    <span className="library-lesson-status-dot" />
+                    {status.label}
+                  </span>
+                </div>
+                <div className="library-lesson-title">{item.titulo}</div>
+                <div className="library-lesson-copy">{item.resumo || item.descricao || 'Conteudo sem resumo cadastrado.'}</div>
+                <div className="library-lesson-meta">
+                  <span>{formatDuracaoMinutos(item.duracaoSegundos)}</span>
+                  {status.progressoPercentual > 0 && !status.concluido && (
+                    <span>{status.progressoPercentual}% assistido</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="library-lesson-action">{status.concluido ? 'Rever' : status.progressoPercentual > 0 ? 'Continuar' : 'Comecar'}</div>
+            </button>
+          )
+        })}
       </div>
     )
   }
 
   function renderSecao({ chave, titulo, subtitulo, itens, destaque = 'modulos' }) {
     const aberta = secaoEstaAberta(chave)
+    const concluidos = itens.filter(item => resolverStatusAula(item).concluido).length
+    const duracaoTotal = itens.reduce((acc, item) => acc + (item.duracaoSegundos || 0), 0)
+    const progressoPercentual = itens.length > 0 ? Math.round((concluidos / itens.length) * 100) : 0
 
     return (
-      <section key={chave} className="library-section-card">
+      <section key={chave} className="library-module-card">
         <button
           type="button"
-          className="library-section-toggle"
+          className="library-module-toggle"
           onClick={() => alternarSecao(chave)}
           aria-expanded={aberta}
         >
-          <div className="library-section-heading">
-            <div className="section-heading">{titulo}</div>
-            <div className="section-copy">{subtitulo}</div>
+          <div className="library-module-hero">
+            <div className="library-module-heading">
+              <div className="section-heading">{titulo}</div>
+              <div className="section-copy">{subtitulo}</div>
+              <div className="library-module-caption">
+                <span>{itens.length} {destaque}</span>
+                <span>{formatDuracaoMinutos(duracaoTotal)}</span>
+                <span>{concluidos} concluidas</span>
+              </div>
+            </div>
           </div>
 
-          <div className="library-section-meta">
-            <span className="badge badge-blue">{itens.length} {destaque}</span>
-            <span className="library-section-toggle-label">{aberta ? 'Fechar' : 'Abrir'}</span>
+          <div className="library-module-meta">
+            <span className="library-module-progress-copy">{concluidos} de {itens.length} aulas concluidas</span>
+            <span className="library-module-toggle-label">{aberta ? 'Fechar aulas' : 'Abrir aulas'}</span>
           </div>
         </button>
 
-        {aberta && <div className="library-section-body">{renderConteudoCards(itens)}</div>}
+        <div className="library-module-progress">
+          <div className="student-progress-bar">
+            <div className="student-progress-fill" style={{ width: `${progressoPercentual}%` }} />
+          </div>
+          <div className="mini-copy">{concluidos} de {itens.length} aulas concluidas</div>
+        </div>
+
+        {aberta && <div className="library-module-body">{renderAulas(itens)}</div>}
       </section>
     )
   }
@@ -144,30 +228,6 @@ export default function Biblioteca() {
   return (
     <>
       <div className="student-shell student-shell--compact">
-        <section className="student-library-head">
-          <div>
-            <div className="page-title">Minha biblioteca</div>
-            <p className="page-sub" style={{ marginBottom: 0 }}>
-              Acesse seus locais e os modulos liberados para revisar com mais criterio.
-            </p>
-          </div>
-
-          <div className="student-kpi-strip">
-            <div className="student-kpi-pill">
-              <span className="student-kpi-pill-value">{assinaturasAtivas.length}</span>
-              <span className="student-kpi-pill-label">Locais ativos</span>
-            </div>
-            <div className="student-kpi-pill">
-              <span className="student-kpi-pill-value">{conteudosGerais.length}</span>
-              <span className="student-kpi-pill-label">Modulos gerais</span>
-            </div>
-            <div className="student-kpi-pill">
-              <span className="student-kpi-pill-value">{filtrados.length}</span>
-              <span className="student-kpi-pill-label">Conteudo liberado</span>
-            </div>
-          </div>
-        </section>
-
         {assinaturasAtivas.length > 0 && (
           <div className="student-chip-grid student-chip-grid--compact">
             {assinaturasAtivas.map(item => (
@@ -180,13 +240,9 @@ export default function Biblioteca() {
         )}
 
         <div className="student-filter-card student-filter-card--inline">
-          <div className="student-filter-copy-wrap">
-            <div className="student-filter-title">Buscar modulos</div>
-            <div className="student-filter-copy">Procure por titulo, tipo de conteudo, categoria ou local de prova.</div>
-          </div>
           <input
-            className="form-input"
-            placeholder="Buscar por titulo, local, tipo ou categoria..."
+            className="form-input student-filter-input--slim"
+            placeholder="Buscar por modulo, aula, local ou tipo..."
             value={filtro}
             onChange={event => setFiltro(event.target.value)}
           />

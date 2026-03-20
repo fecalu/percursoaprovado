@@ -129,6 +129,39 @@ function liberarOrientationLock() {
   }
 }
 
+async function sairDoFullscreenAtual() {
+  const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+  if (!fullscreenElement) return
+
+  try {
+    const waitForExit = new Promise(resolve => {
+      let resolved = false
+      const finish = () => {
+        if (resolved) return
+        resolved = true
+        document.removeEventListener('fullscreenchange', finish)
+        document.removeEventListener('webkitfullscreenchange', finish)
+        window.clearTimeout(timeoutId)
+        resolve()
+      }
+
+      document.addEventListener('fullscreenchange', finish)
+      document.addEventListener('webkitfullscreenchange', finish)
+      const timeoutId = window.setTimeout(finish, 350)
+    })
+
+    if (document.exitFullscreen) {
+      await document.exitFullscreen()
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen()
+    }
+
+    await waitForExit
+  } catch (_) {
+    // alguns providers/browsers falham silenciosamente ao sair do fullscreen
+  }
+}
+
 const PLYR_CONTROLS = [
   'play-large',
   'play',
@@ -179,6 +212,13 @@ export default function Player() {
     return () => {
       window.removeEventListener('resize', atualizarViewport)
       window.removeEventListener('orientationchange', atualizarViewport)
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      liberarOrientationLock()
+      sairDoFullscreenAtual()
     }
   }, [])
 
@@ -693,6 +733,35 @@ export default function Player() {
     }
   }
 
+  async function voltarParaBiblioteca() {
+    const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+    if (fullscreenElement) {
+      await sairDoFullscreenAtual()
+      document.body.classList.remove('player-mobile-focus')
+      liberarOrientationLock()
+      setIsPlayerFullscreen(false)
+      return
+    }
+
+    setPromptPontoId(null)
+    pausarVideo()
+    try {
+      if (playerRef.current?._customCleanup) {
+        playerRef.current._customCleanup()
+      }
+      if (playerRef.current?.destroy) {
+        playerRef.current.destroy()
+      }
+    } catch (_) {
+      // alguns providers podem falhar no destroy durante transicao de rota
+    }
+    playerRef.current = null
+    document.body.classList.remove('player-mobile-focus')
+    liberarOrientationLock()
+    setIsPlayerFullscreen(false)
+    navigate('/biblioteca')
+  }
+
   function renderPainelPontos() {
     if (!pontosAtencaoAtivos.length) return null
 
@@ -783,17 +852,17 @@ export default function Player() {
 
   return (
     <>
-      <button className="back-link" onClick={() => navigate('/biblioteca')}>
+      <button className="back-link" onClick={voltarParaBiblioteca}>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M13 4L6 10l7 6" />
         </svg>
-        Voltar para a biblioteca
+        {isPlayerFullscreen ? 'Sair da tela cheia' : 'Voltar para a biblioteca'}
       </button>
 
       <div className="student-shell student-shell--compact">
         <div ref={playerShellRef} className={`player-stage-shell${isPlayerFullscreen ? ' is-fullscreen' : ''}`}>
           <div className="player-wrap">
-            {playerPodeReproduzir && fontePlayer?.provider === 'bunny' && (
+            {playerPodeReproduzir && fontePlayer?.provider === 'bunny' && isMobileViewport && (
               <button
                 type="button"
                 className="player-fullscreen-toggle"
