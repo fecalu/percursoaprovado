@@ -28,38 +28,28 @@ function getSpotlightCardClass(statusComercial) {
   return 'spotlight-card--draft'
 }
 
-function getCardResumo(local, planosLocal) {
+function getCardLinha(local) {
   if (local.statusComercial === 'DISPONIVEL') {
-    if (planosLocal.length > 0) {
-      return 'Veja os detalhes desse local, escolha seu plano e libere o acesso automaticamente apos o pagamento.'
-    }
-
-    return 'Conteudo desse local ja liberado para compra e estudo.'
+    return 'Percursos mais frequentes e revisao pratica desse local.'
   }
 
   if (local.statusComercial === 'EM_BREVE') {
-    return 'Esse local aparece no site para voce acompanhar, mas a compra so sera liberada quando o preparo estiver pronto.'
+    return 'Esse local sera liberado assim que o conteudo estiver pronto.'
   }
 
   if (local.statusComercial === 'PAUSADO') {
-    return 'O local continua cadastrado, mas a venda foi pausada temporariamente.'
+    return 'As vendas desse local estao pausadas no momento.'
   }
 
   return 'Local em configuracao administrativa.'
 }
 
 function getCardCta(local) {
-  if (local.statusComercial === 'DISPONIVEL') return 'Ver planos e detalhes'
-  if (local.statusComercial === 'EM_BREVE') return 'Acompanhar esse local'
+  if (local.statusComercial === 'DISPONIVEL') return 'Ver planos'
+  if (local.statusComercial === 'EM_BREVE') return 'Acompanhar'
   if (local.statusComercial === 'PAUSADO') return 'Ver status do local'
   return 'Abrir detalhes'
 }
-
-const FAIXA_CONFIANCA = [
-  'Percursos mais frequentes observados na pratica',
-  '1 local por compra, com acesso por periodo',
-  'Pagamento por Pix ou cartao, com liberacao automatica',
-]
 
 const SAIBA_MAIS = [
   {
@@ -185,15 +175,6 @@ export default function Home() {
               Ver como funciona
             </a>
           </div>
-          <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
-            Os conteudos sao baseados em experiencia real, observacao pratica e analise dos percursos mais frequentes.
-            O trajeto pode variar no dia da avaliacao.
-          </div>
-          <div className="hero-proof-grid">
-            <div className="hero-proof-chip hero-proof-chip--strong">Mais confianca no dia da prova</div>
-            <div className="hero-proof-chip">1 local por compra, com acesso por periodo</div>
-            <div className="hero-proof-chip">Pagamento por Pix ou cartao</div>
-          </div>
         </div>
       </section>
 
@@ -206,25 +187,15 @@ export default function Home() {
         ) : locais.length === 0 ? (
           <div className="empty-state">Nenhum local de prova cadastrado ainda.</div>
         ) : (
-          <div className="card-grid">
+          <div className="spotlight-grid">
             {locais.map(local => {
               const planosLocal = planosPorLocal.get(local.slug) || []
               const planoInicial = planosLocal[0]
               const estaDisponivel = local.statusComercial === 'DISPONIVEL'
-              const rodapeEsquerdo = estaDisponivel
-                ? `${planosLocal.length} ${planosLocal.length === 1 ? 'plano' : 'planos'}`
-                : formatStatusComercialLocal(local.statusComercial)
-              const rodapeDireito = estaDisponivel
+              const metaPrincipal = estaDisponivel
                 ? planoInicial ? `A partir de ${fmtMoeda(planoInicial.precoCentavos)}` : 'Planos em breve'
                 : local.statusComercial === 'PAUSADO' ? 'Vendas pausadas' : 'Compra bloqueada'
-              const destaqueLocal = estaDisponivel
-                ? 'Compra liberada agora'
-                : local.statusComercial === 'EM_BREVE'
-                  ? 'Preparacao em andamento'
-                  : local.statusComercial === 'PAUSADO'
-                    ? 'Liberacao temporariamente pausada'
-                    : 'Disponivel somente para administracao'
-              const resumoCard = getCardResumo(local, planosLocal)
+              const resumoCard = getCardLinha(local)
               const imagemLocal = resolveMediaUrl(local.imagemCardUrl || local.imagemPrincipalUrl)
 
               return (
@@ -253,21 +224,19 @@ export default function Home() {
                       <div className="spotlight-mark-fallback">{local.nome}</div>
                     )}
                   </div>
-                  <div className="spotlight-brand-copy">
-                    <div className="spotlight-accent">{destaqueLocal}</div>
+                  <div className="spotlight-main">
+                    {estaDisponivel && <div className="spotlight-eyebrow">Liberado para compra</div>}
                     <div className="spotlight-title">{local.nome}</div>
+                    <div className="spotlight-copy">{resumoCard}</div>
                   </div>
-                  <div className="spotlight-desc">{local.descricao}</div>
-                  <div className="spotlight-summary">{resumoCard}</div>
                   {!estaDisponivel && local.mensagemPublica && (
                     <div className="mini-copy">{local.mensagemPublica}</div>
                   )}
                   <div className="spotlight-footer">
-                    <div className="spotlight-meta-block">
-                      <span className="spotlight-meta-label">{rodapeEsquerdo}</span>
-                      <span className="spotlight-meta-value">{rodapeDireito}</span>
-                    </div>
-                    <div className="spotlight-cta">
+                    <span className={`spotlight-footer-meta ${estaDisponivel ? 'spotlight-footer-meta--available' : ''}`}>
+                      {metaPrincipal}
+                    </span>
+                    <div className={`spotlight-cta ${estaDisponivel ? 'spotlight-cta--available' : ''}`}>
                       <span>{getCardCta(local)}</span>
                       <span className="spotlight-cta-arrow">{'->'}</span>
                     </div>
@@ -277,14 +246,6 @@ export default function Home() {
             })}
           </div>
         )}
-      </RevealSection>
-
-      <RevealSection as="section" className="landing-inline-strip" delay={100} eager>
-        {FAIXA_CONFIANCA.map(item => (
-          <div key={item} className="landing-inline-chip">
-            {item}
-          </div>
-        ))}
       </RevealSection>
 
       <RevealSection as="section" className="landing-section" id="saiba-mais" delay={120} eager>

@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -61,9 +63,26 @@ public class Percurso {
     @Builder.Default
     private boolean destaque = false;
 
+    @OneToMany(mappedBy = "percurso", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("ordemExibicao ASC, timestampSegundos ASC")
+    @Builder.Default
+    private List<PontoAtencaoPercurso> pontosAtencao = new ArrayList<>();
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
+
+    public void substituirPontosAtencao(List<PontoAtencaoPercurso> novosPontos) {
+        this.pontosAtencao.clear();
+        if (novosPontos == null) {
+            return;
+        }
+
+        novosPontos.forEach(ponto -> {
+            ponto.setPercurso(this);
+            this.pontosAtencao.add(ponto);
+        });
+    }
 
     public enum TipoConteudo {
         PERCURSO_REAL,

@@ -17,6 +17,7 @@ const VAZIO = {
   ordemExibicao: '0',
   destaque: false,
   ativo: true,
+  pontosAtencao: [],
 }
 
 const TIPOS_CONTEUDO = [
@@ -27,6 +28,65 @@ const TIPOS_CONTEUDO = [
   'CONTROLE_EMBREAGEM',
   'EXAMINADOR',
 ]
+
+const TIPOS_PONTO_ATENCAO = [
+  'DICA_IMPORTANTE',
+  'ERRO_COMUM',
+  'PLACA',
+  'REFERENCIA_VISUAL',
+  'OBSERVACAO_EXAMINADOR',
+]
+
+const MODOS_PONTO_ATENCAO = ['CLIQUE', 'AUTOMATICO', 'APENAS_LISTA']
+
+function criarPontoAtencaoVazio(ordem = 0) {
+  return {
+    id: null,
+    timestampSegundos: '',
+    titulo: '',
+    descricaoCurta: '',
+    descricaoDetalhada: '',
+    tipo: 'DICA_IMPORTANTE',
+    imagemUrl: '',
+    videoUrl: '',
+    modoExibicao: 'CLIQUE',
+    ordemExibicao: String(ordem),
+    ativo: true,
+  }
+}
+
+function formatarTimestamp(segundos) {
+  const total = Number(segundos) || 0
+  const minutos = Math.floor(total / 60)
+  const resto = total % 60
+  return `${String(minutos).padStart(2, '0')}:${String(resto).padStart(2, '0')}`
+}
+
+function formatarTipoPonto(tipo) {
+  switch (tipo) {
+    case 'ERRO_COMUM':
+      return 'Erro comum'
+    case 'PLACA':
+      return 'Placa'
+    case 'REFERENCIA_VISUAL':
+      return 'Referencia visual'
+    case 'OBSERVACAO_EXAMINADOR':
+      return 'Observacao do examinador'
+    default:
+      return 'Dica importante'
+  }
+}
+
+function formatarModoPonto(modo) {
+  switch (modo) {
+    case 'AUTOMATICO':
+      return 'Automatico'
+    case 'APENAS_LISTA':
+      return 'Apenas na lista'
+    default:
+      return 'Clique'
+  }
+}
 
 export default function AdminPercursoForm() {
   const { id } = useParams()
@@ -40,6 +100,7 @@ export default function AdminPercursoForm() {
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const [enviandoThumbnail, setEnviandoThumbnail] = useState(false)
+  const [uploadingPointField, setUploadingPointField] = useState('')
   const [erros, setErros] = useState({})
 
   useEffect(() => {
@@ -67,6 +128,19 @@ export default function AdminPercursoForm() {
           ordemExibicao: String(percursoResp.ordemExibicao ?? 0),
           destaque: percursoResp.destaque ?? false,
           ativo: percursoResp.ativo ?? true,
+          pontosAtencao: (percursoResp.pontosAtencao || []).map((item, index) => ({
+            id: item.id || null,
+            timestampSegundos: String(item.timestampSegundos ?? ''),
+            titulo: item.titulo || '',
+            descricaoCurta: item.descricaoCurta || '',
+            descricaoDetalhada: item.descricaoDetalhada || '',
+            tipo: item.tipo || 'DICA_IMPORTANTE',
+            imagemUrl: item.imagemUrl || '',
+            videoUrl: item.videoUrl || '',
+            modoExibicao: item.modoExibicao || 'CLIQUE',
+            ordemExibicao: String(item.ordemExibicao ?? index),
+            ativo: item.ativo ?? true,
+          })),
         })
       })
       .finally(() => setLoading(false))
@@ -75,6 +149,30 @@ export default function AdminPercursoForm() {
   function set(field, value) {
     setForm(current => ({ ...current, [field]: value }))
     setErros(current => ({ ...current, [field]: undefined }))
+  }
+
+  function setPontoAtencao(index, field, value) {
+    setForm(current => ({
+      ...current,
+      pontosAtencao: current.pontosAtencao.map((item, idx) => (
+        idx === index ? { ...item, [field]: value } : item
+      )),
+    }))
+    setErros(current => ({ ...current, pontosAtencao: undefined }))
+  }
+
+  function adicionarPontoAtencao() {
+    setForm(current => ({
+      ...current,
+      pontosAtencao: [...current.pontosAtencao, criarPontoAtencaoVazio(current.pontosAtencao.length)],
+    }))
+  }
+
+  function removerPontoAtencao(index) {
+    setForm(current => ({
+      ...current,
+      pontosAtencao: current.pontosAtencao.filter((_, idx) => idx !== index),
+    }))
   }
 
   function validar() {
@@ -105,6 +203,24 @@ export default function AdminPercursoForm() {
     }
   }
 
+  async function handlePontoImagemUpload(index, event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setUploadingPointField(`ponto-${index}`)
+
+    try {
+      const resposta = await uploadService.enviarImagem(file)
+      setPontoAtencao(index, 'imagemUrl', resposta.url)
+      show('Imagem do ponto enviada com sucesso.')
+    } catch (error) {
+      show(error.response?.data?.erro || 'Erro ao enviar imagem do ponto.', 'error')
+    } finally {
+      setUploadingPointField('')
+      event.target.value = ''
+    }
+  }
+
   async function handleSubmit(event) {
     event.preventDefault()
     if (!validar()) return
@@ -124,6 +240,21 @@ export default function AdminPercursoForm() {
       ordemExibicao: Number(form.ordemExibicao) || 0,
       destaque: form.destaque,
       ativo: form.ativo,
+      pontosAtencao: form.pontosAtencao
+        .filter(item => item.titulo.trim() || item.descricaoCurta.trim() || item.imagemUrl.trim() || item.videoUrl.trim())
+        .map((item, index) => ({
+          id: item.id || null,
+          timestampSegundos: Number(item.timestampSegundos) || 0,
+          titulo: item.titulo.trim(),
+          descricaoCurta: item.descricaoCurta.trim() || null,
+          descricaoDetalhada: item.descricaoDetalhada.trim() || null,
+          tipo: item.tipo,
+          imagemUrl: item.imagemUrl.trim() || null,
+          videoUrl: item.videoUrl.trim() || null,
+          modoExibicao: item.modoExibicao,
+          ordemExibicao: Number(item.ordemExibicao) || index,
+          ativo: item.ativo,
+        })),
     }
 
     try {
@@ -326,6 +457,197 @@ export default function AdminPercursoForm() {
               onChange={event => set('videoUrl', event.target.value)}
             />
             {erros.videoUrl && <div className="form-error">{erros.videoUrl}</div>}
+          </div>
+
+          <div className="form-group">
+            <div className="section-heading">Pontos de atencao</div>
+            <div className="mini-copy" style={{ marginTop: '0.35rem' }}>
+              Cadastre alertas, detalhes importantes, placas e observacoes que vao apoiar o aluno dentro desse modulo.
+            </div>
+
+            <div className="attention-admin-list">
+              {form.pontosAtencao.map((ponto, index) => (
+                <div key={ponto.id || index} className="attention-admin-card">
+                  <div className="attention-admin-head">
+                    <div>
+                      <div className="attention-admin-kicker">Ponto {index + 1}</div>
+                      <div className="attention-admin-title">
+                        {ponto.titulo.trim() || 'Novo ponto de atencao'}
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn-ghost"
+                      type="button"
+                      onClick={() => removerPontoAtencao(index)}
+                    >
+                      Remover
+                    </button>
+                  </div>
+
+                  <div className="attention-admin-meta">
+                    <span className="card-tag">{formatarTipoPonto(ponto.tipo)}</span>
+                    <span className="card-tag">{formatarModoPonto(ponto.modoExibicao)}</span>
+                    <span className="card-tag">{formatarTimestamp(ponto.timestampSegundos)}</span>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">Titulo</label>
+                      <input
+                        className="form-input"
+                        placeholder="Ex: Ponto em que o examinador costuma observar a troca de marcha"
+                        value={ponto.titulo}
+                        onChange={event => setPontoAtencao(index, 'titulo', event.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Tempo no video (segundos)</label>
+                      <input
+                        className="form-input"
+                        type="number"
+                        min="0"
+                        placeholder="Ex: 125"
+                        value={ponto.timestampSegundos}
+                        onChange={event => setPontoAtencao(index, 'timestampSegundos', event.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">Tipo</label>
+                      <select
+                        className="form-select"
+                        value={ponto.tipo}
+                        onChange={event => setPontoAtencao(index, 'tipo', event.target.value)}
+                      >
+                        {TIPOS_PONTO_ATENCAO.map(tipo => (
+                          <option key={tipo} value={tipo}>{formatarTipoPonto(tipo)}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Modo de exibicao</label>
+                      <select
+                        className="form-select"
+                        value={ponto.modoExibicao}
+                        onChange={event => setPontoAtencao(index, 'modoExibicao', event.target.value)}
+                      >
+                        {MODOS_PONTO_ATENCAO.map(modo => (
+                          <option key={modo} value={modo}>{formatarModoPonto(modo)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Descricao curta</label>
+                    <textarea
+                      className="form-textarea"
+                      placeholder="Resumo rapido do ponto importante."
+                      value={ponto.descricaoCurta}
+                      onChange={event => setPontoAtencao(index, 'descricaoCurta', event.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Descricao detalhada</label>
+                    <textarea
+                      className="form-textarea"
+                      style={{ minHeight: 110 }}
+                      placeholder="Detalhe melhor o que o aluno deve observar nesse trecho."
+                      value={ponto.descricaoDetalhada}
+                      onChange={event => setPontoAtencao(index, 'descricaoDetalhada', event.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">Upload da imagem de apoio</label>
+                      <div className="question-media-stack">
+                        <input
+                          className="form-input"
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          onChange={event => handlePontoImagemUpload(index, event)}
+                          disabled={uploadingPointField === `ponto-${index}`}
+                        />
+                        <input
+                          className="form-input"
+                          placeholder="/media/... ou URL publica da imagem"
+                          value={ponto.imagemUrl}
+                          onChange={event => setPontoAtencao(index, 'imagemUrl', event.target.value)}
+                        />
+                        <div className="mini-copy">
+                          Use para placas, referencias visuais ou detalhes de um trecho.
+                          {uploadingPointField === `ponto-${index}` ? ' Enviando imagem...' : ''}
+                        </div>
+                        {ponto.imagemUrl && (
+                          <div className="question-media-preview-wrap">
+                            <img
+                              src={ponto.imagemUrl}
+                              alt={`Preview do ponto ${index + 1}`}
+                              className="question-media-preview question-media-preview--option"
+                            />
+                            <button
+                              className="btn btn-ghost"
+                              type="button"
+                              onClick={() => setPontoAtencao(index, 'imagemUrl', '')}
+                            >
+                              Remover imagem
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">Video explicativo opcional</label>
+                      <input
+                        className="form-input"
+                        placeholder="https://youtube.com/watch?v=..."
+                        value={ponto.videoUrl}
+                        onChange={event => setPontoAtencao(index, 'videoUrl', event.target.value)}
+                      />
+                      <div className="mini-copy">
+                        Se preencher, o aluno pode abrir um video curto de apoio para esse ponto.
+                      </div>
+
+                      <div className="form-row" style={{ marginTop: 12 }}>
+                        <div className="form-group" style={{ marginBottom: 0 }}>
+                          <label className="form-label">Ordem</label>
+                          <input
+                            className="form-input"
+                            type="number"
+                            min="0"
+                            value={ponto.ordemExibicao}
+                            onChange={event => setPontoAtencao(index, 'ordemExibicao', event.target.value)}
+                          />
+                        </div>
+
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginTop: 28 }}>
+                          <input
+                            type="checkbox"
+                            checked={ponto.ativo}
+                            onChange={event => setPontoAtencao(index, 'ativo', event.target.checked)}
+                            style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+                          />
+                          <span className="form-label" style={{ margin: 0 }}>Ponto ativo</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: 14 }}>
+              <button className="btn btn-ghost" type="button" onClick={adicionarPontoAtencao}>
+                Adicionar ponto de atencao
+              </button>
+            </div>
           </div>
 
           <div className="form-row">

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import RevealSection from '../components/RevealSection'
 import { useAuth } from '../context/AuthContext'
@@ -60,7 +60,7 @@ function getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade) {
   if (local?.subtituloComercial?.trim()) return local.subtituloComercial.trim()
 
   if (compraLiberada) {
-    return `Veja como a prova costuma acontecer nesse local, conheca os trechos mais recorrentes e revise o que mais reduz surpresa no dia da avaliacao. ${local?.descricao || ''}`.trim()
+    return 'Escolha o periodo que combina melhor com sua data de prova e com o ritmo em que voce quer revisar.'
   }
 
   return `${local?.descricao || ''} ${mensagemDisponibilidade}`.trim()
@@ -122,18 +122,41 @@ const HERO_DESTAQUES_LOCAL = [
 ]
 
 const CHECKOUT_POLLING_MS = 5000
+const PLANO_SHOWCASE_PALETTE = [
+  {
+    accent: 'rgba(119, 210, 255, 0.34)',
+    glow: 'rgba(119, 210, 255, 0.22)',
+  },
+  {
+    accent: 'rgba(45, 224, 154, 0.32)',
+    glow: 'rgba(45, 224, 154, 0.2)',
+  },
+  {
+    accent: 'rgba(255, 194, 107, 0.32)',
+    glow: 'rgba(255, 194, 107, 0.2)',
+  },
+  {
+    accent: 'rgba(255, 151, 196, 0.32)',
+    glow: 'rgba(255, 151, 196, 0.2)',
+  },
+]
 
 function getCaixaDestaque(local) {
   const itens = [local?.boxItem1, local?.boxItem2, local?.boxItem3]
     .map(item => item?.trim())
     .filter(Boolean)
 
+  const titulo = local?.boxTitulo?.trim()
+  const observacao = local?.boxObservacao?.trim()
+
+  if (!titulo && itens.length === 0 && !observacao) {
+    return null
+  }
+
   return {
-    titulo: local?.boxTitulo?.trim() || 'O que voce vai encontrar neste acesso',
-    itens: itens.length > 0
-      ? itens
-      : ['Percursos mais frequentes', 'Simulacao completa da prova', 'Erros que mais tiram pontos'],
-    observacao: local?.boxObservacao?.trim() || 'Acesso liberado automaticamente apos a confirmacao do pagamento.',
+    titulo: titulo || 'Destaques deste acesso',
+    itens,
+    observacao,
   }
 }
 
@@ -220,7 +243,14 @@ export default function LocalDetalhe() {
   const [solicitandoId, setSolicitandoId] = useState('')
   const [checkoutMonitor, setCheckoutMonitor] = useState(null)
   const [sincronizandoCheckout, setSincronizandoCheckout] = useState(false)
+  const [planoAtivoIndex, setPlanoAtivoIndex] = useState(0)
   const checkoutMonitorRef = useRef(null)
+  const planoSwipeStartRef = useRef(null)
+  const planoSwipeLockRef = useRef(false)
+  const planosOrdenados = useMemo(
+    () => [...planos].sort((a, b) => a.duracaoDias - b.duracaoDias || a.precoCentavos - b.precoCentavos),
+    [planos]
+  )
 
   useEffect(() => {
     checkoutMonitorRef.current = checkoutMonitor
@@ -234,6 +264,16 @@ export default function LocalDetalhe() {
       })
       .finally(() => setLoading(false))
   }, [slug])
+
+  useEffect(() => {
+    if (planosOrdenados.length === 0) {
+      setPlanoAtivoIndex(0)
+      return
+    }
+
+    const recomendadoIndex = planosOrdenados.findIndex(plano => getPlanoDestaque(plano.duracaoDias).recomendado)
+    setPlanoAtivoIndex(recomendadoIndex >= 0 ? recomendadoIndex : 0)
+  }, [planosOrdenados])
 
   useEffect(() => {
     const monitorSalvo = loadCheckoutMonitor()
@@ -416,16 +456,92 @@ export default function LocalDetalhe() {
     )
   }
 
+  function irParaPlanoAnterior() {
+    setPlanoAtivoIndex(index => Math.max(0, index - 1))
+  }
+
+  function irParaProximoPlano() {
+    setPlanoAtivoIndex(index => Math.min(planosOrdenados.length - 1, index + 1))
+  }
+
+  function iniciarSwipePlanos(clientX) {
+    planoSwipeStartRef.current = clientX
+    planoSwipeLockRef.current = false
+  }
+
+  function finalizarSwipePlanos(clientX) {
+    if (planoSwipeStartRef.current == null) return
+
+    const delta = clientX - planoSwipeStartRef.current
+    planoSwipeStartRef.current = null
+
+    if (Math.abs(delta) < 44 || planoSwipeLockRef.current) return
+
+    planoSwipeLockRef.current = true
+    if (delta < 0) {
+      irParaProximoPlano()
+      return
+    }
+
+    irParaPlanoAnterior()
+  }
+
+  function renderPlanoShowcaseCard(plano, cardState, index) {
+    const destaquePlano = getPlanoDestaque(plano.duracaoDias)
+    const palette = PLANO_SHOWCASE_PALETTE[index % PLANO_SHOWCASE_PALETTE.length]
+
+    return (
+      <article
+        key={plano.id}
+        className={`plan-showcase-card plan-showcase-card--${cardState}`}
+        style={{
+          '--plan-showcase-accent': palette.accent,
+          '--plan-showcase-glow': palette.glow,
+        }}
+        onClick={() => {
+          if (cardState !== 'active') {
+            setPlanoAtivoIndex(index)
+          }
+        }}
+      >
+        <div className="plan-showcase-card-inner">
+          <div className="plan-showcase-card-top">
+            <div className="plan-showcase-pill">Acesso</div>
+            <div className="plan-showcase-tag">{destaquePlano.selo}</div>
+          </div>
+
+          <div className="plan-showcase-visual">
+            <div className="plan-showcase-visual-kicker">{local.nome}</div>
+            <div className="plan-showcase-visual-highlight">{formatPlanoDuracao(plano.duracaoDias)}</div>
+          </div>
+
+          {destaquePlano.recomendado && <div className="plan-showcase-ribbon">Mais escolhido</div>}
+          <div className="plan-showcase-name">{plano.nome}</div>
+          <div className="plan-showcase-price">{fmtMoeda(plano.precoCentavos)}</div>
+          <div className="plan-showcase-copy">{getPlanoIndicacao(plano.duracaoDias)}</div>
+          <div className="plan-showcase-meta">Pagamento unico pelo periodo escolhido</div>
+          <div className="plan-showcase-action" onClick={event => event.stopPropagation()}>
+            {renderAcaoPlano(plano)}
+          </div>
+        </div>
+      </article>
+    )
+  }
+
   if (loading) return <div className="spinner" />
   if (!local) return <div className="empty-state">Local de prova nao encontrado.</div>
 
   const compraLiberada = local.statusComercial === 'DISPONIVEL'
   const mensagemDisponibilidade = getMensagemDisponibilidade(local)
-  const planoInicial = planos[0]
+  const planoInicial = planosOrdenados[0]
   const tituloComercial = getTituloComercial(local)
   const subtituloComercial = getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade)
   const caixaDestaque = getCaixaDestaque(local)
   const imagemPrincipal = resolveMediaUrl(local.imagemPrincipalUrl)
+  const planoAtivo = planosOrdenados[Math.min(planoAtivoIndex, Math.max(planosOrdenados.length - 1, 0))] || null
+  const destaquePlanoAtivo = planoAtivo ? getPlanoDestaque(planoAtivo.duracaoDias) : null
+  const planoAnterior = planoAtivoIndex > 0 ? planosOrdenados[planoAtivoIndex - 1] : null
+  const planoSeguinte = planoAtivoIndex < planosOrdenados.length - 1 ? planosOrdenados[planoAtivoIndex + 1] : null
   const checkoutAcompanhamento = checkoutMonitor ? getCheckoutAcompanhamento(checkoutMonitor) : null
   const checkoutSituacao = checkoutMonitor
     ? formatSituacaoPedido(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
@@ -479,20 +595,12 @@ export default function LocalDetalhe() {
           <h1 className="hero-title">{tituloComercial}</h1>
           <p className="hero-subtitle">{subtituloComercial}</p>
           <div className="hero-actions">
-            <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/register'}>
-              {user ? (isAdmin ? 'Abrir administracao' : 'Ver minha biblioteca') : 'Criar conta para comprar'}
+            <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/login'}>
+              {user ? (isAdmin ? 'Abrir administracao' : 'Ver minha biblioteca') : 'Entrar ou criar conta'}
             </Link>
-            <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/pedidos' : '/meus-pedidos') : '/login'}>
-              {user ? 'Ver meus pagamentos' : 'Ja tenho conta'}
+            <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/pedidos' : '/meus-pedidos') : '/register'}>
+              {user ? 'Ver meus pagamentos' : 'Criar conta'}
             </Link>
-          </div>
-          <div className="mini-copy" style={{ marginTop: '1rem', maxWidth: 680 }}>
-            Os conteudos refletem experiencia real, observacao pratica e os percursos mais frequentes desse local.
-            O trajeto da avaliacao pode variar.
-          </div>
-          <div className="hero-proof-grid">
-            <div className="hero-proof-chip hero-proof-chip--strong">Trechos mais recorrentes desse local</div>
-            <div className="hero-proof-chip">Conteudo direto para reduzir surpresa e ansiedade</div>
           </div>
         </div>
       </section>
@@ -581,12 +689,14 @@ export default function LocalDetalhe() {
       )}
 
       <RevealSection as="section" className="landing-section" delay={40} eager>
-        <div className="page-title">{compraLiberada ? 'Escolha seu periodo de acesso' : 'Disponibilidade do local'}</div>
-        <p className="page-sub">
-          {compraLiberada
-            ? 'Escolha o periodo que combina melhor com sua data de prova e com o ritmo em que voce quer revisar.'
-            : 'Esse local aparece no site, mas a compra fica bloqueada ate o administrador liberar as vendas.'}
-        </p>
+        {!compraLiberada && (
+          <>
+            <div className="page-title">Disponibilidade do local</div>
+            <p className="page-sub">
+              Esse local aparece no site, mas a compra fica bloqueada ate o administrador liberar as vendas.
+            </p>
+          </>
+        )}
 
         {!compraLiberada ? (
           <div className="card">
@@ -607,84 +717,93 @@ export default function LocalDetalhe() {
               </div>
             )}
           </div>
-        ) : planos.length === 0 ? (
+        ) : planosOrdenados.length === 0 ? (
           <div className="empty-state">Esse local ainda nao possui planos ativos.</div>
         ) : (
           <div className="local-offer-layout">
-            <div className="plan-grid">
-              {planos.map(plano => {
-                const destaquePlano = getPlanoDestaque(plano.duracaoDias)
-                const pontosCurtos = getPlanoPontosCurtos(plano.duracaoDias)
+            <div className="plan-showcase">
+              <div className="plan-showcase-head">
+                <div className="plan-showcase-title">Escolha o tempo certo para estudar esse local</div>
+                {planoAtivo && (
+                  <>
+                    <div className="plan-showcase-subtitle">{getPlanoIndicacao(planoAtivo.duracaoDias)}</div>
+                    <div className="plan-showcase-caption">{destaquePlanoAtivo?.resumo}</div>
+                  </>
+                )}
+              </div>
 
-                return (
-                <div key={plano.id} className={`plan-card ${destaquePlano.recomendado ? 'plan-card--recommended' : ''}`}>
-                  <div className="plan-top-row">
-                    <div className="plan-badge">{formatPlanoDuracao(plano.duracaoDias)}</div>
-                    <div className="plan-mini-tag">{destaquePlano.selo}</div>
-                  </div>
-                  {destaquePlano.recomendado && <div className="plan-ribbon">Recomendado para a maioria dos alunos</div>}
-                  <div className="plan-name">{plano.nome}</div>
-                  <div className="plan-price">{fmtMoeda(plano.precoCentavos)}</div>
-                  <div className="plan-price-caption">Pagamento unico pelo periodo escolhido</div>
-                  <div className="plan-highlight">{getPlanoIndicacao(plano.duracaoDias)}</div>
-                  <div className="plan-summary">{destaquePlano.resumo}</div>
-                  <div className="plan-copy">
-                    Um acesso mais direto para revisar esse local com mais confianca e menos surpresa no dia da prova.
-                  </div>
-                  <div className="plan-feature-grid">
-                    {pontosCurtos.map(item => (
-                      <div key={item} className="plan-feature-pill">
-                        {item}
+              <div
+                className="plan-showcase-stage"
+                onTouchStart={event => iniciarSwipePlanos(event.touches[0]?.clientX ?? 0)}
+                onTouchEnd={event => finalizarSwipePlanos(event.changedTouches[0]?.clientX ?? 0)}
+              >
+                <button
+                  type="button"
+                  className="plan-showcase-arrow plan-showcase-arrow--prev"
+                  onClick={irParaPlanoAnterior}
+                  disabled={planoAtivoIndex === 0}
+                  aria-label="Ver plano anterior"
+                >
+                  <span aria-hidden="true">←</span>
+                </button>
+                {planoAnterior && renderPlanoShowcaseCard(planoAnterior, 'left', planoAtivoIndex - 1)}
+                {planoAtivo && renderPlanoShowcaseCard(planoAtivo, 'active', planoAtivoIndex)}
+                {planoSeguinte && renderPlanoShowcaseCard(planoSeguinte, 'right', planoAtivoIndex + 1)}
+                <button
+                  type="button"
+                  className="plan-showcase-arrow plan-showcase-arrow--next"
+                  onClick={irParaProximoPlano}
+                  disabled={planoAtivoIndex === planosOrdenados.length - 1}
+                  aria-label="Ver proximo plano"
+                >
+                  <span aria-hidden="true">→</span>
+                </button>
+              </div>
+
+              <div className="plan-showcase-dots" role="tablist" aria-label="Selecao de planos">
+                {planosOrdenados.map((plano, index) => (
+                  <button
+                    key={plano.id}
+                    type="button"
+                    className={`plan-showcase-dot ${index === planoAtivoIndex ? 'is-active' : ''}`}
+                    onClick={() => setPlanoAtivoIndex(index)}
+                    aria-label={`Selecionar plano de ${formatPlanoDuracao(plano.duracaoDias)}`}
+                    aria-selected={index === planoAtivoIndex}
+                  />
+                ))}
+              </div>
+
+              <div className="landing-inline-strip landing-inline-strip--compact plan-showcase-strip">
+                <div className="landing-inline-chip">Pagamento unico</div>
+                <div className="landing-inline-chip">Liberacao automatica apos a confirmacao</div>
+                <div className="landing-inline-chip">1 local por compra</div>
+              </div>
+            </div>
+            {caixaDestaque && (
+              <aside className="local-offer-box local-offer-box--support">
+                {imagemPrincipal && (
+                  <img
+                    src={imagemPrincipal}
+                    alt={`Destaque visual do local ${local.nome}`}
+                    className="local-offer-box-image"
+                  />
+                )}
+                <div className="local-offer-box-title">{caixaDestaque.titulo}</div>
+                {caixaDestaque.itens.length > 0 && (
+                  <div className="local-offer-box-list">
+                    {caixaDestaque.itens.map(item => (
+                      <div key={item} className="local-offer-box-item">
+                        <span className="local-offer-box-dot" />
+                        <span>{item}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="plan-footer-note">
-                    Acesso liberado automaticamente apos a confirmacao do pagamento.
-                  </div>
-                  <div className="plan-meta-stack">
-                    <div className="plan-meta">Validade clara: {formatPlanoDuracao(plano.duracaoDias)}</div>
-                    <div className="plan-meta">Pix ou cartao pelo Mercado Pago, sem renovacao automatica.</div>
-                  </div>
-                  <div style={{ marginTop: '1rem' }}>
-                    {renderAcaoPlano(plano)}
-                  </div>
-                  <div className="plan-cta-copy">
-                    {user && !isAdmin
-                      ? 'O acesso e liberado automaticamente apos a confirmacao do pagamento.'
-                      : 'Escolha esse plano para continuar o preparo desse local.'}
-                  </div>
-                </div>
-              )})}
-            </div>
-            <aside className="local-offer-box">
-              {imagemPrincipal && (
-                <img
-                  src={imagemPrincipal}
-                  alt={`Destaque visual do local ${local.nome}`}
-                  className="local-offer-box-image"
-                />
-              )}
-              <div className="local-offer-box-kicker">Mais clareza antes da prova</div>
-              <div className="local-offer-box-title">{caixaDestaque.titulo}</div>
-              <div className="local-offer-box-list">
-                {caixaDestaque.itens.map(item => (
-                  <div key={item} className="local-offer-box-item">
-                    <span className="local-offer-box-dot" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="local-offer-box-note">{caixaDestaque.observacao}</div>
-            </aside>
+                )}
+                {caixaDestaque.observacao && <div className="local-offer-box-note">{caixaDestaque.observacao}</div>}
+              </aside>
+            )}
           </div>
         )}
-      </RevealSection>
-
-      <RevealSection as="section" className="landing-section" delay={65} eager>
-        <div className="landing-inline-strip landing-inline-strip--compact">
-          <div className="landing-inline-chip">1 local por compra, com acesso pelo periodo escolhido.</div>
-          <div className="landing-inline-chip">Compra unica com liberacao automatica apos a confirmacao do pagamento.</div>
-        </div>
       </RevealSection>
 
       <RevealSection as="section" className="landing-section" delay={70} eager>

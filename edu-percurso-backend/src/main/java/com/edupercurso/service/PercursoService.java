@@ -4,6 +4,7 @@ import com.edupercurso.dto.PercursoDTO;
 import com.edupercurso.entity.Categoria;
 import com.edupercurso.entity.LocalProva;
 import com.edupercurso.entity.Percurso;
+import com.edupercurso.entity.PontoAtencaoPercurso;
 import com.edupercurso.entity.Usuario;
 import com.edupercurso.repository.CategoriaRepository;
 import com.edupercurso.repository.PercursoRepository;
@@ -27,6 +28,7 @@ public class PercursoService {
     private final AssinaturaService assinaturaService;
     private final AcessoConteudoService acessoConteudoService;
 
+    @Transactional(readOnly = true)
     public List<PercursoDTO.Response> listar(String email,
                                              boolean admin,
                                              boolean todos,
@@ -52,6 +54,7 @@ public class PercursoService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public PercursoDTO.Response buscarPorId(String email, boolean admin, UUID id) {
         Percurso percurso = buscarEntidadePorId(id);
         if (!admin) {
@@ -77,6 +80,7 @@ public class PercursoService {
                 .ordemExibicao(request.getOrdemExibicao() == null ? 0 : request.getOrdemExibicao())
                 .destaque(request.isDestaque())
                 .build();
+        percurso.substituirPontosAtencao(montarPontosAtencao(request.getPontosAtencao()));
 
         return PercursoDTO.Response.from(percursoRepository.save(percurso));
     }
@@ -97,6 +101,7 @@ public class PercursoService {
         percurso.setThumbnailUrl(request.getThumbnailUrl());
         percurso.setOrdemExibicao(request.getOrdemExibicao() == null ? 0 : request.getOrdemExibicao());
         percurso.setDestaque(request.isDestaque());
+        percurso.substituirPontosAtencao(montarPontosAtencao(request.getPontosAtencao()));
 
         return PercursoDTO.Response.from(percursoRepository.save(percurso));
     }
@@ -150,5 +155,49 @@ public class PercursoService {
             return null;
         }
         return localProvaService.buscarEntidadePorId(localProvaId);
+    }
+
+    private List<PontoAtencaoPercurso> montarPontosAtencao(List<PercursoDTO.PontoAtencaoRequest> pontos) {
+        if (pontos == null) {
+            return List.of();
+        }
+
+        validarPontosAtencao(pontos);
+
+        return pontos.stream()
+                .map(item -> PontoAtencaoPercurso.builder()
+                        .timestampSegundos(item.getTimestampSegundos())
+                        .titulo(item.getTitulo().trim())
+                        .descricaoCurta(normalizarTexto(item.getDescricaoCurta()))
+                        .descricaoDetalhada(normalizarTexto(item.getDescricaoDetalhada()))
+                        .tipo(item.getTipo() == null ? PontoAtencaoPercurso.Tipo.DICA_IMPORTANTE : item.getTipo())
+                        .imagemUrl(normalizarTexto(item.getImagemUrl()))
+                        .videoUrl(normalizarTexto(item.getVideoUrl()))
+                        .modoExibicao(item.getModoExibicao() == null ? PontoAtencaoPercurso.ModoExibicao.CLIQUE : item.getModoExibicao())
+                        .ordemExibicao(item.getOrdemExibicao() == null ? 0 : item.getOrdemExibicao())
+                        .ativo(item.isAtivo())
+                        .build())
+                .toList();
+    }
+
+    private void validarPontosAtencao(List<PercursoDTO.PontoAtencaoRequest> pontos) {
+        for (PercursoDTO.PontoAtencaoRequest ponto : pontos) {
+            if (ponto.getTimestampSegundos() == null || ponto.getTimestampSegundos() < 0) {
+                throw new IllegalArgumentException("Cada ponto de atencao precisa ter um tempo valido.");
+            }
+
+            if (ponto.getTitulo() == null || ponto.getTitulo().trim().isBlank()) {
+                throw new IllegalArgumentException("Cada ponto de atencao precisa ter um titulo.");
+            }
+        }
+    }
+
+    private String normalizarTexto(String valor) {
+        if (valor == null) {
+            return null;
+        }
+
+        String texto = valor.trim();
+        return texto.isBlank() ? null : texto;
     }
 }

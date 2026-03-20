@@ -1,10 +1,15 @@
 package com.edupercurso.dto;
 
 import com.edupercurso.entity.Percurso;
+import com.edupercurso.entity.PontoAtencaoPercurso;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class PercursoDTO {
@@ -25,6 +30,58 @@ public class PercursoDTO {
         private Integer ordemExibicao = 0;
         private boolean destaque;
         private boolean ativo = true;
+        @Valid
+        private List<PontoAtencaoRequest> pontosAtencao;
+    }
+
+    @Data
+    public static class PontoAtencaoRequest {
+        private UUID id;
+        @NotNull
+        private Integer timestampSegundos;
+        @NotBlank
+        private String titulo;
+        private String descricaoCurta;
+        private String descricaoDetalhada;
+        @NotNull
+        private PontoAtencaoPercurso.Tipo tipo = PontoAtencaoPercurso.Tipo.DICA_IMPORTANTE;
+        private String imagemUrl;
+        private String videoUrl;
+        @NotNull
+        private PontoAtencaoPercurso.ModoExibicao modoExibicao = PontoAtencaoPercurso.ModoExibicao.CLIQUE;
+        private Integer ordemExibicao = 0;
+        private boolean ativo = true;
+    }
+
+    @Data
+    public static class PontoAtencaoResponse {
+        private UUID id;
+        private Integer timestampSegundos;
+        private String titulo;
+        private String descricaoCurta;
+        private String descricaoDetalhada;
+        private String tipo;
+        private String imagemUrl;
+        private String videoUrl;
+        private String modoExibicao;
+        private Integer ordemExibicao;
+        private boolean ativo;
+
+        public static PontoAtencaoResponse from(PontoAtencaoPercurso ponto) {
+            PontoAtencaoResponse response = new PontoAtencaoResponse();
+            response.id = ponto.getId();
+            response.timestampSegundos = ponto.getTimestampSegundos();
+            response.titulo = ponto.getTitulo();
+            response.descricaoCurta = ponto.getDescricaoCurta();
+            response.descricaoDetalhada = ponto.getDescricaoDetalhada();
+            response.tipo = ponto.getTipo().name();
+            response.imagemUrl = ponto.getImagemUrl();
+            response.videoUrl = ponto.getVideoUrl();
+            response.modoExibicao = ponto.getModoExibicao().name();
+            response.ordemExibicao = ponto.getOrdemExibicao();
+            response.ativo = ponto.isAtivo();
+            return response;
+        }
     }
 
     @Data
@@ -46,6 +103,7 @@ public class PercursoDTO {
         private Integer ordemExibicao;
         private boolean destaque;
         private LocalDateTime criadoEm;
+        private List<PontoAtencaoResponse> pontosAtencao;
 
         public static Response from(Percurso percurso) {
             Response response = new Response();
@@ -61,6 +119,9 @@ public class PercursoDTO {
             response.ordemExibicao = percurso.getOrdemExibicao();
             response.destaque = percurso.isDestaque();
             response.criadoEm = percurso.getCriadoEm();
+            response.pontosAtencao = percurso.getPontosAtencao().stream()
+                    .map(PontoAtencaoResponse::from)
+                    .toList();
 
             if (percurso.getCategoria() != null) {
                 response.categoriaId = percurso.getCategoria().getId();
