@@ -184,10 +184,14 @@ export default function Player() {
   const playerShellRef = useRef(null)
   const playerMountRef = useRef(null)
   const playerRef = useRef(null)
+  const videoExplicativoMountRef = useRef(null)
+  const videoExplicativoPlayerRef = useRef(null)
   const attentionDetailRef = useRef(null)
   const previousTimeRef = useRef(0)
   const disparadosIdsRef = useRef(new Set())
   const secondsRef = useRef(0)
+  const reproducaoIniciadaRef = useRef(false)
+  const buscaManualEmAndamentoRef = useRef(false)
 
   const [percurso, setPercurso] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -203,6 +207,8 @@ export default function Player() {
   const [disparadosIds, setDisparadosIds] = useState([])
   const [isMobileViewport, setIsMobileViewport] = useState(detectarMobile())
   const [isPlayerFullscreen, setIsPlayerFullscreen] = useState(false)
+  const [videoExplicativoAberto, setVideoExplicativoAberto] = useState(false)
+  const [interrupcoesAtivas, setInterrupcoesAtivas] = useState(true)
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -266,8 +272,12 @@ export default function Player() {
     setPontoAtencaoAtivoId(null)
     setPromptPontoId(null)
     setDisparadosIds([])
+    setVideoExplicativoAberto(false)
+    setInterrupcoesAtivas(true)
     disparadosIdsRef.current = new Set()
     secondsRef.current = 0
+    reproducaoIniciadaRef.current = false
+    buscaManualEmAndamentoRef.current = false
     previousTimeRef.current = 0
 
     Promise.all([percursoService.buscar(id), progressoService.meu()])
@@ -313,6 +323,11 @@ export default function Player() {
 
   const pontoAtencaoAtivo = pontosAtencaoAtivos.find(item => item.id === pontoAtencaoAtivoId) || null
   const pontoEmPrompt = pontosAtencaoAtivos.find(item => item.id === promptPontoId) || null
+  const fonteVideoExplicativo = useMemo(() => resolverFontePlayer({
+    videoProvider: pontoAtencaoAtivo?.videoUrl?.includes('mediadelivery.net/embed/') ? 'BUNNY' : undefined,
+    videoUrl: pontoAtencaoAtivo?.videoUrl,
+    videoAssetId: undefined,
+  }), [pontoAtencaoAtivo?.videoUrl])
   const fontePlayer = useMemo(() => resolverFontePlayer({
     videoProvider: percurso?.videoProvider,
     videoUrl: percurso?.videoUrl,
@@ -400,6 +415,10 @@ export default function Player() {
       return
     }
 
+    if (!interrupcoesAtivas) {
+      return
+    }
+
     if (!isMobileViewport || ponto.modoExibicao === 'AUTOMATICO') {
       pausarVideo()
     }
@@ -413,7 +432,7 @@ export default function Player() {
     setPromptPontoId(ponto.id)
   }
 
-  function handleTimeUpdate(tempoAtual) {
+  function handleTimeUpdate(tempoAtual, { ignorarDisparos = false } = {}) {
     if (typeof tempoAtual !== 'number' || !Number.isFinite(tempoAtual)) return
 
     const tempoArredondado = Number(tempoAtual)
@@ -422,6 +441,14 @@ export default function Player() {
 
     const tempoAnterior = previousTimeRef.current
     previousTimeRef.current = tempoArredondado
+
+    if (!reproducaoIniciadaRef.current) {
+      return
+    }
+
+    if (ignorarDisparos || buscaManualEmAndamentoRef.current) {
+      return
+    }
 
     if (tempoArredondado + 0.75 < tempoAnterior) {
       const rearmados = pontosAtencaoAtivos
@@ -442,6 +469,10 @@ export default function Player() {
       setDisparadosIds([])
       disparadosIdsRef.current = new Set()
       setPromptPontoId(null)
+      return
+    }
+
+    if (tempoArredondado - tempoAnterior > 2.5) {
       return
     }
 
@@ -513,11 +544,15 @@ export default function Player() {
             }
           }
 
+          const handlePlay = () => {
+            reproducaoIniciadaRef.current = true
+          }
           const handlePause = () => {}
           const handleError = () => setPlayerErro(true)
 
           bunnyPlayer.on('ready', handleReady)
           bunnyPlayer.on('timeupdate', handleTime)
+          bunnyPlayer.on('play', handlePlay)
           bunnyPlayer.on('pause', handlePause)
           bunnyPlayer.on('error', handleError)
 
@@ -528,6 +563,7 @@ export default function Player() {
               if (typeof bunnyPlayer.off === 'function') {
                 bunnyPlayer.off('ready', handleReady)
                 bunnyPlayer.off('timeupdate', handleTime)
+                bunnyPlayer.off('play', handlePlay)
                 bunnyPlayer.off('pause', handlePause)
                 bunnyPlayer.off('error', handleError)
               }
@@ -632,6 +668,19 @@ export default function Player() {
         }
 
         const handleTime = () => handleTimeUpdate(Number(player.currentTime || 0))
+        const handleSeek = () => {
+          buscaManualEmAndamentoRef.current = true
+          handleTimeUpdate(Number(player.currentTime || 0), { ignorarDisparos: true })
+        }
+        const handleSeeked = () => {
+          handleTimeUpdate(Number(player.currentTime || 0), { ignorarDisparos: true })
+          window.setTimeout(() => {
+            buscaManualEmAndamentoRef.current = false
+          }, 0)
+        }
+        const handlePlay = () => {
+          reproducaoIniciadaRef.current = true
+        }
         const handleDuration = () => setDurationSegundos(Number(player.duration || 0))
         const handleError = () => setPlayerErro(true)
         const handleEnterFullscreen = async () => {
@@ -645,8 +694,9 @@ export default function Player() {
 
         player.on('ready', handleReady)
         player.on('timeupdate', handleTime)
-        player.on('seeking', handleTime)
-        player.on('seeked', handleTime)
+        player.on('play', handlePlay)
+        player.on('seeking', handleSeek)
+        player.on('seeked', handleSeeked)
         player.on('durationchange', handleDuration)
         player.on('loadedmetadata', handleDuration)
         player.on('error', handleError)
@@ -656,8 +706,9 @@ export default function Player() {
         player._customCleanup = () => {
           player.off('ready', handleReady)
           player.off('timeupdate', handleTime)
-          player.off('seeking', handleTime)
-          player.off('seeked', handleTime)
+          player.off('play', handlePlay)
+          player.off('seeking', handleSeek)
+          player.off('seeked', handleSeeked)
           player.off('durationchange', handleDuration)
           player.off('loadedmetadata', handleDuration)
           player.off('error', handleError)
@@ -682,6 +733,71 @@ export default function Player() {
       playerRef.current = null
     }
   }, [fontePlayer, id, playerPodeReproduzir])
+
+  useEffect(() => {
+    if (!videoExplicativoAberto || !fonteVideoExplicativo || !videoExplicativoMountRef.current) return
+    if (fonteVideoExplicativo.provider === 'bunny') return
+
+    let cancelled = false
+    let player = null
+
+    ;(async () => {
+      try {
+        const [{ default: Plyr }] = await Promise.all([
+          import('plyr'),
+          import('plyr/dist/plyr.css'),
+        ])
+
+        if (cancelled || !videoExplicativoMountRef.current) return
+
+        videoExplicativoMountRef.current.innerHTML = ''
+        videoExplicativoMountRef.current.setAttribute('data-plyr-provider', fonteVideoExplicativo.provider)
+        videoExplicativoMountRef.current.setAttribute('data-plyr-embed-id', fonteVideoExplicativo.embedId)
+
+        player = new Plyr(videoExplicativoMountRef.current, {
+          controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'fullscreen'],
+          keyboard: {
+            focused: true,
+            global: false,
+          },
+          tooltips: {
+            controls: true,
+            seek: true,
+          },
+          youtube: {
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1,
+            iv_load_policy: 3,
+            noCookie: true,
+          },
+          vimeo: {
+            byline: false,
+            portrait: false,
+            title: false,
+            transparent: false,
+          },
+        })
+
+        if (cancelled) {
+          player.destroy()
+          return
+        }
+
+        videoExplicativoPlayerRef.current = player
+      } catch (_) {
+        // fallback permanece no link externo se necessario
+      }
+    })()
+
+    return () => {
+      cancelled = true
+      if (player) {
+        player.destroy()
+      }
+      videoExplicativoPlayerRef.current = null
+    }
+  }, [fonteVideoExplicativo, videoExplicativoAberto])
 
   async function marcarConcluido() {
     setSalvando(true)
@@ -799,14 +915,24 @@ export default function Player() {
                 Ir para este momento
               </button>
               {pontoAtencaoAtivo.videoUrl && (
-                <a
-                  className="btn btn-ghost"
-                  href={pontoAtencaoAtivo.videoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Abrir video explicativo
-                </a>
+                fonteVideoExplicativo ? (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setVideoExplicativoAberto(true)}
+                  >
+                    Ver video explicativo
+                  </button>
+                ) : (
+                  <a
+                    className="btn btn-ghost"
+                    href={pontoAtencaoAtivo.videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Abrir video explicativo
+                  </a>
+                )
               )}
             </div>
           </div>
@@ -852,6 +978,49 @@ export default function Player() {
 
   return (
     <>
+      {videoExplicativoAberto && pontoAtencaoAtivo && fonteVideoExplicativo && (
+        <div className="request-modal-backdrop" onClick={() => setVideoExplicativoAberto(false)}>
+          <div className="request-modal-card attention-video-modal" onClick={event => event.stopPropagation()}>
+            <div className="attention-video-modal-head">
+              <div>
+                <div className="card-tag">Video explicativo</div>
+                <div className="attention-video-modal-title">{pontoAtencaoAtivo.titulo}</div>
+              </div>
+              <button
+                type="button"
+                className="simulado-image-modal-close"
+                onClick={() => setVideoExplicativoAberto(false)}
+              >
+                Fechar
+              </button>
+            </div>
+
+            <div className="attention-video-modal-player">
+              {fonteVideoExplicativo.provider === 'bunny' ? (
+                <iframe
+                  className="attention-video-modal-frame"
+                  src={fonteVideoExplicativo.embedUrl}
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  title={pontoAtencaoAtivo.titulo}
+                />
+              ) : (
+                <div
+                  ref={videoExplicativoMountRef}
+                  className="attention-video-modal-frame"
+                  data-plyr-provider={fonteVideoExplicativo.provider}
+                  data-plyr-embed-id={fonteVideoExplicativo.embedId}
+                />
+              )}
+            </div>
+
+            {pontoAtencaoAtivo.descricaoCurta && (
+              <div className="attention-video-modal-copy">{pontoAtencaoAtivo.descricaoCurta}</div>
+            )}
+          </div>
+        </div>
+      )}
+
       <button className="back-link" onClick={voltarParaBiblioteca}>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M13 4L6 10l7 6" />
@@ -928,7 +1097,19 @@ export default function Player() {
                     ? `Tempo atual: ${formatarTimestamp(currentTime)}`
                     : 'Carregando player...'}
                 </div>
-                <div className="mini-copy">{formatarTimestamp(duracaoBase)}</div>
+                <div className="attention-timeline-tools">
+                  {pontosAtencaoAtivos.length > 0 && (
+                    <label className="player-attention-toggle player-attention-toggle--inline">
+                      <input
+                        type="checkbox"
+                        checked={interrupcoesAtivas}
+                        onChange={event => setInterrupcoesAtivas(event.target.checked)}
+                      />
+                      <span>Pausar nos pontos de atencao</span>
+                    </label>
+                  )}
+                  <div className="mini-copy">{formatarTimestamp(duracaoBase)}</div>
+                </div>
               </div>
               <div className="attention-timeline-bar">
                 <div
@@ -1009,15 +1190,6 @@ export default function Player() {
               </div>
             </div>
 
-            {pontosAtencaoAtivos.length > 0 && (
-              <div className="player-attention-inline">
-                <div className="player-attention-inline-title">Pontos de atencao deste modulo</div>
-                <div className="player-attention-inline-copy">
-                  Esse video tem {pontosAtencaoAtivos.length} apoio{pontosAtencaoAtivos.length > 1 ? 's' : ''} com dicas, placas,
-                  referencias e observacoes importantes para revisar.
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="player-side-stack">

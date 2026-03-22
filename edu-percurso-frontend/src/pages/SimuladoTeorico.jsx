@@ -184,31 +184,7 @@ export default function SimuladoTeorico() {
 
   return (
     <div className="student-shell student-shell--compact">
-      <section className="student-library-head">
-        <div>
-          <div className="page-title">Simulado teorico</div>
-          <p className="page-sub" style={{ marginBottom: 0 }}>
-            Treine por tema, corrija na hora e consulte a explicacao em texto ou video quando precisar.
-          </p>
-        </div>
-
-        <div className="student-kpi-strip">
-          <div className="student-kpi-pill">
-            <span className="student-kpi-pill-value">{temas.length}</span>
-            <span className="student-kpi-pill-label">Temas publicados</span>
-          </div>
-          <div className="student-kpi-pill">
-            <span className="student-kpi-pill-value">{totalQuestoes}</span>
-            <span className="student-kpi-pill-label">Questoes no tema</span>
-          </div>
-          <div className="student-kpi-pill">
-            <span className="student-kpi-pill-value">{corretasSessao}</span>
-            <span className="student-kpi-pill-label">Acertos na sessao</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="student-filter-card simulado-mode-card">
+      <section className="simulado-mode-card">
         <div className="simulado-mode-switch" role="tablist" aria-label="Modos do simulado">
           <button type="button" className="simulado-mode-pill is-active">
             Treinar por tema

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import BrandLogo from '../components/BrandLogo'
 import RevealSection from '../components/RevealSection'
+import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import { localProvaService, planoService } from '../services/api'
 import { formatStatusComercialLocal } from '../utils/formatters'
@@ -137,6 +138,7 @@ export default function Home() {
         </Link>
 
         <div className="landing-topbar-actions">
+          <ThemeToggle compact />
           {user ? (
             <>
               <Link className="btn btn-ghost btn-sm" to={isAdmin ? '/admin/pedidos' : '/meus-acessos'}>

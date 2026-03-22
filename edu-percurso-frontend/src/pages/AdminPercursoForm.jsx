@@ -91,6 +91,12 @@ function formatarModoPonto(modo) {
   }
 }
 
+function videoExplicativoEhEmbedavel(url) {
+  const valor = String(url || '').trim()
+  if (!valor) return true
+  return /youtube\.com|youtu\.be|vimeo\.com|mediadelivery\.net\/embed\//i.test(valor)
+}
+
 function formatarVideoProvider(provider) {
   switch (provider) {
     case 'VIMEO':
@@ -725,13 +731,18 @@ export default function AdminPercursoForm() {
                       <label className="form-label">Video explicativo opcional</label>
                       <input
                         className="form-input"
-                        placeholder="https://youtube.com/watch?v=..."
+                        placeholder="https://youtube.com/watch?v=... ou embed do Bunny"
                         value={ponto.videoUrl}
                         onChange={event => setPontoAtencao(index, 'videoUrl', event.target.value)}
                       />
                       <div className="mini-copy">
-                        Se preencher, o aluno pode abrir um video curto de apoio para esse ponto.
+                        Aceita YouTube, Vimeo e Bunny. Quando a URL for compativel, o video abre dentro da plataforma.
                       </div>
+                      {ponto.videoUrl.trim() && !videoExplicativoEhEmbedavel(ponto.videoUrl) && (
+                        <div className="form-error">
+                          Essa URL nao parece ser de YouTube, Vimeo ou embed do Bunny. Nesse caso, o aluno vai abrir o link fora da plataforma.
+                        </div>
+                      )}
 
                       <div className="form-row" style={{ marginTop: 12 }}>
                         <div className="form-group" style={{ marginBottom: 0 }}>
