@@ -5509,6 +5509,16 @@ html[data-theme='light'] .empty-state {
     white-space: nowrap;
   }
 
+  .landing-topbar .theme-toggle {
+    min-width: 36px;
+    padding: 0.45rem;
+    justify-content: center;
+  }
+
+  .landing-topbar .theme-toggle-label {
+    display: none;
+  }
+
   .checkout-watch-card {
     grid-template-columns: 1fr;
     padding: 1rem;
