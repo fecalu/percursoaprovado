@@ -1447,6 +1447,7 @@ export default function Player() {
     const posicaoAtual = indiceConteudoAtual >= 0 ? indiceConteudoAtual + 1 : 1
     const resumoModulo = `${posicaoAtual} de ${conteudosDoModulo.length} aulas`
     const aulaAtual = indiceConteudoAtual >= 0 ? conteudosDoModulo[indiceConteudoAtual] : percurso
+    const moduloNavExpandida = moduloNavAberta
 
     return (
       <div className="player-module-nav">
@@ -1480,7 +1481,7 @@ export default function Player() {
             </div>
           </button>
 
-          {moduloNavAberta && (
+          {moduloNavExpandida && (
             <div className="player-module-list">
               {conteudosDoModulo.map((item, index) => {
                 const isCurrent = String(item.id) === String(percurso?.id)
@@ -1537,108 +1538,6 @@ export default function Player() {
 
   return (
     <>
-      {!isMobileViewport && pontoExplicacaoAtual && (
-        <div className="request-modal-backdrop" onClick={fecharExplicacaoPonto}>
-          <div className="request-modal-card attention-detail-modal" onClick={event => event.stopPropagation()}>
-            <div className="attention-detail-modal-head">
-              <div>
-                <div className="card-tag">Explicacao</div>
-                <div className="attention-detail-modal-title">{pontoExplicacaoAtual.titulo}</div>
-              </div>
-              <button
-                type="button"
-                className="simulado-image-modal-close"
-                onClick={fecharExplicacaoPonto}
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div className="attention-detail-modal-body">
-              {pontoTemAudio(pontoExplicacaoAtual) && (
-                <div className="attention-detail-modal-audio-wrap">
-                  <audio
-                    className="attention-detail-modal-audio"
-                    controls
-                    preload="none"
-                    src={pontoExplicacaoAtual.audioUrl}
-                  />
-                </div>
-              )}
-
-              {(pontoExplicacaoAtual.descricaoDetalhada || pontoExplicacaoAtual.descricaoCurta) && (
-                <div className="attention-point-detail-copy">
-                  {pontoExplicacaoAtual.descricaoDetalhada || pontoExplicacaoAtual.descricaoCurta}
-                </div>
-              )}
-
-              {pontoExplicacaoAtual.imagemUrl && (
-                <img
-                  src={pontoExplicacaoAtual.imagemUrl}
-                  alt={pontoExplicacaoAtual.titulo}
-                  className="attention-detail-modal-image"
-                />
-              )}
-            </div>
-
-            {pontoExplicacaoAtual.videoUrl && (
-              <div className="attention-detail-modal-actions">
-                <button
-                  className="btn btn-ghost"
-                  type="button"
-                  onClick={() => abrirVideoPonto(pontoExplicacaoAtual)}
-                >
-                  Ver video
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {!isMobileViewport && videoExplicativoAberto && pontoVideoExplicativoAtual && fonteVideoExplicativo && (
-        <div className="request-modal-backdrop" onClick={fecharVideoExplicativo}>
-          <div className="request-modal-card attention-video-modal" onClick={event => event.stopPropagation()}>
-            <div className="attention-video-modal-head">
-              <div>
-                <div className="card-tag">Video explicativo</div>
-                <div className="attention-video-modal-title">{pontoVideoExplicativoAtual.titulo}</div>
-              </div>
-              <button
-                type="button"
-                className="simulado-image-modal-close"
-                onClick={fecharVideoExplicativo}
-              >
-                Fechar
-              </button>
-            </div>
-
-            <div className="attention-video-modal-player">
-              {fonteVideoExplicativo.provider === 'bunny' ? (
-                <iframe
-                  className="attention-video-modal-frame"
-                  src={fonteVideoExplicativo.embedUrl}
-                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  allowFullScreen
-                  title={pontoVideoExplicativoAtual.titulo}
-                />
-              ) : (
-                <div
-                  ref={videoExplicativoMountRef}
-                  className="attention-video-modal-frame"
-                  data-plyr-provider={fonteVideoExplicativo.provider}
-                  data-plyr-embed-id={fonteVideoExplicativo.embedId}
-                />
-              )}
-            </div>
-
-            {pontoVideoExplicativoAtual.descricaoCurta && (
-              <div className="attention-video-modal-copy">{pontoVideoExplicativoAtual.descricaoCurta}</div>
-            )}
-          </div>
-        </div>
-      )}
-
       <button className="back-link" onClick={voltarParaBiblioteca}>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M13 4L6 10l7 6" />
@@ -1648,120 +1547,230 @@ export default function Player() {
 
       <div className="student-shell student-shell--compact">
         <div className={`player-stage-layout${exibirRailPontosDesktop ? ' has-attention' : ''}`}>
-          <div ref={playerShellRef} className={`player-stage-shell${isPlayerFullscreen ? ' is-fullscreen' : ''}`}>
-            <div className="player-stage-head">
-              <h1 className="player-title player-title--stage">{percurso.titulo}</h1>
-            </div>
+          <div className="player-stage-main">
+            <div ref={playerShellRef} className={`player-stage-shell${isPlayerFullscreen ? ' is-fullscreen' : ''}`}>
+              <div className="player-stage-head">
+                <h1 className="player-title player-title--stage">{percurso.titulo}</h1>
+              </div>
 
-            <div className="player-wrap">
-              {playerPodeReproduzir && fontePlayer?.provider === 'bunny' && isMobileViewport && (
-                <button
-                  type="button"
-                  className="player-fullscreen-toggle"
-                  onClick={togglePlayerFullscreen}
-                >
-                  {isPlayerFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
-                </button>
-              )}
-              {playerPodeReproduzir ? (
-                <>
-                  {fontePlayer?.provider === 'bunny' ? (
-                    <iframe
-                      ref={playerMountRef}
-                      className="player-react"
-                      src={fontePlayer.embedUrl}
-                      allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
-                      allowFullScreen
-                      title={percurso.titulo}
-                    />
-                  ) : (
-                    <div ref={playerMountRef} className="player-react" />
-                  )}
-
-                  {pontoEmPrompt && !isMobileViewport && (
-                    <div className="attention-overlay-card">
-                      <div className="attention-overlay-title">{pontoEmPrompt.titulo}</div>
-                      <div className="attention-overlay-copy">{renderPromptTexto(pontoEmPrompt)}</div>
-                      {renderAcoesPrompt(pontoEmPrompt)}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="player-placeholder">
-                  <div className="big-play">
-                    <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
-                      <path d="M7 5l9 5-9 5V5z" fill="#2de09a" />
-                    </svg>
-                  </div>
-                  <div className="player-url">{percurso.videoUrl}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
-                    URL do video nao reconhecida pelo player.
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {playerPodeReproduzir && (
-              <div className="attention-timeline-shell">
-                <div className="attention-timeline-header">
-                  <div className="mini-copy">
-                    {playerReady
-                      ? `Tempo atual: ${formatarTimestamp(currentTime)}`
-                      : 'Carregando player...'}
-                  </div>
-                  <div className="attention-timeline-tools">
-                    {pontosAtencaoAtivos.length > 0 && (
-                      <label className="player-attention-toggle player-attention-toggle--inline">
-                        <input
-                          type="checkbox"
-                          checked={interrupcoesAtivas}
-                          onChange={event => setInterrupcoesAtivas(event.target.checked)}
-                        />
-                        <span>Pausar nos pontos de atencao</span>
-                      </label>
-                    )}
-                    <div className="mini-copy">{formatarTimestamp(duracaoBase)}</div>
-                  </div>
-                </div>
-                <div className="attention-timeline-bar">
-                  <div
-                    className="attention-timeline-progress"
-                    style={{ width: `${clampPercentual(currentTime, duracaoBase)}%` }}
-                  />
-                  {pontosAtencaoAtivos.map(item => {
-                    const visto = disparadosIds.includes(item.id)
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={`attention-marker${item.id === pontoAtencaoAtivoId ? ' is-active' : ''}${visto ? ' is-seen' : ''}`}
-                        style={{ left: `${clampPercentual(item.timestampSegundos, duracaoBase)}%` }}
-                        onClick={() => abrirPromptPonto(item)}
-                        title={`${formatarTimestamp(item.timestampSegundos)} - ${item.titulo}`}
+              <div className="player-wrap">
+                {playerPodeReproduzir && fontePlayer?.provider === 'bunny' && isMobileViewport && (
+                  <button
+                    type="button"
+                    className="player-fullscreen-toggle"
+                    onClick={togglePlayerFullscreen}
+                  >
+                    {isPlayerFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+                  </button>
+                )}
+                {playerPodeReproduzir ? (
+                  <>
+                    {fontePlayer?.provider === 'bunny' ? (
+                      <iframe
+                        ref={playerMountRef}
+                        className="player-react"
+                        src={fontePlayer.embedUrl}
+                        allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                        allowFullScreen
+                        title={percurso.titulo}
                       />
-                    )
-                  })}
-                </div>
-              </div>
-            )}
+                    ) : (
+                      <div ref={playerMountRef} className="player-react" />
+                    )}
 
-            {pontoEmPrompt && isMobileViewport && (
-              <div className="attention-mobile-sheet">
-                <div className="attention-mobile-sheet-card">
-                  <div className="attention-overlay-title">{pontoEmPrompt.titulo}</div>
-                  <div className="attention-overlay-copy">{renderPromptTexto(pontoEmPrompt)}</div>
-                  {renderAcoesPrompt(pontoEmPrompt, { mobile: true })}
-                </div>
-              </div>
-            )}
+                    {pontoEmPrompt && !isMobileViewport && (
+                      <div className="attention-overlay-card">
+                        <div className="attention-overlay-title">{pontoEmPrompt.titulo}</div>
+                        <div className="attention-overlay-copy">{renderPromptTexto(pontoEmPrompt)}</div>
+                        {renderAcoesPrompt(pontoEmPrompt)}
+                      </div>
+                    )}
 
-            {resumoPrincipal && (
-              <div className="player-stage-summary">
-                <p className="player-copy player-copy--stage">
-                  {resumoPrincipal}
-                </p>
+                    {!isMobileViewport && pontoExplicacaoAtual && (
+                      <div className="player-detail-modal-backdrop" onClick={fecharExplicacaoPonto}>
+                        <div
+                          className="request-modal-card attention-detail-modal attention-detail-modal--player"
+                          onClick={event => event.stopPropagation()}
+                        >
+                          <div className="attention-detail-modal-head">
+                            <div>
+                              <div className="card-tag">Explicacao</div>
+                              <div className="attention-detail-modal-title">{pontoExplicacaoAtual.titulo}</div>
+                            </div>
+                            <button
+                              type="button"
+                              className="simulado-image-modal-close"
+                              onClick={fecharExplicacaoPonto}
+                            >
+                              Fechar
+                            </button>
+                          </div>
+
+                          <div className="attention-detail-modal-body">
+                            {pontoTemAudio(pontoExplicacaoAtual) && (
+                              <div className="attention-detail-modal-audio-wrap">
+                                <audio
+                                  className="attention-detail-modal-audio"
+                                  controls
+                                  preload="none"
+                                  src={pontoExplicacaoAtual.audioUrl}
+                                />
+                              </div>
+                            )}
+
+                            {(pontoExplicacaoAtual.descricaoDetalhada || pontoExplicacaoAtual.descricaoCurta) && (
+                              <div className="attention-point-detail-copy">
+                                {pontoExplicacaoAtual.descricaoDetalhada || pontoExplicacaoAtual.descricaoCurta}
+                              </div>
+                            )}
+
+                            {pontoExplicacaoAtual.imagemUrl && (
+                              <img
+                                src={pontoExplicacaoAtual.imagemUrl}
+                                alt={pontoExplicacaoAtual.titulo}
+                                className="attention-detail-modal-image"
+                              />
+                            )}
+                          </div>
+
+                          {pontoExplicacaoAtual.videoUrl && (
+                            <div className="attention-detail-modal-actions">
+                              <button
+                                className="btn btn-ghost"
+                                type="button"
+                                onClick={() => abrirVideoPonto(pontoExplicacaoAtual)}
+                              >
+                                Ver video
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {!isMobileViewport && videoExplicativoAberto && pontoVideoExplicativoAtual && fonteVideoExplicativo && (
+                      <div className="player-video-modal-backdrop" onClick={fecharVideoExplicativo}>
+                        <div
+                          className="request-modal-card attention-video-modal attention-video-modal--player"
+                          onClick={event => event.stopPropagation()}
+                        >
+                          <div className="attention-video-modal-head">
+                            <div>
+                              <div className="card-tag">Video explicativo</div>
+                              <div className="attention-video-modal-title">{pontoVideoExplicativoAtual.titulo}</div>
+                            </div>
+                            <button
+                              type="button"
+                              className="simulado-image-modal-close"
+                              onClick={fecharVideoExplicativo}
+                            >
+                              Fechar
+                            </button>
+                          </div>
+
+                          <div className="attention-video-modal-player">
+                            {fonteVideoExplicativo.provider === 'bunny' ? (
+                              <iframe
+                                className="attention-video-modal-frame"
+                                src={fonteVideoExplicativo.embedUrl}
+                                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen"
+                                allowFullScreen
+                                title={pontoVideoExplicativoAtual.titulo}
+                              />
+                            ) : (
+                              <div
+                                ref={videoExplicativoMountRef}
+                                className="attention-video-modal-frame"
+                                data-plyr-provider={fonteVideoExplicativo.provider}
+                                data-plyr-embed-id={fonteVideoExplicativo.embedId}
+                              />
+                            )}
+                          </div>
+
+                          {pontoVideoExplicativoAtual.descricaoCurta && (
+                            <div className="attention-video-modal-copy">{pontoVideoExplicativoAtual.descricaoCurta}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="player-placeholder">
+                    <div className="big-play">
+                      <svg width="24" height="24" viewBox="0 0 20 20" fill="none">
+                        <path d="M7 5l9 5-9 5V5z" fill="#2de09a" />
+                      </svg>
+                    </div>
+                    <div className="player-url">{percurso.videoUrl}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
+                      URL do video nao reconhecida pelo player.
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+
+              {playerPodeReproduzir && (
+                <div className="attention-timeline-shell">
+                  <div className="attention-timeline-header">
+                    <div className="mini-copy">
+                      {playerReady
+                        ? `Tempo atual: ${formatarTimestamp(currentTime)}`
+                        : 'Carregando player...'}
+                    </div>
+                    <div className="attention-timeline-tools">
+                      {pontosAtencaoAtivos.length > 0 && (
+                        <label className="player-attention-toggle player-attention-toggle--inline">
+                          <input
+                            type="checkbox"
+                            checked={interrupcoesAtivas}
+                            onChange={event => setInterrupcoesAtivas(event.target.checked)}
+                          />
+                          <span>Pausar nos pontos de atencao</span>
+                        </label>
+                      )}
+                      <div className="mini-copy">{formatarTimestamp(duracaoBase)}</div>
+                    </div>
+                  </div>
+                  <div className="attention-timeline-bar">
+                    <div
+                      className="attention-timeline-progress"
+                      style={{ width: `${clampPercentual(currentTime, duracaoBase)}%` }}
+                    />
+                    {pontosAtencaoAtivos.map(item => {
+                      const visto = disparadosIds.includes(item.id)
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          className={`attention-marker${item.id === pontoAtencaoAtivoId ? ' is-active' : ''}${visto ? ' is-seen' : ''}`}
+                          style={{ left: `${clampPercentual(item.timestampSegundos, duracaoBase)}%` }}
+                          onClick={() => abrirPromptPonto(item)}
+                          title={`${formatarTimestamp(item.timestampSegundos)} - ${item.titulo}`}
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {pontoEmPrompt && isMobileViewport && (
+                <div className="attention-mobile-sheet">
+                  <div className="attention-mobile-sheet-card">
+                    <div className="attention-overlay-title">{pontoEmPrompt.titulo}</div>
+                    <div className="attention-overlay-copy">{renderPromptTexto(pontoEmPrompt)}</div>
+                    {renderAcoesPrompt(pontoEmPrompt, { mobile: true })}
+                  </div>
+                </div>
+              )}
+
+              {resumoPrincipal && (
+                <div className="player-stage-summary">
+                  <p className="player-copy player-copy--stage">
+                    {resumoPrincipal}
+                  </p>
+                </div>
+              )}
+            </div>
 
             {renderNavegacaoModulo()}
           </div>
