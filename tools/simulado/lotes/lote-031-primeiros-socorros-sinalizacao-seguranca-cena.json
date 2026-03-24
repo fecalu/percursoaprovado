@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "tema": "PRIMEIROS_SOCORROS",
+    "subtema": "Sinalização do local e segurança da cena",
+    "qtde": 6,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Primeiros socorros",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre proteção do local do sinistro e prevenção de novos acidentes."
+  },
+  "questoes": [
+    {
+      "enunciado": "Ao chegar a um local de acidente de trânsito, a primeira preocupação do condutor deve ser:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Antes de qualquer ajuda, é preciso tornar a cena mais segura.",
+      "explicacaoDetalhada": "Um atendimento inicial responsável começa pela proteção do local. Isso reduz o risco de novos atropelamentos, colisões e exposição adicional das vítimas, de terceiros e do próprio socorrista eventual.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-001",
+      "alternativas": [
+        { "texto": "Registrar imagens do acidente antes de qualquer providência.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Avaliar e proteger a segurança da cena.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Mover imediatamente todas as vítimas para a calçada.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Discutir com os envolvidos sobre quem causou o acidente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Antes de se aproximar de uma vítima, o mais importante é verificar se:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O socorro não pode colocar outra pessoa em risco imediato.",
+      "explicacaoDetalhada": "Aproximar-se de uma vítima sem avaliar o ambiente pode gerar mais feridos. Tráfego em movimento, vazamento de combustível, incêndio ou cabos energizados exigem cautela antes de qualquer tentativa de auxílio.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-002",
+      "alternativas": [
+        { "texto": "A vítima está com os olhos abertos.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A cena oferece condições mínimas de segurança para aproximação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Há testemunhas suficientes no local.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O veículo envolvido tem seguro.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A sinalização do local de um acidente serve principalmente para:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalizar o local ajuda a evitar novos acidentes e a proteger todos os envolvidos.",
+      "explicacaoDetalhada": "Ao alertar outros condutores com antecedência, a sinalização permite redução de velocidade, mudança de trajetória e maior atenção ao ponto de risco. Isso é parte essencial do primeiro atendimento responsável.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-003",
+      "alternativas": [
+        { "texto": "Reservar espaço para a imprensa.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Evitar novos riscos e preservar a área do acidente.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Impedir a chegada do socorro profissional.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Identificar quem tem a razão no acidente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em local com pouca visibilidade, como curva ou período noturno, a sinalização do acidente deve ser:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Quanto menor a visibilidade, maior deve ser o cuidado para alertar outros condutores com antecedência.",
+      "explicacaoDetalhada": "Em curvas, aclives ou à noite, o tempo de percepção do risco por parte dos demais motoristas é menor. Por isso, a sinalização precisa ser pensada para dar aviso antecipado e reduzir a chance de nova colisão.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-004",
+      "alternativas": [
+        { "texto": "Mais próxima possível da vítima, para concentrar o aviso.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Planejada para alertar com antecedência, considerando o campo de visão dos demais condutores.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Dispensada, já que o pisca-alerta resolve sozinho.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Feita apenas depois de falar com todos os envolvidos.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se houver vazamento de combustível ou risco de incêndio no local do acidente, o mais prudente é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Risco de fogo exige prioridade total à segurança da cena e afastamento de fontes de ignição.",
+      "explicacaoDetalhada": "Nessas situações, a proximidade imprudente pode agravar muito o acidente. O adequado é afastar pessoas do perigo, evitar faíscas, não fumar, não improvisar soluções e acionar rapidamente o socorro especializado.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-005",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-005",
+      "alternativas": [
+        { "texto": "Aproximar-se logo para retirar tudo do veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Controlar a cena, afastar pessoas do perigo e acionar ajuda adequada.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ligar o motor do veículo para testar se ainda funciona.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar qualquer objeto metálico para conter o vazamento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Na lógica dos primeiros socorros no trânsito, proteger a cena antes de tocar na vítima é importante porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem controle básico da cena, o risco de agravar o evento e gerar novas vítimas é alto.",
+      "explicacaoDetalhada": "Primeiros socorros em trânsito não começam apenas com a vítima; começam com o ambiente. Se a via continua oferecendo risco de atropelamento, colisão ou incêndio, qualquer tentativa de ajuda pode aumentar o número de feridos e dificultar a chegada do socorro profissional.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-006",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-006",
+      "alternativas": [
+        { "texto": "A proteção da cena é apenas uma formalidade sem impacto prático.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Controlar a cena reduz o risco de agravar o acidente e criar novas vítimas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só é necessário sinalizar se houver mais de um veículo envolvido.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A proteção da cena pode ser deixada para depois, se a vítima estiver consciente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

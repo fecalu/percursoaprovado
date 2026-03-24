@@ -1,0 +1,1206 @@
+{
+  "source": "mock",
+  "generatedAt": "2026-03-23T04:06:18.982Z",
+  "questoes": [
+    {
+      "enunciado": "[MOCK] Ao se aproximar de uma faixa de pedestres sem semaforo, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Dar prioridade ao pedestre.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-001",
+      "fingerprint": "mock-import-001",
+      "alternativas": [
+        {
+          "texto": "Acelerar para liberar a via",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Dar prioridade ao pedestre",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Buzinar para alertar o pedestre",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parar apenas se houver agente de transito",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Em via urbana, o cinto de seguranca deve ser usado:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Por condutor e passageiros.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-002",
+      "fingerprint": "mock-import-002",
+      "alternativas": [
+        {
+          "texto": "Somente pelo condutor",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Somente em rodovias",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Por condutor e passageiros",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Apenas no banco dianteiro",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O condutor que estaciona sobre a calcada comete infracao:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Media.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-003",
+      "fingerprint": "mock-import-003",
+      "alternativas": [
+        {
+          "texto": "Leve",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Media",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Grave",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Gravissima",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O documento que autoriza o veiculo a circular regularmente e o:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: CRLV.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-004",
+      "fingerprint": "mock-import-004",
+      "alternativas": [
+        {
+          "texto": "CRV",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "CRLV",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "CNH",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "RENAVAM",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Antes de mudar de faixa, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Sinalizar e observar retrovisores.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-005",
+      "fingerprint": "mock-import-005",
+      "alternativas": [
+        {
+          "texto": "Frear bruscamente",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Ligar o pisca-alerta",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Sinalizar e observar retrovisores",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Buzinar continuamente",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Direcao defensiva e a pratica de dirigir com foco em:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Prevenir acidentes.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-006",
+      "fingerprint": "mock-import-006",
+      "alternativas": [
+        {
+          "texto": "Chegar mais rapido ao destino",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Prevenir acidentes",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Aumentar a velocidade media",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir o uso do cinto",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Ao dirigir sob chuva forte, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Reduzir a velocidade.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-007",
+      "fingerprint": "mock-import-007",
+      "alternativas": [
+        {
+          "texto": "Aumentar a velocidade para sair logo da area",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a velocidade",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dirigir com uma so mao",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Desligar os farois",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] A distancia de seguranca entre veiculos deve considerar:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Velocidade, via e clima.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-008",
+      "fingerprint": "mock-import-008",
+      "alternativas": [
+        {
+          "texto": "Apenas o tipo de combustivel",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Somente a cor do veiculo da frente",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Velocidade, via e clima",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Apenas o horario do dia",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Em caso de ofuscamento por farol alto, o correto e:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Reduzir e usar referencia lateral.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-009",
+      "fingerprint": "mock-import-009",
+      "alternativas": [
+        {
+          "texto": "Fechar os olhos por um instante",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Acelerar para passar rapido",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir e usar referencia lateral",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Ligar o pisca-alerta",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O uso do celular ao volante aumenta o risco porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Diminui a atencao do condutor.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-010",
+      "fingerprint": "mock-import-010",
+      "alternativas": [
+        {
+          "texto": "Facilita o controle do veiculo",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Diminui a atencao do condutor",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Melhora a visao periferica",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Aumenta a estabilidade do carro",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] A placa de parada obrigatoria determina que o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Parar totalmente.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-011",
+      "fingerprint": "mock-import-011",
+      "alternativas": [
+        {
+          "texto": "Reduzir apenas se houver pedestres",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Parar totalmente",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Acelerar para liberar a via",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Buzinar antes de cruzar",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] A placa de regulamentacao tem como funcao principal:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Mostrar obrigacoes e restricoes.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-012",
+      "fingerprint": "mock-import-012",
+      "alternativas": [
+        {
+          "texto": "Indicar pontos turisticos",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Mostrar obrigacoes e restricoes",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Decorar o trajeto",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir a sinalizacao semaforica",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] A placa de advertencia serve para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Alertar para situacoes de risco.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-013",
+      "fingerprint": "mock-import-013",
+      "alternativas": [
+        {
+          "texto": "Autorizar estacionar em qualquer local",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Alertar para situacoes de risco",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Informar postos de combustivel",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir o cinto de seguranca",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] A cor vermelha nas placas de regulamentacao normalmente indica:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Proibicao ou restricao.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-014",
+      "fingerprint": "mock-import-014",
+      "alternativas": [
+        {
+          "texto": "Orientacao turistica",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Proibicao ou restricao",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Informacao de servicos",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ponto de interesse historico",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Uma placa educativa tem o objetivo de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Orientar condutas seguras.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-015",
+      "fingerprint": "mock-import-015",
+      "alternativas": [
+        {
+          "texto": "Determinar o valor da multa",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Orientar condutas seguras",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dispensar o uso do cinto",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Liberar conversao proibida",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Ao encontrar uma vitima consciente com suspeita de fratura, o mais adequado e:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Imobilizar e chamar socorro.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-016",
+      "fingerprint": "mock-import-016",
+      "alternativas": [
+        {
+          "texto": "Pedir para a vitima andar",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Imobilizar e chamar socorro",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dar alimento imediatamente",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Retirar o capacete a forca",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O SAMU deve ser acionado pelo numero:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: 192.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-017",
+      "fingerprint": "mock-import-017",
+      "alternativas": [
+        {
+          "texto": "190",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "191",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "192",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "193",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Em caso de hemorragia externa visivel, deve-se:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Comprimir o local.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-018",
+      "fingerprint": "mock-import-018",
+      "alternativas": [
+        {
+          "texto": "Lavar com combustivel",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Comprimir o local",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Oferecer bebida alcoolica",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Movimentar bastante o membro",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O extintor do veiculo deve estar:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Em local acessivel e regular.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-019",
+      "fingerprint": "mock-import-019",
+      "alternativas": [
+        {
+          "texto": "Em local de dificil acesso",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Apenas no porta-malas solto",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Em local acessivel e regular",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Sempre descarregado",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Pneus muito gastos podem causar:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Maior risco de derrapagem.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-020",
+      "fingerprint": "mock-import-020",
+      "alternativas": [
+        {
+          "texto": "Aumento de aderencia",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reducao do risco em chuva",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Maior risco de derrapagem",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Menor necessidade de manutencao",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O nivel baixo de oleo do motor pode provocar:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Danos ao motor.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-021",
+      "fingerprint": "mock-import-021",
+      "alternativas": [
+        {
+          "texto": "Melhor lubrificacao",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Maior economia de combustivel garantida",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Danos ao motor",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Melhora imediata da aceleracao",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O sistema de arrefecimento tem a funcao de:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Resfriar o motor.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-022",
+      "fingerprint": "mock-import-022",
+      "alternativas": [
+        {
+          "texto": "Aumentar o som do escapamento",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Resfriar o motor",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir o sistema eletrico",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Diminuir a visibilidade do painel",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] A calibragem incorreta dos pneus pode afetar:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Estabilidade e consumo.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-023",
+      "fingerprint": "mock-import-023",
+      "alternativas": [
+        {
+          "texto": "Somente a cor do veiculo",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Estabilidade e consumo",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A quilometragem do odometro apenas",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas o retrovisor interno",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Reduzir o uso do automovel quando possivel contribui para:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Reduzir impactos ambientais.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-024",
+      "fingerprint": "mock-import-024",
+      "alternativas": [
+        {
+          "texto": "Aumentar a poluicao",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir impactos ambientais",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Eliminar a manutencao do veiculo",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Tornar o transito mais agressivo",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O respeito ao ciclista e ao pedestre demonstra:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Cidadania no transito.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-025",
+      "fingerprint": "mock-import-025",
+      "alternativas": [
+        {
+          "texto": "Falta de educacao no transito",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Cidadania no transito",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Perda de tempo obrigatoria",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Desinteresse pela coletividade",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Manter o veiculo regulado ajuda principalmente a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Reduzir poluicao.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-026",
+      "fingerprint": "mock-import-026",
+      "alternativas": [
+        {
+          "texto": "Aumentar a emissao de fumaca",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir poluicao",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dispensar revisoes",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Eliminar a necessidade de pneus",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] A convivencia harmoniosa no transito depende de:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Respeito e responsabilidade.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-027",
+      "fingerprint": "mock-import-027",
+      "alternativas": [
+        {
+          "texto": "Competicao entre condutores",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Respeito e responsabilidade",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Uso frequente de buzina",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Excesso de velocidade",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Jogar lixo pela janela do veiculo e uma atitude:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Poluidora e inadequada.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-028",
+      "fingerprint": "mock-import-028",
+      "alternativas": [
+        {
+          "texto": "Sustentavel",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Correta em rodovias",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Poluidora e inadequada",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Obrigatoria em viagens longas",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] O processo de primeira habilitacao exige do candidato, entre outras etapas:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: Etapas medicas, teoricas e praticas.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-029",
+      "fingerprint": "mock-import-029",
+      "alternativas": [
+        {
+          "texto": "Apenas comprar o veiculo",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Somente prova pratica",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Etapas medicas, teoricas e praticas",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Somente indicar um fiador",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "[MOCK] Em um cruzamento sem sinalizacao, a preferencia deve observar:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "[MOCK] Alternativa correta: As regras gerais de preferencia.",
+      "explicacaoDetalhada": "[MOCK] Questao criada apenas para validar o fluxo de importacao em producao.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "MOCK_IMPORT",
+      "origemQuestaoId": "mock-030",
+      "fingerprint": "mock-import-030",
+      "alternativas": [
+        {
+          "texto": "Quem buzinar primeiro passa",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Quem estiver mais rapido passa",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "As regras gerais de preferencia",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Nao existe regra aplicavel",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    }
+  ]
+}

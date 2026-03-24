@@ -1,0 +1,252 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Álcool, drogas, fadiga, sono e distração",
+    "qtde": 12,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre fatores humanos que comprometem atenção, julgamento e tempo de reação."
+  },
+  "questoes": [
+    {
+      "enunciado": "Sob o ponto de vista da direção defensiva, o consumo de álcool antes de dirigir:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O álcool reduz atenção, reflexos e capacidade de julgamento.",
+      "explicacaoDetalhada": "Mesmo antes de qualquer consequência legal, o álcool já compromete funções importantes para dirigir com segurança, como percepção de risco, coordenação motora, reflexos e tomada de decisão. Por isso, a direção defensiva é incompatível com condução após ingestão de bebida alcoólica.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-001",
+      "alternativas": [
+        { "texto": "Só é problema em viagens longas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Compromete habilidades essenciais para a condução segura.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Melhora a autoconfiança e, por isso, ajuda na condução.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Não interfere se o motorista estiver acostumado a beber.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A fadiga ao volante é perigosa principalmente porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O cansaço reduz atenção e pode retardar reações ou provocar sonolência.",
+      "explicacaoDetalhada": "Condutores fatigados tendem a ter menor concentração, pior avaliação de risco e reflexos mais lentos. Em casos mais graves, pode ocorrer cochilo ou perda momentânea de atenção, o que aumenta muito o risco de sinistro.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-002",
+      "alternativas": [
+        { "texto": "O motorista cansado dirige mais devagar e por isso fica sempre mais seguro.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A fadiga diminui a atenção e pode atrasar reações.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Cansaço só afeta quem está em veículo pesado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Basta abrir o vidro para eliminar o risco do sono.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Usar o telefone celular enquanto dirige aumenta o risco porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O celular desvia atenção visual, manual e mental da condução.",
+      "explicacaoDetalhada": "A distração pode ocorrer ao olhar a tela, tirar uma das mãos do volante e dividir a atenção mental entre a direção e a interação com o aparelho. Isso reduz a capacidade de perceber e reagir a mudanças no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-003",
+      "alternativas": [
+        { "texto": "Ele melhora a navegação e elimina a necessidade de atenção à via.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Pode desviar a atenção do condutor da tarefa de dirigir.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só é perigoso se houver trânsito intenso.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Não interfere na condução se o motorista estiver parado em qualquer momento da viagem.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Um motorista que passou a noite sem dormir adequadamente deve, antes de pegar a estrada:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sono insuficiente compromete a condução e exige reavaliação do deslocamento.",
+      "explicacaoDetalhada": "A privação de sono aumenta o risco de lapsos de atenção, julgamento inadequado e cochilos ao volante. A decisão defensiva é evitar a condução nessas condições ou reorganizar o deslocamento com descanso suficiente.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-004",
+      "alternativas": [
+        { "texto": "Confiar apenas em café e seguir viagem normalmente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Avaliar o risco e priorizar descanso antes de dirigir.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aumentar o volume do som do veículo para espantar o sono.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dirigir mais rápido para chegar mais cedo e descansar logo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Medicamentos que causam sonolência ou redução de atenção exigem do condutor:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Efeitos colaterais que alteram atenção e reflexo precisam ser considerados antes de dirigir.",
+      "explicacaoDetalhada": "Nem toda substância que compromete a direção é ilícita. Alguns medicamentos podem reduzir reflexos, atenção e coordenação, exigindo cautela redobrada e, em certos casos, a decisão de não conduzir.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-005",
+      "alternativas": [
+        { "texto": "Ignorar o efeito, porque remédio não interfere na condução.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Avaliar os efeitos e evitar dirigir se houver comprometimento.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Misturar o medicamento com café para neutralizar qualquer risco.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dirigir apenas em vias conhecidas, porque isso elimina o problema.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O chamado cochilo ao volante é especialmente perigoso porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mesmo poucos segundos de sono podem deixar o veículo sem controle efetivo.",
+      "explicacaoDetalhada": "Em alta ou média velocidade, poucos segundos sem atenção bastam para percorrer grande distância sem controle consciente. Por isso, qualquer sinal de sono deve ser tratado como fator de alto risco na direção.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-006",
+      "alternativas": [
+        { "texto": "Só causa problema se o veículo estiver em curva.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Poucos segundos de sono podem ser suficientes para perder o controle da condução.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O motorista sempre acorda antes de qualquer perigo real.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Basta reduzir um pouco a velocidade para neutralizar o risco do cochilo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Mesmo usando viva-voz ou recurso semelhante, o condutor ainda pode correr risco porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Nem toda distração é manual; a atenção mental também pode ser desviada da via.",
+      "explicacaoDetalhada": "A direção exige atenção contínua ao ambiente. Mesmo sem segurar o aparelho, uma conversa ou interação que exige raciocínio intenso pode reduzir a capacidade do condutor de perceber detalhes importantes da circulação.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-007",
+      "alternativas": [
+        { "texto": "O viva-voz elimina qualquer forma de distração.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A distração cognitiva ainda pode comprometer a atenção à direção.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ele só é perigoso em viagens acima de 100 km.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O risco existe apenas para condutores iniciantes.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao notar bocejos repetidos, dificuldade de manter os olhos abertos e perda de concentração, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinais de sonolência não devem ser ignorados; é preciso interromper a condução com segurança.",
+      "explicacaoDetalhada": "Bocejos frequentes, olhos pesados e lapsos de atenção são alertas claros de fadiga. A decisão defensiva é interromper a viagem em local seguro para descansar, em vez de insistir em seguir dirigindo.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-008",
+      "alternativas": [
+        { "texto": "Abrir o vidro e continuar normalmente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Parar em local seguro e descansar antes de seguir.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aumentar a velocidade para terminar logo o trajeto.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Confiar apenas em música alta para afastar o sono.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma pessoa emocionalmente alterada, com raiva intensa ou grande ansiedade, pode dirigir pior porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Estado emocional inadequado pode prejudicar julgamento e autocontrole no trânsito.",
+      "explicacaoDetalhada": "A direção defensiva exige serenidade para observar, decidir e reagir com equilíbrio. Emoções intensas podem favorecer impulsividade, agressividade, distração e respostas inadequadas diante de situações comuns do trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-009",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-009",
+      "alternativas": [
+        { "texto": "Emoções fortes sempre melhoram os reflexos do motorista.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O estado emocional pode reduzir o controle e piorar decisões ao volante.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só há problema se o trânsito estiver congestionado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A emoção não interfere se o condutor for experiente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em viagem longa, a prevenção mais adequada contra fadiga inclui:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Planejamento da viagem e pausas regulares ajudam a reduzir o risco da fadiga.",
+      "explicacaoDetalhada": "A fadiga não deve ser enfrentada apenas quando já está instalada. A direção defensiva valoriza planejamento, pausas para descanso, hidratação, atenção aos sinais do corpo e decisão de interromper a condução quando necessário.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-010",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-010",
+      "alternativas": [
+        { "texto": "Dirigir o máximo possível sem parar, para encurtar a exposição.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Fazer pausas regulares e respeitar os sinais de cansaço.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Compensar o sono com pressa e música alta.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Evitar qualquer parada para não perder o ritmo da viagem.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A combinação de sono, distração e velocidade elevada aumenta o risco porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Menor atenção somada a maior velocidade reduz drasticamente a margem para corrigir erros.",
+      "explicacaoDetalhada": "Quanto maior a velocidade, menor o tempo para perceber e reagir. Se ao mesmo tempo o condutor está com sono ou distraído, a chance de identificar tardiamente o perigo cresce, e o espaço necessário para correção pode já não existir.",
+      "videoUrl": null,
+      "ordemExibicao": 10,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-011",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-011",
+      "alternativas": [
+        { "texto": "Velocidade elevada compensa a distração ao reduzir o tempo de viagem.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A mistura desses fatores diminui a margem de segurança e reação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O risco só existe se a via estiver molhada.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Se o veículo estiver revisado, a combinação deixa de ser perigosa.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Na perspectiva da direção defensiva, o melhor comportamento diante de álcool, drogas, fadiga e distração é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Fatores humanos de risco devem ser prevenidos antes de comprometer a condução.",
+      "explicacaoDetalhada": "A direção defensiva não trabalha com improviso diante de fatores previsíveis. Se o condutor sabe que está cansado, afetado por substância ou distraído, deve agir preventivamente e não assumir a direção nessas condições.",
+      "videoUrl": null,
+      "ordemExibicao": 11,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-012",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-risco-humano-012",
+      "alternativas": [
+        { "texto": "Assumir o risco, desde que o trajeto seja curto.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Confiar na experiência pessoal para compensar qualquer limitação.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Prevenir a exposição ao risco e não dirigir em condições inadequadas.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Apenas reduzir um pouco a velocidade já resolve o problema.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

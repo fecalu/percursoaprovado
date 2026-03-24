@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Usuários vulneráveis: pedestre, ciclista, motociclista e crianças",
+    "qtde": 10,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva e convívio social",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre proteção dos usuários mais expostos no trânsito e tomada de decisão preventiva."
+  },
+  "questoes": [
+    {
+      "enunciado": "Ao se aproximar de faixa de pedestres com pessoas aguardando para atravessar, a conduta defensiva do motorista é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pedestres exigem atenção e prioridade compatível com a segurança da travessia.",
+      "explicacaoDetalhada": "O pedestre é um usuário vulnerável, sem a proteção estrutural de um veículo. A direção defensiva exige redução de velocidade, atenção ao comportamento de quem vai atravessar e respeito à travessia segura.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-001",
+      "alternativas": [
+        { "texto": "Acelerar antes que o pedestre entre na faixa.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e conduzir de modo a permitir travessia segura.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Buzinar para avisar que o veículo tem prioridade.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Passar normalmente, desde que o pedestre ainda não tenha pisado na faixa.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Próximo a escola, creche ou local com circulação de crianças, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Crianças podem agir de forma imprevisível, exigindo ainda mais prudência.",
+      "explicacaoDetalhada": "Em áreas com crianças, a atenção precisa ser redobrada porque elas podem surgir repentinamente, ter dificuldade para avaliar risco e agir por impulso. A velocidade e a postura do condutor devem refletir esse cenário.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-002",
+      "alternativas": [
+        { "texto": "Manter a velocidade da via, se não houver trânsito intenso.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e antecipar movimentos inesperados.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Confiar que as crianças sempre obedecerão a sinalização.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar buzina com frequência para afastá-las da rua.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao dividir a via com motociclistas, a atitude defensiva adequada é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Motociclistas são mais vulneráveis e exigem maior margem de segurança.",
+      "explicacaoDetalhada": "Como a motocicleta oferece menor proteção ao condutor, qualquer conflito de espaço pode ter consequências graves. A direção defensiva recomenda atenção aos pontos cegos, distância segura e previsibilidade nas manobras.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-003",
+      "alternativas": [
+        { "texto": "Aproximar-se bastante para evitar que ocupem espaço demais.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conduzir com distância segura e atenção às suas movimentações.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Fechar o espaço lateral para impedir passagem.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Mudar de faixa sem sinalizar, já que motos conseguem desviar.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao ultrapassar um ciclista, o condutor defensivo deve considerar que:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O ciclista é vulnerável e pode sofrer influência do vento e da proximidade do veículo.",
+      "explicacaoDetalhada": "A bicicleta é sensível a irregularidades da via, rajadas de vento e deslocamento de ar causado por veículos maiores. Por isso, a ultrapassagem deve respeitar margem lateral adequada e ser feita com cautela.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-004",
+      "alternativas": [
+        { "texto": "Pode ser feita muito próxima, desde que rápida.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Exige distância lateral de segurança e muita prudência.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Não há diferença entre ultrapassar ciclista e automóvel.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A buzina deve ser usada intensamente durante toda a manobra.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao ver ônibus parado para embarque e desembarque, o condutor defensivo deve esperar a possibilidade de:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Paradas de ônibus podem ocultar pedestres e exigir atenção redobrada.",
+      "explicacaoDetalhada": "Pessoas podem surgir à frente ou por trás do ônibus, inclusive de forma repentina. A direção defensiva exige redução de velocidade, cautela extra e leitura preventiva do entorno.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-005",
+      "alternativas": [
+        { "texto": "Apenas congestionamento, sem alteração do risco a pedestres.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Surgimento inesperado de pedestres na pista.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Maior espaço livre para ultrapassagem rápida.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Nenhum fator extra, se a via for larga.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Pessoas idosas ou com mobilidade reduzida devem ser tratadas no trânsito com:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Usuários com maior limitação exigem ainda mais paciência e margem de segurança.",
+      "explicacaoDetalhada": "A direção defensiva considera limitações de locomoção, tempo de reação e percepção dos demais usuários. Em relação a idosos e pessoas com mobilidade reduzida, o condutor deve adotar postura paciente e protetiva.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-006",
+      "alternativas": [
+        { "texto": "Impaciência, para que terminem logo a travessia.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Paciência, atenção e proteção adicional.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A mesma pressa exigida de qualquer pedestre.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Apenas observação à distância, sem necessidade de adaptação da condução.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em dia de chuva, a atenção com pedestres e motociclistas deve ser maior porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A chuva reduz aderência e visibilidade e torna os usuários vulneráveis ainda mais expostos.",
+      "explicacaoDetalhada": "Em condições de chuva, há menor visibilidade, pista mais escorregadia e maior imprevisibilidade de movimentos. Pedestres podem correr para se abrigar e motociclistas ficam mais expostos à perda de controle, o que exige conduta ainda mais cuidadosa do motorista.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-007",
+      "alternativas": [
+        { "texto": "A chuva só afeta a aderência do carro, não dos demais usuários.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A situação aumenta a exposição e a imprevisibilidade desses usuários.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Pedestres e motociclistas passam a ser menos problemáticos com chuva.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Basta usar o limpador de para-brisa para eliminar o risco extra.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma mudança de faixa sem checar pontos cegos pode ser especialmente grave para:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Motociclistas e ciclistas podem estar em posição menos visível ao condutor.",
+      "explicacaoDetalhada": "Veículos menores, como motos e bicicletas, podem ficar ocultos em ângulos de visibilidade reduzida. A direção defensiva exige sinalização, observação ampla e checagem cuidadosa antes de mudar de faixa.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-008",
+      "alternativas": [
+        { "texto": "Apenas automóveis grandes, porque ocupam mais espaço.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Motociclistas e ciclistas, por serem menores e mais vulneráveis.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente pedestres parados na calçada.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Nenhum usuário, desde que a seta seja ligada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A direção defensiva no convívio com usuários vulneráveis baseia-se principalmente em:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Quanto maior a vulnerabilidade do outro usuário, maior deve ser a margem de proteção oferecida pelo condutor.",
+      "explicacaoDetalhada": "Dirigir defensivamente inclui reconhecer que nem todos os usuários têm o mesmo nível de proteção ou previsibilidade. Por isso, o condutor deve agir de forma preventiva, paciente e protetiva diante de pedestres, ciclistas, motociclistas, idosos e crianças.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-009",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-009",
+      "alternativas": [
+        { "texto": "Pressão para que todos sigam no mesmo ritmo dos veículos.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Oferta de maior margem de segurança aos mais expostos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Redução da atenção para não atrasar o tráfego.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Tratamento igual para todos, sem considerar vulnerabilidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando a conduta do pedestre ou ciclista parecer imprevisível, a decisão mais segura do condutor é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em situação de dúvida, a direção defensiva manda ampliar a segurança, não apostar na sorte.",
+      "explicacaoDetalhada": "Usuários vulneráveis podem mudar de direção, hesitar ou agir sem perceber adequadamente a aproximação do veículo. Nessas situações, o condutor deve reduzir a velocidade, aumentar a margem de segurança e preparar-se para eventual parada.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-010",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-vulneraveis-010",
+      "alternativas": [
+        { "texto": "Manter a velocidade e esperar que ele decida rapidamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e ampliar a margem de segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Acelerar para passar antes da mudança de direção.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Buzinar de forma contínua para forçar uma reação.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

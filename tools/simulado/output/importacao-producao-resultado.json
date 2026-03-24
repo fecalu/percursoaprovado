@@ -1,0 +1,2410 @@
+{
+  "totalRecebidas": 300,
+  "criadas": 300,
+  "atualizadas": 0,
+  "ignoradas": 0,
+  "erros": 0,
+  "dryRun": false,
+  "itens": [
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-001",
+      "enunciado": "Em um cruzamento urbano, um agente de trânsito determina que os veículos sigam em frente, mesmo com o semáforo vermelho. Nessa situação, o condutor deve obedecer:",
+      "questaoId": "53266efc-fee7-41b0-ae24-314b5c30c7c7",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-002",
+      "enunciado": "Quando o semáforo está funcionando normalmente e não há agente de trânsito no local, suas indicações prevalecem sobre:",
+      "questaoId": "44ab5486-305b-4e90-94ca-ec035228979e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-003",
+      "enunciado": "Um condutor encontra uma placa de parada obrigatória, mas um agente de trânsito, visivelmente uniformizado, faz gesto permitindo a passagem. Qual deve ser a conduta correta?",
+      "questaoId": "14a5b012-a87f-47ca-aee9-2e9c1e75eea1",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-004",
+      "enunciado": "Se não houver agente de trânsito nem semáforo operando no local, a indicação de uma placa de regulamentação deve prevalecer sobre:",
+      "questaoId": "0ab7e175-80f4-4109-b0a2-61305fc89adb",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-005",
+      "enunciado": "Em uma via, o semáforo está intermitente amarelo e não há agente de trânsito. Nessa situação, o condutor deve agir principalmente com base:",
+      "questaoId": "658369e9-5f0a-481a-9487-9c76d411615b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-001",
+      "enunciado": "A principal função de uma placa de regulamentação no trânsito é:",
+      "questaoId": "7418a242-561c-4a08-8eac-cf8832c7bef3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-002",
+      "enunciado": "Quando uma placa de regulamentação impõe determinada conduta ao condutor, o descumprimento dessa ordem pode gerar:",
+      "questaoId": "20cc3e07-6241-4267-848e-39028e644237",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-003",
+      "enunciado": "Ao se deparar com uma placa de regulamentação, o condutor deve entendê-la como:",
+      "questaoId": "4ec5b6d7-d2f3-488e-839e-ecb55b07a697",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-004",
+      "enunciado": "Placas que indicam limite máximo de velocidade são exemplos de sinalização de:",
+      "questaoId": "39740a1e-3575-4549-96b0-b79538824e49",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-005",
+      "enunciado": "Uma placa de regulamentação pode ser entendida como o meio pelo qual o poder público:",
+      "questaoId": "676f92ee-3cc0-4120-8bb1-7418acedcb48",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-006",
+      "enunciado": "Se uma placa de regulamentação restringe determinado movimento, o condutor deve:",
+      "questaoId": "751149d1-fc43-469f-98b2-69205e6a0e16",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-007",
+      "enunciado": "A leitura correta de uma placa de regulamentação exige do condutor principalmente:",
+      "questaoId": "44a6f923-6b31-4eaa-bc34-0ac8276a537b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-001",
+      "enunciado": "Uma placa que indique sentido obrigatório em determinado ponto da via significa que o condutor:",
+      "questaoId": "7c680dcd-191d-485f-ad16-d53ef08cb6e8",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-002",
+      "enunciado": "Quando a placa indica proibição de conversão em um cruzamento, o condutor deve:",
+      "questaoId": "16cc4346-ddc2-4bd7-bd9e-56330e5e8672",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-003",
+      "enunciado": "Placas de restrição de altura, largura ou peso servem para:",
+      "questaoId": "7b7c258c-64a2-40d2-9101-7fa7fdbd2467",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-004",
+      "enunciado": "Se a via possui placa determinando circulação exclusiva para uma categoria de veículo, os demais usuários devem:",
+      "questaoId": "2b0976f9-29dc-4402-ae2c-f10adbecfd2d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-005",
+      "enunciado": "Uma placa de velocidade mínima, quando existente, tem o objetivo de:",
+      "questaoId": "9a584659-40a4-4f1b-8739-d5dd59bde00c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-006",
+      "enunciado": "Ao encontrar uma placa que proíbe determinado acesso, a melhor interpretação é que:",
+      "questaoId": "b2cd03a5-e365-4e7d-9849-83e75c878668",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-001",
+      "enunciado": "A função principal de uma placa de advertência é:",
+      "questaoId": "abaa0416-cb1d-4e81-95b2-e2e79077352a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-002",
+      "enunciado": "Ao visualizar placa de advertência indicando curva acentuada adiante, a conduta preventiva mais adequada é:",
+      "questaoId": "f8d7a0e4-6efc-4629-a1f9-b71b809c7607",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-003",
+      "enunciado": "Quando a placa de advertência informa pista escorregadia, o condutor deve principalmente:",
+      "questaoId": "54de0e21-a7dc-4b56-b206-76e145c74458",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-004",
+      "enunciado": "A advertência de área escolar ou travessia frequente de pedestres indica que o condutor deve:",
+      "questaoId": "047695dc-7c8d-4d53-a097-5fcc0dc233e6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-005",
+      "enunciado": "Uma placa de advertência sobre estreitamento de pista serve para lembrar que:",
+      "questaoId": "7f524e3b-cbf5-4dcc-b030-b5f60f4085b9",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-006",
+      "enunciado": "Ao receber advertência de declive acentuado, a conduta mais segura é:",
+      "questaoId": "96678c69-b3fa-4fa6-a86e-ea5f68b400d2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-007",
+      "enunciado": "Se a placa de advertência indica passagem de animais, o condutor deve entender que:",
+      "questaoId": "8ffff527-1b4b-44d6-b4d2-f931535d1d20",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-008",
+      "enunciado": "Qual é a melhor leitura prática de uma placa de advertência?",
+      "questaoId": "1d0ca04a-69dd-4da3-99d2-145e7b67a73b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-001",
+      "enunciado": "Ao aproximar-se de cruzamento com placa de advertência, sem semáforo e com visibilidade parcial, o condutor deve:",
+      "questaoId": "76a710f9-f9ab-419c-bc68-1b79176a4b00",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-002",
+      "enunciado": "Se uma placa adverte sobre sucessão de curvas, a atitude mais correta do condutor é:",
+      "questaoId": "f9d46f8e-f731-431d-8b0e-25f0374fd27f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-003",
+      "enunciado": "Ao ver advertência de ponte estreita, o condutor deve interpretar que:",
+      "questaoId": "c2d5bbd8-8eea-4078-97fb-0238209c01f5",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-004",
+      "enunciado": "Uma advertência de pista irregular deve levar o condutor a:",
+      "questaoId": "2cca3f15-a478-476b-898f-4d15ab4c67aa",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-005",
+      "enunciado": "Se a placa adverte sobre local sujeito a forte vento lateral, o condutor deve considerar especialmente:",
+      "questaoId": "4553185c-abfa-42be-a909-7e66e258b158",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-006",
+      "enunciado": "Quando uma placa de advertência aparece acompanhada de condição visível coerente com o risco anunciado, o condutor deve:",
+      "questaoId": "181c9bfe-a876-4a44-8c63-6a4ab1363127",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-001",
+      "enunciado": "As placas de indicação têm como função principal:",
+      "questaoId": "51448bfb-5d72-4d28-964b-9d314a751403",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-002",
+      "enunciado": "Quando uma placa indica hospital ou pronto atendimento, ela tem finalidade de:",
+      "questaoId": "318a8698-1810-4080-9691-f09ad7429ba3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-003",
+      "enunciado": "Placas que informam postos de combustível, alimentação ou hospedagem servem para:",
+      "questaoId": "ecc18f05-2d2f-4d04-b852-aba4036b33ab",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-004",
+      "enunciado": "Placas de orientação de destino ajudam o condutor principalmente a:",
+      "questaoId": "cf3d66e2-4ea6-43ff-a4ea-726c46d1dc57",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-005",
+      "enunciado": "A grande diferença entre uma placa de indicação e uma placa de regulamentação é que a de indicação:",
+      "questaoId": "1898ed6a-317d-4ab6-a85f-ecdfaa8fe9a0",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-006",
+      "enunciado": "Ao ver uma placa de indicação de serviço na rodovia, o condutor deve compreender que:",
+      "questaoId": "9e1abeb0-fe7c-421c-b26f-9013e0b347f4",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-001",
+      "enunciado": "Placas com nomes de cidades, bairros, saídas ou rodovias ajudam o condutor a:",
+      "questaoId": "2ae0a8c5-b099-41a0-aca6-bca61b795322",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-002",
+      "enunciado": "A principal vantagem da sinalização de destino colocada com antecedência é:",
+      "questaoId": "90f0d11d-07c5-4456-b8f0-f055610a051d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-003",
+      "enunciado": "Quando a placa informa que determinada faixa leva a um destino específico, o condutor deve:",
+      "questaoId": "1ec01edc-60bf-4b2a-b556-c6695893b7d1",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-004",
+      "enunciado": "Em termos práticos, placas de localização e destino reduzem o risco de:",
+      "questaoId": "5f7078a2-5aa3-466a-83f2-22208db11960",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-001",
+      "enunciado": "As marcas longitudinais pintadas na pista servem principalmente para:",
+      "questaoId": "d96ed76c-4574-447e-8fe5-4d1bfe67638b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-002",
+      "enunciado": "Em regra, uma linha seccionada na divisão de faixas indica que a mudança de faixa:",
+      "questaoId": "77151997-6fa7-4747-b3be-6b9fb0a9a3e8",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-003",
+      "enunciado": "Linha longitudinal contínua em área onde ela separa fluxos ou faixas deve ser interpretada como:",
+      "questaoId": "df386584-ee51-4d4a-83c0-a7d9ecb331d6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-004",
+      "enunciado": "A linha de retenção pintada antes do cruzamento ou do semáforo indica o ponto em que o condutor deve:",
+      "questaoId": "431e6a6c-ad3d-46bd-aede-1e2e8b571803",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-005",
+      "enunciado": "Setas pintadas na pista indicam ao condutor principalmente:",
+      "questaoId": "a6d14998-171e-40f1-8062-87397090f729",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-006",
+      "enunciado": "A leitura correta da sinalização horizontal exige que o condutor:",
+      "questaoId": "0bc4039a-3832-4eb8-a748-97542ebcf7e5",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-001",
+      "enunciado": "A faixa de pedestres demarcada na pista tem a finalidade de:",
+      "questaoId": "16f67b56-28fb-41f7-9541-77382d93a97b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-002",
+      "enunciado": "Ao se aproximar de faixa de pedestres com possibilidade de travessia, a conduta defensiva correta é:",
+      "questaoId": "fb9f3145-127b-410b-a6df-09fd7488caf1",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-003",
+      "enunciado": "Marcas de canalização pintadas no pavimento servem para:",
+      "questaoId": "4ac37736-5157-4ecc-94f8-437c5d77bd45",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-001",
+      "enunciado": "A luz verde do semáforo para veículos indica que o condutor pode prosseguir:",
+      "questaoId": "2e3677a1-8859-4010-b59a-cdc6f7a4ea1c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-002",
+      "enunciado": "A luz amarela do semáforo para veículos transmite ideia principal de:",
+      "questaoId": "0ba87cf4-632a-44fc-ab72-57200a37e6d4",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-003",
+      "enunciado": "Diante da luz vermelha do semáforo para veículos, a conduta correta é:",
+      "questaoId": "ea089528-5f1a-435f-9faf-76fe36b9aa3d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-004",
+      "enunciado": "Quando houver foco semafórico específico para pedestres, o condutor deve compreender que:",
+      "questaoId": "fd227c5c-5adb-4dcb-9551-05cdaceea6db",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-005",
+      "enunciado": "Mesmo com semáforo favorável, o condutor não deve ingressar no cruzamento quando:",
+      "questaoId": "22deafed-a316-4111-8924-edc9ac14be88",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-001",
+      "enunciado": "Cones, barreiras e outros dispositivos auxiliares na via servem principalmente para:",
+      "questaoId": "2b3a0a42-0d45-44ff-97e5-5085e7ef4770",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-002",
+      "enunciado": "Ao encontrar sinalização temporária de obras na pista, o condutor deve:",
+      "questaoId": "37989b0e-7d5b-4d1a-b29d-eec60437cf77",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-003",
+      "enunciado": "Tachas e tachões aplicados no pavimento podem ter função de:",
+      "questaoId": "4c63b9ec-3994-4076-8fb8-04547b97e8ea",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-004",
+      "enunciado": "Quando barreiras ou cavaletes isolam parte da pista, o correto é entender que:",
+      "questaoId": "85c5f94d-5d7a-4c05-93a6-ec9b1af54b37",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-005",
+      "enunciado": "A principal leitura defensiva de um trecho com canalização temporária é:",
+      "questaoId": "42bf1092-e2c7-4024-b5a3-314b61b5169a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-006",
+      "enunciado": "Dispositivos auxiliares e sinalização temporária são especialmente importantes porque:",
+      "questaoId": "90238da1-60ea-4419-bebd-a58e183832b6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-001",
+      "enunciado": "Ao identificar sinalização associada a ciclistas ou travessia de bicicletas, o condutor deve:",
+      "questaoId": "6aec0532-f390-4701-9a94-db8e6952e00c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-002",
+      "enunciado": "Diante de cruzamento rodoferroviário sinalizado, a conduta correta do condutor deve ser pautada por:",
+      "questaoId": "3960f604-8f8c-477e-ab56-edaebee4ccb3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-003",
+      "enunciado": "A principal justificativa para reforçar a sinalização em cruzamentos rodoferroviários e áreas cicloviárias é:",
+      "questaoId": "b8841d90-c2df-42ae-95ec-48a3f6f363f8",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-001",
+      "enunciado": "A principal finalidade do processo de habilitação é:",
+      "questaoId": "b07c8726-4cc9-4d03-b46f-cb41a132cf31",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-002",
+      "enunciado": "Antes de conduzir veículo automotor em via pública, a pessoa deve:",
+      "questaoId": "e1b69ffb-07a9-4f7d-8175-110cc3bae69d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-003",
+      "enunciado": "No processo de habilitação, a avaliação de aptidão física e mental existe para:",
+      "questaoId": "6aed9137-cbd0-4162-8dc2-51c0ea24c1d1",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-004",
+      "enunciado": "A etapa teórica do processo de habilitação tem a função de:",
+      "questaoId": "deb8f010-19ea-473c-bb5d-029a3130224c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-005",
+      "enunciado": "A Permissão para Dirigir representa, em regra, a fase em que o condutor:",
+      "questaoId": "2be25a4f-bbeb-4c2f-a8ec-e3d240426704",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-006",
+      "enunciado": "Ao conduzir um veículo regularmente licenciado, os documentos obrigatórios podem ser apresentados:",
+      "questaoId": "5a3a35c0-26c5-48ae-8b73-86135b3c5d03",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-007",
+      "enunciado": "Quando solicitado pela fiscalização, o condutor deve:",
+      "questaoId": "afec46ee-a4f3-423c-9579-fadb82243415",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-008",
+      "enunciado": "O CRLV-e está relacionado, principalmente, à comprovação de que o veículo:",
+      "questaoId": "5398b06a-569a-4115-aa6f-24a9f6c237e6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-009",
+      "enunciado": "Conduzir veículo sem a devida habilitação ou autorização legal é comportamento:",
+      "questaoId": "ae4603b1-3f4d-4395-a737-0f36d936989a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-010",
+      "enunciado": "Entre os deveres básicos do condutor regular estão o de manter a documentação pertinente em ordem e:",
+      "questaoId": "54898281-7545-4c55-ac5f-36ca68e38c15",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-001",
+      "enunciado": "A categoria da habilitação existe para:",
+      "questaoId": "3d1273a7-8ff0-4364-a1e3-2c797b168898",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-002",
+      "enunciado": "A categoria A da habilitação está associada, em regra, à condução de:",
+      "questaoId": "b0729afa-29d4-4103-9507-8f783ec2cf94",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-003",
+      "enunciado": "A categoria B da habilitação está ligada, em regra, à condução de:",
+      "questaoId": "d043f096-7ffe-4fcd-b0cb-536d15e67560",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-004",
+      "enunciado": "Conduzir veículo incompatível com a categoria da habilitação significa:",
+      "questaoId": "5c0ba80f-27eb-406f-baef-6f58a4ec5812",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-005",
+      "enunciado": "A Autorização para Conduzir Ciclomotor (ACC) existe para:",
+      "questaoId": "c7cbe43c-4318-430d-97ee-8935fbbbfd2a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-001",
+      "enunciado": "A classificação das vias é importante porque ela ajuda a definir:",
+      "questaoId": "5f6f68e6-66af-4d9c-9568-ba633b478274",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-002",
+      "enunciado": "No contexto do CTB, rodovia e estrada não são sinônimos porque:",
+      "questaoId": "33b721c3-1f80-4eb8-b2fc-9c5e4036d2fb",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-003",
+      "enunciado": "Uma via local, em regra, está mais associada a:",
+      "questaoId": "5a6f26cb-625c-4ab0-82cb-ae0d14f58c8e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-004",
+      "enunciado": "Quanto maior a função de mobilidade de uma via, em comparação com o simples acesso local, maior tende a ser a necessidade de:",
+      "questaoId": "9f337afd-f330-46dc-bdd6-7f8ad9cfc068",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-005",
+      "enunciado": "A leitura correta do tipo de via ajuda o condutor a entender melhor:",
+      "questaoId": "d51f48bc-ec92-451e-a40e-9e8acec5ae23",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-001",
+      "enunciado": "Em regra geral, a circulação de veículos deve ocorrer pelo lado:",
+      "questaoId": "be0154f9-62f5-4f19-84d0-e4a912d231aa",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-002",
+      "enunciado": "Sinalizar com antecedência a intenção de mudar de direção ou faixa é importante porque:",
+      "questaoId": "d05a603a-e843-44d4-b69b-ab73c98ade5d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-003",
+      "enunciado": "A mudança de faixa deve ser realizada somente quando:",
+      "questaoId": "acb9d26c-ff3a-43e6-b2a6-06a5ca4b6284",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-004",
+      "enunciado": "Manter distância de segurança do veículo à frente é conduta importante porque:",
+      "questaoId": "6973d979-7fa6-41d0-9903-c4dc3fcbcade",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-005",
+      "enunciado": "Parar o veículo em local que prejudique a circulação ou a segurança é conduta:",
+      "questaoId": "c0c229b8-cc15-458d-8627-53af2c9a7cf5",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-006",
+      "enunciado": "Ao iniciar uma conversão, o condutor deve fazê-la de modo que sua trajetória seja:",
+      "questaoId": "ae7f48d4-0d4f-446f-a517-5c5a2e923b6e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-007",
+      "enunciado": "O acostamento, em regra, não deve ser utilizado como faixa normal de circulação porque:",
+      "questaoId": "efaac079-3b7b-4198-a876-933dc3681672",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-008",
+      "enunciado": "Ao aproximar-se de local com pedestres, ciclistas ou outros usuários vulneráveis, o condutor deve adotar postura:",
+      "questaoId": "14b91bab-7514-44fe-a08c-5e7bb62078dc",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-009",
+      "enunciado": "O condutor não deve iniciar manobra que possa surpreender os demais usuários porque:",
+      "questaoId": "e29be1ca-0dff-429a-86d8-44512dcffe5d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-010",
+      "enunciado": "Em termos práticos, obedecer às normas gerais de circulação e conduta significa:",
+      "questaoId": "bdb2d1ab-6c30-4c4c-8c47-93220b4be337",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-001",
+      "enunciado": "Antes de iniciar uma conversão à direita ou à esquerda, o condutor deve, em regra:",
+      "questaoId": "41116d59-6f36-470a-b124-b09ef60e4f62",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-002",
+      "enunciado": "A mudança de faixa deve ser feita:",
+      "questaoId": "cdb7db7d-39fe-479d-a75c-26752cc26f36",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-003",
+      "enunciado": "Posicionar corretamente o veículo antes de uma conversão é importante porque:",
+      "questaoId": "6dae7700-1c3b-4d0e-b5c3-40104811497c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-004",
+      "enunciado": "Ao preparar um retorno, o condutor deve considerar principalmente:",
+      "questaoId": "3e103db3-0c80-478a-8d7b-9395c0a2f9dc",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-005",
+      "enunciado": "Executar mudança de faixa sem sinalizar previamente é inadequado porque:",
+      "questaoId": "3c52326e-c319-4fdb-a80b-43b8b56fe0be",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-006",
+      "enunciado": "Uma conversão iniciada a partir de posição inadequada na via tende a:",
+      "questaoId": "c9246e4a-71b6-4dff-84ae-d60aa8daecbc",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-007",
+      "enunciado": "Ao retornar para a faixa de origem após uma ultrapassagem ou desvio lateral, o condutor deve fazê-lo:",
+      "questaoId": "53074cfe-b10b-482f-b3b4-f73f1d6f144f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-008",
+      "enunciado": "Ao aproximar-se do local onde pretende converter, o condutor deve evitar:",
+      "questaoId": "5ac7c4ad-cf4a-4fbb-8ea4-f992f6d949d0",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-009",
+      "enunciado": "O posicionamento correto do veículo antes da manobra contribui para:",
+      "questaoId": "0f5d5659-4de9-430c-a8eb-d5b36b0b9c85",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-010",
+      "enunciado": "Em termos legais e práticos, conversões, retornos e mudanças de faixa devem sempre ser subordinados à:",
+      "questaoId": "470ce450-9ec0-4515-9121-5caba4138d9e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-001",
+      "enunciado": "Em termos gerais, parar ou estacionar um veículo só é aceitável quando isso ocorre:",
+      "questaoId": "4d886fe4-b8b4-46da-a2c8-bb067cfde629",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-002",
+      "enunciado": "Mesmo que a parada seja breve, ela não deve ocorrer em local que:",
+      "questaoId": "6ebebf64-55df-4039-8c88-a09e7ddb9d02",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-003",
+      "enunciado": "A diferença prática entre parada e estacionamento está ligada principalmente:",
+      "questaoId": "c21b8cad-eed4-4fab-b9bd-1747a3a9d2ad",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-004",
+      "enunciado": "Parar sobre faixa de pedestres ou em ponto que prejudique sua utilização é conduta inadequada porque:",
+      "questaoId": "ca1a6142-7fbf-4e51-b418-2a25e2391796",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-005",
+      "enunciado": "O pisca-alerta, por si só, não torna regular uma parada ou estacionamento indevido porque:",
+      "questaoId": "2ceb2636-44f2-462b-91d2-ce533ed041ff",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-006",
+      "enunciado": "Ao escolher um local para estacionar, o condutor deve observar, entre outros fatores:",
+      "questaoId": "ae8c7182-0351-4c70-94e9-b8eea7c076a3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-007",
+      "enunciado": "Estacionar em local que reduza a visibilidade de cruzamento ou de travessia de pedestres é especialmente perigoso porque:",
+      "questaoId": "e5944596-a600-415b-87c9-7280850b7f6c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-008",
+      "enunciado": "Em termos legais e práticos, a correta imobilização do veículo exige que o condutor:",
+      "questaoId": "a9598b9c-444b-442d-881a-19b0f0cac2b7",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-001",
+      "enunciado": "Em um cruzamento, a preferência de passagem deve ser analisada com base principal em:",
+      "questaoId": "febc4079-0b6d-4fa6-8449-86d66d54d1f3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-002",
+      "enunciado": "Ao se aproximar de um cruzamento sem semáforo e sem agente, o condutor deve:",
+      "questaoId": "d9d86e9b-e58f-413c-b39f-b1113abe041f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-003",
+      "enunciado": "A preferência de passagem não dispensa o condutor de:",
+      "questaoId": "a162051f-36cd-432b-9429-7df96b8c06f3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-004",
+      "enunciado": "Ultrapassagem é uma manobra que só deve ser iniciada quando:",
+      "questaoId": "5b811101-a24e-41af-ac7e-30063fa0a5b9",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-005",
+      "enunciado": "Antes de ultrapassar, o condutor deve verificar principalmente:",
+      "questaoId": "6cd48b02-4178-409e-b90a-062d9df8ccd3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-006",
+      "enunciado": "Iniciar ultrapassagem em local sem visibilidade suficiente é conduta:",
+      "questaoId": "48853239-a05d-4f77-877f-634516019533",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-007",
+      "enunciado": "Ao perceber que outro veículo pretende ultrapassar, o condutor do veículo à frente deve agir com:",
+      "questaoId": "306bb6fa-791f-4e5a-9f30-83fe8582f4ba",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-008",
+      "enunciado": "Em cruzamentos, a decisão de avançar deve levar em conta também:",
+      "questaoId": "95eca165-52a1-4d6d-b888-33ca2d2f6a64",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-009",
+      "enunciado": "Ultrapassagem concluída com segurança pressupõe que o condutor retorne à faixa original:",
+      "questaoId": "c2fb0d71-30e0-48c1-8b27-2b4d9d933062",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-010",
+      "enunciado": "Mesmo tendo prioridade, forçar passagem em cruzamento sem assegurar as condições de segurança é:",
+      "questaoId": "c87fc1c1-41b4-4137-b132-3883128f5922",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-011",
+      "enunciado": "Em termos práticos, a ultrapassagem segura depende de o condutor agir com:",
+      "questaoId": "7629213c-da3f-4652-b7e6-31f1e41879d3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-012",
+      "enunciado": "A leitura correta de preferência de passagem e ultrapassagem no trânsito exige do condutor principalmente:",
+      "questaoId": "4e0211a5-8ae3-40c6-8dd9-cdb51b4937b8",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-001",
+      "enunciado": "Uma infração de trânsito pode ser entendida como:",
+      "questaoId": "e2f15c8a-ac6a-4bf3-9c33-05cb4893f3a4",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-002",
+      "enunciado": "O sistema de pontuação na habilitação está relacionado:",
+      "questaoId": "8d344eba-68dc-4a95-b386-db5ea919ba62",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-003",
+      "enunciado": "Em termos gerais, quanto mais grave for a infração, maior tende a ser:",
+      "questaoId": "2a400f77-618b-410f-b10a-5e2384e1251c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-004",
+      "enunciado": "Cometer infrações repetidas pode indicar, do ponto de vista do sistema de trânsito, que o condutor:",
+      "questaoId": "e598cdbd-c5bb-4f89-9b8b-949c70840a3c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-005",
+      "enunciado": "A pontuação não existe para premiar ou punir subjetivamente, mas para:",
+      "questaoId": "2ea53457-51c2-4f91-ac50-fea86b788422",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-006",
+      "enunciado": "Do ponto de vista legal, a infração de trânsito é diferente de acidente porque:",
+      "questaoId": "aa4d3f53-ac5f-4b32-93a8-d5b411c2cc88",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-007",
+      "enunciado": "Uma boa leitura do sistema de infrações exige compreender que ele busca:",
+      "questaoId": "35170e5b-3637-4b7a-a95b-88230a26274d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-008",
+      "enunciado": "Se um condutor trata a pontuação como algo irrelevante, ele ignora que:",
+      "questaoId": "3c4ef075-a513-4f40-b8f1-d19d4e21f222",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-009",
+      "enunciado": "Quanto à classificação das infrações, o condutor deve saber que:",
+      "questaoId": "e94416fc-c805-4335-ab92-f8c1b3fbfa18",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-010",
+      "enunciado": "Em termos práticos, respeitar as regras de trânsito evita, entre outros efeitos:",
+      "questaoId": "f6c12821-cea4-4c8c-b8b8-12817e9a7f36",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-001",
+      "enunciado": "Em termos gerais, penalidade de trânsito é:",
+      "questaoId": "923d3b78-7360-4222-a68f-3e195129e3ec",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-002",
+      "enunciado": "Medida administrativa, no contexto do trânsito, está mais relacionada a:",
+      "questaoId": "759f10a6-1f39-4fa3-8a1c-c92c9de348aa",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-003",
+      "enunciado": "A diferença central entre penalidade e medida administrativa é que:",
+      "questaoId": "31784b9d-3d53-42de-bd61-b7b185fcf582",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-004",
+      "enunciado": "Quando a legislação prevê retenção ou remoção em determinada hipótese, isso é exemplo de:",
+      "questaoId": "d9f32594-5e8a-4e06-9f13-6f43c9586abf",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-005",
+      "enunciado": "A aplicação de penalidades e medidas administrativas no trânsito busca, entre outros objetivos:",
+      "questaoId": "2b9dc09a-7c66-461d-86e9-c431220a05e3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-006",
+      "enunciado": "Confundir penalidade com medida administrativa pode levar o condutor a:",
+      "questaoId": "eb190588-87e9-4ffc-a68e-d604268f94d0",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-007",
+      "enunciado": "Do ponto de vista da lógica do sistema, a medida administrativa costuma estar mais ligada à:",
+      "questaoId": "f7c0cae6-4d0e-4cac-9b2e-ad24b8adf940",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-008",
+      "enunciado": "Em leitura jurídica básica, é correto afirmar que penalidades e medidas administrativas:",
+      "questaoId": "f0689b66-ce30-4f33-a131-b156ad2ce855",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-001",
+      "enunciado": "Os crimes de trânsito diferem das infrações administrativas porque:",
+      "questaoId": "a84df12c-9825-43c8-97b3-68cd4c22e812",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-002",
+      "enunciado": "No trânsito, responsabilidade do condutor significa, entre outros aspectos:",
+      "questaoId": "c1e1b620-1842-417d-98cb-b2cda87a83e3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-003",
+      "enunciado": "A existência de direito de recurso no trânsito demonstra que:",
+      "questaoId": "4a24385e-fc83-4a4a-b992-24d97620005d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-004",
+      "enunciado": "Exercer o direito de recurso no trânsito não significa:",
+      "questaoId": "f4155b04-3d42-4e17-a05f-3950b6593d4f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-005",
+      "enunciado": "Uma boa leitura sobre crimes de trânsito e responsabilidade exige compreender que:",
+      "questaoId": "313c36fd-447b-49fa-b4f8-3e9d7c4671ad",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-006",
+      "enunciado": "O direito de defesa no processo administrativo de trânsito está ligado à ideia de:",
+      "questaoId": "32276af4-a9ae-4a9c-b701-e688417e819b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-007",
+      "enunciado": "Em termos práticos, conhecer crimes de trânsito, responsabilidade e recursos ajuda o condutor a:",
+      "questaoId": "ee54b7a4-4d27-4fb7-b151-499cef2ecd05",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-001",
+      "enunciado": "Direção defensiva pode ser entendida, em termos práticos, como a forma de dirigir em que o condutor:",
+      "questaoId": "232c6171-5433-4f0c-9917-b2c1b944cbec",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-002",
+      "enunciado": "Percepção de risco, na direção defensiva, significa principalmente:",
+      "questaoId": "7e47bc46-dc1d-4b24-a50e-88aefc509514",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-003",
+      "enunciado": "Um condutor defensivo observa o trânsito à frente, aos lados e pelos retrovisores porque:",
+      "questaoId": "3b8ec7d6-1fb6-4e26-a195-6302b4dca1a1",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-004",
+      "enunciado": "Entre duas atitudes abaixo, qual representa melhor a lógica da prevenção de sinistros?",
+      "questaoId": "47b47f9d-9ffa-43c2-b353-eebef9238518",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-005",
+      "enunciado": "Conduzir presumindo que os outros usuários sempre agirão corretamente é postura:",
+      "questaoId": "1d55380a-a7f5-452f-89f0-818bdee495f2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-006",
+      "enunciado": "Ao perceber um possível risco à frente, a atitude defensiva inicial mais adequada costuma ser:",
+      "questaoId": "e0bd4a7e-acdd-4558-8e4b-c3dacbfd77e7",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-007",
+      "enunciado": "O condutor que observa a presença de pedestres próximos à pista deve entender isso como:",
+      "questaoId": "fc50454e-1bdb-43f3-a3d4-46c9137c87b9",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-008",
+      "enunciado": "No contexto da direção defensiva, distração ao volante é problemática porque:",
+      "questaoId": "3243ebff-a4a7-4185-9b15-b04dd3be406b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-009",
+      "enunciado": "Um dos sinais de direção defensiva madura é o condutor:",
+      "questaoId": "6ecdd3c8-ff3f-4a4f-ad61-9365d226c76e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-010",
+      "enunciado": "Em termos práticos, prevenir sinistros no trânsito significa:",
+      "questaoId": "9e96972a-92f0-4ea7-9cb8-37289227486f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-001",
+      "enunciado": "Manter distância de segurança do veículo à frente é importante porque:",
+      "questaoId": "a816af75-a3f0-4c4d-a37f-ef706779e2ff",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-002",
+      "enunciado": "Quanto maior a velocidade, em regra, maior tende a ser:",
+      "questaoId": "0412b124-6792-4b40-91e8-85df6542e537",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-003",
+      "enunciado": "Frenagem brusca, em geral, tende a ser mais arriscada quando:",
+      "questaoId": "b884dc85-0eb0-4a35-82cc-01d28f2fd770",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-004",
+      "enunciado": "Dirigir dentro do limite de velocidade da via não garante, por si só, condução segura porque:",
+      "questaoId": "7fca8e5c-3981-4387-bde0-33ad46b2b650",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-005",
+      "enunciado": "Tempo de reação, na direção defensiva, corresponde ao intervalo entre:",
+      "questaoId": "535b3441-b2db-4694-8d61-5dd34f3c6782",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-006",
+      "enunciado": "Se a pista está molhada, o condutor defensivo deve, em regra:",
+      "questaoId": "6b19a484-818c-4909-9334-604e8a630841",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-007",
+      "enunciado": "Controle de velocidade, na direção defensiva, significa:",
+      "questaoId": "25e65844-8f6c-46bd-ba5b-d2eaf77a89a0",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-008",
+      "enunciado": "Em descida, aproximação de cruzamento ou local com pedestres, a velocidade deve ser tratada como:",
+      "questaoId": "4a9c7f5b-c3ba-46cf-a81d-9506de2d7bac",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-009",
+      "enunciado": "Dirigir muito próximo ao veículo da frente aumenta o risco porque:",
+      "questaoId": "381d3c94-04a1-4715-94de-8139f983ae78",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-010",
+      "enunciado": "Em via seca, reta e com pouco movimento, o condutor ainda deve manter distância de segurança porque:",
+      "questaoId": "d432cab1-81b8-48d3-9718-fd53e9ce70ca",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-011",
+      "enunciado": "Em direção defensiva, frear mais cedo e de forma progressiva costuma ser melhor do que frear bruscamente porque:",
+      "questaoId": "0a35a359-8cca-4f7f-b3ab-14762fd3834e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-012",
+      "enunciado": "A relação entre velocidade, tempo de reação e distância de frenagem mostra ao condutor que:",
+      "questaoId": "d7e8ff05-0a52-4272-b9e1-d0ac8ec13009",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-001",
+      "enunciado": "Ao dirigir sob chuva forte, a atitude mais segura do condutor é:",
+      "questaoId": "611790be-c7b4-4a9c-b211-4e23c951828e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-002",
+      "enunciado": "Em caso de neblina, o condutor deve preferir:",
+      "questaoId": "50f50cf5-d5e2-4a76-bc33-6b9f389fb56b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-003",
+      "enunciado": "Ao dirigir à noite, a direção defensiva recomenda principalmente:",
+      "questaoId": "a7ef5cbb-0d6f-4c27-b03b-a929bae97340",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-004",
+      "enunciado": "Quando o condutor é ofuscado pela luz de outro veículo à noite, a conduta defensiva mais adequada é:",
+      "questaoId": "ea1b0444-b64e-4b86-af19-a9d85fb529d7",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-005",
+      "enunciado": "Nos primeiros minutos de chuva após período seco, o risco tende a aumentar porque:",
+      "questaoId": "1130ee58-fdc3-4203-b513-cb316bda32a2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-006",
+      "enunciado": "Se o veículo começar a aquaplanar, a reação mais prudente é:",
+      "questaoId": "7cc3a743-3ddd-4cce-b765-28e3018f10d6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-007",
+      "enunciado": "Ao enfrentar um trecho com fumaça, poeira intensa ou neblina muito densa, a postura defensiva é:",
+      "questaoId": "b00c628d-b961-4a60-9238-f5369a7a5240",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-008",
+      "enunciado": "Em pista molhada, a distância de segurança deve ser maior porque:",
+      "questaoId": "f0caf12c-5e89-44ac-a22e-8bed728a260a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-009",
+      "enunciado": "Em uma rodovia à noite, com chuva e visibilidade limitada, a decisão defensiva mais correta é:",
+      "questaoId": "9a539d91-08df-4eb8-b894-9bfeb0c170f8",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-010",
+      "enunciado": "O condutor que insiste em ultrapassar em trecho com visibilidade comprometida age de forma insegura porque:",
+      "questaoId": "f53fb9ed-5c23-4313-9dd5-c8f966475640",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-001",
+      "enunciado": "Ao perceber muitos buracos e irregularidades na pista, o condutor defensivo deve:",
+      "questaoId": "d7dadec7-7f52-4988-aa25-60fad8436c2a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-002",
+      "enunciado": "Em um trecho com obras e sinalização temporária, o condutor deve:",
+      "questaoId": "4a9272b5-f579-4728-a225-874279d8435d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-003",
+      "enunciado": "Se o condutor perceber que os pneus do veículo estão muito desgastados, a conclusão defensiva correta é que:",
+      "questaoId": "7e959fd3-2ebf-4e18-92f4-82a697a5c1f2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-004",
+      "enunciado": "Diante de pista de terra solta, cascalho ou areia, a atitude defensiva é:",
+      "questaoId": "13606fd4-3af9-4a0f-b0d4-b0d8fa541f3b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-005",
+      "enunciado": "Ao notar que a direção do veículo está puxando para um lado, o condutor deve considerar que:",
+      "questaoId": "6960c1d4-d7af-400f-b4c1-bf5af6272361",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-006",
+      "enunciado": "Em uma descida longa e acentuada, a condução defensiva recomenda principalmente:",
+      "questaoId": "ef40bfb6-36c9-407b-b89e-4862f93f9c4f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-007",
+      "enunciado": "Se o veículo estiver muito carregado, a direção defensiva exige maior cuidado porque:",
+      "questaoId": "575f6888-4526-47a4-b558-d059d697c0b5",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-008",
+      "enunciado": "Ao perceber indício de falha nos freios durante a condução, a prioridade do condutor deve ser:",
+      "questaoId": "061eb177-33a3-4b02-b38b-9d182fb7a9ec",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-009",
+      "enunciado": "Em via estreita e sem acostamento, com veículo vindo em sentido contrário e pavimento irregular, o condutor defensivo deve:",
+      "questaoId": "1d7374d2-7062-45c1-b7ef-bc3c2fad9004",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-010",
+      "enunciado": "A direção defensiva considera que veículo em mau estado de conservação:",
+      "questaoId": "88ab010c-e595-4b1f-98a4-72dd8e9410da",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-001",
+      "enunciado": "Antes de iniciar uma ultrapassagem, o condutor defensivo deve verificar principalmente:",
+      "questaoId": "b4b30c49-debf-4d10-8486-875fd9032717",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-002",
+      "enunciado": "Uma ultrapassagem em curva, aclive sem visibilidade ou trecho de risco elevado é defensivamente:",
+      "questaoId": "8593e421-c9e1-45cd-88e6-00bc33b84c88",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-003",
+      "enunciado": "Ao perceber que outro veículo o ultrapassa, a atitude defensiva é:",
+      "questaoId": "5dcb30ba-281f-4983-9c61-176efdbf8443",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-004",
+      "enunciado": "A retomada da faixa após uma ultrapassagem deve ocorrer somente quando o condutor tiver:",
+      "questaoId": "2981272e-3b01-407e-9aea-e190019c5b88",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-005",
+      "enunciado": "Em rodovia de mão dupla, a ultrapassagem exige atenção especial ao:",
+      "questaoId": "b87d4991-23ff-4667-8fa0-a9c63ecb7404",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-006",
+      "enunciado": "Se, durante a avaliação da manobra, surgir qualquer dúvida sobre a segurança da ultrapassagem, o condutor defensivo deve:",
+      "questaoId": "88711e8a-d78b-4d7b-8c79-18ba39641397",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-007",
+      "enunciado": "Em fila de veículos, a ultrapassagem sucessiva e sem avaliação individual de cada situação é perigosa porque:",
+      "questaoId": "34286275-1d41-4cf4-8ad4-745a2518acfb",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-008",
+      "enunciado": "A ultrapassagem só é compatível com a direção defensiva quando o condutor consegue:",
+      "questaoId": "4695d362-0f4f-48a1-8e04-6aeb85bf21ad",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-001",
+      "enunciado": "Sob o ponto de vista da direção defensiva, o consumo de álcool antes de dirigir:",
+      "questaoId": "a69df202-ee99-40ec-87ee-941fcbebe3fe",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-002",
+      "enunciado": "A fadiga ao volante é perigosa principalmente porque:",
+      "questaoId": "132fc0c6-d321-4aca-ac44-b8c6a6d3a3de",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-003",
+      "enunciado": "Usar o telefone celular enquanto dirige aumenta o risco porque:",
+      "questaoId": "27752ba1-6109-4988-b2ac-751b39387cbc",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-004",
+      "enunciado": "Um motorista que passou a noite sem dormir adequadamente deve, antes de pegar a estrada:",
+      "questaoId": "5813037b-3199-4f59-8d08-2d7c7319a760",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-005",
+      "enunciado": "Medicamentos que causam sonolência ou redução de atenção exigem do condutor:",
+      "questaoId": "a6218d07-9a7f-47c9-9a48-738a0e53ad78",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-006",
+      "enunciado": "O chamado cochilo ao volante é especialmente perigoso porque:",
+      "questaoId": "d62103e6-9a23-4248-b999-f7d54ec3056b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-007",
+      "enunciado": "Mesmo usando viva-voz ou recurso semelhante, o condutor ainda pode correr risco porque:",
+      "questaoId": "96dfc41b-034a-4f03-b357-946b8c33d79d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-008",
+      "enunciado": "Ao notar bocejos repetidos, dificuldade de manter os olhos abertos e perda de concentração, o condutor deve:",
+      "questaoId": "e6433e43-b0e3-4a39-86bc-2ba01f8ae719",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-009",
+      "enunciado": "Uma pessoa emocionalmente alterada, com raiva intensa ou grande ansiedade, pode dirigir pior porque:",
+      "questaoId": "1e5765e8-5de7-414f-8d3c-1b45372d58d0",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-010",
+      "enunciado": "Em viagem longa, a prevenção mais adequada contra fadiga inclui:",
+      "questaoId": "a74c182d-416e-4518-9f52-7c1812dd24c8",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-011",
+      "enunciado": "A combinação de sono, distração e velocidade elevada aumenta o risco porque:",
+      "questaoId": "3df5bcb8-3b1b-410e-b84d-17cfd7dd08b3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-risco-humano-012",
+      "enunciado": "Na perspectiva da direção defensiva, o melhor comportamento diante de álcool, drogas, fadiga e distração é:",
+      "questaoId": "f7269309-1909-4362-97fc-5af5787aa1f6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-001",
+      "enunciado": "Ao se aproximar de faixa de pedestres com pessoas aguardando para atravessar, a conduta defensiva do motorista é:",
+      "questaoId": "c231f304-58a4-4a04-9a33-2378ca49b3d3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-002",
+      "enunciado": "Próximo a escola, creche ou local com circulação de crianças, o condutor deve:",
+      "questaoId": "4104761e-9fab-4815-8910-c52c5f17cdc6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-003",
+      "enunciado": "Ao dividir a via com motociclistas, a atitude defensiva adequada é:",
+      "questaoId": "8b1519e5-4288-4f14-9600-2a873c0f98ce",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-004",
+      "enunciado": "Ao ultrapassar um ciclista, o condutor defensivo deve considerar que:",
+      "questaoId": "fbabca68-169b-4b78-a618-f5b38469eadf",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-005",
+      "enunciado": "Ao ver ônibus parado para embarque e desembarque, o condutor defensivo deve esperar a possibilidade de:",
+      "questaoId": "92b07eb0-13c4-412c-a6b9-8c77ea30d890",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-006",
+      "enunciado": "Pessoas idosas ou com mobilidade reduzida devem ser tratadas no trânsito com:",
+      "questaoId": "60baff23-9886-49be-b526-f7a20815a6f6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-007",
+      "enunciado": "Em dia de chuva, a atenção com pedestres e motociclistas deve ser maior porque:",
+      "questaoId": "e7b2e302-3d7c-4da8-8081-8dcd3e8d137f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-008",
+      "enunciado": "Uma mudança de faixa sem checar pontos cegos pode ser especialmente grave para:",
+      "questaoId": "10a3ccef-93b9-46f6-a0b9-67910c728189",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-009",
+      "enunciado": "A direção defensiva no convívio com usuários vulneráveis baseia-se principalmente em:",
+      "questaoId": "d9e0195b-f272-4298-a62f-597c0d14e4e2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-vulneraveis-010",
+      "enunciado": "Quando a conduta do pedestre ou ciclista parecer imprevisível, a decisão mais segura do condutor é:",
+      "questaoId": "6071198d-1421-4607-a9b5-4d214d2d0bb7",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-001",
+      "enunciado": "Para reduzir o risco de colisão traseira, uma atitude defensiva importante é:",
+      "questaoId": "14fe80ff-8553-433e-95a3-35e0c18060ee",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-002",
+      "enunciado": "Ao se aproximar de um cruzamento com visão parcialmente encoberta, o condutor defensivo deve:",
+      "questaoId": "f4e80e43-46c6-4be7-81e8-a50c6212c101",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-003",
+      "enunciado": "Na direção defensiva, escolher a alternativa mais conservadora diante de dúvida significa:",
+      "questaoId": "91fdcb7b-debd-49ba-8455-f54c522f39a2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-004",
+      "enunciado": "Ao trafegar atrás de veículo grande, como ônibus ou caminhão, o condutor deve lembrar que:",
+      "questaoId": "367a5ad8-cb81-48eb-83c2-39f133654e98",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-005",
+      "enunciado": "Se um veículo à frente apresenta comportamento instável, como zigue-zague ou frenagens sem motivo aparente, o condutor defensivo deve:",
+      "questaoId": "c2f23505-6145-431e-9da5-448df650f5d6",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-006",
+      "enunciado": "Em situação de conflito de circulação, a direção defensiva considera mais seguro:",
+      "questaoId": "6ccc8506-eca8-4cb2-8feb-1accbcb5052d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-007",
+      "enunciado": "Planejar rota de fuga, observar laterais e manter atenção ao retrovisor ajudam a prevenir colisões porque:",
+      "questaoId": "b764bd77-e574-453c-b30b-ecfacd4c56d5",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-008",
+      "enunciado": "A tomada de decisão segura no trânsito depende, em grande parte, de o condutor:",
+      "questaoId": "67124b65-1863-420b-95ab-d04e06f64297",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-001",
+      "enunciado": "Ao chegar a um local de acidente de trânsito, a primeira preocupação do condutor deve ser:",
+      "questaoId": "27532232-4261-4a27-aac8-f4a51223af7f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-002",
+      "enunciado": "Antes de se aproximar de uma vítima, o mais importante é verificar se:",
+      "questaoId": "3d5655cd-f1a5-436e-9d66-1fbec51b856d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-003",
+      "enunciado": "A sinalização do local de um acidente serve principalmente para:",
+      "questaoId": "8131eb1a-6cd0-433e-8125-a465c534e7c5",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-004",
+      "enunciado": "Em local com pouca visibilidade, como curva ou período noturno, a sinalização do acidente deve ser:",
+      "questaoId": "fe065d71-60a8-44f7-b3cb-581c66c24696",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-005",
+      "enunciado": "Se houver vazamento de combustível ou risco de incêndio no local do acidente, o mais prudente é:",
+      "questaoId": "b423061a-9f20-4992-8003-dc3759b41c80",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-006",
+      "enunciado": "Na lógica dos primeiros socorros no trânsito, proteger a cena antes de tocar na vítima é importante porque:",
+      "questaoId": "bf23a444-d35b-4b84-9278-aa9159c2a873",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-001",
+      "enunciado": "Ao acionar o socorro após um acidente de trânsito, uma informação essencial é:",
+      "questaoId": "6edc04af-5a3d-4661-be8b-7d15a3bc9dbd",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-002",
+      "enunciado": "Ao pedir ajuda a um serviço de emergência, o condutor deve procurar informar:",
+      "questaoId": "63b5befc-0273-402b-9666-7e4ca3cb0366",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-003",
+      "enunciado": "Se houver mais de uma pessoa disponível para ajudar, uma organização adequada é:",
+      "questaoId": "7cf1a847-c9dd-4206-a5a0-b9c8e68800ec",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-004",
+      "enunciado": "Informações imprecisas, exageradas ou falsas ao serviço de emergência prejudicam o atendimento porque:",
+      "questaoId": "fb2ad4e4-d1d6-4955-bd6c-de32eacfa37f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-001",
+      "enunciado": "Na avaliação inicial da vítima, um dos primeiros pontos a observar é se ela:",
+      "questaoId": "089d4fba-8c1c-46ee-90a6-c71973022394",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-002",
+      "enunciado": "Se a vítima estiver consciente, uma atitude adequada do socorrista eventual é:",
+      "questaoId": "a86dd1f1-a43f-4fba-a9f8-ed74adf151ca",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-003",
+      "enunciado": "Ao avaliar uma vítima após colisão, o condutor deve evitar:",
+      "questaoId": "a7677ebe-2c82-4768-9208-3d86d4753c48",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-004",
+      "enunciado": "Se a vítima estiver inconsciente, o socorrista eventual não deve:",
+      "questaoId": "31347439-6968-492b-a372-87efb5cd922c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-005",
+      "enunciado": "Na avaliação inicial da vítima, a direção mais segura é buscar informações úteis sem:",
+      "questaoId": "9fed4afd-e0b1-410a-ab90-99c4e6f10441",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-001",
+      "enunciado": "Enquanto aguarda o socorro profissional, o condutor pode ajudar a vítima consciente principalmente ao:",
+      "questaoId": "8f4a32fc-9d29-46ba-8905-89d0b639217e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-002",
+      "enunciado": "Se uma vítima de motocicleta estiver usando capacete, a conduta mais prudente para uma pessoa sem treinamento é:",
+      "questaoId": "0724c289-0b67-40d3-b3ba-77a591eb5af2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-003",
+      "enunciado": "Até a chegada do socorro, oferecer alimentos, bebidas ou medicamentos à vítima é uma conduta:",
+      "questaoId": "1d2897e7-697d-4ddf-a8e2-8a3b9824001e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-004",
+      "enunciado": "Uma vítima consciente e assustada costuma se beneficiar quando o socorrista eventual:",
+      "questaoId": "65437d13-1c3f-4b1d-a3cf-091255587e4e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-005",
+      "enunciado": "Em situação sem risco adicional imediato, mover a vítima por conta própria tende a ser uma atitude:",
+      "questaoId": "aa9825ae-ee77-4fd0-8f9e-0c379c4f5527",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-006",
+      "enunciado": "A lógica dos cuidados básicos até a chegada do socorro é:",
+      "questaoId": "08ac2f81-6a59-4051-80b3-7e8bf68039f8",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-001",
+      "enunciado": "Em regra, não se deve puxar, levantar ou arrastar a vítima após acidente porque isso pode:",
+      "questaoId": "0680f049-5d63-4c36-9742-501a3f41877c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-002",
+      "enunciado": "Dar bebida alcoólica, remédios ou qualquer substância à vítima é inadequado porque:",
+      "questaoId": "9b0047c6-d113-415c-aebd-5c39bfc8508e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-003",
+      "enunciado": "Aglomeração de curiosos ao redor da vítima deve ser evitada porque:",
+      "questaoId": "3ee9bb92-b0f0-4441-bda9-e73686fc1525",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-004",
+      "enunciado": "Nos primeiros socorros no trânsito, a regra “não agravar a situação” significa que o condutor deve evitar:",
+      "questaoId": "6b479269-7e45-4497-8723-c11535e4003d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-001",
+      "enunciado": "Pneus em bom estado são importantes para a segurança porque influenciam diretamente:",
+      "questaoId": "b47cce7e-ac27-4a0d-9f13-64f991a8e73a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-002",
+      "enunciado": "A calibragem incorreta dos pneus pode trazer como consequência:",
+      "questaoId": "1e231ca9-a574-45d8-b2d2-e9944eb5b9dc",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-003",
+      "enunciado": "Em pista molhada, pneus muito desgastados representam risco maior porque:",
+      "questaoId": "e2088256-9a0c-4d4d-9e7f-8c546a07cd3e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-001",
+      "enunciado": "O sistema de freios deve estar sempre em boas condições porque é essencial para:",
+      "questaoId": "9783758a-6b48-4051-b928-28ce995dcf10",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-002",
+      "enunciado": "Se o condutor notar que o veículo está puxando para um lado, isso pode indicar problema em componentes como:",
+      "questaoId": "2b73ac86-3993-4da8-98ea-4e6110e6c391",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-003",
+      "enunciado": "Dirigir com falha perceptível nos freios, na direção ou na suspensão é perigoso porque:",
+      "questaoId": "d3789a9a-09be-4dce-a991-e555f835bd3c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-001",
+      "enunciado": "O sistema de iluminação do veículo é importante para a segurança porque ajuda a:",
+      "questaoId": "47757a41-f07a-4ed4-a4ca-09c4b1e0a1c2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-002",
+      "enunciado": "Circular com luzes de freio ou setas sem funcionamento é uma situação indesejável porque:",
+      "questaoId": "3bb236a5-0150-4223-ba55-0a9554ea4857",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-003",
+      "enunciado": "No contexto da mecânica básica, manter iluminação e sinalização do veículo em bom estado é uma forma de:",
+      "questaoId": "45b89df4-2866-4950-bc7e-870364ea07be",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-001",
+      "enunciado": "A manutenção preventiva do veículo é importante porque ajuda a:",
+      "questaoId": "223d2a84-b5b9-41eb-b600-d9981a4dd676",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-002",
+      "enunciado": "No uso cotidiano do veículo, fazer verificações básicas de rotina é uma atitude importante porque:",
+      "questaoId": "e96d9ad1-cf78-4600-beaf-374ed7456b70",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-003",
+      "enunciado": "A lógica da manutenção preventiva é mais próxima de:",
+      "questaoId": "53357ec7-6d7c-4032-b8ef-91529bdc2abc",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-001",
+      "enunciado": "Os equipamentos obrigatórios do veículo têm importância porque:",
+      "questaoId": "0fadb18d-35df-4597-ad0f-af8c38f16d46",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-002",
+      "enunciado": "Em caso de pane simples durante a circulação, uma atitude prudente do condutor é:",
+      "questaoId": "c90cc767-548c-4409-b28c-5d479017e064",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-003",
+      "enunciado": "A melhor relação entre mecânica básica e segurança viária é entender que:",
+      "questaoId": "6377f10e-1424-4eb7-9cfc-c2939b0c0621",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-001",
+      "enunciado": "A emissão excessiva de fumaça por um veículo é um problema porque:",
+      "questaoId": "c5873c4e-b3d8-4562-ac87-e87d5387c9fe",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-002",
+      "enunciado": "Ruído excessivo emitido por veículo ou equipamento de som representa:",
+      "questaoId": "d9f55d28-25b1-4d99-8980-8315686a1869",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-003",
+      "enunciado": "Do ponto de vista ambiental, manter o veículo regulado ajuda a:",
+      "questaoId": "34dc3b84-8582-4e9d-b6f3-9350c6f44f64",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-004",
+      "enunciado": "Entre as condutas abaixo, qual se relaciona melhor com redução de poluição no trânsito?",
+      "questaoId": "4459460d-aef3-4a41-9eee-9c340109cb3b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-005",
+      "enunciado": "A poluição do ar gerada por veículos afeta principalmente:",
+      "questaoId": "f69872cf-436f-4291-a7f1-a0494bb78eab",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-006",
+      "enunciado": "O condutor que mantém escapamento adulterado com ruído excessivo desrespeita:",
+      "questaoId": "9340d7bb-2d5b-4958-abc8-b7c2e8b98a2e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-007",
+      "enunciado": "Reduzir emissões de poluentes no trânsito é uma responsabilidade que envolve:",
+      "questaoId": "b0489be2-131b-4c37-83ae-5e6c12e3ccf4",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-008",
+      "enunciado": "No contexto da educação para o trânsito, falar em poluição veicular significa considerar:",
+      "questaoId": "aede0224-b695-459b-a5b7-c8229d667944",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-001",
+      "enunciado": "A manutenção preventiva contribui para a preservação ambiental porque pode:",
+      "questaoId": "7a756367-9cb2-49e3-a70d-5469690ecefc",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-002",
+      "enunciado": "Um veículo sem manutenção adequada pode prejudicar o meio ambiente ao:",
+      "questaoId": "d35304f5-476a-44e9-b80b-99c3934326f2",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-003",
+      "enunciado": "Do ponto de vista ambiental, adiar por muito tempo cuidados básicos do veículo é inadequado porque:",
+      "questaoId": "56c456fe-9efd-4c8e-b91e-5a73cde05eb1",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-004",
+      "enunciado": "Cuidar do veículo como forma de preservação ambiental significa compreender que:",
+      "questaoId": "4b881f19-d902-4f69-a14e-48038d235bba",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-005",
+      "enunciado": "A manutenção preventiva, além de favorecer a segurança, também ajuda a:",
+      "questaoId": "7231b35f-6336-4b21-bc26-6a8673377a77",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-001",
+      "enunciado": "Respeitar os demais usuários do trânsito significa, entre outras atitudes:",
+      "questaoId": "b30e86ee-6b8c-4c24-a672-b5e8f46f83f9",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-002",
+      "enunciado": "No convívio social no trânsito, a pressa do condutor não justifica:",
+      "questaoId": "570cc46b-afc7-4c69-840c-20fbd403886d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-003",
+      "enunciado": "Uma atitude de respeito no trânsito é:",
+      "questaoId": "34cdb7dc-a6a7-49b9-b69c-077f4ebf86cd",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-004",
+      "enunciado": "A convivência social no trânsito fica prejudicada quando o condutor:",
+      "questaoId": "73fb782f-de8c-4d57-bf6a-f1167c156bf3",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-005",
+      "enunciado": "No trânsito, comportamento cidadão envolve:",
+      "questaoId": "1385d376-0ad8-4435-bda4-e4b8f32a3ed4",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-006",
+      "enunciado": "Um condutor que aceita ceder passagem com segurança, sem disputa desnecessária, demonstra:",
+      "questaoId": "1f7efb45-582c-4c2c-9bbc-3d69e216926d",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-007",
+      "enunciado": "Em termos de convívio social, dirigir de forma responsável significa compreender que:",
+      "questaoId": "cad646fd-8c09-4462-a908-2ca025196e9e",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-001",
+      "enunciado": "A responsabilidade do condutor no trânsito não é apenas pessoal, porque suas ações podem:",
+      "questaoId": "c5c16a27-6e82-40f3-a500-5eee920b4f0a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-002",
+      "enunciado": "A ideia de responsabilidade civil e criminal no trânsito reforça que o condutor deve:",
+      "questaoId": "28b5e475-78a0-4faf-86c7-25361149ec9f",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-003",
+      "enunciado": "Do ponto de vista da cidadania no trânsito, causar dano a outra pessoa por imprudência é relevante porque:",
+      "questaoId": "a374ba7f-703f-495b-bd1e-9e0488cc6e81",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-004",
+      "enunciado": "A responsabilidade cidadã do motorista começa:",
+      "questaoId": "d44a247b-f204-4ef8-a398-38880c9ae8fe",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-005",
+      "enunciado": "Em educação para o trânsito, falar em responsabilidade civil e criminal do condutor serve para:",
+      "questaoId": "766a4dbf-d01b-4f9c-8753-c0c4dfc05952",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-001",
+      "enunciado": "Comportamento solidário no trânsito pode ser entendido como:",
+      "questaoId": "67588e7b-e93b-4b4f-b767-2052fc36078a",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-002",
+      "enunciado": "A ética no trânsito se manifesta quando o condutor:",
+      "questaoId": "262b3461-b0c4-42bf-a7c0-2469634a6c6c",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-003",
+      "enunciado": "Ao perceber dificuldade de outro usuário da via, uma resposta solidária e segura pode ser:",
+      "questaoId": "23947d12-b6b9-4146-844d-f7737e181049",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-004",
+      "enunciado": "A ética no trânsito é incompatível com a ideia de que:",
+      "questaoId": "f4b81403-5143-43ae-8539-48b9e6654098",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    },
+    {
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-005",
+      "enunciado": "No trânsito, solidariedade e ética são importantes porque ajudam a:",
+      "questaoId": "1fe43f2e-2534-4b8f-b3cc-8b8eb72e2e9b",
+      "acao": "CRIADA",
+      "detalhe": "Importada com sucesso como rascunho."
+    }
+  ]
+}

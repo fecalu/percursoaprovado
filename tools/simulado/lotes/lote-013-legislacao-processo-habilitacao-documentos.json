@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Processo de habilitação, documentos de porte obrigatório e deveres do condutor",
+    "qtde": 10,
+    "referenciaOficial": "Resolução CONTRAN 1.020/2025 + Portaria SENATRAN 923/2025",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf",
+    "observacaoEditorial": "Lote autoral sobre finalidade do processo de habilitação, documentos e deveres básicos do condutor."
+  },
+  "questoes": [
+    {
+      "enunciado": "A principal finalidade do processo de habilitação é:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O processo de habilitação busca formar condutores aptos a dirigir com segurança e responsabilidade.",
+      "explicacaoDetalhada": "A habilitação não existe apenas para entregar um documento ao candidato. Ela integra formação, avaliação e verificação de aptidão física, mental e técnica para que a condução ocorra com segurança no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-001",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-001",
+      "alternativas": [
+        { "texto": "Permitir a compra de veículos por qualquer cidadão.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Formar e avaliar condutores aptos a dirigir com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir totalmente a fiscalização de trânsito.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dispensar o estudo das normas de circulação.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Antes de conduzir veículo automotor em via pública, a pessoa deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Somente pode conduzir em via pública quem estiver legalmente habilitado para a categoria correspondente.",
+      "explicacaoDetalhada": "A condução em via pública depende de habilitação regular ou autorização legal equivalente, conforme o tipo de veículo. Isso protege a segurança viária e garante que o condutor tenha sido previamente avaliado.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-002",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-002",
+      "alternativas": [
+        { "texto": "Apenas saber dirigir na prática, ainda que sem documento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Estar devidamente habilitada ou legalmente autorizada para o veículo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ter mais de 16 anos e estar acompanhada.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Possuir somente documento de identidade comum.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No processo de habilitação, a avaliação de aptidão física e mental existe para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela verifica se o candidato tem condições mínimas para conduzir com segurança.",
+      "explicacaoDetalhada": "A condução exige percepção, reação, visão, coordenação e condições gerais compatíveis com a direção segura. Por isso, a aptidão física e mental integra o processo de habilitação.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-003",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-003",
+      "alternativas": [
+        { "texto": "Substituir o exame teórico de legislação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Verificar se o candidato reúne condições para dirigir com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Definir o modelo do veículo que o candidato poderá comprar.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dispensar o exame prático de direção.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A etapa teórica do processo de habilitação tem a função de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela desenvolve e avalia os conhecimentos necessários para a condução responsável.",
+      "explicacaoDetalhada": "A formação teórica aborda legislação, sinalização, direção defensiva, primeiros socorros, meio ambiente e cidadania. Esses conteúdos são parte essencial da preparação do futuro condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-004",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-004",
+      "alternativas": [
+        { "texto": "Ensinar apenas a manobrar o veículo em baixa velocidade.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Garantir a assimilação dos conhecimentos exigidos para condução segura.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Servir somente como formalidade administrativa.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir toda a prática de direção veicular.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A Permissão para Dirigir representa, em regra, a fase em que o condutor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A PPD marca o período inicial em que o novo condutor ainda está em etapa probatória.",
+      "explicacaoDetalhada": "Após cumprir as etapas de formação e aprovação, o condutor ingressa em período inicial de permissão. Nessa fase, deve demonstrar conduta regular para futura obtenção da habilitação definitiva, conforme a legislação aplicável.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-005",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-005",
+      "alternativas": [
+        { "texto": "Ainda não pode dirigir em via pública em nenhuma hipótese.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Está em fase inicial de habilitação, sujeita a regras específicas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Pode conduzir qualquer categoria de veículo sem restrição.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Está dispensado de obedecer a pontuação por infrações.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao conduzir um veículo regularmente licenciado, os documentos obrigatórios podem ser apresentados:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Os documentos podem ser apresentados nos formatos admitidos pela legislação, inclusive digital, quando válidos.",
+      "explicacaoDetalhada": "A legislação admite documentos de trânsito em formato físico ou eletrônico, desde que válidos e aptos à verificação pela fiscalização. O essencial é a regularidade e a possibilidade de comprovação.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-006",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-006",
+      "alternativas": [
+        { "texto": "Somente em papel, nunca em meio digital.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Em formato físico ou digital, desde que válidos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas por fotografia informal do documento.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Somente mediante impressão autenticada em cartório.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando solicitado pela fiscalização, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cabe ao condutor apresentar os documentos exigíveis e colaborar com a fiscalização.",
+      "explicacaoDetalhada": "A abordagem fiscalizatória integra a atividade de controle do trânsito. O condutor deve cooperar, identificando-se e apresentando os documentos legalmente exigidos para a verificação da regularidade.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-007",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-007",
+      "alternativas": [
+        { "texto": "Apresentar os documentos exigíveis e colaborar com a fiscalização.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Negar qualquer informação, por se tratar de ato facultativo.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Apenas informar verbalmente o número da CNH, sem comprovação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Abandonar o local para evitar atraso na viagem.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O CRLV-e está relacionado, principalmente, à comprovação de que o veículo:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O documento comprova o registro e o licenciamento anual regular do veículo.",
+      "explicacaoDetalhada": "O Certificado de Registro e Licenciamento do Veículo, em meio físico ou eletrônico conforme admitido, é o documento que demonstra a regularidade do licenciamento do veículo para circulação.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-008",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-008",
+      "alternativas": [
+        { "texto": "Foi abastecido recentemente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Está registrado e licenciado para circular.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "É de propriedade exclusiva do condutor abordado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Pode circular sem placa de identificação.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Conduzir veículo sem a devida habilitação ou autorização legal é comportamento:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Dirigir sem habilitação regular contraria diretamente a legislação de trânsito.",
+      "explicacaoDetalhada": "A habilitação é requisito legal para conduzir veículo em via pública. Sua ausência compromete a regularidade da condução e sujeita o infrator às consequências previstas na legislação.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-009",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-009",
+      "alternativas": [
+        { "texto": "Permitido desde que o veículo esteja licenciado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Aceito apenas em vias de pouco movimento.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Irregular e contrário às exigências legais de trânsito.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Irrelevante se o condutor souber dirigir bem.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Entre os deveres básicos do condutor regular estão o de manter a documentação pertinente em ordem e:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conduzir com responsabilidade significa unir regularidade documental e cumprimento efetivo das normas de trânsito.",
+      "explicacaoDetalhada": "O dever do condutor não se resume a portar documentos. Também envolve respeitar a sinalização, as regras de circulação e a segurança viária, mantendo comportamento compatível com a responsabilidade de dirigir.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-010",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-010",
+      "alternativas": [
+        { "texto": "Desconsiderar normas de circulação quando a via estiver livre.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Cumprir efetivamente as regras e conduzir com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Dirigir sem atenção sempre que já conhecer o trajeto.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Seguir apenas as orientações de outros condutores.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

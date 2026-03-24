@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Penalidades e medidas administrativas",
+    "qtde": 8,
+    "referenciaOficial": "CTB + Portaria SENATRAN 923/2025",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre distinção entre penalidade e medida administrativa."
+  },
+  "questoes": [
+    {
+      "enunciado": "Em termos gerais, penalidade de trânsito é:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Penalidade é consequência jurídica aplicada ao infrator nos termos da legislação.",
+      "explicacaoDetalhada": "As penalidades são respostas administrativas previstas em lei para o cometimento de infrações. Elas integram o sistema sancionatório do trânsito e não se confundem com providências operacionais imediatas.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-001",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-001",
+      "alternativas": [
+        { "texto": "Uma sugestão opcional ao condutor autuado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Uma consequência jurídica prevista para a infração.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas uma forma de organizar o tráfego momentaneamente.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Um conselho verbal sem base legal.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Medida administrativa, no contexto do trânsito, está mais relacionada a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Medida administrativa corresponde a providência prática adotada pela autoridade ou agente nas hipóteses legais.",
+      "explicacaoDetalhada": "As medidas administrativas não se confundem com a penalidade em si. Elas operam como providências legais de controle, proteção da segurança ou restauração da regularidade da situação de trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-002",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-002",
+      "alternativas": [
+        { "texto": "Providência prática prevista em lei para determinadas situações.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Escolha pessoal do condutor após a infração.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "A mesma coisa que recurso administrativo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituição automática de todas as penalidades.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A diferença central entre penalidade e medida administrativa é que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Penalidade sanciona; medida administrativa atua como providência operacional ou cautelar prevista em lei.",
+      "explicacaoDetalhada": "Embora possam surgir no mesmo contexto infracional, penalidade e medida administrativa têm naturezas distintas. A primeira possui caráter sancionatório; a segunda, caráter prático-operacional ou cautelar, conforme a legislação.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-003",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-003",
+      "alternativas": [
+        { "texto": "Ambas são sinônimas e sempre produzem o mesmo efeito.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A penalidade sanciona e a medida administrativa opera providência legal.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A medida administrativa só existe em vias rurais.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A penalidade depende da vontade do infrator para existir.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando a legislação prevê retenção ou remoção em determinada hipótese, isso é exemplo de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Providências como retenção e remoção são tratadas como medidas administrativas, conforme a hipótese legal.",
+      "explicacaoDetalhada": "Situações que exigem controle imediato do veículo ou da circulação podem ensejar providências materiais por parte da autoridade de trânsito. Essas providências se enquadram no campo das medidas administrativas previstas no CTB.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-004",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-004",
+      "alternativas": [
+        { "texto": "Medida administrativa.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Categoria de habilitação.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Orientação facultativa ao infrator.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Apenas anotação informal sem efeito jurídico.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A aplicação de penalidades e medidas administrativas no trânsito busca, entre outros objetivos:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas servem para responsabilizar condutas e proteger a ordem e a segurança viária.",
+      "explicacaoDetalhada": "O sistema não tem apenas caráter arrecadatório. Penalidades e medidas administrativas integram a política de prevenção, organização e responsabilização no trânsito, visando a redução de riscos e irregularidades.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-005",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-005",
+      "alternativas": [
+        { "texto": "Responsabilizar condutas e proteger a segurança viária.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Substituir totalmente a educação para o trânsito.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Eliminar a necessidade de sinalização nas vias.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Permitir exceções pessoais às regras de circulação.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Confundir penalidade com medida administrativa pode levar o condutor a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A confusão prejudica a compreensão correta das consequências jurídicas da infração.",
+      "explicacaoDetalhada": "Entender a diferença entre essas figuras é importante para compreender o funcionamento do sistema de trânsito, o procedimento administrativo e a natureza das consequências decorrentes da infração.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-006",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-006",
+      "alternativas": [
+        { "texto": "Compreender melhor a lei automaticamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Entender de forma incorreta a resposta jurídica ao fato praticado.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Dispensar o conhecimento do CTB.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Eliminar a possibilidade de defesa administrativa.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista da lógica do sistema, a medida administrativa costuma estar mais ligada à:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela se conecta à regularização, contenção de risco ou providência imediata prevista em lei.",
+      "explicacaoDetalhada": "Medidas administrativas costumam operar sobre a situação concreta de circulação, buscando restabelecer segurança, legalidade ou controle imediato da ocorrência, nos limites da lei.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-007",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-007",
+      "alternativas": [
+        { "texto": "Regularização ou contenção imediata da situação prevista em lei.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Escolha econômica do condutor sobre pagar ou não a multa.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Mudança definitiva de categoria da habilitação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Definição judicial imediata do caso.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em leitura jurídica básica, é correto afirmar que penalidades e medidas administrativas:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "São institutos distintos, embora possam coexistir na resposta legal à mesma situação.",
+      "explicacaoDetalhada": "A legislação de trânsito pode prever, em uma mesma hipótese, consequências de naturezas distintas. Por isso, é importante saber que penalidade e medida administrativa não se anulam por serem coisas diferentes.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-008",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-008",
+      "alternativas": [
+        { "texto": "São exatamente a mesma figura jurídica.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Podem coexistir, por terem naturezas distintas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Nunca aparecem em conjunto em uma infração.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dependem sempre de decisão do proprietário do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1040 @@
+{
+  "meta": {
+    "tema": "PRIMEIROS_SOCORROS",
+    "qtde": 25,
+    "lotes": [
+      {
+        "numero": 31,
+        "arquivo": "lote-031-primeiros-socorros-sinalizacao-seguranca-cena.json",
+        "subtema": "Sinalização do local e segurança da cena",
+        "qtde": 6
+      },
+      {
+        "numero": 32,
+        "arquivo": "lote-032-primeiros-socorros-acionamento-recursos-emergencia.json",
+        "subtema": "Acionamento de recursos de emergência",
+        "qtde": 4
+      },
+      {
+        "numero": 33,
+        "arquivo": "lote-033-primeiros-socorros-avaliacao-inicial-vitima.json",
+        "subtema": "Avaliação inicial da vítima",
+        "qtde": 5
+      },
+      {
+        "numero": 34,
+        "arquivo": "lote-034-primeiros-socorros-cuidados-basicos-ate-socorro.json",
+        "subtema": "Cuidados básicos até a chegada do socorro",
+        "qtde": 6
+      },
+      {
+        "numero": 35,
+        "arquivo": "lote-035-primeiros-socorros-o-que-nao-fazer-vitima.json",
+        "subtema": "O que não fazer com a vítima",
+        "qtde": 4
+      }
+    ]
+  },
+  "questoes": [
+    {
+      "enunciado": "Ao chegar a um local de acidente de trânsito, a primeira preocupação do condutor deve ser:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Antes de qualquer ajuda, é preciso tornar a cena mais segura.",
+      "explicacaoDetalhada": "Um atendimento inicial responsável começa pela proteção do local. Isso reduz o risco de novos atropelamentos, colisões e exposição adicional das vítimas, de terceiros e do próprio socorrista eventual.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-001",
+      "alternativas": [
+        {
+          "texto": "Registrar imagens do acidente antes de qualquer providência.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Avaliar e proteger a segurança da cena.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Mover imediatamente todas as vítimas para a calçada.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Discutir com os envolvidos sobre quem causou o acidente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Antes de se aproximar de uma vítima, o mais importante é verificar se:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O socorro não pode colocar outra pessoa em risco imediato.",
+      "explicacaoDetalhada": "Aproximar-se de uma vítima sem avaliar o ambiente pode gerar mais feridos. Tráfego em movimento, vazamento de combustível, incêndio ou cabos energizados exigem cautela antes de qualquer tentativa de auxílio.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-002",
+      "alternativas": [
+        {
+          "texto": "A vítima está com os olhos abertos.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A cena oferece condições mínimas de segurança para aproximação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Há testemunhas suficientes no local.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O veículo envolvido tem seguro.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A sinalização do local de um acidente serve principalmente para:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalizar o local ajuda a evitar novos acidentes e a proteger todos os envolvidos.",
+      "explicacaoDetalhada": "Ao alertar outros condutores com antecedência, a sinalização permite redução de velocidade, mudança de trajetória e maior atenção ao ponto de risco. Isso é parte essencial do primeiro atendimento responsável.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-003",
+      "alternativas": [
+        {
+          "texto": "Reservar espaço para a imprensa.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Evitar novos riscos e preservar a área do acidente.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Impedir a chegada do socorro profissional.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Identificar quem tem a razão no acidente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em local com pouca visibilidade, como curva ou período noturno, a sinalização do acidente deve ser:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Quanto menor a visibilidade, maior deve ser o cuidado para alertar outros condutores com antecedência.",
+      "explicacaoDetalhada": "Em curvas, aclives ou à noite, o tempo de percepção do risco por parte dos demais motoristas é menor. Por isso, a sinalização precisa ser pensada para dar aviso antecipado e reduzir a chance de nova colisão.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-004",
+      "alternativas": [
+        {
+          "texto": "Mais próxima possível da vítima, para concentrar o aviso.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Planejada para alertar com antecedência, considerando o campo de visão dos demais condutores.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dispensada, já que o pisca-alerta resolve sozinho.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Feita apenas depois de falar com todos os envolvidos.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se houver vazamento de combustível ou risco de incêndio no local do acidente, o mais prudente é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Risco de fogo exige prioridade total à segurança da cena e afastamento de fontes de ignição.",
+      "explicacaoDetalhada": "Nessas situações, a proximidade imprudente pode agravar muito o acidente. O adequado é afastar pessoas do perigo, evitar faíscas, não fumar, não improvisar soluções e acionar rapidamente o socorro especializado.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-005",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-005",
+      "alternativas": [
+        {
+          "texto": "Aproximar-se logo para retirar tudo do veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Controlar a cena, afastar pessoas do perigo e acionar ajuda adequada.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Ligar o motor do veículo para testar se ainda funciona.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Usar qualquer objeto metálico para conter o vazamento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Na lógica dos primeiros socorros no trânsito, proteger a cena antes de tocar na vítima é importante porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem controle básico da cena, o risco de agravar o evento e gerar novas vítimas é alto.",
+      "explicacaoDetalhada": "Primeiros socorros em trânsito não começam apenas com a vítima; começam com o ambiente. Se a via continua oferecendo risco de atropelamento, colisão ou incêndio, qualquer tentativa de ajuda pode aumentar o número de feridos e dificultar a chegada do socorro profissional.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cena-006",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cena-006",
+      "alternativas": [
+        {
+          "texto": "A proteção da cena é apenas uma formalidade sem impacto prático.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Controlar a cena reduz o risco de agravar o acidente e criar novas vítimas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só é necessário sinalizar se houver mais de um veículo envolvido.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A proteção da cena pode ser deixada para depois, se a vítima estiver consciente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao acionar o socorro após um acidente de trânsito, uma informação essencial é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem localização clara, a equipe pode perder tempo importante para chegar ao local.",
+      "explicacaoDetalhada": "Informações precisas ajudam a equipe de emergência a se deslocar com rapidez e preparo adequado. O local do acidente, o número aproximado de vítimas e a existência de riscos adicionais são dados prioritários.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-001",
+      "alternativas": [
+        {
+          "texto": "A marca do veículo envolvido.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A localização do acidente e dados úteis sobre a situação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A opinião dos curiosos sobre o ocorrido.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A cor da roupa das vítimas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao pedir ajuda a um serviço de emergência, o condutor deve procurar informar:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Quanto mais objetiva e útil a informação, melhor a preparação do atendimento.",
+      "explicacaoDetalhada": "Relatar quantas vítimas há, o tipo de acidente e possíveis riscos no local ajuda a equipe a definir os recursos necessários. Informações vagas ou confusas podem atrasar a resposta.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-002",
+      "alternativas": [
+        {
+          "texto": "Somente que houve um acidente, sem mais detalhes.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Local, quantidade aproximada de vítimas e características do risco.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas o nome completo de todos os envolvidos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O valor estimado do prejuízo material.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se houver mais de uma pessoa disponível para ajudar, uma organização adequada é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Distribuir tarefas pode tornar a resposta inicial mais eficiente e segura.",
+      "explicacaoDetalhada": "Enquanto uma pessoa aciona o socorro, outra pode ajudar na proteção da cena, desde que sem se expor ao risco. Essa divisão simples melhora o atendimento inicial e evita perda de tempo.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-003",
+      "alternativas": [
+        {
+          "texto": "Todos discutirem ao mesmo tempo o que fazer.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Uma pessoa aciona o socorro e outra ajuda a proteger o local, se for seguro.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Mandar todos embora para não atrapalhar.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Esperar primeiro a polícia chegar para depois ligar para emergência.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Informações imprecisas, exageradas ou falsas ao serviço de emergência prejudicam o atendimento porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A qualidade da resposta depende da qualidade da informação recebida.",
+      "explicacaoDetalhada": "Equipes de emergência precisam de dados confiáveis para dimensionar recursos, definir prioridade e chegar ao local correto. Informações erradas podem atrasar o atendimento ou mobilizar ajuda inadequada para a ocorrência.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-004",
+      "alternativas": [
+        {
+          "texto": "Não causam prejuízo, porque a equipe corrige tudo ao chegar.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Podem atrasar, confundir ou dimensionar mal a resposta de emergência.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só são problema em acidentes com muitas vítimas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Servem para fazer a equipe chegar mais rápido, mesmo que não sejam verdadeiras.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Na avaliação inicial da vítima, um dos primeiros pontos a observar é se ela:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Consciência e respiração são dados básicos da avaliação inicial.",
+      "explicacaoDetalhada": "A avaliação inicial procura identificar sinais que ajudem a compreender a gravidade do quadro sem expor a vítima a movimentos desnecessários. Verificar se a pessoa responde e respira é parte importante dessa leitura inicial.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-001",
+      "alternativas": [
+        {
+          "texto": "Está usando cinto de segurança.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Responde a estímulos e apresenta sinais de respiração.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Tem documentos pessoais à vista.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Consegue falar o nome do veículo envolvido.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se a vítima estiver consciente, uma atitude adequada do socorrista eventual é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Manter comunicação calma ajuda a reduzir ansiedade e obter informações úteis.",
+      "explicacaoDetalhada": "Falar com tranquilidade pode acalmar a vítima, diminuir agitação e permitir observação mais segura do seu estado geral. Isso deve ser feito sem forçar movimentos ou manipulações desnecessárias.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-002",
+      "alternativas": [
+        {
+          "texto": "Gritar para ver se ela reage mais rápido.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Falar com calma e observar seu estado geral.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Obrigá-la a levantar para testar se consegue andar.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dar água imediatamente para acalmá-la.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao avaliar uma vítima após colisão, o condutor deve evitar:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A observação inicial deve ser feita sem criar novos riscos ou agravar possíveis lesões.",
+      "explicacaoDetalhada": "Movimentos bruscos e testes improvisados podem piorar lesões ocultas, especialmente em coluna, cabeça e membros. A avaliação inicial deve ser cuidadosa, priorizando sinais visíveis e comunicação segura.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-003",
+      "alternativas": [
+        {
+          "texto": "Observar sinais aparentes de lesão.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Conversar com a vítima, se ela estiver consciente.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Fazer movimentações desnecessárias para testar a condição física.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Notar se há dificuldade para respirar.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se a vítima estiver inconsciente, o socorrista eventual não deve:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pessoa inconsciente não deve receber líquidos, alimentos ou medicação improvisada.",
+      "explicacaoDetalhada": "Oferecer água, comida ou qualquer substância a uma vítima inconsciente pode causar engasgo e agravar o quadro. A conduta correta é acionar o socorro e manter a segurança da cena e da vítima.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-004",
+      "alternativas": [
+        {
+          "texto": "Acionar ajuda especializada.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Garantir a segurança do local.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Oferecer água ou outro líquido para estimular reação.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Observar sinais de respiração.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Na avaliação inicial da vítima, a direção mais segura é buscar informações úteis sem:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Avaliar não significa manipular excessivamente a vítima.",
+      "explicacaoDetalhada": "A avaliação inicial em primeiros socorros no trânsito é observacional e cautelosa. O objetivo é perceber consciência, respiração, sinais visíveis de gravidade e risco imediato, evitando transformar a avaliação em intervenção perigosa.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-005",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-005",
+      "alternativas": [
+        {
+          "texto": "Gerar agitação, exposição ou movimentação desnecessária da vítima.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Observar cuidadosamente o estado geral.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Prestar atenção a sinais visíveis de gravidade.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Comunicar-se com calma, se houver resposta.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Enquanto aguarda o socorro profissional, o condutor pode ajudar a vítima consciente principalmente ao:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Calma, observação e proteção são atitudes úteis e seguras.",
+      "explicacaoDetalhada": "Em muitos casos, o melhor auxílio até a chegada da equipe especializada é manter a vítima calma, protegida e acompanhada, sem improvisar procedimentos para os quais o condutor não tenha capacitação.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-001",
+      "alternativas": [
+        {
+          "texto": "Forçá-la a caminhar para demonstrar resistência.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Mantê-la calma e acompanhada, sem movimentos desnecessários.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dar remédios para aliviar a dor imediatamente.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Retirar o equipamento de proteção por curiosidade.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se uma vítima de motocicleta estiver usando capacete, a conduta mais prudente para uma pessoa sem treinamento é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Retirar o capacete sem necessidade e sem técnica pode agravar lesões.",
+      "explicacaoDetalhada": "Em acidentes com motociclistas, pode haver lesões na cabeça, pescoço e coluna. Sem treinamento, retirar o capacete de forma inadequada pode piorar o quadro. A prioridade é manter a segurança e aguardar o atendimento especializado, salvo risco imediato no local.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-002",
+      "alternativas": [
+        {
+          "texto": "Retirar rapidamente o capacete para a vítima respirar melhor, em qualquer situação.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Evitar retirar o capacete sem necessidade e sem treinamento específico.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Pedir que a própria vítima tire o capacete a qualquer custo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Abrir o capacete com força para examinar o ferimento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Até a chegada do socorro, oferecer alimentos, bebidas ou medicamentos à vítima é uma conduta:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Dar qualquer substância à vítima pode agravar o quadro e dificultar o atendimento.",
+      "explicacaoDetalhada": "Sem saber a extensão das lesões, o nível de consciência ou a necessidade de procedimento médico, oferecer alimentos, líquidos ou remédios é uma atitude inadequada e potencialmente perigosa.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-003",
+      "alternativas": [
+        {
+          "texto": "Indicada, pois ajuda a vítima a recuperar as forças.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Inadequada, porque pode agravar a situação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Necessária apenas se a vítima disser que está bem.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Aceitável se o remédio for de uso comum.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma vítima consciente e assustada costuma se beneficiar quando o socorrista eventual:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Orientação calma e presença organizada ajudam a reduzir ansiedade e agitação.",
+      "explicacaoDetalhada": "Falar de forma tranquila, explicar que o socorro foi acionado e evitar tumulto no entorno pode diminuir a ansiedade da vítima. Isso contribui para um ambiente mais controlado e seguro até a chegada da equipe especializada.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-004",
+      "alternativas": [
+        {
+          "texto": "Aumenta a pressão para que ela reaja mais rápido.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Mantém comunicação calma e evita aglomeração desnecessária ao redor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Discute detalhes do acidente na frente da vítima.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Faz perguntas agressivas para obter respostas objetivas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em situação sem risco adicional imediato, mover a vítima por conta própria tende a ser uma atitude:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mover a vítima sem necessidade pode agravar lesões ocultas.",
+      "explicacaoDetalhada": "Em acidentes de trânsito, pode haver trauma em coluna, membros ou cabeça. Se não houver risco urgente como fogo ou atropelamento iminente, a orientação geral é evitar remoção desnecessária até a chegada do socorro adequado.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-005",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-005",
+      "alternativas": [
+        {
+          "texto": "Correta, pois qualquer mudança de posição sempre melhora a dor.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Arriscada, porque pode piorar lesões já existentes.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Obrigatória para verificar se a vítima consegue andar.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Indicada sempre que houver curiosos observando.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A lógica dos cuidados básicos até a chegada do socorro é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O objetivo é proteger e preservar, não improvisar procedimentos complexos.",
+      "explicacaoDetalhada": "Para o condutor comum, os cuidados básicos concentram-se em proteger o local, acionar ajuda, observar a vítima, oferecer calma e evitar ações que possam agravar o trauma. Primeiros socorros no trânsito exigem prudência, não excesso de intervenção.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-006",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-006",
+      "alternativas": [
+        {
+          "texto": "Substituir o atendimento especializado com técnicas improvisadas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Preservar a vítima e a cena, evitando agravar o quadro.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Fazer qualquer procedimento visto em vídeos da internet.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Deixar a vítima sozinha até a ambulância chegar.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em regra, não se deve puxar, levantar ou arrastar a vítima após acidente porque isso pode:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Movimentação inadequada pode agravar lesões, especialmente traumáticas.",
+      "explicacaoDetalhada": "A remoção sem necessidade e sem técnica pode piorar lesões em coluna, pescoço, membros e cabeça. Por isso, a orientação geral é evitar deslocamentos improvisados, salvo perigo imediato no ambiente.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-001",
+      "alternativas": [
+        {
+          "texto": "Melhorar automaticamente a circulação da vítima.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Agravar lesões já existentes.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Facilitar o trabalho do socorro em qualquer caso.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir o risco de dor imediatamente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Dar bebida alcoólica, remédios ou qualquer substância à vítima é inadequado porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Isso pode agravar o quadro e dificultar o atendimento profissional.",
+      "explicacaoDetalhada": "Sem avaliação técnica adequada, não se conhece o estado real da vítima nem as consequências de ingerir algo naquele momento. A prudência exige evitar oferecer substâncias por conta própria.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-002",
+      "alternativas": [
+        {
+          "texto": "Substâncias sempre ajudam a acalmar e melhorar o quadro.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Pode haver agravamento da situação ou interferência no atendimento.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só é inadequado se a vítima for menor de idade.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Água e analgésico nunca oferecem qualquer risco.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Aglomeração de curiosos ao redor da vítima deve ser evitada porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Tumulto atrapalha a ventilação, a organização da cena e a chegada do socorro.",
+      "explicacaoDetalhada": "Muita gente ao redor pode dificultar o acesso da equipe de resgate, aumentar a ansiedade da vítima e transformar a cena em ambiente desorganizado. O ideal é preservar espaço e reduzir o tumulto.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-003",
+      "alternativas": [
+        {
+          "texto": "Quanto mais gente em volta, melhor o atendimento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O excesso de pessoas pode atrapalhar a organização e o socorro.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Curiosos são necessários para decidir o que fazer.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A presença de muitas pessoas reduz sempre o risco do local.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Nos primeiros socorros no trânsito, a regra “não agravar a situação” significa que o condutor deve evitar:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Evitar ações impulsivas é parte central do atendimento inicial responsável.",
+      "explicacaoDetalhada": "A boa intenção não substitui técnica. Em acidentes, muitas atitudes aparentemente úteis podem piorar lesões ou dificultar o socorro. A prioridade é proteção, observação, acionamento de ajuda e prudência na intervenção.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-004",
+      "alternativas": [
+        {
+          "texto": "Ações impulsivas e procedimentos improvisados sem necessidade.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Acionar ajuda especializada o quanto antes.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Manter o local protegido e organizado.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Conversar com calma com a vítima consciente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    }
+  ]
+}

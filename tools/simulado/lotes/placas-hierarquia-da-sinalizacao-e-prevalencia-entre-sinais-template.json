@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Hierarquia da sinalização e prevalência entre sinais",
+    "qtde": 5,
+    "referenciaOficial": "Portaria 923/2025 > Sinalização viária + Manuais de Sinalização",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Testar ordem de prevalência e leitura correta do contexto"
+  },
+  "questoes": [
+    {
+      "enunciado": "Preencher enunciado da questão 001 do lote PLACAS / Hierarquia da sinalização e prevalência entre sinais.",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Preencher explicação curta com a justificativa do gabarito.",
+      "explicacaoDetalhada": "Referência oficial base: Portaria 923/2025 > Sinalização viária + Manuais de Sinalização. Fonte exata: preencher trecho e página usados na questão.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-da-sinalizacao-e-prevalencia-entre-sinais-001",
+      "fingerprint": null,
+      "alternativas": [
+        { "texto": "Alternativa A", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Alternativa B", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Alternativa C", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Alternativa D", "imagemUrl": null, "ordem": 3, "correta": true }
+      ]
+    },
+    {
+      "enunciado": "Preencher enunciado da questão 002 do lote PLACAS / Hierarquia da sinalização e prevalência entre sinais.",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Preencher explicação curta com a justificativa do gabarito.",
+      "explicacaoDetalhada": "Referência oficial base: Portaria 923/2025 > Sinalização viária + Manuais de Sinalização. Fonte exata: preencher trecho e página usados na questão.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-da-sinalizacao-e-prevalencia-entre-sinais-002",
+      "fingerprint": null,
+      "alternativas": [
+        { "texto": "Alternativa A", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Alternativa B", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Alternativa C", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Alternativa D", "imagemUrl": null, "ordem": 3, "correta": true }
+      ]
+    },
+    {
+      "enunciado": "Preencher enunciado da questão 003 do lote PLACAS / Hierarquia da sinalização e prevalência entre sinais.",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Preencher explicação curta com a justificativa do gabarito.",
+      "explicacaoDetalhada": "Referência oficial base: Portaria 923/2025 > Sinalização viária + Manuais de Sinalização. Fonte exata: preencher trecho e página usados na questão.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-da-sinalizacao-e-prevalencia-entre-sinais-003",
+      "fingerprint": null,
+      "alternativas": [
+        { "texto": "Alternativa A", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Alternativa B", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Alternativa C", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Alternativa D", "imagemUrl": null, "ordem": 3, "correta": true }
+      ]
+    },
+    {
+      "enunciado": "Preencher enunciado da questão 004 do lote PLACAS / Hierarquia da sinalização e prevalência entre sinais.",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Preencher explicação curta com a justificativa do gabarito.",
+      "explicacaoDetalhada": "Referência oficial base: Portaria 923/2025 > Sinalização viária + Manuais de Sinalização. Fonte exata: preencher trecho e página usados na questão.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-da-sinalizacao-e-prevalencia-entre-sinais-004",
+      "fingerprint": null,
+      "alternativas": [
+        { "texto": "Alternativa A", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Alternativa B", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Alternativa C", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Alternativa D", "imagemUrl": null, "ordem": 3, "correta": true }
+      ]
+    },
+    {
+      "enunciado": "Preencher enunciado da questão 005 do lote PLACAS / Hierarquia da sinalização e prevalência entre sinais.",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Preencher explicação curta com a justificativa do gabarito.",
+      "explicacaoDetalhada": "Referência oficial base: Portaria 923/2025 > Sinalização viária + Manuais de Sinalização. Fonte exata: preencher trecho e página usados na questão.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-da-sinalizacao-e-prevalencia-entre-sinais-005",
+      "fingerprint": null,
+      "alternativas": [
+        { "texto": "Alternativa A", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Alternativa B", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Alternativa C", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Alternativa D", "imagemUrl": null, "ordem": 3, "correta": true }
+      ]
+    }
+  ]
+}

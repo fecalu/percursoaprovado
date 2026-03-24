@@ -1,0 +1,640 @@
+{
+  "meta": {
+    "tema": "MECANICA_BASICA",
+    "qtde": 15,
+    "lotes": [
+      {
+        "numero": 36,
+        "arquivo": "lote-036-mecanica-basica-pneus-calibragem-desgaste.json",
+        "subtema": "Pneus, calibragem e desgaste",
+        "qtde": 3
+      },
+      {
+        "numero": 37,
+        "arquivo": "lote-037-mecanica-basica-freios-suspensao-direcao.json",
+        "subtema": "Freios, suspensão e direção",
+        "qtde": 3
+      },
+      {
+        "numero": 38,
+        "arquivo": "lote-038-mecanica-basica-iluminacao-sinalizacao-veiculo.json",
+        "subtema": "Sistema de iluminação e sinalização do veículo",
+        "qtde": 3
+      },
+      {
+        "numero": 39,
+        "arquivo": "lote-039-mecanica-basica-manutencao-preventiva-verificacoes.json",
+        "subtema": "Manutenção preventiva e verificações de rotina",
+        "qtde": 3
+      },
+      {
+        "numero": 40,
+        "arquivo": "lote-040-mecanica-basica-equipamentos-obrigatorios-pane-simples.json",
+        "subtema": "Equipamentos obrigatórios e pane simples",
+        "qtde": 3
+      }
+    ]
+  },
+  "questoes": [
+    {
+      "enunciado": "Pneus em bom estado são importantes para a segurança porque influenciam diretamente:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Os pneus interferem na aderência, na estabilidade e na frenagem do veículo.",
+      "explicacaoDetalhada": "Os pneus são o ponto de contato entre o veículo e a via. Quando estão em boas condições, contribuem para melhor aderência, controle em curvas e frenagem mais segura. Desgaste excessivo compromete essas funções.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-pneus-001",
+      "alternativas": [
+        {
+          "texto": "Apenas o conforto dos passageiros.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A aderência, a estabilidade e a eficiência da frenagem.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente o consumo do rádio do veículo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Exclusivamente a aparência externa do automóvel.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A calibragem incorreta dos pneus pode trazer como consequência:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Calibragem inadequada afeta desgaste, controle e segurança do veículo.",
+      "explicacaoDetalhada": "Pneus com pressão acima ou abaixo do recomendado podem desgastar-se de forma irregular, alterar o comportamento do veículo e comprometer estabilidade e frenagem. Por isso, a calibragem deve seguir a orientação do fabricante.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-pneus-002",
+      "alternativas": [
+        {
+          "texto": "Melhora automática do desempenho em qualquer tipo de via.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Desgaste irregular e piora da dirigibilidade.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Eliminação total do risco de aquaplanagem.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Aumento garantido da vida útil dos pneus em qualquer situação.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em pista molhada, pneus muito desgastados representam risco maior porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O desgaste reduz a capacidade do pneu de manter contato seguro com a pista molhada.",
+      "explicacaoDetalhada": "Sulcos desgastados diminuem a capacidade de escoar água e reduzem a aderência do pneu. Em pista molhada, isso aumenta o risco de derrapagem e aquaplanagem, comprometendo o controle do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-pneus-003",
+      "alternativas": [
+        {
+          "texto": "Os sulcos deixam de ter importância quando a pista está molhada.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A capacidade de escoar água e manter aderência fica reduzida.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "O desgaste dos pneus só interfere em pista seca.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Pneus gastos melhoram a estabilidade em chuva intensa.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O sistema de freios deve estar sempre em boas condições porque é essencial para:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Freios em bom estado são fundamentais para reduzir velocidade e parar com segurança.",
+      "explicacaoDetalhada": "Freios eficientes permitem controlar a velocidade, responder a imprevistos e evitar colisões. Qualquer suspeita de falha deve ser tratada com seriedade, pois compromete diretamente a segurança viária.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-freios-001",
+      "alternativas": [
+        {
+          "texto": "Melhorar a aparência do veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir velocidade e parar o veículo com segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Tornar o motor mais potente.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Aumentar a capacidade do porta-malas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se o condutor notar que o veículo está puxando para um lado, isso pode indicar problema em componentes como:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Desvios na trajetória podem estar ligados a pneus, direção, alinhamento ou suspensão.",
+      "explicacaoDetalhada": "Quando o veículo não mantém trajetória regular, pode haver problema em diferentes sistemas que influenciam a dirigibilidade. Ignorar esse sinal é arriscado, porque o controle do veículo pode ficar comprometido.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-freios-002",
+      "alternativas": [
+        {
+          "texto": "Somente o rádio ou o ar-condicionado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Direção, alinhamento, pneus ou suspensão.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Exclusivamente a documentação do veículo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A pintura externa da carroceria.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Dirigir com falha perceptível nos freios, na direção ou na suspensão é perigoso porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Esses sistemas afetam diretamente o controle e a segurança do veículo.",
+      "explicacaoDetalhada": "Freios, direção e suspensão são sistemas centrais para a estabilidade, o controle e a resposta do veículo. Problemas neles elevam o risco de perda de controle, aumento da distância de parada e acidentes.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-freios-003",
+      "alternativas": [
+        {
+          "texto": "Essas falhas só atrapalham o conforto, não a segurança.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Comprometem o controle do veículo e a resposta em situações de risco.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "São irrelevantes em vias urbanas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Podem ser ignoradas se a velocidade for moderada.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O sistema de iluminação do veículo é importante para a segurança porque ajuda a:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Luzes em bom estado melhoram a visibilidade e a comunicação no trânsito.",
+      "explicacaoDetalhada": "Faróis, lanternas, luzes de freio e indicadores de direção ajudam o condutor a enxergar melhor e também a ser visto pelos demais usuários da via. Falhas nesse sistema aumentam riscos, principalmente à noite e em condições adversas.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-iluminacao-001",
+      "alternativas": [
+        {
+          "texto": "Apenas decorar o veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Melhorar a visibilidade e a sinalização da condução.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Diminuir o desgaste dos pneus.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir a necessidade de atenção do motorista.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Circular com luzes de freio ou setas sem funcionamento é uma situação indesejável porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem sinalização adequada, os demais condutores podem não entender a manobra pretendida.",
+      "explicacaoDetalhada": "Luzes de freio e indicadores de direção são formas essenciais de comunicação entre veículos. Quando não funcionam corretamente, aumentam o risco de colisões, especialmente em frenagens e mudanças de direção.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-iluminacao-002",
+      "alternativas": [
+        {
+          "texto": "Não há qualquer impacto relevante no trânsito.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Prejudica a comunicação da frenagem e das mudanças de direção.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só importa em veículos grandes.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Torna o motor menos econômico.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No contexto da mecânica básica, manter iluminação e sinalização do veículo em bom estado é uma forma de:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cuidar das luzes do veículo é medida preventiva de segurança viária.",
+      "explicacaoDetalhada": "A manutenção das luzes não é mero detalhe estético. Ela faz parte da prevenção de acidentes, porque favorece visibilidade, previsibilidade e comunicação segura entre todos os usuários da via.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-iluminacao-003",
+      "alternativas": [
+        {
+          "texto": "Apenas cumprir obrigação sem efeito real na circulação.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Prevenir riscos por meio de melhor visibilidade e comunicação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Compensar falhas do sistema de freios.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Eliminar a necessidade de usar retrovisores.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A manutenção preventiva do veículo é importante porque ajuda a:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Verificações regulares ajudam a identificar falhas antes que se tornem risco maior.",
+      "explicacaoDetalhada": "A manutenção preventiva reduz a chance de panes, melhora a confiabilidade do veículo e contribui para a segurança. Pequenos problemas detectados cedo podem ser corrigidos antes de causar acidentes ou imobilizações.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-manutencao-001",
+      "alternativas": [
+        {
+          "texto": "Evitar qualquer necessidade futura de abastecimento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Prevenir falhas e manter o veículo em condições seguras de uso.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Aumentar automaticamente a potência do motor.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Eliminar a necessidade de atenção do condutor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No uso cotidiano do veículo, fazer verificações básicas de rotina é uma atitude importante porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Checagens simples podem evitar que pequenos defeitos evoluam para situações perigosas.",
+      "explicacaoDetalhada": "Observar itens básicos, como estado visual dos pneus, funcionamento das luzes e sinais aparentes de anormalidade, ajuda a perceber cedo alterações que podem comprometer a segurança e o desempenho do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-manutencao-002",
+      "alternativas": [
+        {
+          "texto": "Essas verificações só importam antes de viagens muito longas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Permitem identificar sinais de problema antes que se agravem.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituem totalmente a manutenção preventiva.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Servem apenas para melhorar a estética do automóvel.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A lógica da manutenção preventiva é mais próxima de:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Manutenção preventiva age antes da falha, reduzindo risco e surpresa.",
+      "explicacaoDetalhada": "A proposta da manutenção preventiva não é esperar o defeito aparecer em situação crítica, mas identificar e corrigir desgastes ou anormalidades antes que eles comprometam a segurança e o funcionamento do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-manutencao-003",
+      "alternativas": [
+        {
+          "texto": "Corrigir apenas quando o veículo já parou de funcionar.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Antecipar cuidados para evitar falhas e riscos.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Consertar somente o que afeta a aparência externa.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Evitar qualquer inspeção técnica no veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Os equipamentos obrigatórios do veículo têm importância porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles contribuem para a segurança e para a regularidade da circulação.",
+      "explicacaoDetalhada": "Equipamentos obrigatórios não existem apenas por exigência formal. Eles têm função relacionada à segurança, à sinalização e à adequação do veículo para circular dentro das regras.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-equipamentos-001",
+      "alternativas": [
+        {
+          "texto": "Servem somente para encarecer a manutenção.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Relacionam-se à segurança e à circulação regular do veículo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "São úteis apenas em viagens interestaduais.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Têm valor apenas estético.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em caso de pane simples durante a circulação, uma atitude prudente do condutor é:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pane exige prioridade à segurança do local e do veículo.",
+      "explicacaoDetalhada": "Se o veículo apresentar pane, o condutor deve agir para reduzir o risco da situação: posicionar-se com segurança, sinalizar adequadamente e buscar solução sem improvisos perigosos nem exposição desnecessária ao tráfego.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-equipamentos-002",
+      "alternativas": [
+        {
+          "texto": "Abandonar o veículo imediatamente, sem qualquer cuidado com o local.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Sinalizar e priorizar a segurança antes de qualquer providência técnica.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Continuar rodando até encontrar oficina, mesmo com risco evidente.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Empurrar o veículo sem observar o fluxo da via.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A melhor relação entre mecânica básica e segurança viária é entender que:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conhecimentos básicos ajudam o condutor a perceber riscos mecânicos e agir preventivamente.",
+      "explicacaoDetalhada": "Mecânica básica, no contexto da formação do condutor, não busca formar um reparador, mas permitir percepção mínima de anormalidades, importância da manutenção e condutas seguras diante de equipamentos e panes simples.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-equipamentos-003",
+      "alternativas": [
+        {
+          "texto": "Mecânica básica é irrelevante para a segurança do condutor comum.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Conhecimentos básicos ajudam a prevenir riscos e a reagir com prudência.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só mecânicos profissionais precisam compreender panes simples.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Basta saber dirigir; o estado do veículo não interfere na segurança.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Sinalização horizontal: marcas longitudinais e transversais",
+    "qtde": 6,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume IV - Sinalização Horizontal",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre leitura prática das marcas horizontais da via."
+  },
+  "questoes": [
+    {
+      "enunciado": "As marcas longitudinais pintadas na pista servem principalmente para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas organizam o fluxo e separam sentidos ou faixas de circulação.",
+      "explicacaoDetalhada": "A sinalização horizontal longitudinal orienta o posicionamento dos veículos, a separação de fluxos e a possibilidade ou não de determinados deslocamentos laterais na via.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-001",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-001",
+      "alternativas": [
+        { "texto": "Indicar serviços de apoio ao usuário.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Organizar a ocupação da pista e separar fluxos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir todas as placas da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Autorizar o uso livre do acostamento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em regra, uma linha seccionada na divisão de faixas indica que a mudança de faixa:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A linha seccionada admite transposição, desde que a manobra seja segura e permitida no contexto.",
+      "explicacaoDetalhada": "A seccionada permite cruzamento ou mudança de faixa, mas isso não elimina o dever de observar tráfego, sinalização complementar e segurança da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-002",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-002",
+      "alternativas": [
+        { "texto": "Pode ser feita quando houver segurança para isso.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Nunca pode ser feita em hipótese alguma.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Só é permitida para motocicletas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dispensa o uso da seta indicadora.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Linha longitudinal contínua em área onde ela separa fluxos ou faixas deve ser interpretada como:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A linha contínua indica maior restrição à transposição, exigindo permanência na faixa.",
+      "explicacaoDetalhada": "Esse tipo de marca visa evitar cruzamentos ou mudanças laterais em trechos de risco. Por isso, a transposição não deve ser feita, salvo situações legalmente excepcionais.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-003",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-003",
+      "alternativas": [
+        { "texto": "Sinal de permissão para ultrapassagem mais rápida.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Restrição à transposição da linha.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Orientação meramente decorativa da pista.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Indício de que a pista é exclusiva para carga.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A linha de retenção pintada antes do cruzamento ou do semáforo indica o ponto em que o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A linha de retenção marca o local correto para imobilização do veículo quando necessário.",
+      "explicacaoDetalhada": "Ela organiza a parada do fluxo e protege áreas como faixa de pedestres e cruzamentos. Em situação de parada obrigatória, o veículo deve ser mantido antes dessa linha.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-004",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-004",
+      "alternativas": [
+        { "texto": "Parar o veículo quando a situação exigir imobilização.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Acelerar para cruzar antes dos demais.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Parar somente se houver agente de trânsito presente.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Posicionar o veículo sobre a faixa de pedestres.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Setas pintadas na pista indicam ao condutor principalmente:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As setas orientam o movimento permitido ou recomendado para a faixa.",
+      "explicacaoDetalhada": "Elas ajudam na distribuição do tráfego e no posicionamento correto do veículo antes de conversões ou divisões da via. Devem ser observadas em conjunto com a demais sinalização.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-005",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-005",
+      "alternativas": [
+        { "texto": "A direção ou movimento correspondente daquela faixa.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "A velocidade máxima da via.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "A localização de serviços de apoio.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A prioridade de passagem do pedestre sobre a calçada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta da sinalização horizontal exige que o condutor:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A interpretação deve considerar a função da marca no fluxo e a segurança da manobra pretendida.",
+      "explicacaoDetalhada": "Marcas no pavimento não são meros complementos visuais. Elas estruturam o uso do espaço viário e precisam ser interpretadas junto com a via, o tráfego e a sinalização vertical existente.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-006",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-006",
+      "alternativas": [
+        { "texto": "Observe apenas placas verticais, ignorando o pavimento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Considere a função da marca no fluxo e adapte sua conduta.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Desconsidere as marcas se a pista estiver com pouco movimento.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Use a faixa central sempre que a pista estiver livre.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

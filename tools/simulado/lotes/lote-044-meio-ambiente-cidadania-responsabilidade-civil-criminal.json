@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "MEIO_AMBIENTE_CIDADANIA",
+    "subtema": "Cidadania, responsabilidade civil e criminal do condutor",
+    "qtde": 5,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Meio ambiente e convívio social",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre consequências da conduta do motorista para si, para terceiros e para a coletividade."
+  },
+  "questoes": [
+    {
+      "enunciado": "A responsabilidade do condutor no trânsito não é apenas pessoal, porque suas ações podem:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A condução afeta a segurança, o patrimônio e a vida de outras pessoas.",
+      "explicacaoDetalhada": "Dirigir não é um ato isolado. As escolhas do condutor podem causar danos físicos, materiais e sociais a terceiros, o que justifica a ideia de responsabilidade no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-001",
+      "alternativas": [
+        { "texto": "Atingir apenas quem está dentro do próprio veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Gerar consequências para terceiros e para a coletividade.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Produzir efeitos somente administrativos e nunca humanos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Deixar de ter relevância quando o veículo está regularizado.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A ideia de responsabilidade civil e criminal no trânsito reforça que o condutor deve:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conduzir exige consciência das consequências jurídicas e humanas dos próprios atos.",
+      "explicacaoDetalhada": "Além de regras de circulação, o trânsito envolve responsabilidade por danos e por condutas graves. Essa noção reforça a importância de dirigir com prudência, respeito e consciência das consequências de uma ação imprudente.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-002",
+      "alternativas": [
+        { "texto": "Desconsiderar os efeitos de sua conduta sobre outras pessoas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Dirigir sabendo que suas ações podem gerar consequências amplas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Acreditar que a intenção elimina qualquer consequência.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Preocupar-se apenas com o estado do próprio veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista da cidadania no trânsito, causar dano a outra pessoa por imprudência é relevante porque:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A imprudência pode gerar danos humanos, materiais e consequências jurídicas.",
+      "explicacaoDetalhada": "O trânsito envolve dever de cuidado. Quando esse dever é violado por imprudência, os efeitos podem alcançar vidas, patrimônio, confiança social e também a esfera de responsabilidade do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-003",
+      "alternativas": [
+        { "texto": "É problema apenas da vítima, sem relação com o dever do motorista.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A imprudência pode gerar danos e consequências para o condutor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Não há relevância se o motorista não tiver intenção de ferir.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Só importa quando há grande prejuízo material.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A responsabilidade cidadã do motorista começa:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela não começa só no acidente; começa antes, na forma de conduzir.",
+      "explicacaoDetalhada": "Responsabilidade no trânsito não surge apenas depois de um dano. Ela existe desde o momento em que o condutor assume o volante, porque cada decisão tomada pode proteger ou expor outras pessoas a risco.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-004",
+      "alternativas": [
+        { "texto": "Somente após a ocorrência de um acidente grave.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Desde o início da condução, pelas escolhas feitas no trânsito.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas quando há fiscalização policial.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Somente em viagens longas e interestaduais.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em educação para o trânsito, falar em responsabilidade civil e criminal do condutor serve para:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O tema reforça a seriedade dos deveres assumidos ao conduzir um veículo.",
+      "explicacaoDetalhada": "O objetivo não é apenas intimidar o condutor, mas desenvolver consciência de que dirigir envolve deveres éticos, sociais e legais. As consequências da imprudência podem ser amplas e duradouras.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-005",
+      "alternativas": [
+        { "texto": "Transformar o trânsito em disputa entre condutores e Estado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Mostrar que dirigir envolve deveres e consequências reais.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir a necessidade de direção defensiva.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Reduzir a importância da cidadania no trânsito.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Hierarquia da sinalização e prevalência entre sinais",
+    "qtde": 5,
+    "referenciaOficial": "CTB art. 89 + Portaria 923/2025 > Sinalização viária",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral inicial sobre ordem de prevalência da sinalização e leitura correta do contexto."
+  },
+  "questoes": [
+    {
+      "enunciado": "Em um cruzamento urbano, um agente de trânsito determina que os veículos sigam em frente, mesmo com o semáforo vermelho. Nessa situação, o condutor deve obedecer:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As ordens do agente de trânsito prevalecem sobre o semáforo e sobre os demais sinais.",
+      "explicacaoDetalhada": "O CTB estabelece ordem de prevalência da sinalização. Em primeiro lugar vem a ordem do agente de trânsito. Por isso, quando houver orientação expressa do agente, ela deve ser seguida mesmo que o semáforo ou outro sinal indique algo diferente.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-001",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-001",
+      "alternativas": [
+        { "texto": "As placas de regulamentação instaladas no cruzamento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O semáforo, porque a luz vermelha sempre prevalece.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "A ordem do agente de trânsito.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "A regra geral de parar e aguardar o semáforo abrir.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando o semáforo está funcionando normalmente e não há agente de trânsito no local, suas indicações prevalecem sobre:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As indicações do semáforo prevalecem sobre os demais sinais e sobre as regras gerais, desde que não haja ordem de agente.",
+      "explicacaoDetalhada": "Na hierarquia da sinalização, o semáforo vem logo abaixo da ordem do agente de trânsito. Assim, quando ele estiver operando regularmente, suas indicações prevalecem sobre placas, marcas viárias e regras gerais de circulação incompatíveis com a situação mostrada.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-002",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-002",
+      "alternativas": [
+        { "texto": "Somente sobre a sinalização horizontal.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Os demais sinais de trânsito, quando não houver agente de trânsito determinando outra conduta.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas sobre placas de advertência, mas não sobre placas de regulamentação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Nenhum outro elemento, porque o semáforo apenas complementa a sinalização.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Um condutor encontra uma placa de parada obrigatória, mas um agente de trânsito, visivelmente uniformizado, faz gesto permitindo a passagem. Qual deve ser a conduta correta?",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A orientação do agente prevalece sobre a placa, desde que o gesto esteja claro e seja seguro prosseguir.",
+      "explicacaoDetalhada": "Placas de regulamentação transmitem ordens imperativas, mas não superam a ordem do agente de trânsito. Se o agente libera a passagem de forma clara, cabe ao condutor segui-la com atenção, porque a ordem do agente ocupa o nível mais alto de prevalência na sinalização.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-003",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-003",
+      "alternativas": [
+        { "texto": "Parar obrigatoriamente e ignorar o gesto do agente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Obedecer ao agente e prosseguir com cautela.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aguardar o surgimento de outro veículo para decidir.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Acionar o pisca-alerta e manter o veículo parado até o agente repetir o gesto.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se não houver agente de trânsito nem semáforo operando no local, a indicação de uma placa de regulamentação deve prevalecer sobre:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Na ausência de agente e semáforo, os sinais de trânsito prevalecem sobre as demais normas gerais de circulação.",
+      "explicacaoDetalhada": "A ordem de prevalência da sinalização coloca os sinais logo abaixo do semáforo. Assim, quando não houver agente nem indicação semafórica, a placa ou outro sinal deve ser obedecido antes da aplicação das regras gerais abstratas de circulação.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-004",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-004",
+      "alternativas": [
+        { "texto": "A opinião dos demais condutores sobre quem deve passar primeiro.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Somente a sinalização horizontal, e nunca as regras gerais.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "As demais normas gerais de trânsito aplicáveis ao caso.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Qualquer decisão do condutor, desde que reduza a velocidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em uma via, o semáforo está intermitente amarelo e não há agente de trânsito. Nessa situação, o condutor deve agir principalmente com base:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem ordem de agente, o condutor deve respeitar a sinalização existente e aplicar as regras gerais com cautela, pois o amarelo intermitente indica atenção.",
+      "explicacaoDetalhada": "O amarelo intermitente não funciona como liberação irrestrita. Sem agente no local, o condutor deve reduzir a velocidade, redobrar a atenção e observar a sinalização instalada e as regras de circulação aplicáveis ao cruzamento. A conduta correta depende da combinação entre a advertência do semáforo e os demais sinais presentes.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-005",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-005",
+      "alternativas": [
+        { "texto": "Na ideia de que o amarelo intermitente sempre equivale a via livre.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Na observação da sinalização presente e das regras gerais, com atenção redobrada.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Na prioridade absoluta do veículo maior sobre os demais.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Na obrigação de parar e aguardar um agente para orientar o tráfego.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

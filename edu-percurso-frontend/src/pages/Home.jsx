@@ -131,7 +131,7 @@ export default function Home() {
   }, [planos])
 
   return (
-    <div className="landing-page landing-page--eager">
+    <div className="landing-page landing-page--eager landing-page--home">
       <section className="landing-topbar fade-in">
         <Link className="landing-topbar-brand" to="/">
           <BrandLogo variant="landing" showTagline />

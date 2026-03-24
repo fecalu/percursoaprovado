@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "MEIO_AMBIENTE_CIDADANIA",
+    "subtema": "Comportamento solidário e ética no trânsito",
+    "qtde": 5,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Meio ambiente e convívio social",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre ética, empatia e cooperação entre usuários da via."
+  },
+  "questoes": [
+    {
+      "enunciado": "Comportamento solidário no trânsito pode ser entendido como:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Solidariedade no trânsito significa agir considerando a segurança e a dignidade dos outros.",
+      "explicacaoDetalhada": "A solidariedade aparece em atitudes como paciência, cooperação, ajuda responsável e respeito aos usuários mais vulneráveis. Ela se opõe à lógica da hostilidade e da competição desnecessária.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-001",
+      "alternativas": [
+        { "texto": "Apenas permitir que outros veículos passem na frente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Agir com cooperação e respeito à segurança dos demais.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Evitar toda interação com outros usuários da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dirigir mais devagar apenas quando houver fiscalização.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A ética no trânsito se manifesta quando o condutor:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ética no trânsito envolve coerência entre regra, respeito e cuidado com o outro.",
+      "explicacaoDetalhada": "Agir eticamente no trânsito não é apenas evitar punição, mas reconhecer o valor da vida e do espaço compartilhado. Isso inclui honestidade de conduta, autocontrole e responsabilidade nas escolhas.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-002",
+      "alternativas": [
+        { "texto": "Cumpre regras apenas quando teme ser multado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Age corretamente mesmo quando não há fiscalização imediata.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Coloca o próprio interesse acima de qualquer impacto sobre terceiros.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usa a vantagem do veículo para intimidar quem é mais frágil.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao perceber dificuldade de outro usuário da via, uma resposta solidária e segura pode ser:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Solidariedade no trânsito deve ser compatível com segurança e prudência.",
+      "explicacaoDetalhada": "Ajudar no trânsito não significa agir de forma improvisada ou insegura. A conduta solidária adequada é aquela que respeita regras, preserva a segurança e facilita a convivência sem criar novo risco.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-003",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para sair logo da situação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Adotar conduta cooperativa sem comprometer a segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ignorar o problema por não ser responsabilidade do condutor.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Parar de qualquer forma no meio da via para ajudar.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A ética no trânsito é incompatível com a ideia de que:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A lógica do “cada um por si” enfraquece a segurança coletiva.",
+      "explicacaoDetalhada": "O trânsito exige convivência cooperativa. Quando o condutor entende a via apenas como espaço de vantagem individual, desconsidera o valor da vida, do respeito e da responsabilidade compartilhada.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-004",
+      "alternativas": [
+        { "texto": "A segurança é construída coletivamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O espaço viário deve ser compartilhado com respeito.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Vale tudo para atender ao interesse individual do motorista.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "A vulnerabilidade do outro deve ser considerada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No trânsito, solidariedade e ética são importantes porque ajudam a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Esses valores fortalecem a segurança e a confiança entre os usuários da via.",
+      "explicacaoDetalhada": "Quando o trânsito é vivido com cooperação, empatia e responsabilidade, há menos conflito, menos agressividade e mais proteção à vida. Ética e solidariedade não são acessórios; são parte da segurança viária.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-005",
+      "alternativas": [
+        { "texto": "Transformar a circulação em disputa permanente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Fortalecer uma convivência mais segura e humana.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Reduzir a importância das regras de trânsito.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir a necessidade de atenção e prudência.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

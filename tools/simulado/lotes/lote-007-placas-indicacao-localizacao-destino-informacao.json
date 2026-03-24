@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Placas de indicação: localização, destino e informação",
+    "qtde": 4,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume III - Sinalização Vertical de Indicação",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre leitura de localização e destino."
+  },
+  "questoes": [
+    {
+      "enunciado": "Placas com nomes de cidades, bairros, saídas ou rodovias ajudam o condutor a:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Essas placas orientam o destino e a localização do usuário ao longo do trajeto.",
+      "explicacaoDetalhada": "Elas facilitam a navegação e permitem que a decisão de faixa, acesso ou permanência na rota seja feita com antecedência, reduzindo manobras de última hora.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-001",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-001",
+      "alternativas": [
+        { "texto": "Aplicar regra de parada obrigatória.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Identificar destinos e organizar a navegação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Advertir sobre risco imediato de colisão.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Permitir desobedecer à sinalização horizontal.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A principal vantagem da sinalização de destino colocada com antecedência é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela permite preparação antecipada da manobra, com mais segurança.",
+      "explicacaoDetalhada": "Quando o condutor recebe a informação antes do ponto de conversão ou acesso, ele pode mudar de faixa ou ajustar a velocidade com antecedência, evitando movimentos bruscos e inseguros.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-002",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-002",
+      "alternativas": [
+        { "texto": "Autorizar retorno em qualquer local da via.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Permitir planejamento antecipado da manobra.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir a necessidade de observar a via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Definir a prioridade de quem vem em sentido contrário.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando a placa informa que determinada faixa leva a um destino específico, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A informação de faixa orienta o posicionamento correto do veículo para seguir ao destino desejado.",
+      "explicacaoDetalhada": "A leitura da placa deve ser usada para planejar o posicionamento do veículo com antecedência, evitando cortes bruscos de faixa e indecisões próximas ao ponto de conversão.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-003",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-003",
+      "alternativas": [
+        { "texto": "Permanecer em qualquer faixa e decidir no último momento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Posicionar-se previamente na faixa indicada para o destino.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar o acostamento se perder a faixa correta.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Parar sobre a pista para confirmar a direção.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, placas de localização e destino reduzem o risco de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Boa orientação reduz manobras repentinas e escolhas tardias de trajeto.",
+      "explicacaoDetalhada": "Quando o condutor sabe com clareza onde está e para onde deve seguir, tende a dirigir com mais previsibilidade. Isso reduz mudanças bruscas de faixa, frenagens inesperadas e conversões tardias.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-004",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-004",
+      "alternativas": [
+        { "texto": "Desgaste dos pneus em pista molhada.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Manobras repentinas por falta de orientação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Falhas mecânicas do sistema de freio.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Oscilação de combustível no tanque do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2682 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "qtde": 65,
+    "lotes": [
+      {
+        "numero": 1,
+        "arquivo": "lote-001-placas-hierarquia-sinalizacao.json",
+        "subtema": "Hierarquia da sinalização e prevalência entre sinais",
+        "qtde": 5
+      },
+      {
+        "numero": 2,
+        "arquivo": "lote-002-placas-regulamentacao-identificacao-pratica.json",
+        "subtema": "Placas de regulamentação: identificação e sentido prático",
+        "qtde": 7
+      },
+      {
+        "numero": 3,
+        "arquivo": "lote-003-placas-regulamentacao-obrigacao-restricao.json",
+        "subtema": "Placas de regulamentação: proibição, obrigação e restrição",
+        "qtde": 6
+      },
+      {
+        "numero": 4,
+        "arquivo": "lote-004-placas-advertencia-risco-prevencao.json",
+        "subtema": "Placas de advertência: risco e prevenção",
+        "qtde": 8
+      },
+      {
+        "numero": 5,
+        "arquivo": "lote-005-placas-advertencia-contexto.json",
+        "subtema": "Placas de advertência: interpretação em contexto",
+        "qtde": 6
+      },
+      {
+        "numero": 6,
+        "arquivo": "lote-006-placas-indicacao-orientacao-servicos-apoio.json",
+        "subtema": "Placas de indicação: orientação, serviços e apoio",
+        "qtde": 6
+      },
+      {
+        "numero": 7,
+        "arquivo": "lote-007-placas-indicacao-localizacao-destino-informacao.json",
+        "subtema": "Placas de indicação: localização, destino e informação",
+        "qtde": 4
+      },
+      {
+        "numero": 8,
+        "arquivo": "lote-008-placas-horizontal-marcas-longitudinais-transversais.json",
+        "subtema": "Sinalização horizontal: marcas longitudinais e transversais",
+        "qtde": 6
+      },
+      {
+        "numero": 9,
+        "arquivo": "lote-009-placas-horizontal-faixa-retencao-canalizacao.json",
+        "subtema": "Sinalização horizontal: faixa de pedestre, retenção e canalização",
+        "qtde": 3
+      },
+      {
+        "numero": 10,
+        "arquivo": "lote-010-placas-semaforica-veiculos-pedestres.json",
+        "subtema": "Sinalização semafórica para veículos e pedestres",
+        "qtde": 5
+      },
+      {
+        "numero": 11,
+        "arquivo": "lote-011-placas-dispositivos-auxiliares-temporaria.json",
+        "subtema": "Dispositivos auxiliares e sinalização temporária",
+        "qtde": 6
+      },
+      {
+        "numero": 12,
+        "arquivo": "lote-012-placas-cicloviaria-rodoferroviarios.json",
+        "subtema": "Sinalização cicloviária e cruzamentos rodoferroviários",
+        "qtde": 3
+      }
+    ]
+  },
+  "questoes": [
+    {
+      "enunciado": "Em um cruzamento urbano, um agente de trânsito determina que os veículos sigam em frente, mesmo com o semáforo vermelho. Nessa situação, o condutor deve obedecer:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As ordens do agente de trânsito prevalecem sobre o semáforo e sobre os demais sinais.",
+      "explicacaoDetalhada": "O CTB estabelece ordem de prevalência da sinalização. Em primeiro lugar vem a ordem do agente de trânsito. Por isso, quando houver orientação expressa do agente, ela deve ser seguida mesmo que o semáforo ou outro sinal indique algo diferente.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-001",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-001",
+      "alternativas": [
+        {
+          "texto": "As placas de regulamentação instaladas no cruzamento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O semáforo, porque a luz vermelha sempre prevalece.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "A ordem do agente de trânsito.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "A regra geral de parar e aguardar o semáforo abrir.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando o semáforo está funcionando normalmente e não há agente de trânsito no local, suas indicações prevalecem sobre:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As indicações do semáforo prevalecem sobre os demais sinais e sobre as regras gerais, desde que não haja ordem de agente.",
+      "explicacaoDetalhada": "Na hierarquia da sinalização, o semáforo vem logo abaixo da ordem do agente de trânsito. Assim, quando ele estiver operando regularmente, suas indicações prevalecem sobre placas, marcas viárias e regras gerais de circulação incompatíveis com a situação mostrada.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-002",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-002",
+      "alternativas": [
+        {
+          "texto": "Somente sobre a sinalização horizontal.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Os demais sinais de trânsito, quando não houver agente de trânsito determinando outra conduta.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas sobre placas de advertência, mas não sobre placas de regulamentação.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Nenhum outro elemento, porque o semáforo apenas complementa a sinalização.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Um condutor encontra uma placa de parada obrigatória, mas um agente de trânsito, visivelmente uniformizado, faz gesto permitindo a passagem. Qual deve ser a conduta correta?",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A orientação do agente prevalece sobre a placa, desde que o gesto esteja claro e seja seguro prosseguir.",
+      "explicacaoDetalhada": "Placas de regulamentação transmitem ordens imperativas, mas não superam a ordem do agente de trânsito. Se o agente libera a passagem de forma clara, cabe ao condutor segui-la com atenção, porque a ordem do agente ocupa o nível mais alto de prevalência na sinalização.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-003",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-003",
+      "alternativas": [
+        {
+          "texto": "Parar obrigatoriamente e ignorar o gesto do agente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Obedecer ao agente e prosseguir com cautela.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Aguardar o surgimento de outro veículo para decidir.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Acionar o pisca-alerta e manter o veículo parado até o agente repetir o gesto.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se não houver agente de trânsito nem semáforo operando no local, a indicação de uma placa de regulamentação deve prevalecer sobre:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Na ausência de agente e semáforo, os sinais de trânsito prevalecem sobre as demais normas gerais de circulação.",
+      "explicacaoDetalhada": "A ordem de prevalência da sinalização coloca os sinais logo abaixo do semáforo. Assim, quando não houver agente nem indicação semafórica, a placa ou outro sinal deve ser obedecido antes da aplicação das regras gerais abstratas de circulação.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-004",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-004",
+      "alternativas": [
+        {
+          "texto": "A opinião dos demais condutores sobre quem deve passar primeiro.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Somente a sinalização horizontal, e nunca as regras gerais.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "As demais normas gerais de trânsito aplicáveis ao caso.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Qualquer decisão do condutor, desde que reduza a velocidade.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em uma via, o semáforo está intermitente amarelo e não há agente de trânsito. Nessa situação, o condutor deve agir principalmente com base:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem ordem de agente, o condutor deve respeitar a sinalização existente e aplicar as regras gerais com cautela, pois o amarelo intermitente indica atenção.",
+      "explicacaoDetalhada": "O amarelo intermitente não funciona como liberação irrestrita. Sem agente no local, o condutor deve reduzir a velocidade, redobrar a atenção e observar a sinalização instalada e as regras de circulação aplicáveis ao cruzamento. A conduta correta depende da combinação entre a advertência do semáforo e os demais sinais presentes.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-hierarquia-sinalizacao-005",
+      "fingerprint": "base-propria-oficial-placas-hierarquia-005",
+      "alternativas": [
+        {
+          "texto": "Na ideia de que o amarelo intermitente sempre equivale a via livre.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Na observação da sinalização presente e das regras gerais, com atenção redobrada.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Na prioridade absoluta do veículo maior sobre os demais.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Na obrigação de parar e aguardar um agente para orientar o tráfego.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A principal função de uma placa de regulamentação no trânsito é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Placas de regulamentação comunicam obrigações, proibições ou restrições que devem ser obedecidas.",
+      "explicacaoDetalhada": "No sistema brasileiro de sinalização, as placas de regulamentação estabelecem condutas obrigatórias ou restrições objetivas ao condutor. Elas não servem apenas para orientar: elas determinam o comportamento exigido no trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-001",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-001",
+      "alternativas": [
+        {
+          "texto": "Orientar sobre pontos turísticos da região.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Determinar obrigações, proibições ou restrições de circulação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas sugerir a melhor forma de conduzir o veículo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Informar serviços de apoio ao usuário da via.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando uma placa de regulamentação impõe determinada conduta ao condutor, o descumprimento dessa ordem pode gerar:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O desrespeito à placa de regulamentação pode configurar infração de trânsito.",
+      "explicacaoDetalhada": "Como a placa de regulamentação traduz uma determinação legal de circulação, seu descumprimento não é mera desatenção. Dependendo do caso, ele caracteriza infração prevista no CTB.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-002",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-002",
+      "alternativas": [
+        {
+          "texto": "Somente uma advertência verbal sem efeito legal.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Apenas orientação educativa, sem qualquer consequência.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Infração de trânsito, conforme a regra desrespeitada.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Multa apenas se houver acidente no local.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao se deparar com uma placa de regulamentação, o condutor deve entendê-la como:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A placa de regulamentação tem caráter imperativo, e não apenas informativo.",
+      "explicacaoDetalhada": "O valor prático da placa de regulamentação é ordenar a conduta na via. Por isso, ela deve ser interpretada como sinal de cumprimento obrigatório, salvo quando houver ordem superior de agente ou semáforo aplicável.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-003",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-003",
+      "alternativas": [
+        {
+          "texto": "Uma recomendação facultativa.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Um aviso de serviço ou apoio na via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Um comando de observância obrigatória.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Uma orientação válida apenas para motoristas profissionais.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Placas que indicam limite máximo de velocidade são exemplos de sinalização de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Limites obrigatórios de velocidade são veiculados por placas de regulamentação.",
+      "explicacaoDetalhada": "Quando a via fixa velocidade máxima permitida, essa ordem é comunicada por sinalização de regulamentação. Ela cria um limite objetivo a ser respeitado pelo condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-004",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-004",
+      "alternativas": [
+        {
+          "texto": "Advertência.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Regulamentação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Indicação.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Orientação turística.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma placa de regulamentação pode ser entendida como o meio pelo qual o poder público:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela materializa uma regra de uso da via que deve ser seguida pelos usuários.",
+      "explicacaoDetalhada": "A placa de regulamentação não tem função decorativa. Ela transmite de forma visual uma regra específica de circulação, tornando objetiva a conduta exigida do condutor naquele ponto da via.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-005",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-005",
+      "alternativas": [
+        {
+          "texto": "Sugere trajetos opcionais para reduzir congestionamentos.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Materializa uma regra de uso da via a ser obedecida.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Comunica apenas localização geográfica e destino.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substitui a necessidade de atenção do condutor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se uma placa de regulamentação restringe determinado movimento, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Movimento restringido por regulamentação não pode ser realizado naquele ponto da via.",
+      "explicacaoDetalhada": "A restrição indicada pela placa existe para organizar o fluxo e proteger a segurança. Por isso, o condutor deve adequar sua manobra à ordem sinalizada, ainda que o movimento pareça conveniente no momento.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-006",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-006",
+      "alternativas": [
+        {
+          "texto": "Cumprir a restrição, planejando outra manobra permitida.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Executar o movimento se não houver outros veículos próximos.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Ignorar a placa quando estiver com pressa.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Solicitar passagem com a buzina e seguir normalmente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta de uma placa de regulamentação exige do condutor principalmente:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve entender o efeito prático da regra sobre sua conduta imediata.",
+      "explicacaoDetalhada": "Mais do que reconhecer a existência da placa, o condutor precisa compreender qual comportamento concreto ela impõe ou proíbe. Essa leitura funcional é essencial para aplicar corretamente a sinalização no contexto da via.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-007",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-007",
+      "alternativas": [
+        {
+          "texto": "Memorizar apenas suas cores e formatos, sem pensar na conduta.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Entender qual comportamento ela exige ou restringe no local.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Esperar a orientação de outro condutor para decidir.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Aplicar a regra somente se o tráfego estiver intenso.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma placa que indique sentido obrigatório em determinado ponto da via significa que o condutor:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em sentido obrigatório, o movimento indicado deve ser seguido pelo condutor.",
+      "explicacaoDetalhada": "A sinalização de sentido obrigatório organiza o fluxo e evita conflitos no cruzamento ou trecho da via. Ela não recomenda: ela determina a direção de deslocamento permitida ao condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-001",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-001",
+      "alternativas": [
+        {
+          "texto": "Pode escolher qualquer direção, desde que sinalize a manobra.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Deve seguir o sentido determinado pela placa.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só precisa obedecer se houver semáforo no local.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Pode contrariar a placa se estiver em via pouco movimentada.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando a placa indica proibição de conversão em um cruzamento, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conversão proibida não pode ser realizada naquele ponto, devendo o condutor buscar alternativa permitida.",
+      "explicacaoDetalhada": "A proibição de conversão existe para reduzir riscos, conflitos ou inadequações do fluxo. O correto é continuar pela rota permitida e procurar local adequado para manobra regular.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-002",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-002",
+      "alternativas": [
+        {
+          "texto": "Realizar a conversão rapidamente, para não atrapalhar o tráfego.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Ignorar a restrição se a via estiver livre.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Respeitar a placa e seguir por movimento permitido.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Parar no cruzamento e aguardar autorização dos demais motoristas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Placas de restrição de altura, largura ou peso servem para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas limitam a passagem de veículos que excedam as dimensões ou carga indicadas.",
+      "explicacaoDetalhada": "Esse tipo de regulamentação protege a infraestrutura da via e a segurança da circulação. Veículos fora do limite informado não devem prosseguir naquele acesso ou trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-003",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-003",
+      "alternativas": [
+        {
+          "texto": "Informar apenas a largura estimada da pista, sem efeito obrigatório.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Permitir a passagem de qualquer veículo mais pesado, desde que em baixa velocidade.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Restringir a circulação de veículos acima do limite indicado.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Orientar a melhor faixa para veículos grandes.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se a via possui placa determinando circulação exclusiva para uma categoria de veículo, os demais usuários devem:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Faixa ou via exclusiva cria restrição para os demais veículos, salvo exceções legais.",
+      "explicacaoDetalhada": "A exclusividade existe para disciplinar o uso do espaço viário. Portanto, quem não se enquadra na categoria autorizada deve evitar aquele trecho, respeitando a destinação sinalizada.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-004",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-004",
+      "alternativas": [
+        {
+          "texto": "Usar normalmente o espaço, desde que por curto período.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Respeitar a exclusividade e não ocupar o espaço indevidamente.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Entrar no trecho somente para ultrapassar outro veículo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Circular no local se estiver abaixo da velocidade da via.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma placa de velocidade mínima, quando existente, tem o objetivo de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela evita circulação excessivamente lenta que comprometa a fluidez e a segurança, quando as condições permitirem.",
+      "explicacaoDetalhada": "Assim como a velocidade máxima, a velocidade mínima integra a regulação do fluxo. O condutor deve mantê-la quando as condições da via, do veículo e do tráfego permitirem com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-005",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-005",
+      "alternativas": [
+        {
+          "texto": "Obrigar o condutor a acelerar mesmo em situação de risco.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Sugerir velocidade ideal sem caráter obrigatório.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Fixar referência abaixo da qual a circulação não deve ocorrer sem justificativa.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Indicar a velocidade média do trecho para fins estatísticos.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao encontrar uma placa que proíbe determinado acesso, a melhor interpretação é que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acesso está vedado naquele ponto, ainda que pareça momentaneamente seguro entrar.",
+      "explicacaoDetalhada": "A proibição existe por razões de organização, visibilidade, risco ou compatibilidade do fluxo. Não cabe ao condutor relativizar a regra com base em impressão pessoal sobre o local.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-006",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-006",
+      "alternativas": [
+        {
+          "texto": "A entrada pode ser feita se o condutor julgar não haver perigo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O acesso está vedado e deve ser evitado naquele ponto.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A proibição vale somente para veículos grandes.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A placa pode ser desconsiderada fora do horário de pico.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A função principal de uma placa de advertência é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Placas de advertência alertam para perigo ou condição especial adiante.",
+      "explicacaoDetalhada": "Diferentemente da regulamentação, a advertência não impõe diretamente uma manobra específica. Sua função é avisar que há situação potencialmente perigosa ou diferenciada, exigindo cautela do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-001",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-001",
+      "alternativas": [
+        {
+          "texto": "Impor obrigação imediata ao condutor.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Alertar para risco ou condição especial na via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Indicar serviços de apoio ao usuário.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir as regras gerais de circulação.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao visualizar placa de advertência indicando curva acentuada adiante, a conduta preventiva mais adequada é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve reduzir a velocidade e preparar a manobra com antecedência.",
+      "explicacaoDetalhada": "A placa de curva acentuada informa que o trajeto exigirá maior controle do veículo. A resposta segura é diminuir a velocidade antes de entrar na curva e ajustar a condução ao risco anunciado.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-002",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-002",
+      "alternativas": [
+        {
+          "texto": "Acelerar para sair da curva mais rapidamente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a velocidade e aumentar a atenção.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Manter a mesma velocidade para não perder estabilidade.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Usar a buzina continuamente ao entrar na curva.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando a placa de advertência informa pista escorregadia, o condutor deve principalmente:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em pista escorregadia, comandos bruscos elevam o risco de derrapagem.",
+      "explicacaoDetalhada": "A advertência indica redução de aderência. Por isso, é essencial conduzir com suavidade, evitando frenagens e acelerações bruscas, além de reduzir a velocidade com antecedência.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-003",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-003",
+      "alternativas": [
+        {
+          "texto": "Aumentar a velocidade para atravessar logo o trecho.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Dirigir com suavidade e velocidade reduzida.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Frenar bruscamente sempre que perceber perda de aderência.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parar o veículo no meio do trecho e aguardar ajuda.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A advertência de área escolar ou travessia frequente de pedestres indica que o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em área com pedestres, o comportamento deve ser mais cauteloso e atento.",
+      "explicacaoDetalhada": "Esse tipo de advertência antecipa presença elevada de usuários vulneráveis. A resposta correta é reduzir a velocidade, observar a via com mais cuidado e estar pronto para parar.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-004",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-004",
+      "alternativas": [
+        {
+          "texto": "Manter velocidade constante para não atrapalhar o fluxo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a velocidade e redobrar a atenção aos pedestres.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Usar a buzina para avisar os pedestres da aproximação.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Circular pela contramão se a faixa estiver ocupada.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma placa de advertência sobre estreitamento de pista serve para lembrar que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A redução da largura da via exige ajuste de posição e mais cautela na circulação.",
+      "explicacaoDetalhada": "Quando a pista se estreita, o espaço útil para passagem diminui. Isso pode exigir redução de velocidade, atenção ao posicionamento do veículo e maior cuidado com cruzamentos e ultrapassagens.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-005",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-005",
+      "alternativas": [
+        {
+          "texto": "A pista ficará mais larga logo adiante.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O condutor deverá ajustar a condução devido à redução do espaço de circulação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "O trecho passa a ser exclusivo para motocicletas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Não há necessidade de alterar a forma de conduzir.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao receber advertência de declive acentuado, a conduta mais segura é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em descida forte, o condutor deve controlar o veículo antes do trecho, sem depender apenas do freio.",
+      "explicacaoDetalhada": "O risco do declive está no ganho de velocidade e no superaquecimento do sistema de freios. O correto é entrar no trecho com velocidade controlada e conduzir de forma preventiva.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-006",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-006",
+      "alternativas": [
+        {
+          "texto": "Entrar no declive em alta velocidade e frear no final.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Controlar o veículo antes do trecho e descer com cautela.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Desligar o motor para economizar combustível.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Usar o pisca-alerta e soltar o volante nas curvas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se a placa de advertência indica passagem de animais, o condutor deve entender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pode haver travessia inesperada de animais, exigindo atenção e velocidade compatível.",
+      "explicacaoDetalhada": "A presença de animais na pista representa risco de colisão e manobras bruscas. A advertência existe para que o condutor ajuste sua condução antes de ser surpreendido.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-007",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-007",
+      "alternativas": [
+        {
+          "texto": "O trecho é exclusivo para veículos rurais.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A passagem de animais ocorrerá apenas durante o dia.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Existe possibilidade de travessia de animais e o risco exige cautela.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "A pista deve ser usada com buzina contínua para espantar animais.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Qual é a melhor leitura prática de uma placa de advertência?",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela deve ser interpretada como aviso preventivo que exige adaptação da conduta ao risco anunciado.",
+      "explicacaoDetalhada": "Placa de advertência não é mera informação decorativa. Sua função é permitir que o condutor ajuste a condução antes de chegar ao ponto crítico, reduzindo a chance de sinistro.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-008",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-008",
+      "alternativas": [
+        {
+          "texto": "É apenas um complemento visual sem reflexo na condução.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "É um aviso preventivo que exige comportamento mais cauteloso.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substitui qualquer outra sinalização do trecho.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Vale somente para motoristas iniciantes.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao aproximar-se de cruzamento com placa de advertência, sem semáforo e com visibilidade parcial, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A advertência exige aproximação cautelosa e observação reforçada do ambiente.",
+      "explicacaoDetalhada": "Quando a placa antecipa perigo em cruzamento, o motorista deve chegar ao ponto em condição de avaliar a via com segurança, pronto para reduzir mais ou parar se necessário.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-001",
+      "fingerprint": "base-propria-oficial-placas-advertencia-contexto-001",
+      "alternativas": [
+        {
+          "texto": "Aumentar a velocidade para cruzar antes dos demais.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Aproximar-se com cautela e redobrar a observação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Manter a preferência por estar em via asfaltada.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ignorar a advertência se não houver outros veículos visíveis.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se uma placa adverte sobre sucessão de curvas, a atitude mais correta do condutor é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sucessão de curvas exige planejamento da condução antes do primeiro desvio.",
+      "explicacaoDetalhada": "Não basta reduzir apenas ao entrar em cada curva isoladamente. O condutor deve adaptar a velocidade de forma global ao trecho sinuoso, mantendo controle e leitura antecipada da via.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-002",
+      "fingerprint": "base-propria-oficial-placas-advertencia-contexto-002",
+      "alternativas": [
+        {
+          "texto": "Reduzir a velocidade apenas na última curva do trecho.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Adequar a velocidade já no início do segmento sinuoso.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Acelerar entre as curvas para compensar a redução anterior.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Circular sobre a faixa central para ganhar visibilidade.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao ver advertência de ponte estreita, o condutor deve interpretar que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A passagem exigirá mais precisão de alinhamento e atenção a outros usuários.",
+      "explicacaoDetalhada": "A ponte estreita reduz a margem lateral de segurança. Por isso, a leitura correta envolve ajustar velocidade, posicionamento e observação dos demais veículos antes de ingressar no trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-003",
+      "fingerprint": "base-propria-oficial-placas-advertencia-contexto-003",
+      "alternativas": [
+        {
+          "texto": "A ponte admite ultrapassagem mais fácil por ser trecho curto.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A travessia exigirá cuidado maior devido ao espaço reduzido.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "O trecho é exclusivo para veículos leves.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Não há necessidade de qualquer ajuste de comportamento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma advertência de pista irregular deve levar o condutor a:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pista irregular pede redução de velocidade e maior controle do veículo.",
+      "explicacaoDetalhada": "As irregularidades comprometem conforto, estabilidade e distância de frenagem. A resposta segura é adequar a velocidade e evitar manobras bruscas no trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-004",
+      "fingerprint": "base-propria-oficial-placas-advertencia-contexto-004",
+      "alternativas": [
+        {
+          "texto": "Reduzir a velocidade e manter o veículo sob controle.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Segurar a buzina para avisar os demais condutores.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Acelerar para atravessar logo a irregularidade.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Desligar as luzes para evitar reflexos na pista.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se a placa adverte sobre local sujeito a forte vento lateral, o condutor deve considerar especialmente:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O vento lateral pode desestabilizar o veículo, sobretudo em velocidade mais alta ou em veículos maiores.",
+      "explicacaoDetalhada": "A advertência existe porque a força lateral do vento pode alterar a trajetória do veículo. A condução segura requer reduzir velocidade, manter firmeza no controle e antecipar possíveis desvios laterais.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-005",
+      "fingerprint": "base-propria-oficial-placas-advertencia-contexto-005",
+      "alternativas": [
+        {
+          "texto": "Que o risco se limita exclusivamente a motocicletas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Que pode haver desvio lateral do veículo e a velocidade deve ser moderada.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Que a pista está obrigatoriamente escorregadia.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Que a melhor defesa é acelerar para sair logo do trecho.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando uma placa de advertência aparece acompanhada de condição visível coerente com o risco anunciado, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A sinalização deve ser usada para antecipar a resposta segura, não apenas confirmar o perigo quando já estiver sobre ele.",
+      "explicacaoDetalhada": "O valor pedagógico da advertência está em permitir antecipação. Ao perceber que o contexto confirma o risco indicado, o condutor deve já estar conduzindo em regime de maior cautela e não reagir tardiamente.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-contexto-006",
+      "fingerprint": "base-propria-oficial-placas-advertencia-contexto-006",
+      "alternativas": [
+        {
+          "texto": "Esperar entrar na área de risco para decidir como agir.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Antecipar a conduta segura com base no aviso e na leitura do ambiente.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Seguir normalmente, pois a advertência é apenas informativa.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parar sempre que houver placa de advertência, independentemente da situação.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "As placas de indicação têm como função principal:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas orientam o usuário da via, informando destinos, localizações, serviços e referências.",
+      "explicacaoDetalhada": "A sinalização de indicação serve para guiar o deslocamento e transmitir informações úteis ao condutor. Diferente da regulamentação, ela não impõe regra; oferece orientação e apoio ao uso da via.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-001",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-001",
+      "alternativas": [
+        {
+          "texto": "Aplicar multas automaticamente ao condutor.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Orientar sobre destinos, localizações e serviços.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Advertir exclusivamente sobre perigos imediatos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir a necessidade de atenção do motorista.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando uma placa indica hospital ou pronto atendimento, ela tem finalidade de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A placa informa a existência ou a direção de um serviço de interesse do usuário da via.",
+      "explicacaoDetalhada": "Serviços como hospital, posto policial ou apoio ao usuário são comunicados por placas de indicação. Elas ajudam o condutor a localizar recursos relevantes sem criar obrigação de conduta.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-002",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-002",
+      "alternativas": [
+        {
+          "texto": "Advertir sobre risco de acidente no local.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Indicar a existência ou direção de serviço relevante.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Restringir o uso da via aos veículos de emergência.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Estabelecer prioridade obrigatória de passagem.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Placas que informam postos de combustível, alimentação ou hospedagem servem para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Essas placas auxiliam o planejamento da viagem e a localização de serviços de apoio.",
+      "explicacaoDetalhada": "Ao informar serviços ao longo da via, a sinalização de indicação melhora a orientação do usuário e contribui para um deslocamento mais seguro e planejado.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-003",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-003",
+      "alternativas": [
+        {
+          "texto": "Impedir o acesso de veículos pesados.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Indicar serviços de apoio disponíveis ao usuário.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Definir velocidade mínima para o trecho.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Avisar sobre risco ambiental na rodovia.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Placas de orientação de destino ajudam o condutor principalmente a:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A orientação de destino organiza a navegação e a escolha correta do trajeto.",
+      "explicacaoDetalhada": "Ao informar direções, destinos e conexões viárias, esse tipo de placa reduz erros de manobra e facilita a tomada de decisão com antecedência.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-004",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-004",
+      "alternativas": [
+        {
+          "texto": "Executar manobras de ultrapassagem com prioridade.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Identificar o trajeto correto com antecedência.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Ignorar outras placas da via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Definir regras de estacionamento no bairro.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A grande diferença entre uma placa de indicação e uma placa de regulamentação é que a de indicação:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A placa de indicação orienta e informa, sem impor diretamente uma obrigação de circulação.",
+      "explicacaoDetalhada": "Enquanto a regulamentação determina ou restringe condutas, a indicação fornece referências de localização, serviços ou direção. Sua função é orientar o usuário da via.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-005",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-005",
+      "alternativas": [
+        {
+          "texto": "Sempre prevalece sobre semáforos e agentes.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Serve para orientar e informar, não para impor regra.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só pode ser usada em áreas urbanas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Vale apenas para transporte coletivo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao ver uma placa de indicação de serviço na rodovia, o condutor deve compreender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A sinalização oferece informação útil para decisão de rota e apoio, sem obrigar o uso do serviço.",
+      "explicacaoDetalhada": "A presença da placa não exige parada nem altera por si só as regras de circulação. Ela apenas informa ao usuário da via a disponibilidade ou direção de determinado serviço de apoio.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-006",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-006",
+      "alternativas": [
+        {
+          "texto": "Há obrigação de utilizar o serviço indicado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O serviço indicado é uma referência opcional de apoio ao deslocamento.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A placa substitui qualquer orientação de destino no trecho.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O local sinalizado tem prioridade sobre todas as demais rotas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Placas com nomes de cidades, bairros, saídas ou rodovias ajudam o condutor a:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Essas placas orientam o destino e a localização do usuário ao longo do trajeto.",
+      "explicacaoDetalhada": "Elas facilitam a navegação e permitem que a decisão de faixa, acesso ou permanência na rota seja feita com antecedência, reduzindo manobras de última hora.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-001",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-001",
+      "alternativas": [
+        {
+          "texto": "Aplicar regra de parada obrigatória.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Identificar destinos e organizar a navegação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Advertir sobre risco imediato de colisão.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Permitir desobedecer à sinalização horizontal.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A principal vantagem da sinalização de destino colocada com antecedência é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela permite preparação antecipada da manobra, com mais segurança.",
+      "explicacaoDetalhada": "Quando o condutor recebe a informação antes do ponto de conversão ou acesso, ele pode mudar de faixa ou ajustar a velocidade com antecedência, evitando movimentos bruscos e inseguros.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-002",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-002",
+      "alternativas": [
+        {
+          "texto": "Autorizar retorno em qualquer local da via.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Permitir planejamento antecipado da manobra.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir a necessidade de observar a via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Definir a prioridade de quem vem em sentido contrário.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando a placa informa que determinada faixa leva a um destino específico, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A informação de faixa orienta o posicionamento correto do veículo para seguir ao destino desejado.",
+      "explicacaoDetalhada": "A leitura da placa deve ser usada para planejar o posicionamento do veículo com antecedência, evitando cortes bruscos de faixa e indecisões próximas ao ponto de conversão.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-003",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-003",
+      "alternativas": [
+        {
+          "texto": "Permanecer em qualquer faixa e decidir no último momento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Posicionar-se previamente na faixa indicada para o destino.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Usar o acostamento se perder a faixa correta.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parar sobre a pista para confirmar a direção.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, placas de localização e destino reduzem o risco de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Boa orientação reduz manobras repentinas e escolhas tardias de trajeto.",
+      "explicacaoDetalhada": "Quando o condutor sabe com clareza onde está e para onde deve seguir, tende a dirigir com mais previsibilidade. Isso reduz mudanças bruscas de faixa, frenagens inesperadas e conversões tardias.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-localizacao-004",
+      "fingerprint": "base-propria-oficial-placas-indicacao-localizacao-004",
+      "alternativas": [
+        {
+          "texto": "Desgaste dos pneus em pista molhada.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Manobras repentinas por falta de orientação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Falhas mecânicas do sistema de freio.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Oscilação de combustível no tanque do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "As marcas longitudinais pintadas na pista servem principalmente para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas organizam o fluxo e separam sentidos ou faixas de circulação.",
+      "explicacaoDetalhada": "A sinalização horizontal longitudinal orienta o posicionamento dos veículos, a separação de fluxos e a possibilidade ou não de determinados deslocamentos laterais na via.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-001",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-001",
+      "alternativas": [
+        {
+          "texto": "Indicar serviços de apoio ao usuário.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Organizar a ocupação da pista e separar fluxos.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir todas as placas da via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Autorizar o uso livre do acostamento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em regra, uma linha seccionada na divisão de faixas indica que a mudança de faixa:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A linha seccionada admite transposição, desde que a manobra seja segura e permitida no contexto.",
+      "explicacaoDetalhada": "A seccionada permite cruzamento ou mudança de faixa, mas isso não elimina o dever de observar tráfego, sinalização complementar e segurança da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-002",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-002",
+      "alternativas": [
+        {
+          "texto": "Pode ser feita quando houver segurança para isso.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Nunca pode ser feita em hipótese alguma.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Só é permitida para motocicletas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dispensa o uso da seta indicadora.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Linha longitudinal contínua em área onde ela separa fluxos ou faixas deve ser interpretada como:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A linha contínua indica maior restrição à transposição, exigindo permanência na faixa.",
+      "explicacaoDetalhada": "Esse tipo de marca visa evitar cruzamentos ou mudanças laterais em trechos de risco. Por isso, a transposição não deve ser feita, salvo situações legalmente excepcionais.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-003",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-003",
+      "alternativas": [
+        {
+          "texto": "Sinal de permissão para ultrapassagem mais rápida.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Restrição à transposição da linha.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Orientação meramente decorativa da pista.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Indício de que a pista é exclusiva para carga.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A linha de retenção pintada antes do cruzamento ou do semáforo indica o ponto em que o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A linha de retenção marca o local correto para imobilização do veículo quando necessário.",
+      "explicacaoDetalhada": "Ela organiza a parada do fluxo e protege áreas como faixa de pedestres e cruzamentos. Em situação de parada obrigatória, o veículo deve ser mantido antes dessa linha.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-004",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-004",
+      "alternativas": [
+        {
+          "texto": "Parar o veículo quando a situação exigir imobilização.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Acelerar para cruzar antes dos demais.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Parar somente se houver agente de trânsito presente.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Posicionar o veículo sobre a faixa de pedestres.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Setas pintadas na pista indicam ao condutor principalmente:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As setas orientam o movimento permitido ou recomendado para a faixa.",
+      "explicacaoDetalhada": "Elas ajudam na distribuição do tráfego e no posicionamento correto do veículo antes de conversões ou divisões da via. Devem ser observadas em conjunto com a demais sinalização.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-005",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-005",
+      "alternativas": [
+        {
+          "texto": "A direção ou movimento correspondente daquela faixa.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "A velocidade máxima da via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "A localização de serviços de apoio.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A prioridade de passagem do pedestre sobre a calçada.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta da sinalização horizontal exige que o condutor:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A interpretação deve considerar a função da marca no fluxo e a segurança da manobra pretendida.",
+      "explicacaoDetalhada": "Marcas no pavimento não são meros complementos visuais. Elas estruturam o uso do espaço viário e precisam ser interpretadas junto com a via, o tráfego e a sinalização vertical existente.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-marcas-006",
+      "fingerprint": "base-propria-oficial-placas-horizontal-marcas-006",
+      "alternativas": [
+        {
+          "texto": "Observe apenas placas verticais, ignorando o pavimento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Considere a função da marca no fluxo e adapte sua conduta.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Desconsidere as marcas se a pista estiver com pouco movimento.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Use a faixa central sempre que a pista estiver livre.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A faixa de pedestres demarcada na pista tem a finalidade de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela organiza e protege a travessia de pedestres.",
+      "explicacaoDetalhada": "A demarcação orienta o local mais seguro de travessia e reforça o dever de cuidado do condutor diante de pedestres que estejam atravessando ou prestes a atravessar em condições seguras.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-001",
+      "fingerprint": "base-propria-oficial-placas-horizontal-faixa-001",
+      "alternativas": [
+        {
+          "texto": "Reservar local de parada exclusiva para motocicletas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Organizar e proteger a travessia de pedestres.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Indicar local permitido para retorno.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Sinalizar área exclusiva de carga e descarga.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao se aproximar de faixa de pedestres com possibilidade de travessia, a conduta defensiva correta é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve reduzir a velocidade e estar pronto para parar.",
+      "explicacaoDetalhada": "A faixa de pedestres não deve ser tratada apenas como marca visual. Ela sinaliza potencial conflito com usuário vulnerável e exige atenção, moderação da velocidade e prioridade quando cabível.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-002",
+      "fingerprint": "base-propria-oficial-placas-horizontal-faixa-002",
+      "alternativas": [
+        {
+          "texto": "Aumentar a velocidade para liberar a faixa rapidamente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a velocidade e observar a travessia.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Usar a buzina para acelerar o passo do pedestre.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parar sobre a faixa para ganhar melhor visão do cruzamento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Marcas de canalização pintadas no pavimento servem para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas orientam a trajetória e delimitam áreas que não devem ser ocupadas indiscriminadamente.",
+      "explicacaoDetalhada": "A canalização organiza movimentos, separa correntes de tráfego e protege zonas de conflito ou direcionamento. O condutor deve respeitar sua função e evitar ocupar áreas não destinadas à circulação comum.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-003",
+      "fingerprint": "base-propria-oficial-placas-horizontal-faixa-003",
+      "alternativas": [
+        {
+          "texto": "Transformar qualquer trecho em área de estacionamento temporário.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Orientar trajetórias e delimitar zonas de organização do fluxo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir a necessidade de semáforo no local.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Autorizar conversão em qualquer sentido da via.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A luz verde do semáforo para veículos indica que o condutor pode prosseguir:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A passagem é permitida, mas deve ocorrer com segurança e observação do cruzamento.",
+      "explicacaoDetalhada": "Sinal verde não elimina o dever geral de cautela. O condutor pode avançar, desde que o cruzamento esteja livre e a manobra possa ser feita com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-001",
+      "fingerprint": "base-propria-oficial-placas-semaforica-001",
+      "alternativas": [
+        {
+          "texto": "Sem qualquer necessidade de observar o cruzamento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Desde que haja condições seguras para seguir.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente se não houver pedestres na calçada.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas se estiver acima da velocidade mínima da via.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A luz amarela do semáforo para veículos transmite ideia principal de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A luz amarela indica atenção e preparação para parada, quando esta puder ser feita com segurança.",
+      "explicacaoDetalhada": "O amarelo não é convite para acelerar. Ele adverte que a fase de passagem está terminando, exigindo avaliação imediata e conduta prudente do motorista.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-002",
+      "fingerprint": "base-propria-oficial-placas-semaforica-002",
+      "alternativas": [
+        {
+          "texto": "Livre passagem sem qualquer cautela.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Atenção e preparação para parar com segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Obrigação de buzinar no cruzamento.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Proibição de reduzir a velocidade.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Diante da luz vermelha do semáforo para veículos, a conduta correta é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A luz vermelha exige parada antes da linha de retenção ou local apropriado de imobilização.",
+      "explicacaoDetalhada": "A fase vermelha impede o ingresso do veículo no cruzamento. O ponto de parada deve respeitar a linha de retenção, a faixa de pedestres e a organização do espaço de conflito.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-003",
+      "fingerprint": "base-propria-oficial-placas-semaforica-003",
+      "alternativas": [
+        {
+          "texto": "Avançar lentamente para reservar espaço no cruzamento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Parar no ponto adequado antes do cruzamento.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Seguir normalmente se não houver outro veículo visível.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parar apenas para transporte coletivo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando houver foco semafórico específico para pedestres, o condutor deve compreender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A travessia de pedestres integra a lógica do cruzamento e deve ser respeitada pelo condutor.",
+      "explicacaoDetalhada": "A sinalização semafórica de pedestres existe para ordenar a travessia com segurança. O motorista não pode agir como se o sinal dirigido a pedestres fosse irrelevante para sua conduta.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-004",
+      "fingerprint": "base-propria-oficial-placas-semaforica-004",
+      "alternativas": [
+        {
+          "texto": "O sinal para pedestres não interfere na atenção do motorista.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A travessia de pedestres deve ser considerada na conduta do condutor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente pedestres idosos devem obedecer ao foco específico.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O foco de pedestres vale apenas em rodovias.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Mesmo com semáforo favorável, o condutor não deve ingressar no cruzamento quando:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Não se deve entrar no cruzamento sem condições reais de liberar o espaço com segurança.",
+      "explicacaoDetalhada": "A permissão semafórica não autoriza bloquear o cruzamento. Se o fluxo adiante estiver impedido e houver risco de reter o veículo na área de conflito, o correto é aguardar.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-005",
+      "fingerprint": "base-propria-oficial-placas-semaforica-005",
+      "alternativas": [
+        {
+          "texto": "Houver espaço para atravessar completamente com segurança.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O semáforo estiver verde e a frente estiver desobstruída.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Não houver condições de liberar o cruzamento sem bloqueá-lo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Existir veículo atrás buzinando para que avance.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Cones, barreiras e outros dispositivos auxiliares na via servem principalmente para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles complementam a sinalização, delimitando espaços e orientando o fluxo.",
+      "explicacaoDetalhada": "Dispositivos auxiliares reforçam visualmente a organização da via, isolam áreas de risco e ajudam a canalizar a movimentação dos usuários com mais segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-001",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-001",
+      "alternativas": [
+        {
+          "texto": "Permitir estacionamento temporário em qualquer ponto.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Complementar a sinalização e organizar o fluxo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir toda e qualquer placa da via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dispensar a necessidade de atenção do condutor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao encontrar sinalização temporária de obras na pista, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalização temporária deve ser obedecida por refletir a condição real e atual da via.",
+      "explicacaoDetalhada": "Durante obras ou eventos extraordinários, a organização normal da via pode mudar. Por isso, a sinalização temporária orienta a conduta segura adequada ao contexto daquele momento.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-002",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-002",
+      "alternativas": [
+        {
+          "texto": "Obedecer à sinalização temporária e ajustar sua condução.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Ignorar os dispositivos, pois eles não substituem a via normal.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Usar o acostamento sempre que houver cones.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Acelerar para sair mais rápido da área sinalizada.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Tachas e tachões aplicados no pavimento podem ter função de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles auxiliam na delimitação visual e tátil do alinhamento ou separação de fluxos.",
+      "explicacaoDetalhada": "Esses dispositivos auxiliares reforçam a percepção da pista, especialmente em condições de baixa visibilidade, e ajudam a guiar o condutor dentro da organização prevista para a via.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-003",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-003",
+      "alternativas": [
+        {
+          "texto": "Substituir a luz dos faróis do veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reforçar a delimitação e orientação do fluxo na pista.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Indicar serviços de emergência próximos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Autorizar conversão proibida em horário noturno.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando barreiras ou cavaletes isolam parte da pista, o correto é entender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A área isolada não deve ser ocupada, pois está fora da faixa segura de circulação.",
+      "explicacaoDetalhada": "O isolamento pode proteger obra, manutenção, sinistro ou obstáculo. O motorista deve respeitar a canalização imposta e seguir apenas pela área efetivamente liberada para o tráfego.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-004",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-004",
+      "alternativas": [
+        {
+          "texto": "A área pode ser usada se o fluxo estiver lento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A área isolada deve ser evitada, seguindo-se a canalização indicada.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente veículos pequenos podem utilizar o trecho isolado.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A passagem depende apenas da decisão do condutor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A principal leitura defensiva de um trecho com canalização temporária é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mudanças temporárias de faixa e trajeto exigem redução de velocidade e leitura antecipada.",
+      "explicacaoDetalhada": "Em situações de desvio ou obra, o fluxo pode mudar rapidamente. O condutor seguro ajusta a velocidade, observa o trajeto canalizado e evita decisões tardias ou deslocamentos bruscos.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-005",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-005",
+      "alternativas": [
+        {
+          "texto": "Seguir a configuração antiga da via, mesmo se houver mudanças visíveis.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Ajustar a condução ao novo desenho temporário da pista.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Manter velocidade alta para liberar a área mais cedo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Conduzir pelo espaço mais aberto, ainda que esteja isolado.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Dispositivos auxiliares e sinalização temporária são especialmente importantes porque:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles tornam visíveis riscos e reorganizações da via que nem sempre estão presentes na sinalização permanente.",
+      "explicacaoDetalhada": "A via é dinâmica. Obras, eventos e obstáculos exigem adaptações de tráfego. Esses elementos complementares viabilizam resposta rápida de segurança, comunicando ao condutor a conduta adequada naquele contexto excepcional.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-006",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-006",
+      "alternativas": [
+        {
+          "texto": "Valem apenas como informação ornamental e provisória.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "São usados somente em rodovias de concessão.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Comunicam alterações reais de risco e de uso da via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Podem ser ignorados quando a pista estiver vazia.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao identificar sinalização associada a ciclistas ou travessia de bicicletas, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A presença de sinalização cicloviária exige atenção especial aos deslocamentos de ciclistas.",
+      "explicacaoDetalhada": "Ciclistas são usuários vulneráveis da via. A sinalização correspondente serve para alertar o motorista, que deve reduzir riscos por meio de velocidade compatível, observação e respeito ao espaço de circulação.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-001",
+      "fingerprint": "base-propria-oficial-placas-cicloviaria-rodoferroviario-001",
+      "alternativas": [
+        {
+          "texto": "Aumentar a velocidade para ultrapassar a área rapidamente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Redobrar a atenção e respeitar a presença de ciclistas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Usar a buzina continuamente ao cruzar a área.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Considerar que a regra vale apenas para bicicletas elétricas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Diante de cruzamento rodoferroviário sinalizado, a conduta correta do condutor deve ser pautada por:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cruzamentos com ferrovia exigem elevada cautela e obediência rigorosa à sinalização existente.",
+      "explicacaoDetalhada": "A proximidade de linha férrea representa risco elevado. Por isso, o motorista deve observar cuidadosamente a sinalização, avaliar a segurança da travessia e jamais forçá-la diante de indicação de perigo.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-002",
+      "fingerprint": "base-propria-oficial-placas-cicloviaria-rodoferroviario-002",
+      "alternativas": [
+        {
+          "texto": "Atravessar com rapidez sempre que não vir trem ao longe.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Obedecer à sinalização do local e atravessar apenas com segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Parar somente se houver cancela fechada.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Usar marcha reduzida e nunca olhar para os lados.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A principal justificativa para reforçar a sinalização em cruzamentos rodoferroviários e áreas cicloviárias é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "São pontos de conflito com usuários ou veículos que exigem antecipação e maior margem de segurança.",
+      "explicacaoDetalhada": "Tanto o encontro com ciclistas quanto a proximidade com ferrovia envolvem riscos específicos e pouca margem para erro. A sinalização existe para antecipar a leitura do condutor e ampliar a segurança da decisão.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-003",
+      "fingerprint": "base-propria-oficial-placas-cicloviaria-rodoferroviario-003",
+      "alternativas": [
+        {
+          "texto": "São locais em que a velocidade máxima sempre aumenta.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "São pontos de conflito que exigem atenção e previsão ampliadas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Permitem ao condutor ignorar o restante da sinalização da via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Valem apenas em horários de movimento intenso.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    }
+  ]
+}

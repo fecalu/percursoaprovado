@@ -226,7 +226,7 @@ export default function Biblioteca() {
   if (loading) return <div className="spinner" />
 
   return (
-    <>
+    <div className="student-library-page">
       <div className="student-shell student-shell--compact">
         {assinaturasAtivas.length > 0 && (
           <div className="student-chip-grid student-chip-grid--compact">
@@ -286,6 +286,6 @@ export default function Biblioteca() {
           ))}
         </>
       )}
-    </>
+    </div>
   )
 }

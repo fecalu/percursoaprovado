@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Categorias de habilitação e tipos de veículo",
+    "qtde": 5,
+    "referenciaOficial": "Resolução CONTRAN 1.020/2025",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-contran/resolucoes/Resolucao10202025.pdf",
+    "observacaoEditorial": "Lote autoral sobre correspondência entre categoria de habilitação e tipo de veículo."
+  },
+  "questoes": [
+    {
+      "enunciado": "A categoria da habilitação existe para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A categoria define para quais tipos de veículo o condutor está legalmente autorizado.",
+      "explicacaoDetalhada": "A habilitação não é genérica para qualquer veículo. As categorias delimitam a autorização conforme características do veículo e da condução pretendida.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-001",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-001",
+      "alternativas": [
+        { "texto": "Indicar a cor do veículo permitido ao condutor.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Definir os tipos de veículo que o condutor pode dirigir.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir a necessidade de licenciamento anual.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Determinar apenas a região em que o condutor pode circular.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A categoria A da habilitação está associada, em regra, à condução de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A categoria A habilita para a condução de veículos de duas ou três rodas, conforme a regulamentação.",
+      "explicacaoDetalhada": "A categoria A é voltada aos veículos motorizados de duas ou três rodas, como motocicletas e similares, observadas as definições regulamentares aplicáveis.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-002",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-002",
+      "alternativas": [
+        { "texto": "Veículos de duas ou três rodas.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Apenas ônibus urbanos.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Qualquer caminhão leve.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Somente automóveis de passeio.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A categoria B da habilitação está ligada, em regra, à condução de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A categoria B se refere aos veículos motorizados não abrangidos pela categoria A, dentro dos limites regulamentares.",
+      "explicacaoDetalhada": "A categoria B normalmente contempla automóveis e outros veículos compatíveis com os critérios fixados pela regulamentação, sem se confundir com categorias destinadas ao transporte coletivo ou de carga mais específica.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-003",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-003",
+      "alternativas": [
+        { "texto": "Automóveis e veículos compatíveis com essa categoria.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Exclusivamente motocicletas e motonetas.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Somente trens e veículos ferroviários.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Apenas veículos de transporte coletivo acima do limite legal.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Conduzir veículo incompatível com a categoria da habilitação significa:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve dirigir apenas veículos compatíveis com a categoria para a qual está habilitado.",
+      "explicacaoDetalhada": "A autorização para dirigir depende da correspondência entre habilitação e tipo de veículo. Conduzir categoria diferente da autorizada viola o regime legal da habilitação.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-004",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-004",
+      "alternativas": [
+        { "texto": "Conduta regular, desde que a via esteja livre.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Irregularidade em relação à habilitação exigida.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Fato irrelevante, se o condutor tiver experiência.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Situação permitida quando o veículo estiver licenciado.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A Autorização para Conduzir Ciclomotor (ACC) existe para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A ACC é uma autorização específica voltada à condução de ciclomotor, nos termos da legislação.",
+      "explicacaoDetalhada": "A legislação de trânsito prevê autorização específica para a condução de ciclomotor. Ela não se confunde automaticamente com todas as categorias de habilitação para outros tipos de veículos.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-005",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-005",
+      "alternativas": [
+        { "texto": "Autorizar a condução de qualquer motocicleta de grande porte.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Autorizar especificamente a condução de ciclomotor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir permanentemente todas as categorias da CNH.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Permitir dirigir automóveis e caminhões leves.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

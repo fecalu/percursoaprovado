@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Classificação das vias e regras básicas associadas",
+    "qtde": 5,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 + CTB",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre classificação das vias e leitura prática de suas características."
+  },
+  "questoes": [
+    {
+      "enunciado": "A classificação das vias é importante porque ela ajuda a definir:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O tipo de via influencia as regras e a forma adequada de circulação.",
+      "explicacaoDetalhada": "Conhecer a classificação da via ajuda o condutor a compreender a função daquele espaço no sistema viário e a adotar comportamento compatível com suas características de mobilidade, acesso e segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-001",
+      "fingerprint": "base-propria-oficial-legislacao-vias-001",
+      "alternativas": [
+        { "texto": "A cor obrigatória do veículo naquela região.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "As características de circulação e o comportamento esperado do condutor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O modelo de combustível autorizado na pista.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A dispensa de obediência à sinalização local.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No contexto do CTB, rodovia e estrada não são sinônimos porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A legislação distingue os tipos de via rural conforme suas características construtivas e funcionais.",
+      "explicacaoDetalhada": "A classificação legal das vias considera critérios próprios. Em área rural, rodovia e estrada possuem definições distintas, e essa diferenciação repercute na leitura da via e na aplicação de regras correspondentes.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-002",
+      "fingerprint": "base-propria-oficial-legislacao-vias-002",
+      "alternativas": [
+        { "texto": "Representam exatamente o mesmo tipo de via, apenas com nomes diferentes.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A legislação diferencia suas características e natureza viária.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente rodovia precisa de sinalização, estrada não.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Estrada é exclusivamente urbana e rodovia é exclusivamente municipal.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma via local, em regra, está mais associada a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Via local prioriza acessos diretos aos imóveis e circulação de âmbito mais restrito.",
+      "explicacaoDetalhada": "A via local tem papel diferente daquele de vias voltadas à mobilidade mais intensa. Ela costuma atender deslocamentos mais próximos e o acesso direto às propriedades lindeiras.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-003",
+      "fingerprint": "base-propria-oficial-legislacao-vias-003",
+      "alternativas": [
+        { "texto": "Grande prioridade para fluxos de longa distância e alta velocidade.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Acesso direto aos imóveis e circulação de caráter mais local.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Uso exclusivo para transporte ferroviário.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Ausência de qualquer regra de circulação.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quanto maior a função de mobilidade de uma via, em comparação com o simples acesso local, maior tende a ser a necessidade de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Vias mais voltadas à mobilidade exigem condução mais compatível com fluxo e organização viária.",
+      "explicacaoDetalhada": "Em vias destinadas a deslocamentos mais contínuos, o condutor precisa observar com mais rigor a fluidez, o posicionamento, a previsibilidade e a adequação da sua conduta ao desenho viário e à sinalização.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-004",
+      "fingerprint": "base-propria-oficial-legislacao-vias-004",
+      "alternativas": [
+        { "texto": "Paradas aleatórias no leito carroçável.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Condução previsível e compatível com o fluxo da via.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Uso livre do acostamento para ultrapassagem.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Desconsideração das características da via.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta do tipo de via ajuda o condutor a entender melhor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Classificação da via e sinalização devem ser lidas em conjunto para orientar a condução segura.",
+      "explicacaoDetalhada": "O condutor não deve tratar todas as vias como se fossem iguais. A classificação legal, somada à sinalização presente e ao contexto real, orienta decisões mais corretas sobre velocidade, atenção, posicionamento e prioridade.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-005",
+      "fingerprint": "base-propria-oficial-legislacao-vias-005",
+      "alternativas": [
+        { "texto": "Como adaptar a condução à função e às características da via.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Que toda via pode ser usada da mesma forma, sem distinção.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Que a sinalização é desnecessária quando a via é conhecida.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Que a preferência sempre depende do veículo maior.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

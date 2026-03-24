@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "tema": "MECANICA_BASICA",
+    "subtema": "Sistema de iluminação e sinalização do veículo",
+    "qtde": 3,
+    "referenciaOficial": "CNH do Brasil + material didático Senatran",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/noticias/2025/12/cnh-do-brasil-como-solicitar-a-primeira-habilitacao-pelo-aplicativo",
+    "observacaoEditorial": "Lote autoral sobre iluminação, visibilidade e comunicação com os demais usuários da via."
+  },
+  "questoes": [
+    {
+      "enunciado": "O sistema de iluminação do veículo é importante para a segurança porque ajuda a:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Luzes em bom estado melhoram a visibilidade e a comunicação no trânsito.",
+      "explicacaoDetalhada": "Faróis, lanternas, luzes de freio e indicadores de direção ajudam o condutor a enxergar melhor e também a ser visto pelos demais usuários da via. Falhas nesse sistema aumentam riscos, principalmente à noite e em condições adversas.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-iluminacao-001",
+      "alternativas": [
+        { "texto": "Apenas decorar o veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Melhorar a visibilidade e a sinalização da condução.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Diminuir o desgaste dos pneus.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir a necessidade de atenção do motorista.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Circular com luzes de freio ou setas sem funcionamento é uma situação indesejável porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem sinalização adequada, os demais condutores podem não entender a manobra pretendida.",
+      "explicacaoDetalhada": "Luzes de freio e indicadores de direção são formas essenciais de comunicação entre veículos. Quando não funcionam corretamente, aumentam o risco de colisões, especialmente em frenagens e mudanças de direção.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-iluminacao-002",
+      "alternativas": [
+        { "texto": "Não há qualquer impacto relevante no trânsito.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Prejudica a comunicação da frenagem e das mudanças de direção.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só importa em veículos grandes.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Torna o motor menos econômico.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No contexto da mecânica básica, manter iluminação e sinalização do veículo em bom estado é uma forma de:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cuidar das luzes do veículo é medida preventiva de segurança viária.",
+      "explicacaoDetalhada": "A manutenção das luzes não é mero detalhe estético. Ela faz parte da prevenção de acidentes, porque favorece visibilidade, previsibilidade e comunicação segura entre todos os usuários da via.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-iluminacao-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-iluminacao-003",
+      "alternativas": [
+        { "texto": "Apenas cumprir obrigação sem efeito real na circulação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Prevenir riscos por meio de melhor visibilidade e comunicação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Compensar falhas do sistema de freios.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Eliminar a necessidade de usar retrovisores.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

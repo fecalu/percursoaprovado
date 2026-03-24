@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Prevenção de colisão e tomada de decisão segura",
+    "qtde": 8,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre decisão conservadora, antecipação de conflitos e redução de risco de colisões."
+  },
+  "questoes": [
+    {
+      "enunciado": "Para reduzir o risco de colisão traseira, uma atitude defensiva importante é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Manter distância segura dá tempo e espaço para reagir a frenagens do veículo à frente.",
+      "explicacaoDetalhada": "A colisão traseira é favorecida quando o condutor segue muito próximo do veículo da frente. A direção defensiva recomenda manter distância adequada para perceber a situação, reagir e frear de forma segura.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-001",
+      "alternativas": [
+        { "texto": "Seguir bem próximo para evitar entrada de outros veículos.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Manter distância de segurança do veículo à frente.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Acelerar sempre que o carro da frente reduzir a velocidade.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Frear de forma brusca para treinar reflexos.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao se aproximar de um cruzamento com visão parcialmente encoberta, o condutor defensivo deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cruzamentos com visibilidade limitada exigem redução da velocidade e maior observação.",
+      "explicacaoDetalhada": "Árvores, muros, veículos estacionados e outros obstáculos podem ocultar aproximadores da via transversal. A direção defensiva recomenda reduzir a velocidade e aproximar-se do cruzamento com prudência reforçada.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-002",
+      "alternativas": [
+        { "texto": "Cruzar rapidamente para não perder tempo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e observar com antecedência.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Confiar que ninguém virá pela transversal.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar apenas a buzina como proteção suficiente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Na direção defensiva, escolher a alternativa mais conservadora diante de dúvida significa:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Quando há incerteza, o condutor deve optar pela conduta que mais preserve a segurança.",
+      "explicacaoDetalhada": "Nem toda situação exige ação rápida; muitas exigem moderação. A tomada de decisão defensiva prioriza a alternativa que reduz exposição ao risco, mesmo que isso represente esperar um pouco mais ou adiar uma manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-003",
+      "alternativas": [
+        { "texto": "Escolher a manobra mais rápida, mesmo com dúvida.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Optar pela conduta que oferece maior margem de segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Agir por impulso para não travar o fluxo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Esperar que outro motorista resolva o conflito.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao trafegar atrás de veículo grande, como ônibus ou caminhão, o condutor deve lembrar que:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Veículos grandes podem reduzir a visibilidade e exigir mais distância para leitura do trânsito.",
+      "explicacaoDetalhada": "Quando o condutor segue muito próximo de veículo grande, perde parte da visão da via à frente e reduz o tempo disponível para reagir. A direção defensiva recomenda ampliar a distância e evitar ficar sem campo visual útil.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-004",
+      "alternativas": [
+        { "texto": "É melhor seguir bem perto para aproveitar o vácuo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Deve manter distância maior para preservar visibilidade e reação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A proximidade não muda nada, desde que a via seja reta.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O caminhão sempre verá e sinalizará todos os riscos à frente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se um veículo à frente apresenta comportamento instável, como zigue-zague ou frenagens sem motivo aparente, o condutor defensivo deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Comportamento anormal de outro veículo exige aumento da margem de segurança.",
+      "explicacaoDetalhada": "Um veículo instável pode indicar distração, falha mecânica, mal-estar ou comportamento de risco do motorista. A direção defensiva recomenda não se aproximar excessivamente e preparar-se para eventual reação necessária.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-005",
+      "alternativas": [
+        { "texto": "Aproximar-se para pressionar o outro condutor a andar melhor.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Aumentar a distância e acompanhar a situação com cautela.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ultrapassar imediatamente, mesmo sem análise da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Ignorar o comportamento do veículo e manter o padrão habitual.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em situação de conflito de circulação, a direção defensiva considera mais seguro:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "É preferível evitar o conflito do que insistir em uma prioridade sob risco de colisão.",
+      "explicacaoDetalhada": "Embora existam regras de prioridade, o objetivo da direção defensiva é preservar vidas e evitar sinistros. Se há risco concreto de conflito, o condutor deve agir de modo preventivo, sem transformar a razão em disputa perigosa.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-006",
+      "alternativas": [
+        { "texto": "Insistir na própria preferência a qualquer custo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Adotar conduta preventiva e evitar a colisão, mesmo com razão.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Acelerar para demonstrar domínio da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Depender exclusivamente da reação do outro condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Planejar rota de fuga, observar laterais e manter atenção ao retrovisor ajudam a prevenir colisões porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A antecipação amplia as opções de resposta do condutor diante de imprevistos.",
+      "explicacaoDetalhada": "A direção defensiva não se limita a olhar apenas para frente. Observar laterais, retrovisores e possíveis espaços de escape permite agir com mais rapidez e segurança diante de obstáculos, invasões de faixa ou frenagens repentinas.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-007",
+      "alternativas": [
+        { "texto": "Isso serve apenas para quem dirige em alta velocidade.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Antecipação aumenta alternativas seguras diante de imprevistos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Observar laterais e retrovisores distrai mais do que ajuda.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Rotas de fuga só existem em rodovias, não em vias urbanas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A tomada de decisão segura no trânsito depende, em grande parte, de o condutor:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Boa decisão nasce de observação, previsão e escolha de alternativas seguras.",
+      "explicacaoDetalhada": "O condutor defensivo observa o ambiente, prevê riscos, controla impulsos e escolhe a opção com menor chance de conflito. A segurança não está em agir depressa, mas em agir corretamente diante das condições reais da via.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-colisao-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-colisao-008",
+      "alternativas": [
+        { "texto": "Basear-se apenas na preferência legal e ignorar o restante.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Observar, prever riscos e escolher a alternativa mais segura.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Confiar que experiência substitui análise da situação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Tomar decisões rápidas sem hesitação, mesmo com dúvida.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

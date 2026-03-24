@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Placas de regulamentação: identificação e sentido prático",
+    "qtde": 7,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume I - Sinalização Vertical de Regulamentação",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre identificação da função prática das placas de regulamentação."
+  },
+  "questoes": [
+    {
+      "enunciado": "A principal função de uma placa de regulamentação no trânsito é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Placas de regulamentação comunicam obrigações, proibições ou restrições que devem ser obedecidas.",
+      "explicacaoDetalhada": "No sistema brasileiro de sinalização, as placas de regulamentação estabelecem condutas obrigatórias ou restrições objetivas ao condutor. Elas não servem apenas para orientar: elas determinam o comportamento exigido no trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-001",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-001",
+      "alternativas": [
+        { "texto": "Orientar sobre pontos turísticos da região.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Determinar obrigações, proibições ou restrições de circulação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas sugerir a melhor forma de conduzir o veículo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Informar serviços de apoio ao usuário da via.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando uma placa de regulamentação impõe determinada conduta ao condutor, o descumprimento dessa ordem pode gerar:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O desrespeito à placa de regulamentação pode configurar infração de trânsito.",
+      "explicacaoDetalhada": "Como a placa de regulamentação traduz uma determinação legal de circulação, seu descumprimento não é mera desatenção. Dependendo do caso, ele caracteriza infração prevista no CTB.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-002",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-002",
+      "alternativas": [
+        { "texto": "Somente uma advertência verbal sem efeito legal.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Apenas orientação educativa, sem qualquer consequência.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Infração de trânsito, conforme a regra desrespeitada.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Multa apenas se houver acidente no local.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao se deparar com uma placa de regulamentação, o condutor deve entendê-la como:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A placa de regulamentação tem caráter imperativo, e não apenas informativo.",
+      "explicacaoDetalhada": "O valor prático da placa de regulamentação é ordenar a conduta na via. Por isso, ela deve ser interpretada como sinal de cumprimento obrigatório, salvo quando houver ordem superior de agente ou semáforo aplicável.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-003",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-003",
+      "alternativas": [
+        { "texto": "Uma recomendação facultativa.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Um aviso de serviço ou apoio na via.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Um comando de observância obrigatória.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Uma orientação válida apenas para motoristas profissionais.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Placas que indicam limite máximo de velocidade são exemplos de sinalização de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Limites obrigatórios de velocidade são veiculados por placas de regulamentação.",
+      "explicacaoDetalhada": "Quando a via fixa velocidade máxima permitida, essa ordem é comunicada por sinalização de regulamentação. Ela cria um limite objetivo a ser respeitado pelo condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-004",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-004",
+      "alternativas": [
+        { "texto": "Advertência.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Regulamentação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Indicação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Orientação turística.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma placa de regulamentação pode ser entendida como o meio pelo qual o poder público:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela materializa uma regra de uso da via que deve ser seguida pelos usuários.",
+      "explicacaoDetalhada": "A placa de regulamentação não tem função decorativa. Ela transmite de forma visual uma regra específica de circulação, tornando objetiva a conduta exigida do condutor naquele ponto da via.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-005",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-005",
+      "alternativas": [
+        { "texto": "Sugere trajetos opcionais para reduzir congestionamentos.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Materializa uma regra de uso da via a ser obedecida.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Comunica apenas localização geográfica e destino.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substitui a necessidade de atenção do condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se uma placa de regulamentação restringe determinado movimento, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Movimento restringido por regulamentação não pode ser realizado naquele ponto da via.",
+      "explicacaoDetalhada": "A restrição indicada pela placa existe para organizar o fluxo e proteger a segurança. Por isso, o condutor deve adequar sua manobra à ordem sinalizada, ainda que o movimento pareça conveniente no momento.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-006",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-006",
+      "alternativas": [
+        { "texto": "Cumprir a restrição, planejando outra manobra permitida.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Executar o movimento se não houver outros veículos próximos.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Ignorar a placa quando estiver com pressa.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Solicitar passagem com a buzina e seguir normalmente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta de uma placa de regulamentação exige do condutor principalmente:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve entender o efeito prático da regra sobre sua conduta imediata.",
+      "explicacaoDetalhada": "Mais do que reconhecer a existência da placa, o condutor precisa compreender qual comportamento concreto ela impõe ou proíbe. Essa leitura funcional é essencial para aplicar corretamente a sinalização no contexto da via.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-pratica-007",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-pratica-007",
+      "alternativas": [
+        { "texto": "Memorizar apenas suas cores e formatos, sem pensar na conduta.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Entender qual comportamento ela exige ou restringe no local.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Esperar a orientação de outro condutor para decidir.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Aplicar a regra somente se o tráfego estiver intenso.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

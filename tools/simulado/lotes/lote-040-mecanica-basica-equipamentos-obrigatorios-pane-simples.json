@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "tema": "MECANICA_BASICA",
+    "subtema": "Equipamentos obrigatórios e pane simples",
+    "qtde": 3,
+    "referenciaOficial": "CTB + material didático Senatran",
+    "linkFonte": "https://www.gov.br/pt-br/servicos/consultar-informacoes-sobre-educacao-para-o-transito",
+    "observacaoEditorial": "Lote autoral sobre preparação básica do veículo e resposta prudente diante de panes simples."
+  },
+  "questoes": [
+    {
+      "enunciado": "Os equipamentos obrigatórios do veículo têm importância porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles contribuem para a segurança e para a regularidade da circulação.",
+      "explicacaoDetalhada": "Equipamentos obrigatórios não existem apenas por exigência formal. Eles têm função relacionada à segurança, à sinalização e à adequação do veículo para circular dentro das regras.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-equipamentos-001",
+      "alternativas": [
+        { "texto": "Servem somente para encarecer a manutenção.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Relacionam-se à segurança e à circulação regular do veículo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "São úteis apenas em viagens interestaduais.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Têm valor apenas estético.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em caso de pane simples durante a circulação, uma atitude prudente do condutor é:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pane exige prioridade à segurança do local e do veículo.",
+      "explicacaoDetalhada": "Se o veículo apresentar pane, o condutor deve agir para reduzir o risco da situação: posicionar-se com segurança, sinalizar adequadamente e buscar solução sem improvisos perigosos nem exposição desnecessária ao tráfego.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-equipamentos-002",
+      "alternativas": [
+        { "texto": "Abandonar o veículo imediatamente, sem qualquer cuidado com o local.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Sinalizar e priorizar a segurança antes de qualquer providência técnica.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Continuar rodando até encontrar oficina, mesmo com risco evidente.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Empurrar o veículo sem observar o fluxo da via.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A melhor relação entre mecânica básica e segurança viária é entender que:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conhecimentos básicos ajudam o condutor a perceber riscos mecânicos e agir preventivamente.",
+      "explicacaoDetalhada": "Mecânica básica, no contexto da formação do condutor, não busca formar um reparador, mas permitir percepção mínima de anormalidades, importância da manutenção e condutas seguras diante de equipamentos e panes simples.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-equipamentos-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-equipamentos-003",
+      "alternativas": [
+        { "texto": "Mecânica básica é irrelevante para a segurança do condutor comum.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conhecimentos básicos ajudam a prevenir riscos e a reagir com prudência.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só mecânicos profissionais precisam compreender panes simples.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Basta saber dirigir; o estado do veículo não interfere na segurança.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

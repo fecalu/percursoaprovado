@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Percepção de risco e prevenção de sinistros",
+    "qtde": 10,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre leitura preventiva do ambiente viário e redução de riscos."
+  },
+  "questoes": [
+    {
+      "enunciado": "Direção defensiva pode ser entendida, em termos práticos, como a forma de dirigir em que o condutor:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Na direção defensiva, o condutor antecipa riscos e adota atitudes para evitá-los.",
+      "explicacaoDetalhada": "A direção defensiva não depende apenas de reagir a um perigo já instalado. Ela se baseia em atenção, previsão e adoção de comportamentos que diminuam a chance de sinistros no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-001",
+      "alternativas": [
+        { "texto": "Conduz de forma agressiva para não perder tempo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Prevê situações de risco e procura evitá-las com antecedência.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Depende exclusivamente da habilidade dos outros motoristas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Só reduz a velocidade quando ocorre um acidente à frente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Percepção de risco, na direção defensiva, significa principalmente:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Percepção de risco é a capacidade de identificar fatores que podem gerar perigo antes que o problema aconteça.",
+      "explicacaoDetalhada": "Conduzir com segurança exige observar a via, os demais usuários, o clima, o veículo e as condições do entorno. Perceber risco é notar sinais de perigo antes que a situação saia do controle.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-002",
+      "alternativas": [
+        { "texto": "Acreditar que nada de grave ocorrerá durante o trajeto.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Identificar antecipadamente fatores que podem provocar perigo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Esperar a colisão para então frear.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dirigir mais rápido para sair logo da via.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Um condutor defensivo observa o trânsito à frente, aos lados e pelos retrovisores porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A observação ampla melhora a capacidade de antecipar riscos e decidir com segurança.",
+      "explicacaoDetalhada": "A direção defensiva depende de leitura constante do ambiente. Observar apenas um ponto da via reduz a percepção de risco e aumenta a chance de surpresa diante de mudanças no tráfego.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-003",
+      "alternativas": [
+        { "texto": "Isso permite ver melhor o acabamento do veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Ajuda a antecipar situações e agir antes que o risco se concretize.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substitui a necessidade de manter distância de segurança.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Serve apenas para evitar multas de estacionamento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Entre duas atitudes abaixo, qual representa melhor a lógica da prevenção de sinistros?",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Prevenir sinistros significa adotar conduta segura antes que o perigo se consolide.",
+      "explicacaoDetalhada": "A base da direção defensiva é agir antes do problema. Isso inclui reduzir velocidade, aumentar atenção e adaptar a condução às condições da via, do clima e do tráfego.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-004",
+      "alternativas": [
+        { "texto": "Conduzir normalmente até que alguém buzine ou freie à frente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Ajustar a condução ao menor sinal de risco percebido.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Esperar ocorrer a derrapagem para corrigir o volante.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Acelerar para sair rapidamente do problema.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Conduzir presumindo que os outros usuários sempre agirão corretamente é postura:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A direção defensiva não depende da perfeição do comportamento alheio.",
+      "explicacaoDetalhada": "O condutor defensivo sabe que os demais podem errar, distrair-se ou agir de modo imprevisível. Por isso, ele mantém margem de segurança e não baseia sua condução em confiança absoluta nos outros.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-005",
+      "alternativas": [
+        { "texto": "Correta, pois o CTB garante comportamento perfeito de todos.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Arriscada, porque ignora a possibilidade de erro dos demais.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aceitável apenas em vias pouco movimentadas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Recomendada somente para motoristas experientes.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao perceber um possível risco à frente, a atitude defensiva inicial mais adequada costuma ser:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A primeira resposta defensiva normalmente envolve redução de velocidade e aumento da atenção.",
+      "explicacaoDetalhada": "Nem todo risco exige parada imediata, mas quase sempre exige ganho de tempo para decisão. Reduzir a velocidade e aumentar a atenção amplia a margem de segurança e evita reações bruscas.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-006",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para sair logo da situação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e reavaliar o ambiente.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ignorar o risco até que ele se confirme.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Fechar os vidros e manter a mesma condução.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O condutor que observa a presença de pedestres próximos à pista deve entender isso como:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pedestres próximos à via representam risco potencial e exigem conduta mais cuidadosa.",
+      "explicacaoDetalhada": "A proximidade de pedestres é um indício claro de possível travessia ou movimentação inesperada. A leitura defensiva manda reduzir velocidade e manter o veículo sob controle em condição de resposta rápida.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-007",
+      "alternativas": [
+        { "texto": "Sinal de que a via está completamente livre.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Risco potencial que exige mais cautela.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Autorização para usar a buzina continuamente.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Situação irrelevante, desde que o pedestre esteja na calçada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No contexto da direção defensiva, distração ao volante é problemática porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A distração reduz a capacidade de perceber e antecipar perigos.",
+      "explicacaoDetalhada": "A prevenção de sinistros depende de atenção contínua. Quando o condutor se distrai, perde tempo de reação, deixa de notar sinais de risco e compromete a segurança da decisão.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-008",
+      "alternativas": [
+        { "texto": "Melhora a capacidade de agir sob pressão.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduz a percepção de risco e o tempo útil para reagir.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só afeta quem dirige em rodovia.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "É irrelevante se o veículo tiver direção hidráulica.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Um dos sinais de direção defensiva madura é o condutor:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor maduro não dirige no improviso; ele mantém margem de segurança e previsão.",
+      "explicacaoDetalhada": "Dirigir defensivamente é reduzir a dependência de reflexos de última hora. Isso exige atenção constante, leitura ampla do ambiente e decisões que preservem espaço e tempo para correção segura.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-009",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-009",
+      "alternativas": [
+        { "texto": "Que aposta sempre na habilidade de frear no último instante.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Que preserva tempo e espaço para lidar com imprevistos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Que depende de buzina e aceleração para resolver conflitos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Que dirige mais rápido para sair logo de qualquer risco.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, prevenir sinistros no trânsito significa:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Prevenir sinistros é dirigir de modo a reduzir a probabilidade de ocorrência e a gravidade das consequências.",
+      "explicacaoDetalhada": "A prevenção não elimina todo risco, mas reduz muito sua chance e impacto. Isso ocorre quando o condutor conduz com atenção, velocidade compatível, respeito às regras e leitura ativa do ambiente.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-percepcao-010",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-percepcao-010",
+      "alternativas": [
+        { "texto": "Confiar que o risco desaparecerá sozinho.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Dirigir de forma a diminuir chance e gravidade de ocorrências.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Evitar apenas vias muito movimentadas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir a necessidade de obedecer à sinalização.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

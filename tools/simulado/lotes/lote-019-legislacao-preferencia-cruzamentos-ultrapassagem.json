@@ -1,0 +1,252 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Preferência de passagem, cruzamentos e ultrapassagem",
+    "qtde": 12,
+    "referenciaOficial": "CTB + Portaria SENATRAN 923/2025",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre leitura de prioridade, conduta em cruzamentos e ultrapassagem segura."
+  },
+  "questoes": [
+    {
+      "enunciado": "Em um cruzamento, a preferência de passagem deve ser analisada com base principal em:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalização, regras legais e situação concreta da via orientam a preferência de passagem.",
+      "explicacaoDetalhada": "Preferência não depende de opinião pessoal do condutor. Ela deve ser definida pela sinalização existente, pelas regras do CTB e pelo contexto do cruzamento, sempre com foco na segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-001",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-001",
+      "alternativas": [
+        { "texto": "No tamanho do veículo envolvido.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Na sinalização, nas regras legais e na segurança do caso concreto.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Na pressa de quem chega primeiro.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Na força do motor do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao se aproximar de um cruzamento sem semáforo e sem agente, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "É necessário reduzir a velocidade e avaliar corretamente a situação antes de prosseguir.",
+      "explicacaoDetalhada": "Cruzamentos exigem atenção elevada, mesmo quando parecem simples. O condutor deve aproximar-se em condição de observar os demais usuários, a sinalização existente e as regras aplicáveis àquele ponto.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-002",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-002",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para atravessar antes dos demais.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e avaliar a situação com cautela.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Seguir automaticamente se estiver em via asfaltada.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Confiar apenas no buzinaço dos outros usuários.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A preferência de passagem não dispensa o condutor de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mesmo com preferência, permanece o dever de conduzir com cautela.",
+      "explicacaoDetalhada": "Ter preferência não autoriza avançar sem atenção. O condutor continua responsável por agir de forma prudente e evitar situações de risco previsíveis no cruzamento.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-003",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-003",
+      "alternativas": [
+        { "texto": "Observar a segurança e a movimentação dos demais usuários.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Usar seta ao mudar de direção.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Respeitar a sinalização semafórica quando existir.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Manter atenção no ambiente do cruzamento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ultrapassagem é uma manobra que só deve ser iniciada quando:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A manobra depende de segurança, visibilidade e permissão legal.",
+      "explicacaoDetalhada": "Ultrapassar exige análise do sentido contrário, da sinalização, da velocidade relativa e do espaço disponível. A simples vontade de seguir mais rápido não justifica o início da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-004",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-004",
+      "alternativas": [
+        { "texto": "O condutor estiver impaciente com o veículo da frente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Houver condições seguras e a manobra for permitida.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A via tiver qualquer acostamento disponível.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O veículo ultrapassado reduzir um pouco a velocidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Antes de ultrapassar, o condutor deve verificar principalmente:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "É preciso observar a frente, a retaguarda, a sinalização e o sentido contrário.",
+      "explicacaoDetalhada": "Uma ultrapassagem segura exige leitura ampla da via: se há proibição pela sinalização, se há aproximação de veículos no sentido oposto, se o veículo atrás também pretende ultrapassar e se existe espaço suficiente para concluir a manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-005",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-005",
+      "alternativas": [
+        { "texto": "Somente se o veículo à frente estiver lento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Se há espaço, visibilidade, sinalização permissiva e segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas a potência do próprio motor.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Se os passageiros concordam com a manobra.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Iniciar ultrapassagem em local sem visibilidade suficiente é conduta:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem visibilidade adequada, a ultrapassagem se torna altamente arriscada e incompatível com a direção segura.",
+      "explicacaoDetalhada": "A visibilidade é requisito central da ultrapassagem. Se o condutor não consegue perceber adequadamente o sentido contrário ou o desenvolvimento da via, a manobra não deve ser iniciada.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-006",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-006",
+      "alternativas": [
+        { "texto": "Regular, desde que a velocidade seja alta.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Arriscada e incompatível com a segurança da manobra.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aceitável em qualquer rodovia de pista simples.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Recomendada para diminuir o tempo no trecho.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao perceber que outro veículo pretende ultrapassar, o condutor do veículo à frente deve agir com:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O comportamento do ultrapassado deve favorecer a segurança, sem criar disputa ou risco adicional.",
+      "explicacaoDetalhada": "A ultrapassagem é uma interação entre veículos. O condutor ultrapassado deve evitar atitudes que dificultem a manobra e comprometam a segurança, mantendo comportamento previsível e responsável.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-007",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-007",
+      "alternativas": [
+        { "texto": "Competição, aumentando a velocidade para impedir a manobra.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conduta previsível, sem dificultar a ultrapassagem segura.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Mudança brusca de faixa para testar o outro motorista.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Parada imediata no leito carroçável.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em cruzamentos, a decisão de avançar deve levar em conta também:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Além da preferência, é preciso observar pedestres, ciclistas e demais usuários vulneráveis.",
+      "explicacaoDetalhada": "A análise do cruzamento não envolve apenas veículos. Usuários vulneráveis podem estar atravessando ou prestes a cruzar, e sua proteção integra a leitura correta da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-008",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-008",
+      "alternativas": [
+        { "texto": "A existência de usuários vulneráveis no local.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "A vontade do veículo que estiver buzinando mais.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "A cor do veículo com maior porte.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A possibilidade de ocupar a contramão temporariamente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ultrapassagem concluída com segurança pressupõe que o condutor retorne à faixa original:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O retorno só deve acontecer quando houver espaço e visibilidade suficientes.",
+      "explicacaoDetalhada": "Voltar cedo demais à faixa pode gerar fechamento do veículo ultrapassado. Por isso, o retorno deve ocorrer apenas quando a manobra já estiver consolidada e houver distância segura.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-009",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-009",
+      "alternativas": [
+        { "texto": "Logo após igualar a dianteira ao veículo ultrapassado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Somente quando houver distância suficiente e segurança no retorno.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Sem sinalizar, para não confundir os demais.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Apenas após acionar o pisca-alerta.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Mesmo tendo prioridade, forçar passagem em cruzamento sem assegurar as condições de segurança é:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Prioridade de passagem não autoriza comportamento imprudente.",
+      "explicacaoDetalhada": "A preferência organiza o fluxo, mas não elimina o dever de prudência. O condutor que força passagem sem observar o risco atua de forma incompatível com a segurança exigida no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-010",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-010",
+      "alternativas": [
+        { "texto": "Correto, porque a prioridade elimina o risco.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Inadequado, pois prioridade não dispensa cautela.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aceitável apenas à noite.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Permitido sempre que o outro veículo for menor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, a ultrapassagem segura depende de o condutor agir com:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ultrapassar com segurança exige leitura completa da via e decisão responsável.",
+      "explicacaoDetalhada": "A ultrapassagem é uma das manobras mais críticas da circulação. Ela exige avaliação técnica do espaço, do tempo, da visibilidade, da sinalização e do comportamento dos demais usuários.",
+      "videoUrl": null,
+      "ordemExibicao": 10,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-011",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-011",
+      "alternativas": [
+        { "texto": "Impulsividade e confiança excessiva.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Leitura completa da situação e decisão prudente.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Pressa para liberar logo a faixa contrária.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dependência exclusiva da potência do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta de preferência de passagem e ultrapassagem no trânsito exige do condutor principalmente:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve unir conhecimento da regra e avaliação responsável do contexto real.",
+      "explicacaoDetalhada": "Saber a regra abstrata não basta. No trânsito real, é necessário interpretar a sinalização, o comportamento dos demais, a visibilidade e os riscos concretos para decidir de forma segura e legal.",
+      "videoUrl": null,
+      "ordemExibicao": 11,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-012",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-012",
+      "alternativas": [
+        { "texto": "Aplicar a regra de modo automático, sem olhar o entorno.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Combinar regra legal com avaliação real do contexto.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Seguir apenas a iniciativa do veículo maior.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Priorizar sempre a rapidez sobre a segurança.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

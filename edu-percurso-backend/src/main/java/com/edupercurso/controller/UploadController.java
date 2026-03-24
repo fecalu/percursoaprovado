@@ -29,6 +29,18 @@ public class UploadController {
         ));
     }
 
+    @PostMapping(value = "/audios", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UploadResponse> uploadAudio(@RequestPart("file") MultipartFile file) {
+        StorageService.StoredFile storedFile = storageService.salvarAudio(file);
+        return ResponseEntity.ok(new UploadResponse(
+                storedFile.url(),
+                storedFile.fileName(),
+                storedFile.contentType(),
+                storedFile.size()
+        ));
+    }
+
     @PostMapping(value = "/videos/bunny", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BunnyVideoUploadResponse> uploadVideoToBunny(

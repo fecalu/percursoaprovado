@@ -83,6 +83,9 @@ public class PercursoService {
                 .thumbnailUrl(request.getThumbnailUrl())
                 .ordemExibicao(request.getOrdemExibicao() == null ? 0 : request.getOrdemExibicao())
                 .destaque(request.isDestaque())
+                .configuracaoPontosAtencao(request.getConfiguracaoPontosAtencao() == null
+                        ? Percurso.ConfiguracaoPontosAtencao.AUTOMATICO
+                        : request.getConfiguracaoPontosAtencao())
                 .build();
         percurso.substituirPontosAtencao(montarPontosAtencao(request.getPontosAtencao()));
 
@@ -108,6 +111,9 @@ public class PercursoService {
         percurso.setThumbnailUrl(request.getThumbnailUrl());
         percurso.setOrdemExibicao(request.getOrdemExibicao() == null ? 0 : request.getOrdemExibicao());
         percurso.setDestaque(request.isDestaque());
+        percurso.setConfiguracaoPontosAtencao(request.getConfiguracaoPontosAtencao() == null
+                ? Percurso.ConfiguracaoPontosAtencao.AUTOMATICO
+                : request.getConfiguracaoPontosAtencao());
         percurso.substituirPontosAtencao(montarPontosAtencao(request.getPontosAtencao()));
 
         return PercursoDTO.Response.from(percursoRepository.save(percurso));
@@ -179,6 +185,7 @@ public class PercursoService {
                         .descricaoDetalhada(normalizarTexto(item.getDescricaoDetalhada()))
                         .tipo(item.getTipo() == null ? PontoAtencaoPercurso.Tipo.DICA_IMPORTANTE : item.getTipo())
                         .imagemUrl(normalizarTexto(item.getImagemUrl()))
+                        .audioUrl(normalizarTexto(item.getAudioUrl()))
                         .videoUrl(normalizarTexto(item.getVideoUrl()))
                         .modoExibicao(item.getModoExibicao() == null ? PontoAtencaoPercurso.ModoExibicao.CLIQUE : item.getModoExibicao())
                         .ordemExibicao(item.getOrdemExibicao() == null ? 0 : item.getOrdemExibicao())

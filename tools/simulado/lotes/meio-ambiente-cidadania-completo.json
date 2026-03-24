@@ -1,0 +1,1240 @@
+{
+  "meta": {
+    "tema": "MEIO_AMBIENTE_CIDADANIA",
+    "qtde": 30,
+    "lotes": [
+      {
+        "numero": 41,
+        "arquivo": "lote-041-meio-ambiente-poluicao-emissoes-ruido.json",
+        "subtema": "Poluição, emissão de gases, fumaça e ruído",
+        "qtde": 8
+      },
+      {
+        "numero": 42,
+        "arquivo": "lote-042-meio-ambiente-manutencao-preservacao-ambiental.json",
+        "subtema": "Manutenção preventiva para preservação ambiental",
+        "qtde": 5
+      },
+      {
+        "numero": 43,
+        "arquivo": "lote-043-meio-ambiente-convivio-social-respeito-comportamento.json",
+        "subtema": "Convívio social, respeito e comportamento no trânsito",
+        "qtde": 7
+      },
+      {
+        "numero": 44,
+        "arquivo": "lote-044-meio-ambiente-cidadania-responsabilidade-civil-criminal.json",
+        "subtema": "Cidadania, responsabilidade civil e criminal do condutor",
+        "qtde": 5
+      },
+      {
+        "numero": 45,
+        "arquivo": "lote-045-meio-ambiente-solidariedade-etica-transito.json",
+        "subtema": "Comportamento solidário e ética no trânsito",
+        "qtde": 5
+      }
+    ]
+  },
+  "questoes": [
+    {
+      "enunciado": "A emissão excessiva de fumaça por um veículo é um problema porque:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Fumaça excessiva indica poluição e possível problema de manutenção.",
+      "explicacaoDetalhada": "Quando o veículo emite fumaça em excesso, ele contribui mais para a poluição do ar e pode ainda sinalizar falha de funcionamento. Isso afeta a saúde coletiva e a qualidade ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-001",
+      "alternativas": [
+        {
+          "texto": "Só altera a estética do veículo, sem impacto externo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Aumenta a poluição do ar e pode indicar mau funcionamento.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Melhora o desempenho do motor em subidas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "É normal em qualquer veículo em movimento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ruído excessivo emitido por veículo ou equipamento de som representa:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Barulho excessivo também é forma de poluição e afeta o convívio social.",
+      "explicacaoDetalhada": "A poluição sonora prejudica o bem-estar, o descanso e a saúde das pessoas. No trânsito, o respeito ao silêncio e ao ambiente urbano também faz parte da responsabilidade do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-002",
+      "alternativas": [
+        {
+          "texto": "Apenas uma forma de expressão sem efeito sobre terceiros.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Uma forma de poluição que prejudica o convívio social.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Um detalhe irrelevante fora de áreas residenciais.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Um direito absoluto do proprietário do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista ambiental, manter o veículo regulado ajuda a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Veículo regulado tende a poluir menos e funcionar com mais eficiência.",
+      "explicacaoDetalhada": "A regulagem adequada favorece melhor queima de combustível, menor emissão de poluentes e funcionamento mais estável do veículo. Isso reduz impacto ambiental e melhora o uso responsável do automóvel.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-003",
+      "alternativas": [
+        {
+          "texto": "Aumentar ruídos para alertar outros motoristas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir emissões e melhorar a eficiência do funcionamento.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Eliminar totalmente qualquer necessidade de manutenção.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Permitir uso irrestrito de buzina e som automotivo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Entre as condutas abaixo, qual se relaciona melhor com redução de poluição no trânsito?",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Direção e manutenção conscientes ajudam a reduzir o impacto ambiental do veículo.",
+      "explicacaoDetalhada": "A redução da poluição no trânsito depende tanto do estado do veículo quanto do modo como ele é utilizado. Cuidar da manutenção e dirigir com prudência contribuem para menor desgaste e emissão.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-004",
+      "alternativas": [
+        {
+          "texto": "Ignorar sinais de mau funcionamento do motor.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Fazer manutenção preventiva e evitar uso agressivo do veículo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Acelerar bruscamente em toda saída para economizar combustível.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Usar escapamento alterado para aumentar o som do carro.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A poluição do ar gerada por veículos afeta principalmente:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Emissões veiculares prejudicam o ambiente e a saúde das pessoas.",
+      "explicacaoDetalhada": "A emissão de gases e partículas por veículos impacta a qualidade do ar, o ambiente urbano e a saúde coletiva, especialmente em locais de tráfego intenso. Por isso, a condução responsável tem também dimensão ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-005",
+      "alternativas": [
+        {
+          "texto": "Somente a aparência externa da cidade.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O meio ambiente e a saúde das pessoas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas os veículos mais antigos estacionados.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Exclusivamente o consumo interno do motorista.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O condutor que mantém escapamento adulterado com ruído excessivo desrespeita:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ruído excessivo agride o ambiente urbano e o convívio social.",
+      "explicacaoDetalhada": "A modificação que aumenta indevidamente o ruído do veículo afeta o sossego público e o respeito aos demais usuários e moradores. O uso responsável do veículo inclui evitar esse tipo de impacto desnecessário.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-006",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-006",
+      "alternativas": [
+        {
+          "texto": "Apenas uma convenção estética sem relevância social.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O direito coletivo ao ambiente sonoro equilibrado e ao respeito no trânsito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente a preferência de motoristas mais antigos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Uma regra aplicável apenas a veículos de carga.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Reduzir emissões de poluentes no trânsito é uma responsabilidade que envolve:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor também participa da proteção ambiental por meio de suas escolhas de uso e manutenção.",
+      "explicacaoDetalhada": "A proteção ambiental no trânsito não depende apenas do poder público ou da indústria. O condutor participa diretamente quando cuida do veículo, evita condutas agressivas e valoriza o funcionamento adequado dos sistemas.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-007",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-007",
+      "alternativas": [
+        {
+          "texto": "Somente fabricantes e oficinas, nunca o motorista.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O poder público, as empresas e também o comportamento do condutor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas cidades grandes com muito congestionamento.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Exclusivamente quem utiliza combustível fóssil em rodovias.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No contexto da educação para o trânsito, falar em poluição veicular significa considerar:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O impacto do veículo não é só mecânico ou econômico; também é ambiental e social.",
+      "explicacaoDetalhada": "A poluição veicular inclui emissão de gases, fumaça, partículas e ruído. Ela afeta o ar, o bem-estar coletivo e a saúde das pessoas, razão pela qual faz parte da formação responsável do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-008",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-008",
+      "alternativas": [
+        {
+          "texto": "Apenas a sujeira externa que fica no carro após a chuva.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Os efeitos ambientais e sociais das emissões e ruídos do veículo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente o consumo de combustível em viagens curtas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Questões sem relação com a responsabilidade do condutor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A manutenção preventiva contribui para a preservação ambiental porque pode:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Veículo bem cuidado tende a funcionar de forma mais limpa e eficiente.",
+      "explicacaoDetalhada": "Manutenção preventiva ajuda a evitar emissão excessiva de fumaça, falhas de combustão e outras situações que aumentam o impacto ambiental do veículo. Cuidar do veículo é também uma atitude de responsabilidade ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-001",
+      "alternativas": [
+        {
+          "texto": "Aumentar o ruído do veículo para melhorar a percepção no trânsito.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir falhas que elevam poluição e desperdício.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Eliminar toda necessidade de atenção do motorista.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir completamente a legislação ambiental.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Um veículo sem manutenção adequada pode prejudicar o meio ambiente ao:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Defeitos e desregulagens podem aumentar emissão de poluentes e desperdícios.",
+      "explicacaoDetalhada": "Problemas mecânicos e ausência de cuidado preventivo podem resultar em maior emissão de gases, fumaça, ruído e funcionamento ineficiente. Isso amplia o impacto ambiental do uso do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-002",
+      "alternativas": [
+        {
+          "texto": "Emitir mais poluentes e operar de forma menos eficiente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Melhorar a qualidade do ar em áreas urbanas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir automaticamente o consumo de combustível.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Diminuir qualquer necessidade de fiscalização.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista ambiental, adiar por muito tempo cuidados básicos do veículo é inadequado porque:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pequenos problemas mecânicos podem se transformar em fontes maiores de impacto ambiental.",
+      "explicacaoDetalhada": "Quando o condutor posterga verificações e ajustes, falhas simples podem evoluir e aumentar emissões, ruídos e desperdício. A prevenção reduz esse acúmulo de danos ao veículo e ao ambiente.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-003",
+      "alternativas": [
+        {
+          "texto": "Problemas pequenos podem evoluir e ampliar o impacto ambiental.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Isso não interfere no ambiente, apenas no conforto interno.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "O meio ambiente só é afetado por veículos muito novos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Só há efeito ambiental se o veículo rodar em estrada de terra.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Cuidar do veículo como forma de preservação ambiental significa compreender que:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O estado mecânico do veículo interfere no impacto ambiental de seu uso.",
+      "explicacaoDetalhada": "A preservação ambiental no trânsito não se resume a regras abstratas. Ela também depende do comportamento cotidiano do condutor, inclusive na forma como ele cuida do funcionamento e da conservação do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-004",
+      "alternativas": [
+        {
+          "texto": "Mecânica e meio ambiente são temas totalmente separados.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Conservação do veículo e preservação ambiental estão relacionadas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só oficinas têm responsabilidade ambiental no trânsito.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O condutor não influencia o impacto ambiental do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A manutenção preventiva, além de favorecer a segurança, também ajuda a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Segurança e preservação ambiental caminham juntas no uso responsável do veículo.",
+      "explicacaoDetalhada": "Ao manter o veículo em condições adequadas de funcionamento, o condutor reduz riscos à circulação e também contribui para diminuir emissões, ruídos e desperdícios. A manutenção tem dimensão de segurança e de cidadania ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-005",
+      "alternativas": [
+        {
+          "texto": "Aumentar o impacto ambiental do uso do veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir poluição e desperdícios ligados ao mau funcionamento.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Tornar desnecessário qualquer cuidado com o trânsito.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Permitir uso agressivo do veículo sem consequências.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Respeitar os demais usuários do trânsito significa, entre outras atitudes:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O trânsito seguro depende de cooperação e respeito mútuo.",
+      "explicacaoDetalhada": "O espaço viário é compartilhado. Por isso, o condutor deve adotar comportamento que considere a segurança, a dignidade e os direitos dos demais usuários, evitando agressividade e imposição de vontade.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-001",
+      "alternativas": [
+        {
+          "texto": "Disputar espaço para provar habilidade.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Conduzir com consideração, previsibilidade e respeito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Usar a buzina para impor prioridade moral.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dirigir apenas pensando na própria pressa.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No convívio social no trânsito, a pressa do condutor não justifica:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Urgência pessoal não autoriza conduta arriscada ou desrespeitosa.",
+      "explicacaoDetalhada": "O fato de o condutor estar apressado não elimina sua responsabilidade com a vida e a integridade dos demais. A direção responsável exige autocontrole, mesmo em situações de pressa ou frustração.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-002",
+      "alternativas": [
+        {
+          "texto": "Respeitar limites e demais usuários da via.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Condutas agressivas e perigosas contra outros usuários.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Planejar melhor o tempo de deslocamento.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Redobrar atenção em pontos críticos.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma atitude de respeito no trânsito é:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Respeito se manifesta em escolhas seguras e cooperativas.",
+      "explicacaoDetalhada": "O comportamento no trânsito não se resume a obedecer sinais. Também envolve civilidade, paciência, previsibilidade e disposição para compartilhar o espaço com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-003",
+      "alternativas": [
+        {
+          "texto": "Fechar passagem para punir outro motorista.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Manter comportamento previsível e sem hostilidade.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Responder erro alheio com manobra brusca.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ignorar pedestres para não perder tempo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A convivência social no trânsito fica prejudicada quando o condutor:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Agressividade e intolerância deterioram a segurança coletiva.",
+      "explicacaoDetalhada": "O trânsito é um ambiente de interação constante. Quando o condutor transforma divergências em agressividade, aumenta conflitos e risco de acidentes, prejudicando toda a coletividade.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-004",
+      "alternativas": [
+        {
+          "texto": "Age com tolerância e atenção ao coletivo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Usa o veículo como instrumento de disputa ou intimidação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Sinaliza adequadamente suas intenções.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Reconhece a vulnerabilidade dos demais usuários.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No trânsito, comportamento cidadão envolve:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cidadania no trânsito junta regra, responsabilidade e respeito humano.",
+      "explicacaoDetalhada": "Ser cidadão no trânsito é reconhecer que cada decisão ao volante afeta outras pessoas. Isso exige obediência às regras, consideração pelos demais e compromisso com a segurança coletiva.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-005",
+      "alternativas": [
+        {
+          "texto": "Cumprir regras apenas quando há fiscalização.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Unir respeito às normas com responsabilidade social.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Priorizar o próprio interesse em qualquer circunstância.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Separar totalmente direção e convivência humana.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Um condutor que aceita ceder passagem com segurança, sem disputa desnecessária, demonstra:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cooperação e serenidade reduzem conflitos no trânsito.",
+      "explicacaoDetalhada": "Nem toda situação de circulação precisa virar confronto. Em muitos momentos, a cooperação entre usuários melhora o fluxo e reduz o risco, desde que a conduta permaneça segura e previsível.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-006",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-006",
+      "alternativas": [
+        {
+          "texto": "Fraqueza incompatível com a condução segura.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Maturidade, cooperação e respeito no trânsito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Desconhecimento das regras de circulação.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Obrigação restrita a motoristas iniciantes.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos de convívio social, dirigir de forma responsável significa compreender que:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O trânsito é um espaço coletivo, e não extensão da vontade individual.",
+      "explicacaoDetalhada": "A responsabilidade no trânsito nasce do reconhecimento de que cada usuário divide um mesmo espaço e pode afetar diretamente a segurança e o bem-estar dos outros. Por isso, o condutor deve conter impulsos e agir com senso de coletividade.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-007",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-007",
+      "alternativas": [
+        {
+          "texto": "A via é espaço privado do motorista mais habilidoso.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O trânsito é espaço coletivo e exige autocontrole e respeito mútuo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Cada condutor responde apenas por sua pressa.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Boas intenções dispensam a necessidade de regras.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A responsabilidade do condutor no trânsito não é apenas pessoal, porque suas ações podem:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A condução afeta a segurança, o patrimônio e a vida de outras pessoas.",
+      "explicacaoDetalhada": "Dirigir não é um ato isolado. As escolhas do condutor podem causar danos físicos, materiais e sociais a terceiros, o que justifica a ideia de responsabilidade no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-001",
+      "alternativas": [
+        {
+          "texto": "Atingir apenas quem está dentro do próprio veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Gerar consequências para terceiros e para a coletividade.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Produzir efeitos somente administrativos e nunca humanos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Deixar de ter relevância quando o veículo está regularizado.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A ideia de responsabilidade civil e criminal no trânsito reforça que o condutor deve:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conduzir exige consciência das consequências jurídicas e humanas dos próprios atos.",
+      "explicacaoDetalhada": "Além de regras de circulação, o trânsito envolve responsabilidade por danos e por condutas graves. Essa noção reforça a importância de dirigir com prudência, respeito e consciência das consequências de uma ação imprudente.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-002",
+      "alternativas": [
+        {
+          "texto": "Desconsiderar os efeitos de sua conduta sobre outras pessoas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Dirigir sabendo que suas ações podem gerar consequências amplas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Acreditar que a intenção elimina qualquer consequência.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Preocupar-se apenas com o estado do próprio veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista da cidadania no trânsito, causar dano a outra pessoa por imprudência é relevante porque:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A imprudência pode gerar danos humanos, materiais e consequências jurídicas.",
+      "explicacaoDetalhada": "O trânsito envolve dever de cuidado. Quando esse dever é violado por imprudência, os efeitos podem alcançar vidas, patrimônio, confiança social e também a esfera de responsabilidade do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-003",
+      "alternativas": [
+        {
+          "texto": "É problema apenas da vítima, sem relação com o dever do motorista.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A imprudência pode gerar danos e consequências para o condutor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Não há relevância se o motorista não tiver intenção de ferir.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Só importa quando há grande prejuízo material.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A responsabilidade cidadã do motorista começa:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela não começa só no acidente; começa antes, na forma de conduzir.",
+      "explicacaoDetalhada": "Responsabilidade no trânsito não surge apenas depois de um dano. Ela existe desde o momento em que o condutor assume o volante, porque cada decisão tomada pode proteger ou expor outras pessoas a risco.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-004",
+      "alternativas": [
+        {
+          "texto": "Somente após a ocorrência de um acidente grave.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Desde o início da condução, pelas escolhas feitas no trânsito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas quando há fiscalização policial.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Somente em viagens longas e interestaduais.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em educação para o trânsito, falar em responsabilidade civil e criminal do condutor serve para:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O tema reforça a seriedade dos deveres assumidos ao conduzir um veículo.",
+      "explicacaoDetalhada": "O objetivo não é apenas intimidar o condutor, mas desenvolver consciência de que dirigir envolve deveres éticos, sociais e legais. As consequências da imprudência podem ser amplas e duradouras.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-responsabilidade-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-responsabilidade-005",
+      "alternativas": [
+        {
+          "texto": "Transformar o trânsito em disputa entre condutores e Estado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Mostrar que dirigir envolve deveres e consequências reais.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir a necessidade de direção defensiva.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a importância da cidadania no trânsito.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Comportamento solidário no trânsito pode ser entendido como:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Solidariedade no trânsito significa agir considerando a segurança e a dignidade dos outros.",
+      "explicacaoDetalhada": "A solidariedade aparece em atitudes como paciência, cooperação, ajuda responsável e respeito aos usuários mais vulneráveis. Ela se opõe à lógica da hostilidade e da competição desnecessária.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-001",
+      "alternativas": [
+        {
+          "texto": "Apenas permitir que outros veículos passem na frente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Agir com cooperação e respeito à segurança dos demais.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Evitar toda interação com outros usuários da via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dirigir mais devagar apenas quando houver fiscalização.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A ética no trânsito se manifesta quando o condutor:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ética no trânsito envolve coerência entre regra, respeito e cuidado com o outro.",
+      "explicacaoDetalhada": "Agir eticamente no trânsito não é apenas evitar punição, mas reconhecer o valor da vida e do espaço compartilhado. Isso inclui honestidade de conduta, autocontrole e responsabilidade nas escolhas.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-002",
+      "alternativas": [
+        {
+          "texto": "Cumpre regras apenas quando teme ser multado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Age corretamente mesmo quando não há fiscalização imediata.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Coloca o próprio interesse acima de qualquer impacto sobre terceiros.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Usa a vantagem do veículo para intimidar quem é mais frágil.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao perceber dificuldade de outro usuário da via, uma resposta solidária e segura pode ser:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Solidariedade no trânsito deve ser compatível com segurança e prudência.",
+      "explicacaoDetalhada": "Ajudar no trânsito não significa agir de forma improvisada ou insegura. A conduta solidária adequada é aquela que respeita regras, preserva a segurança e facilita a convivência sem criar novo risco.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-003",
+      "alternativas": [
+        {
+          "texto": "Aumentar a velocidade para sair logo da situação.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Adotar conduta cooperativa sem comprometer a segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Ignorar o problema por não ser responsabilidade do condutor.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parar de qualquer forma no meio da via para ajudar.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A ética no trânsito é incompatível com a ideia de que:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A lógica do “cada um por si” enfraquece a segurança coletiva.",
+      "explicacaoDetalhada": "O trânsito exige convivência cooperativa. Quando o condutor entende a via apenas como espaço de vantagem individual, desconsidera o valor da vida, do respeito e da responsabilidade compartilhada.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-004",
+      "alternativas": [
+        {
+          "texto": "A segurança é construída coletivamente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O espaço viário deve ser compartilhado com respeito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Vale tudo para atender ao interesse individual do motorista.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "A vulnerabilidade do outro deve ser considerada.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No trânsito, solidariedade e ética são importantes porque ajudam a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Esses valores fortalecem a segurança e a confiança entre os usuários da via.",
+      "explicacaoDetalhada": "Quando o trânsito é vivido com cooperação, empatia e responsabilidade, há menos conflito, menos agressividade e mais proteção à vida. Ética e solidariedade não são acessórios; são parte da segurança viária.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-etica-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-etica-005",
+      "alternativas": [
+        {
+          "texto": "Transformar a circulação em disputa permanente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Fortalecer uma convivência mais segura e humana.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Reduzir a importância das regras de trânsito.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir a necessidade de atenção e prudência.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    }
+  ]
+}

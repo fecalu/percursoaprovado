@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "tema": "MEIO_AMBIENTE_CIDADANIA",
+    "subtema": "Convívio social, respeito e comportamento no trânsito",
+    "qtde": 7,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Meio ambiente e convívio social",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre convivência respeitosa, autocontrole e responsabilidade social no trânsito."
+  },
+  "questoes": [
+    {
+      "enunciado": "Respeitar os demais usuários do trânsito significa, entre outras atitudes:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O trânsito seguro depende de cooperação e respeito mútuo.",
+      "explicacaoDetalhada": "O espaço viário é compartilhado. Por isso, o condutor deve adotar comportamento que considere a segurança, a dignidade e os direitos dos demais usuários, evitando agressividade e imposição de vontade.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-001",
+      "alternativas": [
+        { "texto": "Disputar espaço para provar habilidade.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conduzir com consideração, previsibilidade e respeito.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar a buzina para impor prioridade moral.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dirigir apenas pensando na própria pressa.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No convívio social no trânsito, a pressa do condutor não justifica:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Urgência pessoal não autoriza conduta arriscada ou desrespeitosa.",
+      "explicacaoDetalhada": "O fato de o condutor estar apressado não elimina sua responsabilidade com a vida e a integridade dos demais. A direção responsável exige autocontrole, mesmo em situações de pressa ou frustração.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-002",
+      "alternativas": [
+        { "texto": "Respeitar limites e demais usuários da via.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Condutas agressivas e perigosas contra outros usuários.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Planejar melhor o tempo de deslocamento.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Redobrar atenção em pontos críticos.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma atitude de respeito no trânsito é:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Respeito se manifesta em escolhas seguras e cooperativas.",
+      "explicacaoDetalhada": "O comportamento no trânsito não se resume a obedecer sinais. Também envolve civilidade, paciência, previsibilidade e disposição para compartilhar o espaço com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-003",
+      "alternativas": [
+        { "texto": "Fechar passagem para punir outro motorista.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Manter comportamento previsível e sem hostilidade.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Responder erro alheio com manobra brusca.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Ignorar pedestres para não perder tempo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A convivência social no trânsito fica prejudicada quando o condutor:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Agressividade e intolerância deterioram a segurança coletiva.",
+      "explicacaoDetalhada": "O trânsito é um ambiente de interação constante. Quando o condutor transforma divergências em agressividade, aumenta conflitos e risco de acidentes, prejudicando toda a coletividade.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-004",
+      "alternativas": [
+        { "texto": "Age com tolerância e atenção ao coletivo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Usa o veículo como instrumento de disputa ou intimidação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Sinaliza adequadamente suas intenções.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Reconhece a vulnerabilidade dos demais usuários.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No trânsito, comportamento cidadão envolve:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cidadania no trânsito junta regra, responsabilidade e respeito humano.",
+      "explicacaoDetalhada": "Ser cidadão no trânsito é reconhecer que cada decisão ao volante afeta outras pessoas. Isso exige obediência às regras, consideração pelos demais e compromisso com a segurança coletiva.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-005",
+      "alternativas": [
+        { "texto": "Cumprir regras apenas quando há fiscalização.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Unir respeito às normas com responsabilidade social.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Priorizar o próprio interesse em qualquer circunstância.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Separar totalmente direção e convivência humana.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Um condutor que aceita ceder passagem com segurança, sem disputa desnecessária, demonstra:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cooperação e serenidade reduzem conflitos no trânsito.",
+      "explicacaoDetalhada": "Nem toda situação de circulação precisa virar confronto. Em muitos momentos, a cooperação entre usuários melhora o fluxo e reduz o risco, desde que a conduta permaneça segura e previsível.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-006",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-006",
+      "alternativas": [
+        { "texto": "Fraqueza incompatível com a condução segura.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Maturidade, cooperação e respeito no trânsito.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Desconhecimento das regras de circulação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Obrigação restrita a motoristas iniciantes.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos de convívio social, dirigir de forma responsável significa compreender que:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O trânsito é um espaço coletivo, e não extensão da vontade individual.",
+      "explicacaoDetalhada": "A responsabilidade no trânsito nasce do reconhecimento de que cada usuário divide um mesmo espaço e pode afetar diretamente a segurança e o bem-estar dos outros. Por isso, o condutor deve conter impulsos e agir com senso de coletividade.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-convivio-007",
+      "fingerprint": "base-propria-oficial-meio-ambiente-convivio-007",
+      "alternativas": [
+        { "texto": "A via é espaço privado do motorista mais habilidoso.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O trânsito é espaço coletivo e exige autocontrole e respeito mútuo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Cada condutor responde apenas por sua pressa.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Boas intenções dispensam a necessidade de regras.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

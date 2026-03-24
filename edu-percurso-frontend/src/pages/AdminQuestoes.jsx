@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { questaoService } from '../services/api'
 import { useToast } from '../hooks/useToast'
@@ -25,6 +25,7 @@ const TEMAS = [
 ]
 
 const STATUS = ['RASCUNHO', 'PUBLICADA', 'ARQUIVADA']
+const ITENS_POR_PAGINA = 50
 
 function resumirEnunciado(texto) {
   if (!texto) return ''
@@ -38,15 +39,42 @@ export default function AdminQuestoes() {
   const [questoes, setQuestoes] = useState([])
   const [filtros, setFiltros] = useState(FILTROS_INICIAIS)
   const [loading, setLoading] = useState(true)
+  const [paginaAtual, setPaginaAtual] = useState(1)
+
+  const totalPaginas = Math.max(1, Math.ceil(questoes.length / ITENS_POR_PAGINA))
+  const inicioPaginacao = (paginaAtual - 1) * ITENS_POR_PAGINA
+  const fimPaginacao = inicioPaginacao + ITENS_POR_PAGINA
+
+  const questoesPaginadas = useMemo(
+    () => questoes.slice(inicioPaginacao, fimPaginacao),
+    [fimPaginacao, inicioPaginacao, questoes]
+  )
+
+  const paginasVisiveis = useMemo(() => {
+    const paginaInicial = Math.max(1, paginaAtual - 2)
+    const paginaFinal = Math.min(totalPaginas, paginaAtual + 2)
+    const paginas = []
+
+    for (let pagina = paginaInicial; pagina <= paginaFinal; pagina += 1) {
+      paginas.push(pagina)
+    }
+
+    return paginas
+  }, [paginaAtual, totalPaginas])
 
   useEffect(() => {
     carregar(FILTROS_INICIAIS)
   }, [])
 
+  useEffect(() => {
+    setPaginaAtual(current => Math.min(current, totalPaginas))
+  }, [totalPaginas])
+
   async function carregar(params = filtros) {
     try {
       setLoading(true)
       setQuestoes(await questaoService.listarAdmin(params))
+      setPaginaAtual(1)
     } finally {
       setLoading(false)
     }
@@ -104,7 +132,7 @@ export default function AdminQuestoes() {
     <>
       {ToastEl}
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className="admin-page-head">
         <div className="page-title">Banco de questoes</div>
         <button className="btn btn-primary" onClick={() => navigate('/admin/questoes/nova')}>
           + Nova questao
@@ -144,8 +172,18 @@ export default function AdminQuestoes() {
           Nenhuma questao encontrada com esses filtros.
         </div>
       ) : (
-        <div className="table-wrap">
-          <div className="table-head" style={{ gridTemplateColumns: '2.7fr 1.1fr 0.8fr 0.95fr 240px' }}>
+        <>
+          <div className="admin-list-toolbar">
+            <div className="mini-copy admin-list-toolbar-copy">
+              Exibindo <strong>{inicioPaginacao + 1}</strong> a <strong>{Math.min(fimPaginacao, questoes.length)}</strong> de <strong>{questoes.length}</strong> questoes
+            </div>
+            <div className="mini-copy admin-list-toolbar-copy">
+              Pagina <strong>{paginaAtual}</strong> de <strong>{totalPaginas}</strong>
+            </div>
+          </div>
+
+          <div className="table-wrap questoes-admin-table-wrap">
+          <div className="table-head questoes-admin-table-head">
             <span>Questao</span>
             <span>Tema</span>
             <span>Dificuldade</span>
@@ -153,9 +191,9 @@ export default function AdminQuestoes() {
             <span>Acoes</span>
           </div>
 
-          {questoes.map(item => (
-            <div key={item.id} className="table-row" style={{ gridTemplateColumns: '2.7fr 1.1fr 0.8fr 0.95fr 240px' }}>
-              <div>
+          {questoesPaginadas.map(item => (
+            <div key={item.id} className="table-row questoes-admin-row">
+              <div className="questoes-admin-cell questoes-admin-cell--questao">
                 <div className="table-name question-row-title">{resumirEnunciado(item.enunciado)}</div>
                 <div className="mini-copy">{item.alternativas.length} alternativas cadastradas</div>
                 <div className="question-inline-meta">
@@ -164,18 +202,28 @@ export default function AdminQuestoes() {
                 </div>
               </div>
 
-              <span className="table-cat">{formatTemaQuestao(item.tema)}</span>
-              <span className="table-cat">{formatDificuldadeQuestao(item.dificuldade)}</span>
-              <span>
+              <div className="questoes-admin-cell">
+                <span className="questoes-admin-label">Tema</span>
+                <span className="table-cat">{formatTemaQuestao(item.tema)}</span>
+              </div>
+
+              <div className="questoes-admin-cell">
+                <span className="questoes-admin-label">Dificuldade</span>
+                <span className="table-cat">{formatDificuldadeQuestao(item.dificuldade)}</span>
+              </div>
+
+              <div className="questoes-admin-cell">
+                <span className="questoes-admin-label">Status</span>
                 <span className={`badge ${getStatusQuestaoBadgeClass(item.status)}`}>
                   {formatStatusQuestao(item.status)}
                 </span>
-              </span>
+              </div>
 
-              <div className="table-actions" style={{ flexWrap: 'wrap' }}>
+              <div className="table-actions questoes-admin-actions">
+                <span className="questoes-admin-label">Acoes</span>
                 <button
                   className="btn btn-ghost"
-                  style={{ fontSize: 12, padding: '5px 12px' }}
+                  type="button"
                   onClick={() => navigate(`/admin/questoes/${item.id}/editar`)}
                 >
                   Editar
@@ -184,7 +232,7 @@ export default function AdminQuestoes() {
                 {item.status === 'PUBLICADA' ? (
                   <button
                     className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: '5px 12px' }}
+                    type="button"
                     onClick={() => arquivar(item.id)}
                   >
                     Arquivar
@@ -192,7 +240,7 @@ export default function AdminQuestoes() {
                 ) : (
                   <button
                     className="btn btn-primary"
-                    style={{ fontSize: 12, padding: '5px 12px' }}
+                    type="button"
                     onClick={() => publicar(item.id)}
                   >
                     Publicar
@@ -201,7 +249,7 @@ export default function AdminQuestoes() {
 
                 <button
                   className="btn btn-danger"
-                  style={{ fontSize: 12, padding: '5px 12px' }}
+                  type="button"
                   onClick={() => excluir(item.id, item.enunciado)}
                 >
                   Excluir
@@ -209,7 +257,44 @@ export default function AdminQuestoes() {
               </div>
             </div>
           ))}
-        </div>
+
+          </div>
+
+          {totalPaginas > 1 && (
+            <div className="admin-pagination">
+              <button
+                className="btn btn-ghost"
+                type="button"
+                disabled={paginaAtual === 1}
+                onClick={() => setPaginaAtual(current => Math.max(1, current - 1))}
+              >
+                Anterior
+              </button>
+
+              <div className="admin-pagination-pages">
+                {paginasVisiveis.map(pagina => (
+                  <button
+                    key={pagina}
+                    className={`admin-pagination-page ${pagina === paginaAtual ? 'is-active' : ''}`}
+                    type="button"
+                    onClick={() => setPaginaAtual(pagina)}
+                  >
+                    {pagina}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                className="btn btn-ghost"
+                type="button"
+                disabled={paginaAtual === totalPaginas}
+                onClick={() => setPaginaAtual(current => Math.min(totalPaginas, current + 1))}
+              >
+                Proxima
+              </button>
+            </div>
+          )}
+        </>
       )}
     </>
   )

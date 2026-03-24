@@ -1,0 +1,252 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Distância de segurança, frenagem e controle de velocidade",
+    "qtde": 12,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre tempo de reação, distância de segurança e adaptação da velocidade."
+  },
+  "questoes": [
+    {
+      "enunciado": "Manter distância de segurança do veículo à frente é importante porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A distância de segurança aumenta o tempo de reação e reduz o risco de colisão traseira.",
+      "explicacaoDetalhada": "Ao dirigir muito próximo do veículo da frente, o condutor perde margem para reagir a frenagens inesperadas. A distância adequada ajuda a controlar o veículo sem movimentos bruscos ou tardios.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-001",
+      "alternativas": [
+        { "texto": "Permite frear em tempo útil e reduz risco de colisão.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Substitui o uso dos freios em emergências.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Só é necessária em vias sem acostamento.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "É irrelevante se o condutor estiver atento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quanto maior a velocidade, em regra, maior tende a ser:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Velocidade mais alta tende a aumentar a distância necessária para reagir e parar com segurança.",
+      "explicacaoDetalhada": "O aumento da velocidade diminui o tempo disponível para perceber o risco e amplia a distância total percorrida até a imobilização do veículo. Por isso, a velocidade deve ser compatível com as condições do momento.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-002",
+      "alternativas": [
+        { "texto": "A facilidade de fazer curvas fechadas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A distância necessária para reagir e frear com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A estabilidade automática do veículo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A visibilidade dos espelhos retrovisores.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Frenagem brusca, em geral, tende a ser mais arriscada quando:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A frenagem brusca é mais crítica quando o condutor não preservou distância ou dirige em condições adversas.",
+      "explicacaoDetalhada": "Frear de forma repentina pode causar perda de controle, colisão traseira ou derrapagem, sobretudo se o condutor dirige sem margem de segurança ou em pista com aderência reduzida.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-003",
+      "alternativas": [
+        { "texto": "O condutor manteve boa distância e velocidade compatível.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Não houve margem de segurança ou a aderência da pista é menor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A via está totalmente livre e seca.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O veículo está parado no acostamento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Dirigir dentro do limite de velocidade da via não garante, por si só, condução segura porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A velocidade precisa ser compatível não só com a lei, mas também com as condições reais do ambiente.",
+      "explicacaoDetalhada": "O limite legal é referência importante, mas a condução segura também depende de clima, visibilidade, tráfego, estado da pista e condições do veículo. Em certos contextos, pode ser necessário andar abaixo do limite.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-004",
+      "alternativas": [
+        { "texto": "Porque a velocidade segura depende também das condições concretas da via e do ambiente.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Porque o limite da via vale apenas de madrugada.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Porque quem está dentro do limite pode ultrapassar em qualquer local.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Porque o limite de velocidade não tem valor jurídico.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Tempo de reação, na direção defensiva, corresponde ao intervalo entre:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Tempo de reação é o período entre perceber o risco e iniciar a resposta ao problema.",
+      "explicacaoDetalhada": "A distância total até a parada não depende só dos freios. O tempo gasto para perceber o perigo e começar a agir também faz o veículo avançar significativamente.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-005",
+      "alternativas": [
+        { "texto": "Ligar o motor e iniciar o movimento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Perceber o risco e iniciar a ação de resposta.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Parar o veículo e desligar o motor.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Acionar o pisca-alerta e buzinar.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se a pista está molhada, o condutor defensivo deve, em regra:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em pista molhada, o condutor deve reduzir velocidade e ampliar a margem de segurança.",
+      "explicacaoDetalhada": "A pista molhada pode reduzir a aderência dos pneus e aumentar o espaço necessário para frenagem. Por isso, a resposta adequada é dirigir com mais suavidade, menor velocidade e maior distância do veículo à frente.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-006",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para evitar acúmulo de água nos pneus.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e aumentar a distância de segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Frear mais tarde para manter o ritmo do trânsito.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dirigir mais próximo do veículo da frente para acompanhar sua trajetória.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Controle de velocidade, na direção defensiva, significa:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Controlar a velocidade é adequá-la às condições legais e reais do ambiente.",
+      "explicacaoDetalhada": "Não basta manter velocidade constante. O condutor defensivo ajusta a velocidade ao fluxo, à visibilidade, ao estado da via, ao clima e ao comportamento dos demais usuários.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-007",
+      "alternativas": [
+        { "texto": "Andar sempre o mais rápido possível sem ultrapassar o limite.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Adequar a velocidade às condições da via, do tráfego e do ambiente.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Manter sempre a mesma velocidade em qualquer situação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Acelerar sempre que houver fila atrás do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em descida, aproximação de cruzamento ou local com pedestres, a velocidade deve ser tratada como:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "São situações em que o controle da velocidade se torna ainda mais importante.",
+      "explicacaoDetalhada": "Esses cenários elevam o risco e diminuem a margem para erro. O condutor defensivo reduz a velocidade antes de entrar na situação crítica, e não depois que o problema aparece.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-008",
+      "alternativas": [
+        { "texto": "Fator secundário, sem relação com o risco do local.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Elemento essencial para prevenir perda de controle e conflitos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Detalhe irrelevante se o veículo for novo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Questão importante apenas para veículos de carga.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Dirigir muito próximo ao veículo da frente aumenta o risco porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem distância adequada, o condutor perde tempo e espaço para reagir.",
+      "explicacaoDetalhada": "A segurança viária depende de margem física e temporal. Quando essa margem desaparece, qualquer desaceleração do veículo à frente pode resultar em frenagem ineficaz ou colisão traseira.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-009",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-009",
+      "alternativas": [
+        { "texto": "Facilita a visão do trânsito além do veículo da frente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduz o tempo e o espaço disponíveis para resposta segura.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Elimina a necessidade de usar os freios.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Melhora a aerodinâmica do conjunto.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em via seca, reta e com pouco movimento, o condutor ainda deve manter distância de segurança porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Condições aparentemente favoráveis não eliminam imprevistos no trânsito.",
+      "explicacaoDetalhada": "Mesmo em ambiente aparentemente simples, podem ocorrer frenagens repentinas, entradas inesperadas de outros usuários ou obstáculos na pista. A direção defensiva não depende apenas do cenário ideal.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-010",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-010",
+      "alternativas": [
+        { "texto": "Imprevistos ainda podem ocorrer e exigem margem de reação.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "A regra só existe para dias de chuva.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Distância de segurança vale apenas para caminhões.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Em via seca, ela pode ser ignorada sem risco.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em direção defensiva, frear mais cedo e de forma progressiva costuma ser melhor do que frear bruscamente porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A frenagem progressiva preserva controle e previsibilidade.",
+      "explicacaoDetalhada": "Quando o condutor percebe o risco cedo, pode usar o freio de forma gradual, manter mais estabilidade e dar sinais mais claros aos demais usuários. Isso reduz a chance de perda de controle e colisão traseira.",
+      "videoUrl": null,
+      "ordemExibicao": 10,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-011",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-011",
+      "alternativas": [
+        { "texto": "Porque elimina totalmente o risco de acidente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Porque ajuda a manter controle e previsibilidade da manobra.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Porque torna desnecessário observar a via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Porque vale apenas para carros automáticos.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A relação entre velocidade, tempo de reação e distância de frenagem mostra ao condutor que:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Velocidade mais alta exige margem maior de resposta e controle.",
+      "explicacaoDetalhada": "Quanto mais rápido o veículo se desloca, menor parece o tempo disponível e maior se torna o espaço percorrido até a parada. Essa relação explica por que o controle da velocidade é tão central na direção defensiva.",
+      "videoUrl": null,
+      "ordemExibicao": 11,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-distancia-012",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-distancia-012",
+      "alternativas": [
+        { "texto": "Maior velocidade reduz a necessidade de atenção.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Velocidade elevada exige mais espaço e tempo para reagir com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O freio compensa completamente qualquer excesso de velocidade.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A distância de frenagem depende apenas da força do motor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Sinalização semafórica para veículos e pedestres",
+    "qtde": 5,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume V - Sinalização Semafórica",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre interpretação segura do semáforo."
+  },
+  "questoes": [
+    {
+      "enunciado": "A luz verde do semáforo para veículos indica que o condutor pode prosseguir:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A passagem é permitida, mas deve ocorrer com segurança e observação do cruzamento.",
+      "explicacaoDetalhada": "Sinal verde não elimina o dever geral de cautela. O condutor pode avançar, desde que o cruzamento esteja livre e a manobra possa ser feita com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-001",
+      "fingerprint": "base-propria-oficial-placas-semaforica-001",
+      "alternativas": [
+        { "texto": "Sem qualquer necessidade de observar o cruzamento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Desde que haja condições seguras para seguir.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente se não houver pedestres na calçada.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Apenas se estiver acima da velocidade mínima da via.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A luz amarela do semáforo para veículos transmite ideia principal de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A luz amarela indica atenção e preparação para parada, quando esta puder ser feita com segurança.",
+      "explicacaoDetalhada": "O amarelo não é convite para acelerar. Ele adverte que a fase de passagem está terminando, exigindo avaliação imediata e conduta prudente do motorista.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-002",
+      "fingerprint": "base-propria-oficial-placas-semaforica-002",
+      "alternativas": [
+        { "texto": "Livre passagem sem qualquer cautela.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Atenção e preparação para parar com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Obrigação de buzinar no cruzamento.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Proibição de reduzir a velocidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Diante da luz vermelha do semáforo para veículos, a conduta correta é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A luz vermelha exige parada antes da linha de retenção ou local apropriado de imobilização.",
+      "explicacaoDetalhada": "A fase vermelha impede o ingresso do veículo no cruzamento. O ponto de parada deve respeitar a linha de retenção, a faixa de pedestres e a organização do espaço de conflito.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-003",
+      "fingerprint": "base-propria-oficial-placas-semaforica-003",
+      "alternativas": [
+        { "texto": "Avançar lentamente para reservar espaço no cruzamento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Parar no ponto adequado antes do cruzamento.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Seguir normalmente se não houver outro veículo visível.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Parar apenas para transporte coletivo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando houver foco semafórico específico para pedestres, o condutor deve compreender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A travessia de pedestres integra a lógica do cruzamento e deve ser respeitada pelo condutor.",
+      "explicacaoDetalhada": "A sinalização semafórica de pedestres existe para ordenar a travessia com segurança. O motorista não pode agir como se o sinal dirigido a pedestres fosse irrelevante para sua conduta.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-004",
+      "fingerprint": "base-propria-oficial-placas-semaforica-004",
+      "alternativas": [
+        { "texto": "O sinal para pedestres não interfere na atenção do motorista.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A travessia de pedestres deve ser considerada na conduta do condutor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente pedestres idosos devem obedecer ao foco específico.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O foco de pedestres vale apenas em rodovias.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Mesmo com semáforo favorável, o condutor não deve ingressar no cruzamento quando:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Não se deve entrar no cruzamento sem condições reais de liberar o espaço com segurança.",
+      "explicacaoDetalhada": "A permissão semafórica não autoriza bloquear o cruzamento. Se o fluxo adiante estiver impedido e houver risco de reter o veículo na área de conflito, o correto é aguardar.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-semaforica-005",
+      "fingerprint": "base-propria-oficial-placas-semaforica-005",
+      "alternativas": [
+        { "texto": "Houver espaço para atravessar completamente com segurança.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O semáforo estiver verde e a frente estiver desobstruída.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Não houver condições de liberar o cruzamento sem bloqueá-lo.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Existir veículo atrás buzinando para que avance.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

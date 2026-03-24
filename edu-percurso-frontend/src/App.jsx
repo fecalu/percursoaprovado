@@ -5,6 +5,7 @@ import PrivateRoute from './components/PrivateRoute'
 
 import Home from './pages/Home'
 import LocalDetalhe from './pages/LocalDetalhe'
+import CheckoutRevisao from './pages/CheckoutRevisao'
 import CheckoutResultado from './pages/CheckoutResultado'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -34,6 +35,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/locais/:slug" element={<LocalDetalhe />} />
+            <Route path="/checkout/revisao/:localSlug/:planoId" element={<CheckoutRevisao />} />
             <Route path="/checkout/:status" element={<CheckoutResultado />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

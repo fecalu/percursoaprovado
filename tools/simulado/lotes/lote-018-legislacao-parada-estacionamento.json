@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Parada e estacionamento",
+    "qtde": 8,
+    "referenciaOficial": "CTB + Portaria SENATRAN 923/2025",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre distinção entre parada e estacionamento e leitura segura do local de imobilização."
+  },
+  "questoes": [
+    {
+      "enunciado": "Em termos gerais, parar ou estacionar um veículo só é aceitável quando isso ocorre:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A imobilização do veículo deve respeitar a sinalização, a segurança e a fluidez do trânsito.",
+      "explicacaoDetalhada": "Parada e estacionamento não dependem apenas da vontade do condutor. O local escolhido precisa ser compatível com a sinalização existente, com a visibilidade e com a preservação da circulação segura dos demais usuários.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-001",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-001",
+      "alternativas": [
+        { "texto": "Em local permitido e sem comprometer segurança ou fluidez.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Sempre que o condutor acionar o pisca-alerta.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Em qualquer ponto da via, desde que por pouco tempo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Apenas na faixa da esquerda, para facilitar a saída.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Mesmo que a parada seja breve, ela não deve ocorrer em local que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Paradas curtas também podem gerar risco e obstrução indevida.",
+      "explicacaoDetalhada": "A brevidade da manobra não elimina seus efeitos sobre a segurança. Se o local prejudica a visibilidade, bloqueia a passagem ou cria conflito com outros usuários, a parada se torna inadequada.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-002",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-002",
+      "alternativas": [
+        { "texto": "Esteja sinalizado como permitido para imobilização.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Comprometa a segurança ou o funcionamento normal da via.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Tenha boa visibilidade e área lateral suficiente.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Seja fora do horário de pico.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A diferença prática entre parada e estacionamento está ligada principalmente:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A distinção considera a finalidade e o contexto da imobilização do veículo.",
+      "explicacaoDetalhada": "Na legislação de trânsito, a parada e o estacionamento são figuras distintas, embora ambas envolvam imobilização do veículo. A análise correta depende da situação e da finalidade da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-003",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-003",
+      "alternativas": [
+        { "texto": "Ao tipo de combustível do veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "À finalidade e ao modo de imobilização do veículo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "À cor da sinalização vertical mais próxima.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Exclusivamente ao tamanho do automóvel.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Parar sobre faixa de pedestres ou em ponto que prejudique sua utilização é conduta inadequada porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A faixa de pedestres deve permanecer livre e visível para sua função de proteção.",
+      "explicacaoDetalhada": "A ocupação indevida da faixa ou de sua área de segurança prejudica a travessia e reduz a visibilidade entre pedestres e condutores, elevando o risco de atropelamento e conflito viário.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-004",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-004",
+      "alternativas": [
+        { "texto": "Porque a faixa de pedestres deve permanecer funcional e segura.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Porque a faixa só pode ser usada por ciclistas.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Porque estacionar ali é permitido apenas à noite.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Porque a infração depende da presença de escola próxima.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O pisca-alerta, por si só, não torna regular uma parada ou estacionamento indevido porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acionamento do pisca-alerta não substitui a exigência de local permitido e seguro.",
+      "explicacaoDetalhada": "Embora possa sinalizar situação momentânea, o pisca-alerta não tem poder para transformar em regular uma imobilização feita em desacordo com a sinalização, com a segurança ou com a organização da via.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-005",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-005",
+      "alternativas": [
+        { "texto": "O pisca-alerta substitui qualquer placa de proibição.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O local continua precisando ser permitido e seguro.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O recurso só vale para veículos de carga.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Ele só produz efeito legal em rodovias.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao escolher um local para estacionar, o condutor deve observar, entre outros fatores:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalização, visibilidade e impacto no fluxo são critérios essenciais.",
+      "explicacaoDetalhada": "Estacionar corretamente depende da leitura do ambiente. Não basta haver espaço físico: é preciso verificar se a sinalização permite, se há boa visibilidade e se a imobilização não compromete a circulação ou a segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-006",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-006",
+      "alternativas": [
+        { "texto": "Somente a proximidade do destino do condutor.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Sinalização do local, visibilidade e impacto na circulação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A quantidade de veículos já estacionados no quarteirão.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A opinião dos demais motoristas da rua.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Estacionar em local que reduza a visibilidade de cruzamento ou de travessia de pedestres é especialmente perigoso porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A obstrução da visão aumenta o risco de conflito entre usuários.",
+      "explicacaoDetalhada": "A visibilidade é condição essencial para a segurança no trânsito. Quando um veículo estacionado interfere na visão de quem cruza ou atravessa, ele agrava o risco de colisões e atropelamentos.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-007",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-007",
+      "alternativas": [
+        { "texto": "Facilita a identificação de pedestres pelos demais condutores.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Aumenta a chance de conflitos por obstrução da visão.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só traz problema se o veículo for de grande porte.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "É permitido sempre que o condutor permaneça por perto.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos legais e práticos, a correta imobilização do veículo exige que o condutor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Regularidade da parada ou do estacionamento depende do local, da sinalização e da segurança gerada.",
+      "explicacaoDetalhada": "Parar ou estacionar corretamente é um ato de responsabilidade. O condutor deve avaliar se a imobilização respeita a sinalização, não prejudica a circulação e não expõe outros usuários a perigo evitável.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-008",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-008",
+      "alternativas": [
+        { "texto": "Decida apenas pela conveniência pessoal.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Avalie sinalização, segurança e impacto sobre a via.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Use o pisca-alerta e ignore a análise do local.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Priorize somente a rapidez para sair do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

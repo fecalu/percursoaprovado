@@ -23,4 +23,10 @@ public interface QuestaoTeoricaRepository extends JpaRepository<QuestaoTeorica, 
 
     @EntityGraph(attributePaths = "alternativas")
     List<QuestaoTeorica> findByStatusAndTema(QuestaoTeorica.Status status, QuestaoTeorica.Tema tema);
+
+    @EntityGraph(attributePaths = "alternativas")
+    Optional<QuestaoTeorica> findByOrigemAndOrigemQuestaoId(String origem, String origemQuestaoId);
+
+    @EntityGraph(attributePaths = "alternativas")
+    Optional<QuestaoTeorica> findByFingerprint(String fingerprint);
 }

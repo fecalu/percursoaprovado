@@ -52,6 +52,9 @@ public class QuestaoAlunoDTO {
         private String dificuldade;
         private String dificuldadeLabel;
         private Integer ordemExibicao;
+        private String explicacaoCurta;
+        private String explicacaoDetalhada;
+        private String videoUrl;
         private List<AlternativaResponse> alternativas;
 
         public static QuestaoTreinoResponse from(QuestaoTeorica questao) {
@@ -64,6 +67,9 @@ public class QuestaoAlunoDTO {
             response.dificuldade = questao.getDificuldade().name();
             response.dificuldadeLabel = formatDificuldade(questao.getDificuldade());
             response.ordemExibicao = questao.getOrdemExibicao();
+            response.explicacaoCurta = questao.getExplicacaoCurta();
+            response.explicacaoDetalhada = questao.getExplicacaoDetalhada();
+            response.videoUrl = questao.getVideoUrl();
             response.alternativas = questao.getAlternativas().stream()
                     .map(AlternativaResponse::from)
                     .toList();

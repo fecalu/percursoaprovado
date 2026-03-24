@@ -1,6 +1,7 @@
 package com.edupercurso.controller;
 
 import com.edupercurso.dto.QuestaoDTO;
+import com.edupercurso.dto.QuestaoImportDTO;
 import com.edupercurso.entity.QuestaoTeorica;
 import com.edupercurso.service.QuestaoTeoricaService;
 import jakarta.validation.Valid;
@@ -45,6 +46,11 @@ public class AdminQuestaoController {
     @PostMapping
     public ResponseEntity<QuestaoDTO.Response> criar(@Valid @RequestBody QuestaoDTO.Request request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(questaoTeoricaService.criar(request));
+    }
+
+    @PostMapping("/importar-lote")
+    public ResponseEntity<QuestaoImportDTO.ImportResponse> importarLote(@Valid @RequestBody QuestaoImportDTO.ImportRequest request) {
+        return ResponseEntity.ok(questaoTeoricaService.importarLote(request));
     }
 
     @PutMapping("/{id}")

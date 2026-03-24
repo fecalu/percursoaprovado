@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Infrações de trânsito e sistema de pontuação",
+    "qtde": 10,
+    "referenciaOficial": "CTB + Portaria SENATRAN 923/2025 > Infrações de trânsito",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre natureza das infrações e lógica do sistema de pontuação."
+  },
+  "questoes": [
+    {
+      "enunciado": "Uma infração de trânsito pode ser entendida como:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Infração é o descumprimento de uma regra de trânsito prevista na legislação.",
+      "explicacaoDetalhada": "As infrações de trânsito correspondem a condutas contrárias às normas estabelecidas no CTB e em sua regulamentação. Elas geram consequências administrativas e integram o sistema de fiscalização e responsabilização.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-001",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-001",
+      "alternativas": [
+        { "texto": "Uma opinião pessoal do agente sobre a forma de dirigir.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O descumprimento de regra de trânsito prevista em lei.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas um conselho educativo sem consequência.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Qualquer situação em que haja congestionamento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O sistema de pontuação na habilitação está relacionado:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A pontuação está associada ao registro de infrações cometidas pelo condutor.",
+      "explicacaoDetalhada": "As infrações cometidas pelo condutor repercutem em seu prontuário, dentro do sistema legal de pontuação. Esse mecanismo tem função de controle e responsabilização administrativa.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-002",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-002",
+      "alternativas": [
+        { "texto": "Ao valor de mercado do veículo utilizado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Ao registro das infrações cometidas pelo condutor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A uma bonificação por boa direção em rodovias.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Ao número de viagens feitas no mês.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos gerais, quanto mais grave for a infração, maior tende a ser:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A gravidade da infração se reflete na severidade das consequências administrativas.",
+      "explicacaoDetalhada": "A legislação de trânsito estrutura as infrações de forma escalonada. Quanto maior a gravidade da conduta, maior tende a ser a resposta administrativa correspondente, inclusive no sistema de pontuação.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-003",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-003",
+      "alternativas": [
+        { "texto": "A tolerância da fiscalização ao comportamento irregular.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A repercussão administrativa da conduta.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A liberdade do condutor para repetir a infração.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A dispensa de qualquer anotação no prontuário.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Cometer infrações repetidas pode indicar, do ponto de vista do sistema de trânsito, que o condutor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A reincidência demonstra persistência de comportamento incompatível com a condução segura.",
+      "explicacaoDetalhada": "A repetição de infrações não é vista apenas como episódio isolado. Ela pode revelar padrão de comportamento inseguro ou de desrespeito às normas, justificando controle administrativo mais rigoroso.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-004",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-004",
+      "alternativas": [
+        { "texto": "Tem liberdade ampliada para escolher quais regras cumprir.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Mantém padrão de conduta que pode comprometer a segurança e a regularidade.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Está automaticamente dispensado de penalidades futuras.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Será premiado se cometer infração fora do horário de pico.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A pontuação não existe para premiar ou punir subjetivamente, mas para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela serve como mecanismo objetivo de acompanhamento da conduta do motorista.",
+      "explicacaoDetalhada": "O sistema de pontos não depende de simpatia ou opinião. Ele busca registrar objetivamente o histórico infracional do condutor e permitir medidas administrativas quando o padrão legalmente previsto for atingido.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-005",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-005",
+      "alternativas": [
+        { "texto": "Acompanhar objetivamente a conduta infracional do motorista.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Definir a potência permitida do veículo do condutor.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Avaliar a aparência do veículo abordado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir completamente o processo de fiscalização.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista legal, a infração de trânsito é diferente de acidente porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Infração é violação de norma; acidente é evento danoso ou de risco, que pode ou não decorrer de infração.",
+      "explicacaoDetalhada": "Embora possam se relacionar, infração e acidente não são a mesma coisa. A infração se refere ao descumprimento da regra; o acidente é um fato concreto de trânsito com potencial danoso.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-006",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-006",
+      "alternativas": [
+        { "texto": "Todo acidente elimina automaticamente a existência de infração.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Infração é violação de norma; acidente é evento de trânsito.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Acidente só existe quando há pontuação na CNH.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Infração e acidente são termos sempre equivalentes.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma boa leitura do sistema de infrações exige compreender que ele busca:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As infrações fazem parte de um mecanismo de ordem, responsabilização e proteção da segurança viária.",
+      "explicacaoDetalhada": "As normas de infração existem para proteger o interesse coletivo no trânsito. Elas organizam o comportamento dos usuários e criam consequências para condutas que aumentam risco ou desordem viária.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-007",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-007",
+      "alternativas": [
+        { "texto": "Somente arrecadar valores por meio de multas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Ordenar condutas e responsabilizar comportamentos inseguros.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir totalmente a educação para o trânsito.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Atender apenas a interesses individuais de cada condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se um condutor trata a pontuação como algo irrelevante, ele ignora que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acúmulo de pontos pode gerar consequências administrativas relevantes para a habilitação.",
+      "explicacaoDetalhada": "A pontuação integra o controle da regularidade do condutor. Desconsiderá-la é ignorar um dos principais mecanismos de acompanhamento do histórico infracional e de resposta administrativa previstos pela legislação.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-008",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-008",
+      "alternativas": [
+        { "texto": "Os pontos não têm nenhuma relação com a situação da habilitação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A pontuação pode repercutir administrativamente sobre o direito de dirigir.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Pontos só existem para veículos de carga.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A pontuação só vale se houver acidente com vítima.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quanto à classificação das infrações, o condutor deve saber que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As infrações possuem diferentes níveis de gravidade e consequências correspondentes.",
+      "explicacaoDetalhada": "A legislação não trata todas as infrações da mesma forma. Há gradação na resposta administrativa, conforme a gravidade da conduta e sua repercussão na segurança e na ordem do trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-009",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-009",
+      "alternativas": [
+        { "texto": "Todas possuem exatamente a mesma importância e efeito.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Há gradação legal de gravidade e de repercussão administrativa.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A classificação depende da cor do veículo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A gravidade é definida livremente pelo condutor autuado.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, respeitar as regras de trânsito evita, entre outros efeitos:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cumprir as normas reduz o risco de infrações e a acumulação de pontos na habilitação.",
+      "explicacaoDetalhada": "Obedecer às regras não é apenas uma escolha moral: é conduta juridicamente adequada que preserva a regularidade do condutor, evita autuações e protege a segurança de todos os usuários da via.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-010",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-010",
+      "alternativas": [
+        { "texto": "A incidência de infrações e os reflexos administrativos correspondentes.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "A necessidade de observar a sinalização horizontal.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "A existência de fiscalização em cruzamentos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A obrigação de portar documentos do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

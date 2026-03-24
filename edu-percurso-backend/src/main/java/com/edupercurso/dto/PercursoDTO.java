@@ -30,6 +30,7 @@ public class PercursoDTO {
         private Integer ordemExibicao = 0;
         private boolean destaque;
         private boolean ativo = true;
+        private Percurso.ConfiguracaoPontosAtencao configuracaoPontosAtencao = Percurso.ConfiguracaoPontosAtencao.AUTOMATICO;
         @Valid
         private List<PontoAtencaoRequest> pontosAtencao;
     }
@@ -46,6 +47,7 @@ public class PercursoDTO {
         @NotNull
         private PontoAtencaoPercurso.Tipo tipo = PontoAtencaoPercurso.Tipo.DICA_IMPORTANTE;
         private String imagemUrl;
+        private String audioUrl;
         private String videoUrl;
         @NotNull
         private PontoAtencaoPercurso.ModoExibicao modoExibicao = PontoAtencaoPercurso.ModoExibicao.CLIQUE;
@@ -62,6 +64,7 @@ public class PercursoDTO {
         private String descricaoDetalhada;
         private String tipo;
         private String imagemUrl;
+        private String audioUrl;
         private String videoUrl;
         private String modoExibicao;
         private Integer ordemExibicao;
@@ -76,6 +79,7 @@ public class PercursoDTO {
             response.descricaoDetalhada = ponto.getDescricaoDetalhada();
             response.tipo = ponto.getTipo().name();
             response.imagemUrl = ponto.getImagemUrl();
+            response.audioUrl = ponto.getAudioUrl();
             response.videoUrl = ponto.getVideoUrl();
             response.modoExibicao = ponto.getModoExibicao().name();
             response.ordemExibicao = ponto.getOrdemExibicao();
@@ -104,11 +108,15 @@ public class PercursoDTO {
         private String thumbnailUrl;
         private Integer ordemExibicao;
         private boolean destaque;
+        private String configuracaoPontosAtencao;
         private LocalDateTime criadoEm;
         private List<PontoAtencaoResponse> pontosAtencao;
 
         public static Response from(Percurso percurso) {
             Response response = new Response();
+            Percurso.ConfiguracaoPontosAtencao configuracaoPontosAtencao = percurso.getConfiguracaoPontosAtencao() == null
+                    ? Percurso.ConfiguracaoPontosAtencao.AUTOMATICO
+                    : percurso.getConfiguracaoPontosAtencao();
             response.id = percurso.getId();
             response.titulo = percurso.getTitulo();
             response.descricao = percurso.getDescricao();
@@ -122,6 +130,7 @@ public class PercursoDTO {
             response.thumbnailUrl = percurso.getThumbnailUrl();
             response.ordemExibicao = percurso.getOrdemExibicao();
             response.destaque = percurso.isDestaque();
+            response.configuracaoPontosAtencao = configuracaoPontosAtencao.name();
             response.criadoEm = percurso.getCriadoEm();
             response.pontosAtencao = percurso.getPontosAtencao().stream()
                     .map(PontoAtencaoResponse::from)

@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Condições adversas de clima e visibilidade",
+    "qtde": 10,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre condução segura em chuva, neblina, noite e situações de visibilidade reduzida."
+  },
+  "questoes": [
+    {
+      "enunciado": "Ao dirigir sob chuva forte, a atitude mais segura do condutor é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em chuva forte, o condutor deve reduzir a velocidade e aumentar a margem de segurança.",
+      "explicacaoDetalhada": "A chuva diminui a aderência dos pneus, reduz a visibilidade e aumenta o tempo necessário para reagir e frear. Por isso, a direção defensiva recomenda diminuir a velocidade, ampliar a distância do veículo à frente e conduzir com suavidade.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-001",
+      "alternativas": [
+        { "texto": "Acelerar para sair logo do trecho molhado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e aumentar a distância de segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Dirigir com movimentos bruscos para corrigir a trajetória.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar apenas o freio de forma repetida e forte.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em caso de neblina, o condutor deve preferir:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Na neblina, o farol baixo é mais adequado do que o farol alto.",
+      "explicacaoDetalhada": "O farol alto reflete nas partículas de água suspensas no ar e pode piorar ainda mais a visibilidade. Em situação de neblina, a direção defensiva recomenda reduzir a velocidade, usar iluminação apropriada e aumentar a atenção ao alinhamento da via.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-002",
+      "alternativas": [
+        { "texto": "Farol alto e velocidade constante alta.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Farol baixo, menor velocidade e maior distância de segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Piscar o farol continuamente para enxergar melhor.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dirigir apenas pela memória do trajeto.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao dirigir à noite, a direção defensiva recomenda principalmente:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "À noite, a visibilidade é menor, exigindo mais cautela e velocidade compatível.",
+      "explicacaoDetalhada": "No período noturno, o campo visual do condutor fica mais restrito e a identificação de obstáculos pode ser tardia. Conduzir com prudência, iluminação em bom estado e velocidade ajustada às condições da via reduz riscos.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-003",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para reduzir o tempo de percurso.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Dirigir com atenção redobrada e velocidade compatível com a visibilidade.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar farol alto o tempo inteiro, mesmo cruzando com outros veículos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Confiar apenas na iluminação pública.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando o condutor é ofuscado pela luz de outro veículo à noite, a conduta defensiva mais adequada é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em ofuscamento, o condutor deve reduzir a velocidade e manter referência segura da via.",
+      "explicacaoDetalhada": "A luz intensa pode reduzir momentaneamente a percepção visual. Nessas situações, é recomendável diminuir a velocidade, evitar olhar diretamente para a luz e manter referência segura no bordo da pista, sem movimentos bruscos.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-004",
+      "alternativas": [
+        { "texto": "Acelerar para passar logo pela situação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Fechar os olhos por um instante até a luz passar.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Reduzir a velocidade e orientar-se com prudência pela borda da pista.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Virar totalmente o rosto para o lado contrário.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Nos primeiros minutos de chuva após período seco, o risco tende a aumentar porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A água mistura-se a resíduos da pista e pode deixá-la mais escorregadia.",
+      "explicacaoDetalhada": "Em muitos casos, os primeiros minutos de chuva formam uma mistura de água, poeira, óleo e outros resíduos na superfície da via. Isso reduz a aderência dos pneus e exige ainda mais cuidado do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-005",
+      "alternativas": [
+        { "texto": "Os pneus aderem melhor no início da chuva.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A mistura de água com resíduos da pista pode aumentar a derrapagem.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A chuva elimina imediatamente toda a sujeira da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Os freios ficam mais eficientes quando molhados.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se o veículo começar a aquaplanar, a reação mais prudente é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Na aquaplanagem, o condutor deve evitar manobras bruscas e buscar retomar o controle com suavidade.",
+      "explicacaoDetalhada": "A aquaplanagem ocorre quando os pneus perdem contato adequado com a pista por causa de uma lâmina de água. Nessa condição, frear bruscamente ou esterçar de forma abrupta pode piorar a perda de controle. A condução deve ser estabilizada com suavidade.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-006",
+      "alternativas": [
+        { "texto": "Virar o volante de um lado para o outro rapidamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Frear bruscamente para parar o veículo imediatamente.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Manter a calma, evitar movimentos bruscos e reduzir a velocidade gradualmente.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Aumentar a aceleração para romper a lâmina de água.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao enfrentar um trecho com fumaça, poeira intensa ou neblina muito densa, a postura defensiva é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A visibilidade severamente reduzida exige extrema prudência e eventual parada em local seguro.",
+      "explicacaoDetalhada": "Quando o condutor praticamente perde as referências da via, continuar dirigindo como se nada tivesse mudado aumenta muito o risco. A direção defensiva orienta reduzir bastante a velocidade e, se necessário, interromper a condução em local seguro até que a condição melhore.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-007",
+      "alternativas": [
+        { "texto": "Seguir no ritmo normal para não atrapalhar o fluxo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir drasticamente a velocidade e, se preciso, parar em local seguro.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar farol alto para atravessar rapidamente a área.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Confiar apenas nas lanternas do veículo à frente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em pista molhada, a distância de segurança deve ser maior porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Com menos aderência, o veículo pode precisar de mais espaço para parar com segurança.",
+      "explicacaoDetalhada": "Na pista molhada, a frenagem tende a exigir distância maior do que em piso seco. Isso acontece porque a aderência entre pneus e solo diminui, aumentando o risco de derrapagem e reduzindo a eficiência da frenagem em situações críticas.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-008",
+      "alternativas": [
+        { "texto": "A água reduz a aderência e pode aumentar o espaço de parada.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "O freio atua melhor com o piso molhado.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "A pista molhada facilita a correção de trajetória.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Os pneus passam a responder mais rápido aos comandos.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em uma rodovia à noite, com chuva e visibilidade limitada, a decisão defensiva mais correta é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Combinação de fatores adversos exige reduzir ainda mais a exposição ao risco.",
+      "explicacaoDetalhada": "Quando mais de um fator de risco se acumula, como chuva, noite e velocidade de rodovia, o condutor deve adotar postura ainda mais conservadora. Isso inclui reduzir a velocidade, ampliar a distância de segurança, intensificar a observação e evitar manobras desnecessárias.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-009",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-009",
+      "alternativas": [
+        { "texto": "Manter a velocidade habitual, já que a rodovia favorece fluxo contínuo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Aproximar-se do veículo à frente para usar suas luzes como guia.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Reduzir a velocidade, ampliar a distância e evitar manobras arriscadas.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Usar farol alto constantemente para enxergar mais longe.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O condutor que insiste em ultrapassar em trecho com visibilidade comprometida age de forma insegura porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ultrapassar sem visibilidade suficiente reduz o tempo de reação e eleva muito o risco de colisão.",
+      "explicacaoDetalhada": "A ultrapassagem exige visão ampla da pista, do fluxo contrário e do espaço disponível para retorno seguro à faixa. Em condições de visibilidade reduzida, o condutor perde a capacidade de avaliar corretamente distâncias e velocidade de aproximação de outros veículos.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-clima-010",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-clima-010",
+      "alternativas": [
+        { "texto": "A pista fica mais larga em situações de neblina.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A redução de visibilidade dificulta avaliar tempo, distância e segurança da manobra.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ultrapassagens ficam mais seguras quando há menos informação visual.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Em rodovia, qualquer ultrapassagem é permitida se o veículo for potente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

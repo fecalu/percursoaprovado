@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "tema": "MECANICA_BASICA",
+    "subtema": "Manutenção preventiva e verificações de rotina",
+    "qtde": 3,
+    "referenciaOficial": "CNH do Brasil + material didático Senatran",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/noticias/2025/12/cnh-do-brasil-como-solicitar-a-primeira-habilitacao-pelo-aplicativo",
+    "observacaoEditorial": "Lote autoral sobre cuidados preventivos simples que ajudam a evitar falhas no veículo."
+  },
+  "questoes": [
+    {
+      "enunciado": "A manutenção preventiva do veículo é importante porque ajuda a:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Verificações regulares ajudam a identificar falhas antes que se tornem risco maior.",
+      "explicacaoDetalhada": "A manutenção preventiva reduz a chance de panes, melhora a confiabilidade do veículo e contribui para a segurança. Pequenos problemas detectados cedo podem ser corrigidos antes de causar acidentes ou imobilizações.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-manutencao-001",
+      "alternativas": [
+        { "texto": "Evitar qualquer necessidade futura de abastecimento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Prevenir falhas e manter o veículo em condições seguras de uso.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aumentar automaticamente a potência do motor.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Eliminar a necessidade de atenção do condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No uso cotidiano do veículo, fazer verificações básicas de rotina é uma atitude importante porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Checagens simples podem evitar que pequenos defeitos evoluam para situações perigosas.",
+      "explicacaoDetalhada": "Observar itens básicos, como estado visual dos pneus, funcionamento das luzes e sinais aparentes de anormalidade, ajuda a perceber cedo alterações que podem comprometer a segurança e o desempenho do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-manutencao-002",
+      "alternativas": [
+        { "texto": "Essas verificações só importam antes de viagens muito longas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Permitem identificar sinais de problema antes que se agravem.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituem totalmente a manutenção preventiva.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Servem apenas para melhorar a estética do automóvel.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A lógica da manutenção preventiva é mais próxima de:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Manutenção preventiva age antes da falha, reduzindo risco e surpresa.",
+      "explicacaoDetalhada": "A proposta da manutenção preventiva não é esperar o defeito aparecer em situação crítica, mas identificar e corrigir desgastes ou anormalidades antes que eles comprometam a segurança e o funcionamento do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-manutencao-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-manutencao-003",
+      "alternativas": [
+        { "texto": "Corrigir apenas quando o veículo já parou de funcionar.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Antecipar cuidados para evitar falhas e riscos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Consertar somente o que afeta a aparência externa.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Evitar qualquer inspeção técnica no veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

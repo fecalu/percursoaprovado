@@ -37,9 +37,9 @@ export default function AdminPercursos() {
   if (loading) return <div className="spinner" />
 
   return (
-    <>
+      <>
       {ToastEl}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+      <div className="admin-page-head">
         <div className="page-title">Conteudos</div>
         <button className="btn btn-primary" onClick={() => navigate('/admin/percursos/novo')}>
           + Novo conteudo

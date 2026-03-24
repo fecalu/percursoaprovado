@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Placas de indicação: orientação, serviços e apoio",
+    "qtde": 6,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume III - Sinalização Vertical de Indicação",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre uso das placas de indicação para serviços e apoio ao usuário."
+  },
+  "questoes": [
+    {
+      "enunciado": "As placas de indicação têm como função principal:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas orientam o usuário da via, informando destinos, localizações, serviços e referências.",
+      "explicacaoDetalhada": "A sinalização de indicação serve para guiar o deslocamento e transmitir informações úteis ao condutor. Diferente da regulamentação, ela não impõe regra; oferece orientação e apoio ao uso da via.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-001",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-001",
+      "alternativas": [
+        { "texto": "Aplicar multas automaticamente ao condutor.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Orientar sobre destinos, localizações e serviços.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Advertir exclusivamente sobre perigos imediatos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir a necessidade de atenção do motorista.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando uma placa indica hospital ou pronto atendimento, ela tem finalidade de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A placa informa a existência ou a direção de um serviço de interesse do usuário da via.",
+      "explicacaoDetalhada": "Serviços como hospital, posto policial ou apoio ao usuário são comunicados por placas de indicação. Elas ajudam o condutor a localizar recursos relevantes sem criar obrigação de conduta.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-002",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-002",
+      "alternativas": [
+        { "texto": "Advertir sobre risco de acidente no local.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Indicar a existência ou direção de serviço relevante.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Restringir o uso da via aos veículos de emergência.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Estabelecer prioridade obrigatória de passagem.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Placas que informam postos de combustível, alimentação ou hospedagem servem para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Essas placas auxiliam o planejamento da viagem e a localização de serviços de apoio.",
+      "explicacaoDetalhada": "Ao informar serviços ao longo da via, a sinalização de indicação melhora a orientação do usuário e contribui para um deslocamento mais seguro e planejado.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-003",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-003",
+      "alternativas": [
+        { "texto": "Impedir o acesso de veículos pesados.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Indicar serviços de apoio disponíveis ao usuário.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Definir velocidade mínima para o trecho.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Avisar sobre risco ambiental na rodovia.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Placas de orientação de destino ajudam o condutor principalmente a:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A orientação de destino organiza a navegação e a escolha correta do trajeto.",
+      "explicacaoDetalhada": "Ao informar direções, destinos e conexões viárias, esse tipo de placa reduz erros de manobra e facilita a tomada de decisão com antecedência.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-004",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-004",
+      "alternativas": [
+        { "texto": "Executar manobras de ultrapassagem com prioridade.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Identificar o trajeto correto com antecedência.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ignorar outras placas da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Definir regras de estacionamento no bairro.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A grande diferença entre uma placa de indicação e uma placa de regulamentação é que a de indicação:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A placa de indicação orienta e informa, sem impor diretamente uma obrigação de circulação.",
+      "explicacaoDetalhada": "Enquanto a regulamentação determina ou restringe condutas, a indicação fornece referências de localização, serviços ou direção. Sua função é orientar o usuário da via.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-005",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-005",
+      "alternativas": [
+        { "texto": "Sempre prevalece sobre semáforos e agentes.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Serve para orientar e informar, não para impor regra.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só pode ser usada em áreas urbanas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Vale apenas para transporte coletivo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao ver uma placa de indicação de serviço na rodovia, o condutor deve compreender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A sinalização oferece informação útil para decisão de rota e apoio, sem obrigar o uso do serviço.",
+      "explicacaoDetalhada": "A presença da placa não exige parada nem altera por si só as regras de circulação. Ela apenas informa ao usuário da via a disponibilidade ou direção de determinado serviço de apoio.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-indicacao-apoio-006",
+      "fingerprint": "base-propria-oficial-placas-indicacao-apoio-006",
+      "alternativas": [
+        { "texto": "Há obrigação de utilizar o serviço indicado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O serviço indicado é uma referência opcional de apoio ao deslocamento.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A placa substitui qualquer orientação de destino no trecho.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O local sinalizado tem prioridade sobre todas as demais rotas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

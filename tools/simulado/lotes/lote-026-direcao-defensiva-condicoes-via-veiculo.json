@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Condições adversas da via e do veículo",
+    "qtde": 10,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre condução segura diante de problemas da pista, do veículo e do entorno viário."
+  },
+  "questoes": [
+    {
+      "enunciado": "Ao perceber muitos buracos e irregularidades na pista, o condutor defensivo deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em pista irregular, a direção deve ser mais cautelosa e com menor velocidade.",
+      "explicacaoDetalhada": "Buracos e ondulações podem desestabilizar o veículo, danificar componentes e comprometer a frenagem. A atitude mais segura é reduzir a velocidade, manter firmeza no controle e evitar manobras bruscas.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-001",
+      "alternativas": [
+        { "texto": "Acelerar para o veículo passar mais rápido pelas irregularidades.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e conduzir com suavidade.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Virar o volante bruscamente sempre que surgir um buraco.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Frear e esterçar ao mesmo tempo, de forma intensa.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em um trecho com obras e sinalização temporária, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Obras na via exigem atenção ao novo desenho de circulação e redução da velocidade.",
+      "explicacaoDetalhada": "Trechos em obra podem alterar faixas, prioridades, espaço de circulação e presença de trabalhadores ou máquinas. A direção defensiva recomenda obedecer integralmente a sinalização temporária e adaptar a condução ao cenário provisório.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-002",
+      "alternativas": [
+        { "texto": "Ignorar a sinalização temporária se já conhecer a via.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Obedecer à sinalização do trecho e reduzir a velocidade.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Aumentar a velocidade para sair logo do trecho.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Ultrapassar sempre que houver fila formada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se o condutor perceber que os pneus do veículo estão muito desgastados, a conclusão defensiva correta é que:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pneus desgastados comprometem a aderência e aumentam o risco de perda de controle.",
+      "explicacaoDetalhada": "Os pneus são fundamentais para a estabilidade, frenagem e dirigibilidade. Desgaste excessivo reduz a aderência, especialmente em pista molhada, elevando o risco de derrapagem e aquaplanagem.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-003",
+      "alternativas": [
+        { "texto": "O veículo ficará mais econômico, sem perda de segurança.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A condução exige atenção, mas o desgaste não interfere na aderência.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "A segurança pode ficar comprometida, especialmente em curva e chuva.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "O problema só existe se o veículo estiver muito carregado.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Diante de pista de terra solta, cascalho ou areia, a atitude defensiva é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Superfícies soltas exigem redução de velocidade e comandos suaves.",
+      "explicacaoDetalhada": "Cascalho, areia e terra solta diminuem a aderência dos pneus e podem tornar o veículo instável. A condução deve ser feita com velocidade moderada, direção suave e sem frenagens bruscas.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-004",
+      "alternativas": [
+        { "texto": "Fazer movimentos bruscos para manter o veículo alinhado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conduzir com suavidade e velocidade reduzida.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Frear forte em qualquer pequena instabilidade.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Aumentar a velocidade para não afundar os pneus.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao notar que a direção do veículo está puxando para um lado, o condutor deve considerar que:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinais de mau funcionamento no veículo exigem atenção e providência preventiva.",
+      "explicacaoDetalhada": "Quando o veículo apresenta comportamento anormal, como puxar para um lado, pode haver problema em pneus, alinhamento, suspensão ou freios. A direção defensiva orienta não ignorar o sintoma e buscar correção antes que a falha agrave o risco.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-005",
+      "alternativas": [
+        { "texto": "Isso é normal em qualquer veículo mais antigo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Basta segurar o volante com mais força e seguir normalmente.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Há indício de problema mecânico ou de alinhamento que precisa de verificação.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "O efeito desaparece sozinho com o aumento da velocidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em uma descida longa e acentuada, a condução defensiva recomenda principalmente:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Descidas exigem controle do veículo sem depender apenas de frenagens intensas.",
+      "explicacaoDetalhada": "Em declives prolongados, o uso inadequado e contínuo do freio pode comprometer a eficiência da frenagem. A direção defensiva recomenda condução controlada, velocidade compatível com o trecho e uso correto dos recursos do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-006",
+      "alternativas": [
+        { "texto": "Descer em velocidade alta e frear apenas no final.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Controlar a velocidade desde o início e evitar abusar da frenagem.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Dirigir com o veículo em ponto morto para economizar combustível.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Acelerar nas curvas para estabilizar o veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se o veículo estiver muito carregado, a direção defensiva exige maior cuidado porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Carga altera comportamento do veículo e pode aumentar a distância de frenagem.",
+      "explicacaoDetalhada": "Quanto maior a carga, maior tende a ser a exigência sobre pneus, freios e estabilidade. O condutor deve considerar que o veículo pode precisar de mais espaço para frear e responder de forma diferente em curvas e manobras.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-007",
+      "alternativas": [
+        { "texto": "O peso extra melhora a aderência em qualquer situação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A carga pode influenciar estabilidade e frenagem, exigindo mais prudência.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A única diferença é o aumento do consumo de combustível.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O excesso de carga não interfere em curvas nem em descidas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao perceber indício de falha nos freios durante a condução, a prioridade do condutor deve ser:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinais de falha nos freios exigem reação controlada e busca imediata de segurança.",
+      "explicacaoDetalhada": "Quando o sistema de freios não responde como esperado, o condutor precisa manter a calma, procurar reduzir o risco imediato e parar o veículo em local seguro assim que possível. Ignorar o problema pode levar a situação crítica.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-008",
+      "alternativas": [
+        { "texto": "Continuar normalmente até encontrar uma oficina, sem alterar a condução.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Manter o controle do veículo e buscar parar em local seguro o quanto antes.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Acelerar para reduzir o tempo de exposição ao problema.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Desligar o motor imediatamente em qualquer velocidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em via estreita e sem acostamento, com veículo vindo em sentido contrário e pavimento irregular, o condutor defensivo deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Situações de espaço reduzido e pista ruim exigem moderação e antecipação.",
+      "explicacaoDetalhada": "Quando a via está estreita, o pavimento é ruim e há aproximação de outro veículo, qualquer excesso de velocidade ou disputa por espaço aumenta muito o risco. A decisão defensiva é reduzir a velocidade, aumentar a margem lateral possível e facilitar o cruzamento com prudência.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-009",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-009",
+      "alternativas": [
+        { "texto": "Acelerar para passar primeiro antes que o outro veículo chegue.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e facilitar o cruzamento com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Manter o centro da via para evitar buracos nas laterais.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Confiar que o outro condutor sempre fará a manobra correta.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A direção defensiva considera que veículo em mau estado de conservação:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Problemas de conservação aumentam o risco e reduzem a margem de segurança do condutor.",
+      "explicacaoDetalhada": "Direção defensiva não depende apenas do comportamento do motorista, mas também de condições adequadas do veículo. Falhas de manutenção podem comprometer freios, pneus, iluminação, visibilidade e estabilidade, ampliando a chance de sinistros.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-via-veiculo-010",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-via-veiculo-010",
+      "alternativas": [
+        { "texto": "Só representa problema se o trajeto for muito longo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Não interfere na segurança se o condutor for experiente.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Aumenta o risco e exige providência preventiva antes de circular.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "É aceitável desde que a documentação esteja em dia.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

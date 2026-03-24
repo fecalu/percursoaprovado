@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "MEIO_AMBIENTE_CIDADANIA",
+    "subtema": "Manutenção preventiva para preservação ambiental",
+    "qtde": 5,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Meio ambiente e convívio social",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre a relação entre cuidado mecânico básico e menor impacto ambiental."
+  },
+  "questoes": [
+    {
+      "enunciado": "A manutenção preventiva contribui para a preservação ambiental porque pode:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Veículo bem cuidado tende a funcionar de forma mais limpa e eficiente.",
+      "explicacaoDetalhada": "Manutenção preventiva ajuda a evitar emissão excessiva de fumaça, falhas de combustão e outras situações que aumentam o impacto ambiental do veículo. Cuidar do veículo é também uma atitude de responsabilidade ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-001",
+      "alternativas": [
+        { "texto": "Aumentar o ruído do veículo para melhorar a percepção no trânsito.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir falhas que elevam poluição e desperdício.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Eliminar toda necessidade de atenção do motorista.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir completamente a legislação ambiental.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Um veículo sem manutenção adequada pode prejudicar o meio ambiente ao:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Defeitos e desregulagens podem aumentar emissão de poluentes e desperdícios.",
+      "explicacaoDetalhada": "Problemas mecânicos e ausência de cuidado preventivo podem resultar em maior emissão de gases, fumaça, ruído e funcionamento ineficiente. Isso amplia o impacto ambiental do uso do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-002",
+      "alternativas": [
+        { "texto": "Emitir mais poluentes e operar de forma menos eficiente.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Melhorar a qualidade do ar em áreas urbanas.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Reduzir automaticamente o consumo de combustível.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Diminuir qualquer necessidade de fiscalização.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista ambiental, adiar por muito tempo cuidados básicos do veículo é inadequado porque:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pequenos problemas mecânicos podem se transformar em fontes maiores de impacto ambiental.",
+      "explicacaoDetalhada": "Quando o condutor posterga verificações e ajustes, falhas simples podem evoluir e aumentar emissões, ruídos e desperdício. A prevenção reduz esse acúmulo de danos ao veículo e ao ambiente.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-003",
+      "alternativas": [
+        { "texto": "Problemas pequenos podem evoluir e ampliar o impacto ambiental.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Isso não interfere no ambiente, apenas no conforto interno.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "O meio ambiente só é afetado por veículos muito novos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Só há efeito ambiental se o veículo rodar em estrada de terra.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Cuidar do veículo como forma de preservação ambiental significa compreender que:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O estado mecânico do veículo interfere no impacto ambiental de seu uso.",
+      "explicacaoDetalhada": "A preservação ambiental no trânsito não se resume a regras abstratas. Ela também depende do comportamento cotidiano do condutor, inclusive na forma como ele cuida do funcionamento e da conservação do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-004",
+      "alternativas": [
+        { "texto": "Mecânica e meio ambiente são temas totalmente separados.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conservação do veículo e preservação ambiental estão relacionadas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só oficinas têm responsabilidade ambiental no trânsito.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O condutor não influencia o impacto ambiental do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A manutenção preventiva, além de favorecer a segurança, também ajuda a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Segurança e preservação ambiental caminham juntas no uso responsável do veículo.",
+      "explicacaoDetalhada": "Ao manter o veículo em condições adequadas de funcionamento, o condutor reduz riscos à circulação e também contribui para diminuir emissões, ruídos e desperdícios. A manutenção tem dimensão de segurança e de cidadania ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-manutencao-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-manutencao-005",
+      "alternativas": [
+        { "texto": "Aumentar o impacto ambiental do uso do veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir poluição e desperdícios ligados ao mau funcionamento.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Tornar desnecessário qualquer cuidado com o trânsito.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Permitir uso agressivo do veículo sem consequências.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

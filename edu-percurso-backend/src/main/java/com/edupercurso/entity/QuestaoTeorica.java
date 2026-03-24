@@ -65,6 +65,15 @@ public class QuestaoTeorica {
     @Column(name = "video_url", columnDefinition = "TEXT")
     private String videoUrl;
 
+    @Column(length = 60)
+    private String origem;
+
+    @Column(name = "origem_questao_id", length = 120)
+    private String origemQuestaoId;
+
+    @Column(length = 64)
+    private String fingerprint;
+
     @Column(name = "ordem_exibicao")
     @Builder.Default
     private Integer ordemExibicao = 0;

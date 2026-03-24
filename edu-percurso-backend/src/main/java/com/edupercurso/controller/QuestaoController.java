@@ -36,6 +36,12 @@ public class QuestaoController {
         return ResponseEntity.ok(questaoTeoricaService.listarTreino(tema));
     }
 
+    @GetMapping("/simulado-completo")
+    public ResponseEntity<List<QuestaoAlunoDTO.QuestaoTreinoResponse>> listarSimuladoCompleto(
+            @RequestParam(required = false) List<UUID> excluirIds) {
+        return ResponseEntity.ok(questaoTeoricaService.listarSimuladoCompleto(excluirIds));
+    }
+
     @PostMapping("/{id}/responder")
     public ResponseEntity<QuestaoAlunoDTO.ResponderResponse> responder(
             @AuthenticationPrincipal String email,

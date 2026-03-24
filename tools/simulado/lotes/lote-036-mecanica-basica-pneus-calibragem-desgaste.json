@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "tema": "MECANICA_BASICA",
+    "subtema": "Pneus, calibragem e desgaste",
+    "qtde": 3,
+    "referenciaOficial": "CNH do Brasil + material didático Senatran",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/noticias/2025/12/cnh-do-brasil-como-solicitar-a-primeira-habilitacao-pelo-aplicativo",
+    "observacaoEditorial": "Lote autoral sobre cuidados básicos com pneus e impacto na segurança."
+  },
+  "questoes": [
+    {
+      "enunciado": "Pneus em bom estado são importantes para a segurança porque influenciam diretamente:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Os pneus interferem na aderência, na estabilidade e na frenagem do veículo.",
+      "explicacaoDetalhada": "Os pneus são o ponto de contato entre o veículo e a via. Quando estão em boas condições, contribuem para melhor aderência, controle em curvas e frenagem mais segura. Desgaste excessivo compromete essas funções.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-pneus-001",
+      "alternativas": [
+        { "texto": "Apenas o conforto dos passageiros.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A aderência, a estabilidade e a eficiência da frenagem.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente o consumo do rádio do veículo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Exclusivamente a aparência externa do automóvel.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A calibragem incorreta dos pneus pode trazer como consequência:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Calibragem inadequada afeta desgaste, controle e segurança do veículo.",
+      "explicacaoDetalhada": "Pneus com pressão acima ou abaixo do recomendado podem desgastar-se de forma irregular, alterar o comportamento do veículo e comprometer estabilidade e frenagem. Por isso, a calibragem deve seguir a orientação do fabricante.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-pneus-002",
+      "alternativas": [
+        { "texto": "Melhora automática do desempenho em qualquer tipo de via.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Desgaste irregular e piora da dirigibilidade.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Eliminação total do risco de aquaplanagem.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Aumento garantido da vida útil dos pneus em qualquer situação.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em pista molhada, pneus muito desgastados representam risco maior porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O desgaste reduz a capacidade do pneu de manter contato seguro com a pista molhada.",
+      "explicacaoDetalhada": "Sulcos desgastados diminuem a capacidade de escoar água e reduzem a aderência do pneu. Em pista molhada, isso aumenta o risco de derrapagem e aquaplanagem, comprometendo o controle do veículo.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-pneus-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-pneus-003",
+      "alternativas": [
+        { "texto": "Os sulcos deixam de ter importância quando a pista está molhada.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A capacidade de escoar água e manter aderência fica reduzida.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O desgaste dos pneus só interfere em pista seca.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Pneus gastos melhoram a estabilidade em chuva intensa.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

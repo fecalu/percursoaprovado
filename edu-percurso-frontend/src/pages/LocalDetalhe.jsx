@@ -240,7 +240,6 @@ export default function LocalDetalhe() {
   const [local, setLocal] = useState(null)
   const [planos, setPlanos] = useState([])
   const [loading, setLoading] = useState(true)
-  const [solicitandoId, setSolicitandoId] = useState('')
   const [checkoutMonitor, setCheckoutMonitor] = useState(null)
   const [sincronizandoCheckout, setSincronizandoCheckout] = useState(false)
   const [planoAtivoIndex, setPlanoAtivoIndex] = useState(0)
@@ -382,47 +381,6 @@ export default function LocalDetalhe() {
     })
   }, [slug])
 
-  async function solicitarPlano(planoId) {
-    const abaCheckout = window.open('', '_blank')
-    setSolicitandoId(planoId)
-    try {
-      const pedido = await pedidoService.criar({ planoId })
-      const monitor = createCheckoutMonitor(pedido, slug)
-      saveCheckoutMonitor(monitor)
-      setCheckoutMonitor(monitor)
-      notifyCheckoutMonitor({
-        pedidoId: monitor.pedidoId,
-        referencia: monitor.referencia,
-        localSlug: monitor.localSlug,
-      })
-
-      if (pedido.checkoutUrl) {
-        if (abaCheckout) {
-          abaCheckout.opener = null
-          abaCheckout.location.href = pedido.checkoutUrl
-          show('Checkout aberto em outra aba. Vamos acompanhar a confirmacao por aqui.')
-          return
-        }
-
-        show('Seu navegador bloqueou a nova aba. Vamos abrir o checkout nesta mesma pagina.')
-        window.location.href = pedido.checkoutUrl
-        return
-      }
-      if (abaCheckout) abaCheckout.close()
-      show('Pedido criado com sucesso.')
-      setTimeout(() => navigate('/meus-pedidos'), 600)
-    } catch (error) {
-      if (abaCheckout) abaCheckout.close()
-      const mensagem = error.response?.data?.erro || 'Nao foi possivel iniciar a compra.'
-      show(mensagem, 'error')
-      if (mensagem.includes('pedido pendente')) {
-        setTimeout(() => navigate('/meus-pedidos'), 900)
-      }
-    } finally {
-      setSolicitandoId('')
-    }
-  }
-
   function fecharAcompanhamentoCheckout() {
     clearCheckoutMonitor()
     setCheckoutMonitor(null)
@@ -448,10 +406,9 @@ export default function LocalDetalhe() {
     return (
       <button
         className="btn btn-primary"
-        onClick={() => solicitarPlano(plano.id)}
-        disabled={solicitandoId === plano.id}
+        onClick={() => navigate(`/checkout/revisao/${slug}/${plano.id}`)}
       >
-        {solicitandoId === plano.id ? 'Abrindo pagamento...' : 'Pagar com Mercado Pago'}
+        Revisar antes de pagar
       </button>
     )
   }

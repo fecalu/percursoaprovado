@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Placas de regulamentação: proibição, obrigação e restrição",
+    "qtde": 6,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume I - Sinalização Vertical de Regulamentação",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre sentidos práticos de proibição, obrigação e restrição."
+  },
+  "questoes": [
+    {
+      "enunciado": "Uma placa que indique sentido obrigatório em determinado ponto da via significa que o condutor:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em sentido obrigatório, o movimento indicado deve ser seguido pelo condutor.",
+      "explicacaoDetalhada": "A sinalização de sentido obrigatório organiza o fluxo e evita conflitos no cruzamento ou trecho da via. Ela não recomenda: ela determina a direção de deslocamento permitida ao condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-001",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-001",
+      "alternativas": [
+        { "texto": "Pode escolher qualquer direção, desde que sinalize a manobra.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Deve seguir o sentido determinado pela placa.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só precisa obedecer se houver semáforo no local.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Pode contrariar a placa se estiver em via pouco movimentada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando a placa indica proibição de conversão em um cruzamento, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conversão proibida não pode ser realizada naquele ponto, devendo o condutor buscar alternativa permitida.",
+      "explicacaoDetalhada": "A proibição de conversão existe para reduzir riscos, conflitos ou inadequações do fluxo. O correto é continuar pela rota permitida e procurar local adequado para manobra regular.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-002",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-002",
+      "alternativas": [
+        { "texto": "Realizar a conversão rapidamente, para não atrapalhar o tráfego.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Ignorar a restrição se a via estiver livre.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Respeitar a placa e seguir por movimento permitido.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Parar no cruzamento e aguardar autorização dos demais motoristas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Placas de restrição de altura, largura ou peso servem para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas limitam a passagem de veículos que excedam as dimensões ou carga indicadas.",
+      "explicacaoDetalhada": "Esse tipo de regulamentação protege a infraestrutura da via e a segurança da circulação. Veículos fora do limite informado não devem prosseguir naquele acesso ou trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-003",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-003",
+      "alternativas": [
+        { "texto": "Informar apenas a largura estimada da pista, sem efeito obrigatório.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Permitir a passagem de qualquer veículo mais pesado, desde que em baixa velocidade.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Restringir a circulação de veículos acima do limite indicado.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Orientar a melhor faixa para veículos grandes.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se a via possui placa determinando circulação exclusiva para uma categoria de veículo, os demais usuários devem:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Faixa ou via exclusiva cria restrição para os demais veículos, salvo exceções legais.",
+      "explicacaoDetalhada": "A exclusividade existe para disciplinar o uso do espaço viário. Portanto, quem não se enquadra na categoria autorizada deve evitar aquele trecho, respeitando a destinação sinalizada.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-004",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-004",
+      "alternativas": [
+        { "texto": "Usar normalmente o espaço, desde que por curto período.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Respeitar a exclusividade e não ocupar o espaço indevidamente.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Entrar no trecho somente para ultrapassar outro veículo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Circular no local se estiver abaixo da velocidade da via.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma placa de velocidade mínima, quando existente, tem o objetivo de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela evita circulação excessivamente lenta que comprometa a fluidez e a segurança, quando as condições permitirem.",
+      "explicacaoDetalhada": "Assim como a velocidade máxima, a velocidade mínima integra a regulação do fluxo. O condutor deve mantê-la quando as condições da via, do veículo e do tráfego permitirem com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-005",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-005",
+      "alternativas": [
+        { "texto": "Obrigar o condutor a acelerar mesmo em situação de risco.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Sugerir velocidade ideal sem caráter obrigatório.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Fixar referência abaixo da qual a circulação não deve ocorrer sem justificativa.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Indicar a velocidade média do trecho para fins estatísticos.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao encontrar uma placa que proíbe determinado acesso, a melhor interpretação é que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acesso está vedado naquele ponto, ainda que pareça momentaneamente seguro entrar.",
+      "explicacaoDetalhada": "A proibição existe por razões de organização, visibilidade, risco ou compatibilidade do fluxo. Não cabe ao condutor relativizar a regra com base em impressão pessoal sobre o local.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-regulamentacao-obrigacao-006",
+      "fingerprint": "base-propria-oficial-placas-regulamentacao-obrigacao-006",
+      "alternativas": [
+        { "texto": "A entrada pode ser feita se o condutor julgar não haver perigo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O acesso está vedado e deve ser evitado naquele ponto.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A proibição vale somente para veículos grandes.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A placa pode ser desconsiderada fora do horário de pico.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

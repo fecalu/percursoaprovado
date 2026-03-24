@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "tema": "MEIO_AMBIENTE_CIDADANIA",
+    "subtema": "Poluição, emissão de gases, fumaça e ruído",
+    "qtde": 8,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Meio ambiente e convívio social",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre impacto ambiental do veículo e condutas que reduzem poluição e ruído."
+  },
+  "questoes": [
+    {
+      "enunciado": "A emissão excessiva de fumaça por um veículo é um problema porque:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Fumaça excessiva indica poluição e possível problema de manutenção.",
+      "explicacaoDetalhada": "Quando o veículo emite fumaça em excesso, ele contribui mais para a poluição do ar e pode ainda sinalizar falha de funcionamento. Isso afeta a saúde coletiva e a qualidade ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-001",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-001",
+      "alternativas": [
+        { "texto": "Só altera a estética do veículo, sem impacto externo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Aumenta a poluição do ar e pode indicar mau funcionamento.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Melhora o desempenho do motor em subidas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "É normal em qualquer veículo em movimento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ruído excessivo emitido por veículo ou equipamento de som representa:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Barulho excessivo também é forma de poluição e afeta o convívio social.",
+      "explicacaoDetalhada": "A poluição sonora prejudica o bem-estar, o descanso e a saúde das pessoas. No trânsito, o respeito ao silêncio e ao ambiente urbano também faz parte da responsabilidade do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-002",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-002",
+      "alternativas": [
+        { "texto": "Apenas uma forma de expressão sem efeito sobre terceiros.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Uma forma de poluição que prejudica o convívio social.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Um detalhe irrelevante fora de áreas residenciais.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Um direito absoluto do proprietário do veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista ambiental, manter o veículo regulado ajuda a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Veículo regulado tende a poluir menos e funcionar com mais eficiência.",
+      "explicacaoDetalhada": "A regulagem adequada favorece melhor queima de combustível, menor emissão de poluentes e funcionamento mais estável do veículo. Isso reduz impacto ambiental e melhora o uso responsável do automóvel.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-003",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-003",
+      "alternativas": [
+        { "texto": "Aumentar ruídos para alertar outros motoristas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir emissões e melhorar a eficiência do funcionamento.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Eliminar totalmente qualquer necessidade de manutenção.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Permitir uso irrestrito de buzina e som automotivo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Entre as condutas abaixo, qual se relaciona melhor com redução de poluição no trânsito?",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Direção e manutenção conscientes ajudam a reduzir o impacto ambiental do veículo.",
+      "explicacaoDetalhada": "A redução da poluição no trânsito depende tanto do estado do veículo quanto do modo como ele é utilizado. Cuidar da manutenção e dirigir com prudência contribuem para menor desgaste e emissão.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-004",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-004",
+      "alternativas": [
+        { "texto": "Ignorar sinais de mau funcionamento do motor.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Fazer manutenção preventiva e evitar uso agressivo do veículo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Acelerar bruscamente em toda saída para economizar combustível.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar escapamento alterado para aumentar o som do carro.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A poluição do ar gerada por veículos afeta principalmente:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Emissões veiculares prejudicam o ambiente e a saúde das pessoas.",
+      "explicacaoDetalhada": "A emissão de gases e partículas por veículos impacta a qualidade do ar, o ambiente urbano e a saúde coletiva, especialmente em locais de tráfego intenso. Por isso, a condução responsável tem também dimensão ambiental.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-005",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-005",
+      "alternativas": [
+        { "texto": "Somente a aparência externa da cidade.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O meio ambiente e a saúde das pessoas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas os veículos mais antigos estacionados.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Exclusivamente o consumo interno do motorista.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O condutor que mantém escapamento adulterado com ruído excessivo desrespeita:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ruído excessivo agride o ambiente urbano e o convívio social.",
+      "explicacaoDetalhada": "A modificação que aumenta indevidamente o ruído do veículo afeta o sossego público e o respeito aos demais usuários e moradores. O uso responsável do veículo inclui evitar esse tipo de impacto desnecessário.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-006",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-006",
+      "alternativas": [
+        { "texto": "Apenas uma convenção estética sem relevância social.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O direito coletivo ao ambiente sonoro equilibrado e ao respeito no trânsito.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente a preferência de motoristas mais antigos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Uma regra aplicável apenas a veículos de carga.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Reduzir emissões de poluentes no trânsito é uma responsabilidade que envolve:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor também participa da proteção ambiental por meio de suas escolhas de uso e manutenção.",
+      "explicacaoDetalhada": "A proteção ambiental no trânsito não depende apenas do poder público ou da indústria. O condutor participa diretamente quando cuida do veículo, evita condutas agressivas e valoriza o funcionamento adequado dos sistemas.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-007",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-007",
+      "alternativas": [
+        { "texto": "Somente fabricantes e oficinas, nunca o motorista.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O poder público, as empresas e também o comportamento do condutor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas cidades grandes com muito congestionamento.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Exclusivamente quem utiliza combustível fóssil em rodovias.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "No contexto da educação para o trânsito, falar em poluição veicular significa considerar:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O impacto do veículo não é só mecânico ou econômico; também é ambiental e social.",
+      "explicacaoDetalhada": "A poluição veicular inclui emissão de gases, fumaça, partículas e ruído. Ela afeta o ar, o bem-estar coletivo e a saúde das pessoas, razão pela qual faz parte da formação responsável do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "meio-ambiente-poluicao-008",
+      "fingerprint": "base-propria-oficial-meio-ambiente-poluicao-008",
+      "alternativas": [
+        { "texto": "Apenas a sujeira externa que fica no carro após a chuva.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Os efeitos ambientais e sociais das emissões e ruídos do veículo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente o consumo de combustível em viagens curtas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Questões sem relação com a responsabilidade do condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

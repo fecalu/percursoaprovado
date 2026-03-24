@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "tema": "PRIMEIROS_SOCORROS",
+    "subtema": "O que não fazer com a vítima",
+    "qtde": 4,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Primeiros socorros",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre condutas que devem ser evitadas para não agravar lesões."
+  },
+  "questoes": [
+    {
+      "enunciado": "Em regra, não se deve puxar, levantar ou arrastar a vítima após acidente porque isso pode:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Movimentação inadequada pode agravar lesões, especialmente traumáticas.",
+      "explicacaoDetalhada": "A remoção sem necessidade e sem técnica pode piorar lesões em coluna, pescoço, membros e cabeça. Por isso, a orientação geral é evitar deslocamentos improvisados, salvo perigo imediato no ambiente.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-001",
+      "alternativas": [
+        { "texto": "Melhorar automaticamente a circulação da vítima.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Agravar lesões já existentes.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Facilitar o trabalho do socorro em qualquer caso.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Reduzir o risco de dor imediatamente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Dar bebida alcoólica, remédios ou qualquer substância à vítima é inadequado porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Isso pode agravar o quadro e dificultar o atendimento profissional.",
+      "explicacaoDetalhada": "Sem avaliação técnica adequada, não se conhece o estado real da vítima nem as consequências de ingerir algo naquele momento. A prudência exige evitar oferecer substâncias por conta própria.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-002",
+      "alternativas": [
+        { "texto": "Substâncias sempre ajudam a acalmar e melhorar o quadro.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Pode haver agravamento da situação ou interferência no atendimento.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só é inadequado se a vítima for menor de idade.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Água e analgésico nunca oferecem qualquer risco.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Aglomeração de curiosos ao redor da vítima deve ser evitada porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Tumulto atrapalha a ventilação, a organização da cena e a chegada do socorro.",
+      "explicacaoDetalhada": "Muita gente ao redor pode dificultar o acesso da equipe de resgate, aumentar a ansiedade da vítima e transformar a cena em ambiente desorganizado. O ideal é preservar espaço e reduzir o tumulto.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-003",
+      "alternativas": [
+        { "texto": "Quanto mais gente em volta, melhor o atendimento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O excesso de pessoas pode atrapalhar a organização e o socorro.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Curiosos são necessários para decidir o que fazer.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A presença de muitas pessoas reduz sempre o risco do local.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Nos primeiros socorros no trânsito, a regra “não agravar a situação” significa que o condutor deve evitar:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Evitar ações impulsivas é parte central do atendimento inicial responsável.",
+      "explicacaoDetalhada": "A boa intenção não substitui técnica. Em acidentes, muitas atitudes aparentemente úteis podem piorar lesões ou dificultar o socorro. A prioridade é proteção, observação, acionamento de ajuda e prudência na intervenção.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-evitar-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-evitar-004",
+      "alternativas": [
+        { "texto": "Ações impulsivas e procedimentos improvisados sem necessidade.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Acionar ajuda especializada o quanto antes.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Manter o local protegido e organizado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Conversar com calma com a vítima consciente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

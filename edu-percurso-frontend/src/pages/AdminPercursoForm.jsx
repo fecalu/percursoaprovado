@@ -19,6 +19,7 @@ const VAZIO = {
   ordemExibicao: '0',
   destaque: false,
   ativo: true,
+  configuracaoPontosAtencao: 'AUTOMATICO',
   pontosAtencao: [],
 }
 
@@ -32,6 +33,7 @@ const TIPOS_CONTEUDO = [
 ]
 
 const VIDEO_PROVIDERS = ['YOUTUBE', 'VIMEO', 'BUNNY']
+const CONFIGURACOES_PONTOS_ATENCAO = ['AUTOMATICO', 'SEMPRE_MOSTRAR', 'OCULTAR']
 const TIPOS_PONTO_ATENCAO = [
   'DICA_IMPORTANTE',
   'ERRO_COMUM',
@@ -51,6 +53,7 @@ function criarPontoAtencaoVazio(ordem = 0) {
     descricaoDetalhada: '',
     tipo: 'DICA_IMPORTANTE',
     imagemUrl: '',
+    audioUrl: '',
     videoUrl: '',
     modoExibicao: 'CLIQUE',
     ordemExibicao: String(ordem),
@@ -108,6 +111,17 @@ function formatarVideoProvider(provider) {
   }
 }
 
+function formatarConfiguracaoPontosAtencao(configuracao) {
+  switch (configuracao) {
+    case 'SEMPRE_MOSTRAR':
+      return 'Sempre mostrar'
+    case 'OCULTAR':
+      return 'Ocultar'
+    default:
+      return 'Automatico'
+  }
+}
+
 export default function AdminPercursoForm() {
   const { id } = useParams()
   const isEdicao = Boolean(id)
@@ -151,6 +165,7 @@ export default function AdminPercursoForm() {
           ordemExibicao: String(percursoResp.ordemExibicao ?? 0),
           destaque: percursoResp.destaque ?? false,
           ativo: percursoResp.ativo ?? true,
+          configuracaoPontosAtencao: percursoResp.configuracaoPontosAtencao || 'AUTOMATICO',
           pontosAtencao: (percursoResp.pontosAtencao || []).map((item, index) => ({
             id: item.id || null,
             timestampSegundos: String(item.timestampSegundos ?? ''),
@@ -159,6 +174,7 @@ export default function AdminPercursoForm() {
             descricaoDetalhada: item.descricaoDetalhada || '',
             tipo: item.tipo || 'DICA_IMPORTANTE',
             imagemUrl: item.imagemUrl || '',
+            audioUrl: item.audioUrl || '',
             videoUrl: item.videoUrl || '',
             modoExibicao: item.modoExibicao || 'CLIQUE',
             ordemExibicao: String(item.ordemExibicao ?? index),
@@ -250,6 +266,24 @@ export default function AdminPercursoForm() {
     }
   }
 
+  async function handlePontoAudioUpload(index, event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setUploadingPointField(`ponto-audio-${index}`)
+
+    try {
+      const resposta = await uploadService.enviarAudio(file)
+      setPontoAtencao(index, 'audioUrl', resposta.url)
+      show('Audio do ponto enviado com sucesso.')
+    } catch (error) {
+      show(error.response?.data?.erro || 'Erro ao enviar audio do ponto.', 'error')
+    } finally {
+      setUploadingPointField('')
+      event.target.value = ''
+    }
+  }
+
   async function handleBunnyVideoUpload(event) {
     const file = event.target.files?.[0]
     if (!file) return
@@ -299,8 +333,16 @@ export default function AdminPercursoForm() {
       ordemExibicao: Number(form.ordemExibicao) || 0,
       destaque: form.destaque,
       ativo: form.ativo,
+      configuracaoPontosAtencao: form.configuracaoPontosAtencao,
       pontosAtencao: form.pontosAtencao
-        .filter(item => item.titulo.trim() || item.descricaoCurta.trim() || item.imagemUrl.trim() || item.videoUrl.trim())
+        .filter(item => (
+          item.titulo.trim() ||
+          item.descricaoCurta.trim() ||
+          item.descricaoDetalhada.trim() ||
+          item.imagemUrl.trim() ||
+          item.audioUrl.trim() ||
+          item.videoUrl.trim()
+        ))
         .map((item, index) => ({
           id: item.id || null,
           timestampSegundos: Number(item.timestampSegundos) || 0,
@@ -309,6 +351,7 @@ export default function AdminPercursoForm() {
           descricaoDetalhada: item.descricaoDetalhada.trim() || null,
           tipo: item.tipo,
           imagemUrl: item.imagemUrl.trim() || null,
+          audioUrl: item.audioUrl.trim() || null,
           videoUrl: item.videoUrl.trim() || null,
           modoExibicao: item.modoExibicao,
           ordemExibicao: Number(item.ordemExibicao) || index,
@@ -444,6 +487,24 @@ export default function AdminPercursoForm() {
                 value={form.ordemExibicao}
                 onChange={event => set('ordemExibicao', event.target.value)}
               />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Pontos de atencao no player</label>
+            <select
+              className="form-select"
+              value={form.configuracaoPontosAtencao}
+              onChange={event => set('configuracaoPontosAtencao', event.target.value)}
+            >
+              {CONFIGURACOES_PONTOS_ATENCAO.map(configuracao => (
+                <option key={configuracao} value={configuracao}>
+                  {formatarConfiguracaoPontosAtencao(configuracao)}
+                </option>
+              ))}
+            </select>
+            <div className="mini-copy">
+              Automatico usa a logica normal do player. Sempre mostrar mantem a area de pontos visivel mesmo sem pontos cadastrados neste video. Ocultar remove essa experiencia deste conteudo.
             </div>
           </div>
 
@@ -685,6 +746,46 @@ export default function AdminPercursoForm() {
                       value={ponto.descricaoDetalhada}
                       onChange={event => setPontoAtencao(index, 'descricaoDetalhada', event.target.value)}
                     />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Audio explicativo</label>
+                    <div className="question-media-stack">
+                      <input
+                        className="form-input"
+                        type="file"
+                        accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg,.mp3,.m4a,.ogg"
+                        onChange={event => handlePontoAudioUpload(index, event)}
+                        disabled={uploadingPointField === `ponto-audio-${index}`}
+                      />
+                      <input
+                        className="form-input"
+                        placeholder="/media/audios/... ou URL publica do audio"
+                        value={ponto.audioUrl}
+                        onChange={event => setPontoAtencao(index, 'audioUrl', event.target.value)}
+                      />
+                      <div className="mini-copy">
+                        Use para uma explicacao falada curta, como se o instrutor comentasse esse trecho.
+                        {uploadingPointField === `ponto-audio-${index}` ? ' Enviando audio...' : ''}
+                      </div>
+                      {ponto.audioUrl && (
+                        <div className="question-media-preview-wrap">
+                          <audio
+                            className="question-audio-preview"
+                            controls
+                            preload="none"
+                            src={ponto.audioUrl}
+                          />
+                          <button
+                            className="btn btn-ghost"
+                            type="button"
+                            onClick={() => setPontoAtencao(index, 'audioUrl', '')}
+                          >
+                            Remover audio
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="form-row">

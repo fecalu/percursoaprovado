@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "tema": "PRIMEIROS_SOCORROS",
+    "subtema": "Cuidados básicos até a chegada do socorro",
+    "qtde": 6,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Primeiros socorros",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre atitudes simples e seguras enquanto o socorro especializado não chega."
+  },
+  "questoes": [
+    {
+      "enunciado": "Enquanto aguarda o socorro profissional, o condutor pode ajudar a vítima consciente principalmente ao:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Calma, observação e proteção são atitudes úteis e seguras.",
+      "explicacaoDetalhada": "Em muitos casos, o melhor auxílio até a chegada da equipe especializada é manter a vítima calma, protegida e acompanhada, sem improvisar procedimentos para os quais o condutor não tenha capacitação.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-001",
+      "alternativas": [
+        { "texto": "Forçá-la a caminhar para demonstrar resistência.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Mantê-la calma e acompanhada, sem movimentos desnecessários.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Dar remédios para aliviar a dor imediatamente.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Retirar o equipamento de proteção por curiosidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se uma vítima de motocicleta estiver usando capacete, a conduta mais prudente para uma pessoa sem treinamento é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Retirar o capacete sem necessidade e sem técnica pode agravar lesões.",
+      "explicacaoDetalhada": "Em acidentes com motociclistas, pode haver lesões na cabeça, pescoço e coluna. Sem treinamento, retirar o capacete de forma inadequada pode piorar o quadro. A prioridade é manter a segurança e aguardar o atendimento especializado, salvo risco imediato no local.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-002",
+      "alternativas": [
+        { "texto": "Retirar rapidamente o capacete para a vítima respirar melhor, em qualquer situação.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Evitar retirar o capacete sem necessidade e sem treinamento específico.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Pedir que a própria vítima tire o capacete a qualquer custo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Abrir o capacete com força para examinar o ferimento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Até a chegada do socorro, oferecer alimentos, bebidas ou medicamentos à vítima é uma conduta:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Dar qualquer substância à vítima pode agravar o quadro e dificultar o atendimento.",
+      "explicacaoDetalhada": "Sem saber a extensão das lesões, o nível de consciência ou a necessidade de procedimento médico, oferecer alimentos, líquidos ou remédios é uma atitude inadequada e potencialmente perigosa.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-003",
+      "alternativas": [
+        { "texto": "Indicada, pois ajuda a vítima a recuperar as forças.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Inadequada, porque pode agravar a situação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Necessária apenas se a vítima disser que está bem.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Aceitável se o remédio for de uso comum.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma vítima consciente e assustada costuma se beneficiar quando o socorrista eventual:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Orientação calma e presença organizada ajudam a reduzir ansiedade e agitação.",
+      "explicacaoDetalhada": "Falar de forma tranquila, explicar que o socorro foi acionado e evitar tumulto no entorno pode diminuir a ansiedade da vítima. Isso contribui para um ambiente mais controlado e seguro até a chegada da equipe especializada.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-004",
+      "alternativas": [
+        { "texto": "Aumenta a pressão para que ela reaja mais rápido.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Mantém comunicação calma e evita aglomeração desnecessária ao redor.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Discute detalhes do acidente na frente da vítima.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Faz perguntas agressivas para obter respostas objetivas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em situação sem risco adicional imediato, mover a vítima por conta própria tende a ser uma atitude:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mover a vítima sem necessidade pode agravar lesões ocultas.",
+      "explicacaoDetalhada": "Em acidentes de trânsito, pode haver trauma em coluna, membros ou cabeça. Se não houver risco urgente como fogo ou atropelamento iminente, a orientação geral é evitar remoção desnecessária até a chegada do socorro adequado.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-005",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-005",
+      "alternativas": [
+        { "texto": "Correta, pois qualquer mudança de posição sempre melhora a dor.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Arriscada, porque pode piorar lesões já existentes.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Obrigatória para verificar se a vítima consegue andar.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Indicada sempre que houver curiosos observando.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A lógica dos cuidados básicos até a chegada do socorro é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O objetivo é proteger e preservar, não improvisar procedimentos complexos.",
+      "explicacaoDetalhada": "Para o condutor comum, os cuidados básicos concentram-se em proteger o local, acionar ajuda, observar a vítima, oferecer calma e evitar ações que possam agravar o trauma. Primeiros socorros no trânsito exigem prudência, não excesso de intervenção.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-cuidados-006",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-cuidados-006",
+      "alternativas": [
+        { "texto": "Substituir o atendimento especializado com técnicas improvisadas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Preservar a vítima e a cena, evitando agravar o quadro.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Fazer qualquer procedimento visto em vídeos da internet.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Deixar a vítima sozinha até a ambulância chegar.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

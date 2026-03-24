@@ -62,6 +62,9 @@ export const questaoService = {
   excluirAdmin: id => api.delete(`/admin/questoes/${id}`),
   listarTemasAluno: () => api.get('/questoes/temas').then(response => response.data),
   listarTreinoAluno: params => api.get(`/questoes/treino${toSearchParams(params)}`).then(response => response.data),
+  listarSimuladoCompletoAluno: excluirIds => api.get(`/questoes/simulado-completo${toSearchParams({
+    excluirIds: Array.isArray(excluirIds) && excluirIds.length ? excluirIds.join(',') : '',
+  })}`).then(response => response.data),
   responderAluno: (id, data) => api.post(`/questoes/${id}/responder`, data).then(response => response.data),
 }
 
@@ -110,6 +113,11 @@ export const uploadService = {
     const formData = new FormData()
     formData.append('file', file)
     return api.post('/uploads/thumbnails', formData).then(response => response.data)
+  },
+  enviarAudio: file => {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/uploads/audios', formData).then(response => response.data)
   },
   enviarVideoBunny: (file, title) => {
     const formData = new FormData()

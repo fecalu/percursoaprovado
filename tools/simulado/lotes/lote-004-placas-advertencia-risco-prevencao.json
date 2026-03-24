@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Placas de advertência: risco e prevenção",
+    "qtde": 8,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume II - Sinalização Vertical de Advertência",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre função preventiva das placas de advertência."
+  },
+  "questoes": [
+    {
+      "enunciado": "A função principal de uma placa de advertência é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Placas de advertência alertam para perigo ou condição especial adiante.",
+      "explicacaoDetalhada": "Diferentemente da regulamentação, a advertência não impõe diretamente uma manobra específica. Sua função é avisar que há situação potencialmente perigosa ou diferenciada, exigindo cautela do condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-001",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-001",
+      "alternativas": [
+        { "texto": "Impor obrigação imediata ao condutor.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Alertar para risco ou condição especial na via.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Indicar serviços de apoio ao usuário.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substituir as regras gerais de circulação.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao visualizar placa de advertência indicando curva acentuada adiante, a conduta preventiva mais adequada é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve reduzir a velocidade e preparar a manobra com antecedência.",
+      "explicacaoDetalhada": "A placa de curva acentuada informa que o trajeto exigirá maior controle do veículo. A resposta segura é diminuir a velocidade antes de entrar na curva e ajustar a condução ao risco anunciado.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-002",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-002",
+      "alternativas": [
+        { "texto": "Acelerar para sair da curva mais rapidamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e aumentar a atenção.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Manter a mesma velocidade para não perder estabilidade.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar a buzina continuamente ao entrar na curva.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando a placa de advertência informa pista escorregadia, o condutor deve principalmente:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em pista escorregadia, comandos bruscos elevam o risco de derrapagem.",
+      "explicacaoDetalhada": "A advertência indica redução de aderência. Por isso, é essencial conduzir com suavidade, evitando frenagens e acelerações bruscas, além de reduzir a velocidade com antecedência.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-003",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-003",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para atravessar logo o trecho.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Dirigir com suavidade e velocidade reduzida.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Frenar bruscamente sempre que perceber perda de aderência.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Parar o veículo no meio do trecho e aguardar ajuda.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A advertência de área escolar ou travessia frequente de pedestres indica que o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em área com pedestres, o comportamento deve ser mais cauteloso e atento.",
+      "explicacaoDetalhada": "Esse tipo de advertência antecipa presença elevada de usuários vulneráveis. A resposta correta é reduzir a velocidade, observar a via com mais cuidado e estar pronto para parar.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-004",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-004",
+      "alternativas": [
+        { "texto": "Manter velocidade constante para não atrapalhar o fluxo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e redobrar a atenção aos pedestres.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar a buzina para avisar os pedestres da aproximação.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Circular pela contramão se a faixa estiver ocupada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma placa de advertência sobre estreitamento de pista serve para lembrar que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A redução da largura da via exige ajuste de posição e mais cautela na circulação.",
+      "explicacaoDetalhada": "Quando a pista se estreita, o espaço útil para passagem diminui. Isso pode exigir redução de velocidade, atenção ao posicionamento do veículo e maior cuidado com cruzamentos e ultrapassagens.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-005",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-005",
+      "alternativas": [
+        { "texto": "A pista ficará mais larga logo adiante.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "O condutor deverá ajustar a condução devido à redução do espaço de circulação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O trecho passa a ser exclusivo para motocicletas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Não há necessidade de alterar a forma de conduzir.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao receber advertência de declive acentuado, a conduta mais segura é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em descida forte, o condutor deve controlar o veículo antes do trecho, sem depender apenas do freio.",
+      "explicacaoDetalhada": "O risco do declive está no ganho de velocidade e no superaquecimento do sistema de freios. O correto é entrar no trecho com velocidade controlada e conduzir de forma preventiva.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-006",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-006",
+      "alternativas": [
+        { "texto": "Entrar no declive em alta velocidade e frear no final.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Controlar o veículo antes do trecho e descer com cautela.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Desligar o motor para economizar combustível.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar o pisca-alerta e soltar o volante nas curvas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se a placa de advertência indica passagem de animais, o condutor deve entender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pode haver travessia inesperada de animais, exigindo atenção e velocidade compatível.",
+      "explicacaoDetalhada": "A presença de animais na pista representa risco de colisão e manobras bruscas. A advertência existe para que o condutor ajuste sua condução antes de ser surpreendido.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-007",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-007",
+      "alternativas": [
+        { "texto": "O trecho é exclusivo para veículos rurais.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A passagem de animais ocorrerá apenas durante o dia.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Existe possibilidade de travessia de animais e o risco exige cautela.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "A pista deve ser usada com buzina contínua para espantar animais.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Qual é a melhor leitura prática de uma placa de advertência?",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela deve ser interpretada como aviso preventivo que exige adaptação da conduta ao risco anunciado.",
+      "explicacaoDetalhada": "Placa de advertência não é mera informação decorativa. Sua função é permitir que o condutor ajuste a condução antes de chegar ao ponto crítico, reduzindo a chance de sinistro.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-advertencia-risco-008",
+      "fingerprint": "base-propria-oficial-placas-advertencia-risco-008",
+      "alternativas": [
+        { "texto": "É apenas um complemento visual sem reflexo na condução.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "É um aviso preventivo que exige comportamento mais cauteloso.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substitui qualquer outra sinalização do trecho.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Vale somente para motoristas iniciantes.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

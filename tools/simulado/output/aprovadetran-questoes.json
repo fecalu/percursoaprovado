@@ -1,0 +1,1208 @@
+{
+  "source": "APROVADETRAN",
+  "pageUrl": "https://www.aprovadetran.com.br/simulado-detran/gratuito",
+  "extractedAt": "2026-03-23T03:23:33.717Z",
+  "total": 30,
+  "questoes": [
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "796",
+      "fingerprint": "477b680d80ab5769184d40be989238d0245ef9619f5e9285653d8757f6c57fbd",
+      "enunciado": "A sigla SAMU significa:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "Serviço de Atendimento Médico Urbano",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "Serviço de Auxílio Médico de Urgência",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "Serviço de Auxílio Móvel ao Usuário",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "Serviço de Atendimento Móvel de Urgência",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "255",
+      "fingerprint": "6a9cbb4b3c5cf4bc3cc80f7e9f2904cd430181a1ca425a142e074d887a56313f",
+      "enunciado": "A competência para poder autorizar a circulação de bicicletas no sentido contrário ao fluxo dos veículos automotores é:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "do CONTRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "do CETRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "da autoridade de trânsito com circunscrição sobre a via",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 3,
+          "texto": "da Polícia Rodoviária",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "331",
+      "fingerprint": "77a74d6f3ce5cee5680b4525d3399c056b1ddcf35fe074cf0c8b39de192a6f0e",
+      "enunciado": "Em dias de chuva, com a pista escorregadia, a distância de segurança entre dois veículos deverá ser de:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "4 segundos",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 1,
+          "texto": "2 segundos",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "6 segundos",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "10 segundos",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "1017",
+      "fingerprint": "563d9741bf04521d4d28861393509d7aa9fa5c00ac01dd8ac6f98304ed2db647",
+      "enunciado": "A placa ao lado significa:",
+      "imagemUrl": "https://www.aprovadetran.com.br/n/placas/regulamentacao/Placas-de-transito-Aprova-Detran-pedestre-ande-pela-esquerda-R-30.png",
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "ultrapassar os pedestres pela esquerda",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "pedestre, ande pela esquerda",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "pedestre, ultrapasse sempre pela esquerda",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "atenção, pedestres circulando pela esquerda",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "976",
+      "fingerprint": "429d5d335ddad3ed5f2f88e0e5ba4544ee91dd7a0f689c13481155994e2d7756",
+      "enunciado": "A placa ao lado significa:",
+      "imagemUrl": "https://www.aprovadetran.com.br/n/placas/advertencia/Placas-de-transito-Aprova-Detran-ponte-estreita-A-22.png",
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "ponte estreita",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 1,
+          "texto": "pista estreita",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "sentido obrigatório",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "passagem de apenas um veículo",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "785",
+      "fingerprint": "7020b334c9b2c879d5d777cd8f5bed68240f4896fed86ac5ed0f3e996536dee2",
+      "enunciado": "O sinal vital que não varia com a idade é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "temperatura",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 1,
+          "texto": "pulso",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "respiração",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "pressão arterial",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "262",
+      "fingerprint": "e1d1520cc58b4c39a1b247bbabf2b1b9949cff25f0f9c421aaa98647cbf8ef0a",
+      "enunciado": "A velocidade mínima não pode ser inferior a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "40 Km/h",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "20 Km/h",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "1/3 da velocidade máxima regulamentada para a via",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "1⁄2 da velocidade máxima regulamentada para a via",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "360",
+      "fingerprint": "ae0229847cb0ed8b7e4d00430a1f4e2d165e4d50a59ed87cb0071bd1e550fb71",
+      "enunciado": "Entre as técnicas de direção defensiva estão agrupados cinco elementos básicos:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "conhecimento, atenção, previsão, habilidade e ação",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 1,
+          "texto": "atenção, habilidade, experiência de 2 anos, segurança e prudência",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "habilidade, ação, prudência, conhecimentos técnicos e previsão",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "atenção, previsão, habilidade, conhecimentos mecânicos e prudência",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "861",
+      "fingerprint": "19af66e0149231c064f4e6a0fad9f6d745d53d88ec3f3dc9246598bb5ec43b52",
+      "enunciado": "O Presidente do CETRAN é nomeado:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "pelo Ministro dos Transportes",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "pelo Governador do Estado",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "pelo Presidente da República",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "pela Câmara dos Deputados",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "305",
+      "fingerprint": "a87afad0c949b6da96deab4198601f967942743eaeac2e9f28a636055de59309",
+      "enunciado": "O procedimento correto em um declive acentuado é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "utilizar o \"ponto morto\"",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "utilizar a mesma marcha que seria necessária no caso de um aclive acentuado",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "testar o acelerador e desengrenar o veículo",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "desligar o motor do veículo",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "320",
+      "fingerprint": "a4a7ed931f75390f17f53827fa1db5de6406cbdf8b09aa1ddcc413d5b10bf87f",
+      "enunciado": "Tempo de reação é aquele que transcorre entre:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "o pisar no freio e a imobilização total do veículo",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "o acionar a embreagem e o freio",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "a visualização do perigo e o pisar no freio",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 3,
+          "texto": "a percepção do perigo e a parada",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "195",
+      "fingerprint": "3e6d3596703fe219968150bf57c6507b8cf4399bebc488783cee972ccc66282e",
+      "enunciado": "Os rótulos de risco com o título MOPP são usados nos veículos destinados ao transporte de:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "produtos artesanais",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "cargas indivisíveis",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "cargas perecíveis",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "produtos perigosos",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "983",
+      "fingerprint": "ebaaa32f908f27770709a3560e95696ac29622a8c519a4c238e6176e6002b843",
+      "enunciado": "A placa ao lado significa:",
+      "imagemUrl": "https://www.aprovadetran.com.br/n/placas/advertencia/Placas-de-transito-Aprova-Detran-altura-limitada-A-37.png",
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "altura máxima permitida",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "largura mínima permitida",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "peso máximo permitido",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "altura limitada",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "116",
+      "fingerprint": "f88e1edbcec4888e78b6701d997b3c45217c5eb6cc327972a4a857a1b59d72b9",
+      "enunciado": "O dever de dar prioridade em suas ações à defesa da vida, nela incluída a preservação da saúde e do meio ambiente, incumbe:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "ao Sistema Nacional de Trânsito",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "ao CONTRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "ao DETRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "aos órgãos e entidades de trânsito pertencentes ao Sistema Nacional de Trânsito",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "322",
+      "fingerprint": "70f54d8e233955a860e9443d827e012dc9a79ccf880f61becfb4c7077d9c4b0e",
+      "enunciado": "São tipos de direção defensiva:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "disciplinar e legal",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "preventiva e corretiva",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "eficiente e utilitária",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "segura e insegura",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "220",
+      "fingerprint": "db84ee1c731acd8f7e87b909d9771f60a8b2a2f12afa322ba220ef65cad25cd4",
+      "enunciado": "São vias rurais:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "vias de trânsito rápido",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "rodovias e estradas",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "vias locais e coletoras",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "estradas e vias preferenciais",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "677",
+      "fingerprint": "92d972209d25ed0cd9c8a9099e601b22a8db1ed68a5969040cea15db9b32e8af",
+      "enunciado": "O sistema que mantém a temperatura do motor sempre em condições de funcionamento chama-se:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "alimentação",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "elétrico",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "arrefecimento",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 3,
+          "texto": "inflamação",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "838",
+      "fingerprint": "0afee9e61718928b417b517ce0fc32d5c3a8dc38e4d09cdff1fdae33e4064509",
+      "enunciado": "Para habilitar-se na categoria “D”, o candidato deverá ser:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "maior de 18 anos",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "penalmente imputável, não importando sua idade",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "menor de 21 anos",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "maior de 21 anos",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "263",
+      "fingerprint": "d0f7b7c0a4f42975bcf5bf600bb4605f87fc0b85ff69adb08c0758f49bf3020f",
+      "enunciado": "É obrigatório o uso do cinto de segurança para condutor e passageiros em todas as vias do território nacional, salvo em situações regulamentadas:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "pelo CONTRAN",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 1,
+          "texto": "pelo Sistema Nacional de Trânsito",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "pelo CETRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "nenhuma das alternativas",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "840",
+      "fingerprint": "95b7f0236457b7427eabacbe4f6828a32bb1143d4e435698004e0e98cc067bdc",
+      "enunciado": "Se o candidato à habilitação for reprovado no exame de direção veicular, ele só poderá realizar novo exame após:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "a qualquer tempo, não é necessário esperar nenhum prazo",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 1,
+          "texto": "14 dias da divulgação do resultado",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "15 dias da divulgação do resultado",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "8 dias da divulgação do resultado",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "1009",
+      "fingerprint": "cbc15adc71ec0a0b9d892249e12fb8ad1b3dcee8a194bf163d374e9eba9023ad",
+      "enunciado": "A placa ao lado significa:",
+      "imagemUrl": "https://www.aprovadetran.com.br/n/placas/regulamentacao/Placas-de-transito-Aprova-Detran-peso-bruto-total-maximo-permitido-R-14.png",
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "peso bruto total máximo proibido",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "peso bruto total mínimo permitido",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "peso bruto permitido",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "peso bruto total máximo permitido",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "391",
+      "fingerprint": "7ea23954a9695966345e0f159a4d1b1b5906a882cf029935e728fc7648995843",
+      "enunciado": "Parar o veículo sobre a faixa de pedestres na mudança de sinal luminoso é infração de trânsito de natureza:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "leve",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "média",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "grave",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "gravíssima",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "866",
+      "fingerprint": "8c07542c6fe811476af41818418a2d2c53fa22162cd456b460dd7686fb0723b2",
+      "enunciado": "O julgamento dos recursos interpostos pelos infratores compete:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "ao CONTRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "ao CETRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "ao CONTRANDIFE",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "à JARI",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "988",
+      "fingerprint": "3c41dc8c7e6ad4710bd68a81b2fc72bd31bfae5692c808d7258b7507e48afecf",
+      "enunciado": "A placa ao lado significa:",
+      "imagemUrl": "https://www.aprovadetran.com.br/n/placas/advertencia/Placas-de-transito-Aprova-Detran-cruzamento-de-vias-A-6.png",
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "bifurcação em cruz",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "entroncamento",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "cruzamento de vias",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 3,
+          "texto": "interseção de vias",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "857",
+      "fingerprint": "5ff9582c3bddfd7393905dc13fe34021612d1c6af3fccc35ce4cd040b4f57c97",
+      "enunciado": "De acordo com o art. 13 do Código de Trânsito Brasileiro, é órgão técnico vinculado ao CONTRAN:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "o DETRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "as Câmaras Temáticas",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "o CETRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "a JARI",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "176",
+      "fingerprint": "45b3f9de3fb2d772a90d5f24a8e49f495e446b50f24ec45d2e8728dd729c9527",
+      "enunciado": "A diasina é um gás expelido pelos motores movidos a:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "eletricidade",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "gasolina",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "álcool",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "diesel",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "140",
+      "fingerprint": "3747db939d76cffdaaa34e3259de9676a99480352255f520952703e024246cb5",
+      "enunciado": "O órgão responsável pela regulamentação dos padrões da qualidade do ar é o:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "CONAMA",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 1,
+          "texto": "PROCONVE",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "DETRAN",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "Ministério da Saúde",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "788",
+      "fingerprint": "186e754194d745b817bd183426f30e39b45eacbb15053e5feee66e30cb9c73e5",
+      "enunciado": "Afastar os curiosos, desligar o motor do veículo envolvido e orientar para que não fumem no local é uma ação do socorrista no caso de:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "atropelamento",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "derramamento de combustível",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "obstáculo na pista",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "cabos de eletricidade caindo no local",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "131",
+      "fingerprint": "89392f9801bb6a7b1273656ec4b02771c84679c256b75645633e5042ec5949bf",
+      "enunciado": "Aos veículos reprovados na inspeção de segurança e na de emissão de gases poluentes e ruídos será aplicada:",
+      "imagemUrl": null,
+      "tema": "MEIO_AMBIENTE_CIDADANIA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "multa",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "apreensão do veículo",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 2,
+          "texto": "recolhimento do veículo",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "medida administrativa de retenção",
+          "imagemUrl": null,
+          "correta": true
+        }
+      ]
+    },
+    {
+      "origem": "APROVADETRAN",
+      "origemQuestaoId": "392",
+      "fingerprint": "1fde952b2572bfdedb7d24a2550e6b9735d8569cfe0267686c42a5262af2d094",
+      "enunciado": "Quando estacionar o veículo sobre as pistas de rolamento das estradas, o condutor será punido com:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Questao importada automaticamente. Revise a explicacao antes de publicar.",
+      "explicacaoDetalhada": null,
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "alternativas": [
+        {
+          "ordem": 0,
+          "texto": "multa, apenas",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 1,
+          "texto": "remoção do veiculo e multa",
+          "imagemUrl": null,
+          "correta": true
+        },
+        {
+          "ordem": 2,
+          "texto": "apreensão da Carteira Nacional de Habilitação e multa",
+          "imagemUrl": null,
+          "correta": false
+        },
+        {
+          "ordem": 3,
+          "texto": "cassação da Carteira Nacional de Habilitação",
+          "imagemUrl": null,
+          "correta": false
+        }
+      ]
+    }
+  ]
+}

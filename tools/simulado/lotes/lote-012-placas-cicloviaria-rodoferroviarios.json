@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Sinalização cicloviária e cruzamentos rodoferroviários",
+    "qtde": 3,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volumes VIII e IX",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre interações com ciclistas e cruzamentos rodoferroviários."
+  },
+  "questoes": [
+    {
+      "enunciado": "Ao identificar sinalização associada a ciclistas ou travessia de bicicletas, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A presença de sinalização cicloviária exige atenção especial aos deslocamentos de ciclistas.",
+      "explicacaoDetalhada": "Ciclistas são usuários vulneráveis da via. A sinalização correspondente serve para alertar o motorista, que deve reduzir riscos por meio de velocidade compatível, observação e respeito ao espaço de circulação.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-001",
+      "fingerprint": "base-propria-oficial-placas-cicloviaria-rodoferroviario-001",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para ultrapassar a área rapidamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Redobrar a atenção e respeitar a presença de ciclistas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar a buzina continuamente ao cruzar a área.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Considerar que a regra vale apenas para bicicletas elétricas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Diante de cruzamento rodoferroviário sinalizado, a conduta correta do condutor deve ser pautada por:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cruzamentos com ferrovia exigem elevada cautela e obediência rigorosa à sinalização existente.",
+      "explicacaoDetalhada": "A proximidade de linha férrea representa risco elevado. Por isso, o motorista deve observar cuidadosamente a sinalização, avaliar a segurança da travessia e jamais forçá-la diante de indicação de perigo.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-002",
+      "fingerprint": "base-propria-oficial-placas-cicloviaria-rodoferroviario-002",
+      "alternativas": [
+        { "texto": "Atravessar com rapidez sempre que não vir trem ao longe.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Obedecer à sinalização do local e atravessar apenas com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Parar somente se houver cancela fechada.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Usar marcha reduzida e nunca olhar para os lados.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A principal justificativa para reforçar a sinalização em cruzamentos rodoferroviários e áreas cicloviárias é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "São pontos de conflito com usuários ou veículos que exigem antecipação e maior margem de segurança.",
+      "explicacaoDetalhada": "Tanto o encontro com ciclistas quanto a proximidade com ferrovia envolvem riscos específicos e pouca margem para erro. A sinalização existe para antecipar a leitura do condutor e ampliar a segurança da decisão.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-cicloviaria-rodoferroviario-003",
+      "fingerprint": "base-propria-oficial-placas-cicloviaria-rodoferroviario-003",
+      "alternativas": [
+        { "texto": "São locais em que a velocidade máxima sempre aumenta.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "São pontos de conflito que exigem atenção e previsão ampliadas.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Permitem ao condutor ignorar o restante da sinalização da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Valem apenas em horários de movimento intenso.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

@@ -56,6 +56,9 @@ public class PontoAtencaoPercurso {
     @Column(name = "imagem_url", columnDefinition = "TEXT")
     private String imagemUrl;
 
+    @Column(name = "audio_url", columnDefinition = "TEXT")
+    private String audioUrl;
+
     @Column(name = "video_url", columnDefinition = "TEXT")
     private String videoUrl;
 

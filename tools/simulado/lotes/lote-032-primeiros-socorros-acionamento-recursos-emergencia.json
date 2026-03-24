@@ -1,0 +1,92 @@
+{
+  "meta": {
+    "tema": "PRIMEIROS_SOCORROS",
+    "subtema": "Acionamento de recursos de emergência",
+    "qtde": 4,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Primeiros socorros",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre pedido correto de ajuda e comunicação útil com os serviços de emergência."
+  },
+  "questoes": [
+    {
+      "enunciado": "Ao acionar o socorro após um acidente de trânsito, uma informação essencial é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem localização clara, a equipe pode perder tempo importante para chegar ao local.",
+      "explicacaoDetalhada": "Informações precisas ajudam a equipe de emergência a se deslocar com rapidez e preparo adequado. O local do acidente, o número aproximado de vítimas e a existência de riscos adicionais são dados prioritários.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-001",
+      "alternativas": [
+        { "texto": "A marca do veículo envolvido.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A localização do acidente e dados úteis sobre a situação.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "A opinião dos curiosos sobre o ocorrido.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A cor da roupa das vítimas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao pedir ajuda a um serviço de emergência, o condutor deve procurar informar:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Quanto mais objetiva e útil a informação, melhor a preparação do atendimento.",
+      "explicacaoDetalhada": "Relatar quantas vítimas há, o tipo de acidente e possíveis riscos no local ajuda a equipe a definir os recursos necessários. Informações vagas ou confusas podem atrasar a resposta.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-002",
+      "alternativas": [
+        { "texto": "Somente que houve um acidente, sem mais detalhes.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Local, quantidade aproximada de vítimas e características do risco.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Apenas o nome completo de todos os envolvidos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O valor estimado do prejuízo material.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se houver mais de uma pessoa disponível para ajudar, uma organização adequada é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Distribuir tarefas pode tornar a resposta inicial mais eficiente e segura.",
+      "explicacaoDetalhada": "Enquanto uma pessoa aciona o socorro, outra pode ajudar na proteção da cena, desde que sem se expor ao risco. Essa divisão simples melhora o atendimento inicial e evita perda de tempo.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-003",
+      "alternativas": [
+        { "texto": "Todos discutirem ao mesmo tempo o que fazer.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Uma pessoa aciona o socorro e outra ajuda a proteger o local, se for seguro.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Mandar todos embora para não atrapalhar.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Esperar primeiro a polícia chegar para depois ligar para emergência.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Informações imprecisas, exageradas ou falsas ao serviço de emergência prejudicam o atendimento porque:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A qualidade da resposta depende da qualidade da informação recebida.",
+      "explicacaoDetalhada": "Equipes de emergência precisam de dados confiáveis para dimensionar recursos, definir prioridade e chegar ao local correto. Informações erradas podem atrasar o atendimento ou mobilizar ajuda inadequada para a ocorrência.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-emergencia-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-emergencia-004",
+      "alternativas": [
+        { "texto": "Não causam prejuízo, porque a equipe corrige tudo ao chegar.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Podem atrasar, confundir ou dimensionar mal a resposta de emergência.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Só são problema em acidentes com muitas vítimas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Servem para fazer a equipe chegar mais rápido, mesmo que não sejam verdadeiras.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

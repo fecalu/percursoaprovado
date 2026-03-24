@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Dispositivos auxiliares e sinalização temporária",
+    "qtde": 6,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volumes VI e VII",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre dispositivos auxiliares e sinalização temporária em obras e canalização."
+  },
+  "questoes": [
+    {
+      "enunciado": "Cones, barreiras e outros dispositivos auxiliares na via servem principalmente para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles complementam a sinalização, delimitando espaços e orientando o fluxo.",
+      "explicacaoDetalhada": "Dispositivos auxiliares reforçam visualmente a organização da via, isolam áreas de risco e ajudam a canalizar a movimentação dos usuários com mais segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-001",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-001",
+      "alternativas": [
+        { "texto": "Permitir estacionamento temporário em qualquer ponto.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Complementar a sinalização e organizar o fluxo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir toda e qualquer placa da via.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dispensar a necessidade de atenção do condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao encontrar sinalização temporária de obras na pista, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalização temporária deve ser obedecida por refletir a condição real e atual da via.",
+      "explicacaoDetalhada": "Durante obras ou eventos extraordinários, a organização normal da via pode mudar. Por isso, a sinalização temporária orienta a conduta segura adequada ao contexto daquele momento.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-002",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-002",
+      "alternativas": [
+        { "texto": "Obedecer à sinalização temporária e ajustar sua condução.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Ignorar os dispositivos, pois eles não substituem a via normal.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Usar o acostamento sempre que houver cones.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Acelerar para sair mais rápido da área sinalizada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Tachas e tachões aplicados no pavimento podem ter função de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles auxiliam na delimitação visual e tátil do alinhamento ou separação de fluxos.",
+      "explicacaoDetalhada": "Esses dispositivos auxiliares reforçam a percepção da pista, especialmente em condições de baixa visibilidade, e ajudam a guiar o condutor dentro da organização prevista para a via.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-003",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-003",
+      "alternativas": [
+        { "texto": "Substituir a luz dos faróis do veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reforçar a delimitação e orientação do fluxo na pista.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Indicar serviços de emergência próximos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Autorizar conversão proibida em horário noturno.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Quando barreiras ou cavaletes isolam parte da pista, o correto é entender que:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A área isolada não deve ser ocupada, pois está fora da faixa segura de circulação.",
+      "explicacaoDetalhada": "O isolamento pode proteger obra, manutenção, sinistro ou obstáculo. O motorista deve respeitar a canalização imposta e seguir apenas pela área efetivamente liberada para o tráfego.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-004",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-004",
+      "alternativas": [
+        { "texto": "A área pode ser usada se o fluxo estiver lento.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A área isolada deve ser evitada, seguindo-se a canalização indicada.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Somente veículos pequenos podem utilizar o trecho isolado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A passagem depende apenas da decisão do condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A principal leitura defensiva de um trecho com canalização temporária é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mudanças temporárias de faixa e trajeto exigem redução de velocidade e leitura antecipada.",
+      "explicacaoDetalhada": "Em situações de desvio ou obra, o fluxo pode mudar rapidamente. O condutor seguro ajusta a velocidade, observa o trajeto canalizado e evita decisões tardias ou deslocamentos bruscos.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-005",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-005",
+      "alternativas": [
+        { "texto": "Seguir a configuração antiga da via, mesmo se houver mudanças visíveis.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Ajustar a condução ao novo desenho temporário da pista.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Manter velocidade alta para liberar a área mais cedo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Conduzir pelo espaço mais aberto, ainda que esteja isolado.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Dispositivos auxiliares e sinalização temporária são especialmente importantes porque:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Eles tornam visíveis riscos e reorganizações da via que nem sempre estão presentes na sinalização permanente.",
+      "explicacaoDetalhada": "A via é dinâmica. Obras, eventos e obstáculos exigem adaptações de tráfego. Esses elementos complementares viabilizam resposta rápida de segurança, comunicando ao condutor a conduta adequada naquele contexto excepcional.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-dispositivos-temporaria-006",
+      "fingerprint": "base-propria-oficial-placas-dispositivos-temporaria-006",
+      "alternativas": [
+        { "texto": "Valem apenas como informação ornamental e provisória.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "São usados somente em rodovias de concessão.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Comunicam alterações reais de risco e de uso da via.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Podem ser ignorados quando a pista estiver vazia.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@ package com.edupercurso.service;
 
 import com.edupercurso.dto.QuestaoAlunoDTO;
 import com.edupercurso.dto.QuestaoDTO;
+import com.edupercurso.dto.QuestaoImportDTO;
 import com.edupercurso.entity.QuestaoAlternativa;
 import com.edupercurso.entity.QuestaoTeorica;
 import com.edupercurso.entity.RespostaQuestaoAluno;
@@ -12,15 +13,23 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class QuestaoTeoricaService {
+
+    private static final int TOTAL_QUESTOES_SIMULADO_COMPLETO = 30;
 
     private final QuestaoTeoricaRepository questaoTeoricaRepository;
     private final RespostaQuestaoAlunoRepository respostaQuestaoAlunoRepository;
@@ -65,6 +74,94 @@ public class QuestaoTeoricaService {
                 .toList();
     }
 
+    public List<QuestaoAlunoDTO.QuestaoTreinoResponse> listarSimuladoCompleto(List<UUID> excluirIds) {
+        List<QuestaoTeorica> publicadas = questaoTeoricaRepository.findByStatus(QuestaoTeorica.Status.PUBLICADA);
+        if (publicadas.isEmpty()) {
+            return List.of();
+        }
+
+        Set<UUID> idsExcluidos = excluirIds == null ? Set.of() : new HashSet<>(excluirIds);
+        List<QuestaoTeorica> poolBase = publicadas.stream()
+                .filter(questao -> !idsExcluidos.contains(questao.getId()))
+                .toList();
+
+        List<QuestaoTeorica> candidatas = poolBase.size() >= TOTAL_QUESTOES_SIMULADO_COMPLETO ? poolBase : publicadas;
+
+        Map<QuestaoTeorica.Tema, List<QuestaoTeorica>> questoesPorTema = candidatas.stream()
+                .collect(Collectors.groupingBy(QuestaoTeorica::getTema, () -> new EnumMap<>(QuestaoTeorica.Tema.class), Collectors.toList()));
+
+        questoesPorTema.values().forEach(Collections::shuffle);
+
+        List<QuestaoTeorica> selecionadas = new ArrayList<>();
+        Set<UUID> idsSelecionados = new HashSet<>();
+
+        adicionarQuestoes(selecionadas, idsSelecionados, combinarQuestoes(questoesPorTema,
+                QuestaoTeorica.Tema.LEGISLACAO,
+                QuestaoTeorica.Tema.PLACAS), 12);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.DIRECAO_DEFENSIVA, List.of()), 10);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.PRIMEIROS_SOCORROS, List.of()), 3);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.MEIO_AMBIENTE_CIDADANIA, List.of()), 3);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.MECANICA_BASICA, List.of()), 2);
+
+        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO) {
+            List<QuestaoTeorica> restantes = new ArrayList<>(candidatas.stream()
+                    .filter(questao -> !idsSelecionados.contains(questao.getId()))
+                    .toList());
+            Collections.shuffle(restantes);
+            restantes.stream()
+                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO - selecionadas.size())
+                    .forEach(questao -> {
+                        if (idsSelecionados.add(questao.getId())) {
+                            selecionadas.add(questao);
+                        }
+                    });
+        }
+
+        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO && candidatas != publicadas) {
+            List<QuestaoTeorica> restantesExcluidas = new ArrayList<>(publicadas.stream()
+                    .filter(questao -> !idsSelecionados.contains(questao.getId()))
+                    .toList());
+            Collections.shuffle(restantesExcluidas);
+            restantesExcluidas.stream()
+                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO - selecionadas.size())
+                    .forEach(questao -> {
+                        if (idsSelecionados.add(questao.getId())) {
+                            selecionadas.add(questao);
+                        }
+                    });
+        }
+
+        Collections.shuffle(selecionadas);
+
+        return selecionadas.stream()
+                .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO)
+                .map(QuestaoAlunoDTO.QuestaoTreinoResponse::from)
+                .toList();
+    }
+
+    private List<QuestaoTeorica> combinarQuestoes(Map<QuestaoTeorica.Tema, List<QuestaoTeorica>> questoesPorTema,
+                                                  QuestaoTeorica.Tema... temas) {
+        List<QuestaoTeorica> combinadas = new ArrayList<>();
+        for (QuestaoTeorica.Tema tema : temas) {
+            combinadas.addAll(questoesPorTema.getOrDefault(tema, List.of()));
+        }
+        Collections.shuffle(combinadas);
+        return combinadas;
+    }
+
+    private void adicionarQuestoes(List<QuestaoTeorica> selecionadas,
+                                   Set<UUID> idsSelecionados,
+                                   List<QuestaoTeorica> candidatas,
+                                   int limite) {
+        candidatas.stream()
+                .limit(limite)
+                .forEach(questao -> {
+                    if (idsSelecionados.add(questao.getId())) {
+                        selecionadas.add(questao);
+                    }
+                });
+    }
+
     public QuestaoDTO.Response buscarAdmin(UUID id) {
         return QuestaoDTO.Response.from(buscarEntidadePorId(id));
     }
@@ -95,6 +192,63 @@ public class QuestaoTeoricaService {
         QuestaoTeorica questao = buscarEntidadePorId(id);
         questao.setStatus(QuestaoTeorica.Status.ARQUIVADA);
         return QuestaoDTO.Response.from(questaoTeoricaRepository.save(questao));
+    }
+
+    @Transactional
+    public QuestaoImportDTO.ImportResponse importarLote(QuestaoImportDTO.ImportRequest request) {
+        QuestaoImportDTO.ImportResponse response = new QuestaoImportDTO.ImportResponse();
+        response.setDryRun(request.isDryRun());
+        response.setTotalRecebidas(request.getQuestoes().size());
+
+        for (QuestaoImportDTO.QuestaoRequest item : request.getQuestoes()) {
+            QuestaoImportDTO.ItemResultado itemResultado = new QuestaoImportDTO.ItemResultado();
+            itemResultado.setOrigem(item.getOrigem());
+            itemResultado.setOrigemQuestaoId(item.getOrigemQuestaoId());
+            itemResultado.setEnunciado(item.getEnunciado());
+
+            try {
+                validarAlternativasImportacao(item.getAlternativas());
+
+                Optional<QuestaoTeorica> existente = buscarExistenteImportacao(item);
+                boolean atualiza = existente.isPresent() && request.isAtualizarExistentes();
+
+                if (existente.isPresent() && !atualiza) {
+                    itemResultado.setQuestaoId(existente.get().getId());
+                    itemResultado.setAcao("IGNORADA");
+                    itemResultado.setDetalhe("Questao duplicada por origem/fingerprint.");
+                    response.setIgnoradas(response.getIgnoradas() + 1);
+                    response.getItens().add(itemResultado);
+                    continue;
+                }
+
+                QuestaoTeorica questao = existente.orElseGet(() -> QuestaoTeorica.builder().build());
+                aplicarImportacao(questao, item);
+
+                if (!request.isDryRun()) {
+                    questao = questaoTeoricaRepository.save(questao);
+                }
+
+                itemResultado.setQuestaoId(questao.getId());
+                itemResultado.setAcao(existente.isPresent() ? "ATUALIZADA" : "CRIADA");
+                itemResultado.setDetalhe(request.isDryRun()
+                        ? "Validada em dry-run."
+                        : "Importada com sucesso como rascunho.");
+
+                if (existente.isPresent()) {
+                    response.setAtualizadas(response.getAtualizadas() + 1);
+                } else {
+                    response.setCriadas(response.getCriadas() + 1);
+                }
+            } catch (Exception exception) {
+                itemResultado.setAcao("ERRO");
+                itemResultado.setDetalhe(exception.getMessage());
+                response.setErros(response.getErros() + 1);
+            }
+
+            response.getItens().add(itemResultado);
+        }
+
+        return response;
     }
 
     @Transactional
@@ -168,7 +322,34 @@ public class QuestaoTeoricaService {
         questao.substituirAlternativas(montarAlternativas(request.getAlternativas()));
     }
 
+    private void aplicarImportacao(QuestaoTeorica questao, QuestaoImportDTO.QuestaoRequest request) {
+        questao.setEnunciado(request.getEnunciado().trim());
+        questao.setImagemUrl(normalizarTexto(request.getImagemUrl()));
+        questao.setTema(request.getTema());
+        questao.setDificuldade(request.getDificuldade() == null ? QuestaoTeorica.Dificuldade.MEDIA : request.getDificuldade());
+        questao.setStatus(request.getStatus() == null ? QuestaoTeorica.Status.RASCUNHO : request.getStatus());
+        questao.setExplicacaoCurta(request.getExplicacaoCurta().trim());
+        questao.setExplicacaoDetalhada(normalizarTexto(request.getExplicacaoDetalhada()));
+        questao.setVideoUrl(normalizarTexto(request.getVideoUrl()));
+        questao.setOrdemExibicao(request.getOrdemExibicao() == null ? 0 : request.getOrdemExibicao());
+        questao.setOrigem(normalizarTexto(request.getOrigem()));
+        questao.setOrigemQuestaoId(normalizarTexto(request.getOrigemQuestaoId()));
+        questao.setFingerprint(normalizarTexto(request.getFingerprint()));
+        questao.substituirAlternativas(montarAlternativasImportacao(request.getAlternativas()));
+    }
+
     private List<QuestaoAlternativa> montarAlternativas(List<QuestaoDTO.AlternativaRequest> alternativas) {
+        return alternativas.stream()
+                .map(item -> QuestaoAlternativa.builder()
+                        .texto(normalizarTexto(item.getTexto()))
+                        .imagemUrl(normalizarTexto(item.getImagemUrl()))
+                        .ordem(item.getOrdem())
+                        .correta(item.isCorreta())
+                        .build())
+                .toList();
+    }
+
+    private List<QuestaoAlternativa> montarAlternativasImportacao(List<QuestaoImportDTO.AlternativaRequest> alternativas) {
         return alternativas.stream()
                 .map(item -> QuestaoAlternativa.builder()
                         .texto(normalizarTexto(item.getTexto()))
@@ -195,6 +376,43 @@ public class QuestaoTeoricaService {
                 throw new IllegalArgumentException("Cada alternativa precisa ter texto, imagem ou os dois.");
             }
         }
+    }
+
+    private void validarAlternativasImportacao(List<QuestaoImportDTO.AlternativaRequest> alternativas) {
+        long corretas = alternativas.stream().filter(QuestaoImportDTO.AlternativaRequest::isCorreta).count();
+        if (corretas != 1) {
+            throw new IllegalArgumentException("Selecione exatamente uma alternativa correta.");
+        }
+
+        for (int i = 0; i < alternativas.size(); i++) {
+            QuestaoImportDTO.AlternativaRequest alternativa = alternativas.get(i);
+            if (alternativa.getOrdem() == null) {
+                alternativa.setOrdem(i);
+            }
+
+            if (normalizarTexto(alternativa.getTexto()) == null && normalizarTexto(alternativa.getImagemUrl()) == null) {
+                throw new IllegalArgumentException("Cada alternativa precisa ter texto, imagem ou os dois.");
+            }
+        }
+    }
+
+    private Optional<QuestaoTeorica> buscarExistenteImportacao(QuestaoImportDTO.QuestaoRequest request) {
+        String origem = normalizarTexto(request.getOrigem());
+        String origemQuestaoId = normalizarTexto(request.getOrigemQuestaoId());
+        String fingerprint = normalizarTexto(request.getFingerprint());
+
+        if (origem != null && origemQuestaoId != null) {
+            Optional<QuestaoTeorica> porOrigem = questaoTeoricaRepository.findByOrigemAndOrigemQuestaoId(origem, origemQuestaoId);
+            if (porOrigem.isPresent()) {
+                return porOrigem;
+            }
+        }
+
+        if (fingerprint != null) {
+            return questaoTeoricaRepository.findByFingerprint(fingerprint);
+        }
+
+        return Optional.empty();
     }
 
     private String normalizarTexto(String valor) {

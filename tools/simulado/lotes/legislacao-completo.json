@@ -1,0 +1,3470 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "qtde": 85,
+    "lotes": [
+      {
+        "numero": 13,
+        "arquivo": "lote-013-legislacao-processo-habilitacao-documentos.json",
+        "subtema": "Processo de habilitação, documentos de porte obrigatório e deveres do condutor",
+        "qtde": 10
+      },
+      {
+        "numero": 14,
+        "arquivo": "lote-014-legislacao-categorias-habilitacao-veiculos.json",
+        "subtema": "Categorias de habilitação e tipos de veículo",
+        "qtde": 5
+      },
+      {
+        "numero": 15,
+        "arquivo": "lote-015-legislacao-classificacao-vias-regras-basicas.json",
+        "subtema": "Classificação das vias e regras básicas associadas",
+        "qtde": 5
+      },
+      {
+        "numero": 16,
+        "arquivo": "lote-016-legislacao-normas-gerais-circulacao-conduta.json",
+        "subtema": "Normas gerais de circulação e conduta",
+        "qtde": 10
+      },
+      {
+        "numero": 17,
+        "arquivo": "lote-017-legislacao-conversoes-retorno-mudanca-faixa-posicionamento.json",
+        "subtema": "Conversões, retorno, mudança de faixa e posicionamento",
+        "qtde": 10
+      },
+      {
+        "numero": 18,
+        "arquivo": "lote-018-legislacao-parada-estacionamento.json",
+        "subtema": "Parada e estacionamento",
+        "qtde": 8
+      },
+      {
+        "numero": 19,
+        "arquivo": "lote-019-legislacao-preferencia-cruzamentos-ultrapassagem.json",
+        "subtema": "Preferência de passagem, cruzamentos e ultrapassagem",
+        "qtde": 12
+      },
+      {
+        "numero": 20,
+        "arquivo": "lote-020-legislacao-infracoes-pontuacao.json",
+        "subtema": "Infrações de trânsito e sistema de pontuação",
+        "qtde": 10
+      },
+      {
+        "numero": 21,
+        "arquivo": "lote-021-legislacao-penalidades-medidas-administrativas.json",
+        "subtema": "Penalidades e medidas administrativas",
+        "qtde": 8
+      },
+      {
+        "numero": 22,
+        "arquivo": "lote-022-legislacao-crimes-responsabilidade-recursos.json",
+        "subtema": "Crimes de trânsito, responsabilidade e recursos",
+        "qtde": 7
+      }
+    ]
+  },
+  "questoes": [
+    {
+      "enunciado": "A principal finalidade do processo de habilitação é:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O processo de habilitação busca formar condutores aptos a dirigir com segurança e responsabilidade.",
+      "explicacaoDetalhada": "A habilitação não existe apenas para entregar um documento ao candidato. Ela integra formação, avaliação e verificação de aptidão física, mental e técnica para que a condução ocorra com segurança no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-001",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-001",
+      "alternativas": [
+        {
+          "texto": "Permitir a compra de veículos por qualquer cidadão.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Formar e avaliar condutores aptos a dirigir com segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir totalmente a fiscalização de trânsito.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dispensar o estudo das normas de circulação.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Antes de conduzir veículo automotor em via pública, a pessoa deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Somente pode conduzir em via pública quem estiver legalmente habilitado para a categoria correspondente.",
+      "explicacaoDetalhada": "A condução em via pública depende de habilitação regular ou autorização legal equivalente, conforme o tipo de veículo. Isso protege a segurança viária e garante que o condutor tenha sido previamente avaliado.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-002",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-002",
+      "alternativas": [
+        {
+          "texto": "Apenas saber dirigir na prática, ainda que sem documento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Estar devidamente habilitada ou legalmente autorizada para o veículo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Ter mais de 16 anos e estar acompanhada.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Possuir somente documento de identidade comum.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No processo de habilitação, a avaliação de aptidão física e mental existe para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela verifica se o candidato tem condições mínimas para conduzir com segurança.",
+      "explicacaoDetalhada": "A condução exige percepção, reação, visão, coordenação e condições gerais compatíveis com a direção segura. Por isso, a aptidão física e mental integra o processo de habilitação.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-003",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-003",
+      "alternativas": [
+        {
+          "texto": "Substituir o exame teórico de legislação.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Verificar se o candidato reúne condições para dirigir com segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Definir o modelo do veículo que o candidato poderá comprar.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dispensar o exame prático de direção.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A etapa teórica do processo de habilitação tem a função de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela desenvolve e avalia os conhecimentos necessários para a condução responsável.",
+      "explicacaoDetalhada": "A formação teórica aborda legislação, sinalização, direção defensiva, primeiros socorros, meio ambiente e cidadania. Esses conteúdos são parte essencial da preparação do futuro condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-004",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-004",
+      "alternativas": [
+        {
+          "texto": "Ensinar apenas a manobrar o veículo em baixa velocidade.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Garantir a assimilação dos conhecimentos exigidos para condução segura.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Servir somente como formalidade administrativa.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir toda a prática de direção veicular.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A Permissão para Dirigir representa, em regra, a fase em que o condutor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A PPD marca o período inicial em que o novo condutor ainda está em etapa probatória.",
+      "explicacaoDetalhada": "Após cumprir as etapas de formação e aprovação, o condutor ingressa em período inicial de permissão. Nessa fase, deve demonstrar conduta regular para futura obtenção da habilitação definitiva, conforme a legislação aplicável.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-005",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-005",
+      "alternativas": [
+        {
+          "texto": "Ainda não pode dirigir em via pública em nenhuma hipótese.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Está em fase inicial de habilitação, sujeita a regras específicas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Pode conduzir qualquer categoria de veículo sem restrição.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Está dispensado de obedecer a pontuação por infrações.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao conduzir um veículo regularmente licenciado, os documentos obrigatórios podem ser apresentados:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Os documentos podem ser apresentados nos formatos admitidos pela legislação, inclusive digital, quando válidos.",
+      "explicacaoDetalhada": "A legislação admite documentos de trânsito em formato físico ou eletrônico, desde que válidos e aptos à verificação pela fiscalização. O essencial é a regularidade e a possibilidade de comprovação.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-006",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-006",
+      "alternativas": [
+        {
+          "texto": "Somente em papel, nunca em meio digital.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Em formato físico ou digital, desde que válidos.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas por fotografia informal do documento.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Somente mediante impressão autenticada em cartório.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando solicitado pela fiscalização, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cabe ao condutor apresentar os documentos exigíveis e colaborar com a fiscalização.",
+      "explicacaoDetalhada": "A abordagem fiscalizatória integra a atividade de controle do trânsito. O condutor deve cooperar, identificando-se e apresentando os documentos legalmente exigidos para a verificação da regularidade.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-007",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-007",
+      "alternativas": [
+        {
+          "texto": "Apresentar os documentos exigíveis e colaborar com a fiscalização.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Negar qualquer informação, por se tratar de ato facultativo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Apenas informar verbalmente o número da CNH, sem comprovação.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Abandonar o local para evitar atraso na viagem.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O CRLV-e está relacionado, principalmente, à comprovação de que o veículo:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O documento comprova o registro e o licenciamento anual regular do veículo.",
+      "explicacaoDetalhada": "O Certificado de Registro e Licenciamento do Veículo, em meio físico ou eletrônico conforme admitido, é o documento que demonstra a regularidade do licenciamento do veículo para circulação.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-008",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-008",
+      "alternativas": [
+        {
+          "texto": "Foi abastecido recentemente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Está registrado e licenciado para circular.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "É de propriedade exclusiva do condutor abordado.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Pode circular sem placa de identificação.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Conduzir veículo sem a devida habilitação ou autorização legal é comportamento:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Dirigir sem habilitação regular contraria diretamente a legislação de trânsito.",
+      "explicacaoDetalhada": "A habilitação é requisito legal para conduzir veículo em via pública. Sua ausência compromete a regularidade da condução e sujeita o infrator às consequências previstas na legislação.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-009",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-009",
+      "alternativas": [
+        {
+          "texto": "Permitido desde que o veículo esteja licenciado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Aceito apenas em vias de pouco movimento.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Irregular e contrário às exigências legais de trânsito.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Irrelevante se o condutor souber dirigir bem.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Entre os deveres básicos do condutor regular estão o de manter a documentação pertinente em ordem e:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conduzir com responsabilidade significa unir regularidade documental e cumprimento efetivo das normas de trânsito.",
+      "explicacaoDetalhada": "O dever do condutor não se resume a portar documentos. Também envolve respeitar a sinalização, as regras de circulação e a segurança viária, mantendo comportamento compatível com a responsabilidade de dirigir.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-processo-habilitacao-010",
+      "fingerprint": "base-propria-oficial-legislacao-processo-habilitacao-010",
+      "alternativas": [
+        {
+          "texto": "Desconsiderar normas de circulação quando a via estiver livre.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Cumprir efetivamente as regras e conduzir com segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dirigir sem atenção sempre que já conhecer o trajeto.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Seguir apenas as orientações de outros condutores.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A categoria da habilitação existe para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A categoria define para quais tipos de veículo o condutor está legalmente autorizado.",
+      "explicacaoDetalhada": "A habilitação não é genérica para qualquer veículo. As categorias delimitam a autorização conforme características do veículo e da condução pretendida.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-001",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-001",
+      "alternativas": [
+        {
+          "texto": "Indicar a cor do veículo permitido ao condutor.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Definir os tipos de veículo que o condutor pode dirigir.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir a necessidade de licenciamento anual.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Determinar apenas a região em que o condutor pode circular.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A categoria A da habilitação está associada, em regra, à condução de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A categoria A habilita para a condução de veículos de duas ou três rodas, conforme a regulamentação.",
+      "explicacaoDetalhada": "A categoria A é voltada aos veículos motorizados de duas ou três rodas, como motocicletas e similares, observadas as definições regulamentares aplicáveis.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-002",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-002",
+      "alternativas": [
+        {
+          "texto": "Veículos de duas ou três rodas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Apenas ônibus urbanos.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Qualquer caminhão leve.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Somente automóveis de passeio.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A categoria B da habilitação está ligada, em regra, à condução de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A categoria B se refere aos veículos motorizados não abrangidos pela categoria A, dentro dos limites regulamentares.",
+      "explicacaoDetalhada": "A categoria B normalmente contempla automóveis e outros veículos compatíveis com os critérios fixados pela regulamentação, sem se confundir com categorias destinadas ao transporte coletivo ou de carga mais específica.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-003",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-003",
+      "alternativas": [
+        {
+          "texto": "Automóveis e veículos compatíveis com essa categoria.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Exclusivamente motocicletas e motonetas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Somente trens e veículos ferroviários.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas veículos de transporte coletivo acima do limite legal.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Conduzir veículo incompatível com a categoria da habilitação significa:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve dirigir apenas veículos compatíveis com a categoria para a qual está habilitado.",
+      "explicacaoDetalhada": "A autorização para dirigir depende da correspondência entre habilitação e tipo de veículo. Conduzir categoria diferente da autorizada viola o regime legal da habilitação.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-004",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-004",
+      "alternativas": [
+        {
+          "texto": "Conduta regular, desde que a via esteja livre.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Irregularidade em relação à habilitação exigida.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Fato irrelevante, se o condutor tiver experiência.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Situação permitida quando o veículo estiver licenciado.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A Autorização para Conduzir Ciclomotor (ACC) existe para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A ACC é uma autorização específica voltada à condução de ciclomotor, nos termos da legislação.",
+      "explicacaoDetalhada": "A legislação de trânsito prevê autorização específica para a condução de ciclomotor. Ela não se confunde automaticamente com todas as categorias de habilitação para outros tipos de veículos.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-categorias-005",
+      "fingerprint": "base-propria-oficial-legislacao-categorias-005",
+      "alternativas": [
+        {
+          "texto": "Autorizar a condução de qualquer motocicleta de grande porte.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Autorizar especificamente a condução de ciclomotor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir permanentemente todas as categorias da CNH.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Permitir dirigir automóveis e caminhões leves.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A classificação das vias é importante porque ela ajuda a definir:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O tipo de via influencia as regras e a forma adequada de circulação.",
+      "explicacaoDetalhada": "Conhecer a classificação da via ajuda o condutor a compreender a função daquele espaço no sistema viário e a adotar comportamento compatível com suas características de mobilidade, acesso e segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-001",
+      "fingerprint": "base-propria-oficial-legislacao-vias-001",
+      "alternativas": [
+        {
+          "texto": "A cor obrigatória do veículo naquela região.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "As características de circulação e o comportamento esperado do condutor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "O modelo de combustível autorizado na pista.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A dispensa de obediência à sinalização local.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No contexto do CTB, rodovia e estrada não são sinônimos porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A legislação distingue os tipos de via rural conforme suas características construtivas e funcionais.",
+      "explicacaoDetalhada": "A classificação legal das vias considera critérios próprios. Em área rural, rodovia e estrada possuem definições distintas, e essa diferenciação repercute na leitura da via e na aplicação de regras correspondentes.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-002",
+      "fingerprint": "base-propria-oficial-legislacao-vias-002",
+      "alternativas": [
+        {
+          "texto": "Representam exatamente o mesmo tipo de via, apenas com nomes diferentes.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A legislação diferencia suas características e natureza viária.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente rodovia precisa de sinalização, estrada não.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Estrada é exclusivamente urbana e rodovia é exclusivamente municipal.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma via local, em regra, está mais associada a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Via local prioriza acessos diretos aos imóveis e circulação de âmbito mais restrito.",
+      "explicacaoDetalhada": "A via local tem papel diferente daquele de vias voltadas à mobilidade mais intensa. Ela costuma atender deslocamentos mais próximos e o acesso direto às propriedades lindeiras.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-003",
+      "fingerprint": "base-propria-oficial-legislacao-vias-003",
+      "alternativas": [
+        {
+          "texto": "Grande prioridade para fluxos de longa distância e alta velocidade.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Acesso direto aos imóveis e circulação de caráter mais local.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Uso exclusivo para transporte ferroviário.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ausência de qualquer regra de circulação.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quanto maior a função de mobilidade de uma via, em comparação com o simples acesso local, maior tende a ser a necessidade de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Vias mais voltadas à mobilidade exigem condução mais compatível com fluxo e organização viária.",
+      "explicacaoDetalhada": "Em vias destinadas a deslocamentos mais contínuos, o condutor precisa observar com mais rigor a fluidez, o posicionamento, a previsibilidade e a adequação da sua conduta ao desenho viário e à sinalização.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-004",
+      "fingerprint": "base-propria-oficial-legislacao-vias-004",
+      "alternativas": [
+        {
+          "texto": "Paradas aleatórias no leito carroçável.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Condução previsível e compatível com o fluxo da via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Uso livre do acostamento para ultrapassagem.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Desconsideração das características da via.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta do tipo de via ajuda o condutor a entender melhor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Classificação da via e sinalização devem ser lidas em conjunto para orientar a condução segura.",
+      "explicacaoDetalhada": "O condutor não deve tratar todas as vias como se fossem iguais. A classificação legal, somada à sinalização presente e ao contexto real, orienta decisões mais corretas sobre velocidade, atenção, posicionamento e prioridade.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-vias-005",
+      "fingerprint": "base-propria-oficial-legislacao-vias-005",
+      "alternativas": [
+        {
+          "texto": "Como adaptar a condução à função e às características da via.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Que toda via pode ser usada da mesma forma, sem distinção.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Que a sinalização é desnecessária quando a via é conhecida.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Que a preferência sempre depende do veículo maior.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em regra geral, a circulação de veículos deve ocorrer pelo lado:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "No Brasil, a circulação ocorre, em regra, pelo lado direito da via.",
+      "explicacaoDetalhada": "A organização do trânsito brasileiro adota circulação pela direita. Essa referência é fundamental para posicionamento, ultrapassagem e leitura geral da via.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-001",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-001",
+      "alternativas": [
+        {
+          "texto": "Esquerdo da via, salvo rodovias.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Direito da via, observada a sinalização e as exceções legais.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Centro da via, quando o fluxo estiver leve.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Acostamento, se não houver fiscalização.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Sinalizar com antecedência a intenção de mudar de direção ou faixa é importante porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A sinalização prévia torna a condução previsível para os demais usuários.",
+      "explicacaoDetalhada": "Ao indicar com antecedência a manobra pretendida, o condutor reduz o risco de surpresa, conflito e colisão, permitindo que os demais usuários reajam com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-002",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-002",
+      "alternativas": [
+        {
+          "texto": "Dispensa a necessidade de observar retrovisores.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Torna a manobra mais previsível e segura para os demais.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Permite ao condutor ter prioridade absoluta na mudança de faixa.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substitui a obrigação de manter distância lateral.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A mudança de faixa deve ser realizada somente quando:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mudar de faixa exige segurança, observação e compatibilidade com a sinalização.",
+      "explicacaoDetalhada": "A troca de faixa não depende apenas da vontade do condutor. Ela deve respeitar a sinalização, a posição dos demais veículos e a possibilidade real de executar a manobra sem risco.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-003",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-003",
+      "alternativas": [
+        {
+          "texto": "O condutor desejar ganhar tempo no percurso.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Houver condições seguras e a manobra for permitida.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "O veículo de trás estiver distante, independentemente do restante.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A via estiver congestionada.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Manter distância de segurança do veículo à frente é conduta importante porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A distância reduz o risco de colisão traseira e amplia o tempo de reação.",
+      "explicacaoDetalhada": "A distância de segurança permite resposta adequada a frenagens, obstáculos e mudanças inesperadas no trânsito. Dirigir muito próximo ao veículo da frente aumenta o risco de sinistro.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-004",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-004",
+      "alternativas": [
+        {
+          "texto": "Facilita a ultrapassagem sem necessidade de sinalizar.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Amplia o tempo de reação e reduz o risco de colisão.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Permite andar em velocidade sempre maior.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Elimina a necessidade de frear em emergências.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Parar o veículo em local que prejudique a circulação ou a segurança é conduta:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Paradas irregulares comprometem o fluxo e aumentam riscos no trânsito.",
+      "explicacaoDetalhada": "Parada e estacionamento devem respeitar regras próprias e a segurança do local. Imobilizar o veículo de forma indevida pode bloquear visibilidade, gerar conflitos e colocar usuários em risco.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-005",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-005",
+      "alternativas": [
+        {
+          "texto": "Aceitável sempre que o condutor permaneça dentro do veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Irregular, pois pode prejudicar o fluxo e a segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Permitida se o pisca-alerta estiver acionado.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Livre em qualquer via de pouco movimento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao iniciar uma conversão, o condutor deve fazê-la de modo que sua trajetória seja:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A conversão deve ser previsível, compatível com a sinalização e segura para os demais usuários.",
+      "explicacaoDetalhada": "Conversões exigem posicionamento adequado, sinalização prévia e execução sem surpreender os demais. A trajetória deve respeitar o desenho da via e evitar invasões perigosas de espaço.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-006",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-006",
+      "alternativas": [
+        {
+          "texto": "Ampla e imprevisível, para ganhar mais espaço.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Compatível com a via, segura e corretamente sinalizada.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Indiferente à posição dos demais veículos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Feita apenas com base na pressa do condutor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O acostamento, em regra, não deve ser utilizado como faixa normal de circulação porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acostamento possui função própria e não se confunde com a pista regular de rolamento.",
+      "explicacaoDetalhada": "O acostamento integra a via com finalidade específica, ligada a segurança e apoio em situações próprias. Seu uso como faixa comum de circulação compromete a organização e a segurança viária.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-007",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-007",
+      "alternativas": [
+        {
+          "texto": "Porque é reservado para circulação ordinária de veículos leves.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Porque não se destina, em regra, à circulação comum da via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Porque somente ônibus podem usá-lo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Porque substitui totalmente a faixa da direita.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao aproximar-se de local com pedestres, ciclistas ou outros usuários vulneráveis, o condutor deve adotar postura:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A presença de usuários vulneráveis exige cuidado redobrado e condução mais preventiva.",
+      "explicacaoDetalhada": "As normas de circulação não podem ser lidas isoladas da proteção à vida. Em áreas com usuários vulneráveis, o comportamento do condutor deve ser mais cauteloso, previsível e responsável.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-008",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-008",
+      "alternativas": [
+        {
+          "texto": "Mais agressiva, para liberar a via rapidamente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Mais cautelosa e preventiva.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Indiferente, porque todos devem se adaptar ao veículo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Voltada apenas à manutenção da velocidade.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O condutor não deve iniciar manobra que possa surpreender os demais usuários porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A previsibilidade é um dos pilares da circulação segura.",
+      "explicacaoDetalhada": "Boa parte da segurança no trânsito depende de condutas que possam ser compreendidas e antecipadas pelos demais. Manobras súbitas aumentam drasticamente a chance de reação inadequada e colisão.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-009",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-009",
+      "alternativas": [
+        {
+          "texto": "A surpresa melhora a fluidez do trânsito.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A previsibilidade é essencial para a segurança viária.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Os outros usuários sempre são obrigados a adivinhar a manobra.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O importante é apenas concluir a manobra rapidamente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, obedecer às normas gerais de circulação e conduta significa:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "É dirigir de forma regular, previsível, compatível com a sinalização e segura para todos.",
+      "explicacaoDetalhada": "As normas gerais estruturam o comportamento cotidiano do condutor: posição na via, manobras, prioridades, cuidado com os demais e respeito ao espaço viário. Cumpri-las é dirigir com responsabilidade social e legal.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-010",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-010",
+      "alternativas": [
+        {
+          "texto": "Dirigir apenas conforme conveniência pessoal.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Conduzir de modo previsível, regular e seguro para todos.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Observar somente a vontade dos demais motoristas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ignorar regras quando a via parecer vazia.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Antes de iniciar uma conversão à direita ou à esquerda, o condutor deve, em regra:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conversões exigem sinalização prévia, observação do trânsito e posicionamento adequado.",
+      "explicacaoDetalhada": "A manobra de conversão precisa ser previsível e segura. Por isso, o condutor deve preparar o veículo com antecedência, sinalizar a intenção e observar se há condições efetivas para realizá-la sem conflito com outros usuários.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-001",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-001",
+      "alternativas": [
+        {
+          "texto": "Apenas reduzir a velocidade, sem necessidade de sinalizar.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Sinalizar, observar o trânsito e posicionar-se corretamente.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Executar a manobra rapidamente para não atrapalhar o fluxo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Confiar que os demais condutores irão ceder passagem.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A mudança de faixa deve ser feita:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A troca de faixa depende de sinalização, observação e segurança da manobra.",
+      "explicacaoDetalhada": "Mudar de faixa não é um ato automático. O condutor deve verificar espelhos, ponto cego, fluxo lateral e traseiro, além de respeitar a sinalização horizontal e vertical aplicável ao trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-002",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-002",
+      "alternativas": [
+        {
+          "texto": "Somente quando for segura e corretamente sinalizada.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Sempre que o condutor quiser acelerar o trajeto.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Sem necessidade de observar o veículo que vem atrás.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas com acionamento de buzina.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Posicionar corretamente o veículo antes de uma conversão é importante porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O posicionamento correto torna a manobra mais segura e previsível.",
+      "explicacaoDetalhada": "Quando o veículo se posiciona de forma adequada antes da conversão, os demais usuários conseguem compreender melhor a intenção do condutor, reduzindo conflitos, fechadas e movimentos bruscos.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-003",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-003",
+      "alternativas": [
+        {
+          "texto": "Dispensa a necessidade de usar seta.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Facilita uma manobra segura e previsível.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Permite ocupar qualquer espaço da via.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substitui a observação dos demais usuários.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao preparar um retorno, o condutor deve considerar principalmente:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Retorno exige observação do local, sinalização e possibilidade real de execução segura.",
+      "explicacaoDetalhada": "O retorno não pode ser feito de forma improvisada. É necessário verificar se a manobra é permitida, se há visibilidade suficiente e se a movimentação dos demais usuários permite sua realização sem risco.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-004",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-004",
+      "alternativas": [
+        {
+          "texto": "Somente a pressa do condutor em voltar ao caminho desejado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Se a manobra é permitida e pode ser feita com segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A presença de veículos maiores para protegê-lo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A possibilidade de usar a contramão por alguns segundos.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Executar mudança de faixa sem sinalizar previamente é inadequado porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A ausência de sinalização aumenta a surpresa e o risco de colisão.",
+      "explicacaoDetalhada": "A sinalização é elemento essencial da previsibilidade. Sem ela, os demais usuários não conseguem antecipar a intenção do condutor, o que compromete a segurança de quem vem ao lado ou atrás.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-005",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-005",
+      "alternativas": [
+        {
+          "texto": "Aumenta a surpresa para os demais usuários da via.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "É indiferente, desde que a via esteja asfaltada.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Só é proibido em rodovias federais.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substitui a necessidade de reduzir a velocidade.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma conversão iniciada a partir de posição inadequada na via tende a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Posição inadequada aumenta a chance de conflito com outros usuários.",
+      "explicacaoDetalhada": "Quando o veículo inicia a conversão sem alinhamento adequado, a trajetória costuma invadir espaços indevidos, surpreender os demais e dificultar a compreensão da manobra no fluxo.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-006",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-006",
+      "alternativas": [
+        {
+          "texto": "Reduzir automaticamente o risco da manobra.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Melhorar a fluidez sem necessidade de seta.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Aumentar a chance de conflito e insegurança.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Ser recomendada em vias movimentadas.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao retornar para a faixa de origem após uma ultrapassagem ou desvio lateral, o condutor deve fazê-lo:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O retorno à faixa deve ser sinalizado e feito apenas quando houver espaço suficiente e segurança.",
+      "explicacaoDetalhada": "Voltar prematuramente para a faixa pode fechar o veículo ultrapassado ou surpreender quem trafega atrás. A manobra exige noção de espaço, sinalização e avaliação segura do momento adequado.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-007",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-007",
+      "alternativas": [
+        {
+          "texto": "Assim que a dianteira do próprio veículo passar minimamente o outro.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Somente quando houver espaço e segurança para o retorno.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Sem observar retrovisores, para manter a firmeza da direção.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas com uso de farol alto.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao aproximar-se do local onde pretende converter, o condutor deve evitar:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mudanças bruscas e tardias de posição comprometem a segurança da manobra.",
+      "explicacaoDetalhada": "A preparação da conversão deve ocorrer com antecedência. Ajustes bruscos de faixa ou de trajetória no último instante tendem a gerar surpresa, travamento do fluxo e colisões laterais.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-008",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-008",
+      "alternativas": [
+        {
+          "texto": "Movimentos tardios e bruscos para alcançar a posição de conversão.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Sinalizar a manobra com antecedência.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Observar a presença de pedestres e ciclistas.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a velocidade quando necessário.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O posicionamento correto do veículo antes da manobra contribui para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Bom posicionamento aumenta previsibilidade e segurança da circulação.",
+      "explicacaoDetalhada": "Em trânsito, a clareza da intenção do condutor é essencial. Posicionar-se corretamente comunica a manobra desejada, reduz a chance de erro de interpretação e favorece a harmonia do fluxo.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-009",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-009",
+      "alternativas": [
+        {
+          "texto": "A imprevisibilidade da manobra.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A previsibilidade e a segurança no fluxo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "O uso desnecessário do acostamento.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A dispensa da observação do ponto cego.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos legais e práticos, conversões, retornos e mudanças de faixa devem sempre ser subordinados à:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Toda manobra depende da sinalização e da segurança efetiva do contexto.",
+      "explicacaoDetalhada": "Nenhuma manobra pode ser avaliada apenas pela conveniência do condutor. Ela deve respeitar a sinalização, a organização da via e a segurança dos demais usuários, que prevalecem sobre a vontade individual.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-conversoes-010",
+      "fingerprint": "base-propria-oficial-legislacao-conversoes-010",
+      "alternativas": [
+        {
+          "texto": "Conveniência imediata de quem está dirigindo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Segurança, sinalização e condições reais da via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Pressão do veículo que vem atrás.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ausência momentânea de fiscalização.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos gerais, parar ou estacionar um veículo só é aceitável quando isso ocorre:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A imobilização do veículo deve respeitar a sinalização, a segurança e a fluidez do trânsito.",
+      "explicacaoDetalhada": "Parada e estacionamento não dependem apenas da vontade do condutor. O local escolhido precisa ser compatível com a sinalização existente, com a visibilidade e com a preservação da circulação segura dos demais usuários.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-001",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-001",
+      "alternativas": [
+        {
+          "texto": "Em local permitido e sem comprometer segurança ou fluidez.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Sempre que o condutor acionar o pisca-alerta.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Em qualquer ponto da via, desde que por pouco tempo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas na faixa da esquerda, para facilitar a saída.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Mesmo que a parada seja breve, ela não deve ocorrer em local que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Paradas curtas também podem gerar risco e obstrução indevida.",
+      "explicacaoDetalhada": "A brevidade da manobra não elimina seus efeitos sobre a segurança. Se o local prejudica a visibilidade, bloqueia a passagem ou cria conflito com outros usuários, a parada se torna inadequada.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-002",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-002",
+      "alternativas": [
+        {
+          "texto": "Esteja sinalizado como permitido para imobilização.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Comprometa a segurança ou o funcionamento normal da via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Tenha boa visibilidade e área lateral suficiente.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Seja fora do horário de pico.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A diferença prática entre parada e estacionamento está ligada principalmente:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A distinção considera a finalidade e o contexto da imobilização do veículo.",
+      "explicacaoDetalhada": "Na legislação de trânsito, a parada e o estacionamento são figuras distintas, embora ambas envolvam imobilização do veículo. A análise correta depende da situação e da finalidade da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-003",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-003",
+      "alternativas": [
+        {
+          "texto": "Ao tipo de combustível do veículo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "À finalidade e ao modo de imobilização do veículo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "À cor da sinalização vertical mais próxima.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Exclusivamente ao tamanho do automóvel.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Parar sobre faixa de pedestres ou em ponto que prejudique sua utilização é conduta inadequada porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A faixa de pedestres deve permanecer livre e visível para sua função de proteção.",
+      "explicacaoDetalhada": "A ocupação indevida da faixa ou de sua área de segurança prejudica a travessia e reduz a visibilidade entre pedestres e condutores, elevando o risco de atropelamento e conflito viário.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-004",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-004",
+      "alternativas": [
+        {
+          "texto": "Porque a faixa de pedestres deve permanecer funcional e segura.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Porque a faixa só pode ser usada por ciclistas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Porque estacionar ali é permitido apenas à noite.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Porque a infração depende da presença de escola próxima.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O pisca-alerta, por si só, não torna regular uma parada ou estacionamento indevido porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acionamento do pisca-alerta não substitui a exigência de local permitido e seguro.",
+      "explicacaoDetalhada": "Embora possa sinalizar situação momentânea, o pisca-alerta não tem poder para transformar em regular uma imobilização feita em desacordo com a sinalização, com a segurança ou com a organização da via.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-005",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-005",
+      "alternativas": [
+        {
+          "texto": "O pisca-alerta substitui qualquer placa de proibição.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O local continua precisando ser permitido e seguro.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "O recurso só vale para veículos de carga.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ele só produz efeito legal em rodovias.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao escolher um local para estacionar, o condutor deve observar, entre outros fatores:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalização, visibilidade e impacto no fluxo são critérios essenciais.",
+      "explicacaoDetalhada": "Estacionar corretamente depende da leitura do ambiente. Não basta haver espaço físico: é preciso verificar se a sinalização permite, se há boa visibilidade e se a imobilização não compromete a circulação ou a segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-006",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-006",
+      "alternativas": [
+        {
+          "texto": "Somente a proximidade do destino do condutor.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Sinalização do local, visibilidade e impacto na circulação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A quantidade de veículos já estacionados no quarteirão.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A opinião dos demais motoristas da rua.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Estacionar em local que reduza a visibilidade de cruzamento ou de travessia de pedestres é especialmente perigoso porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A obstrução da visão aumenta o risco de conflito entre usuários.",
+      "explicacaoDetalhada": "A visibilidade é condição essencial para a segurança no trânsito. Quando um veículo estacionado interfere na visão de quem cruza ou atravessa, ele agrava o risco de colisões e atropelamentos.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-007",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-007",
+      "alternativas": [
+        {
+          "texto": "Facilita a identificação de pedestres pelos demais condutores.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Aumenta a chance de conflitos por obstrução da visão.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Só traz problema se o veículo for de grande porte.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "É permitido sempre que o condutor permaneça por perto.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos legais e práticos, a correta imobilização do veículo exige que o condutor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Regularidade da parada ou do estacionamento depende do local, da sinalização e da segurança gerada.",
+      "explicacaoDetalhada": "Parar ou estacionar corretamente é um ato de responsabilidade. O condutor deve avaliar se a imobilização respeita a sinalização, não prejudica a circulação e não expõe outros usuários a perigo evitável.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-parada-estacionamento-008",
+      "fingerprint": "base-propria-oficial-legislacao-parada-estacionamento-008",
+      "alternativas": [
+        {
+          "texto": "Decida apenas pela conveniência pessoal.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Avalie sinalização, segurança e impacto sobre a via.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Use o pisca-alerta e ignore a análise do local.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Priorize somente a rapidez para sair do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em um cruzamento, a preferência de passagem deve ser analisada com base principal em:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sinalização, regras legais e situação concreta da via orientam a preferência de passagem.",
+      "explicacaoDetalhada": "Preferência não depende de opinião pessoal do condutor. Ela deve ser definida pela sinalização existente, pelas regras do CTB e pelo contexto do cruzamento, sempre com foco na segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-001",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-001",
+      "alternativas": [
+        {
+          "texto": "No tamanho do veículo envolvido.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Na sinalização, nas regras legais e na segurança do caso concreto.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Na pressa de quem chega primeiro.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Na força do motor do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao se aproximar de um cruzamento sem semáforo e sem agente, o condutor deve:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "É necessário reduzir a velocidade e avaliar corretamente a situação antes de prosseguir.",
+      "explicacaoDetalhada": "Cruzamentos exigem atenção elevada, mesmo quando parecem simples. O condutor deve aproximar-se em condição de observar os demais usuários, a sinalização existente e as regras aplicáveis àquele ponto.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-002",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-002",
+      "alternativas": [
+        {
+          "texto": "Aumentar a velocidade para atravessar antes dos demais.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a velocidade e avaliar a situação com cautela.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Seguir automaticamente se estiver em via asfaltada.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Confiar apenas no buzinaço dos outros usuários.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A preferência de passagem não dispensa o condutor de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mesmo com preferência, permanece o dever de conduzir com cautela.",
+      "explicacaoDetalhada": "Ter preferência não autoriza avançar sem atenção. O condutor continua responsável por agir de forma prudente e evitar situações de risco previsíveis no cruzamento.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-003",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-003",
+      "alternativas": [
+        {
+          "texto": "Observar a segurança e a movimentação dos demais usuários.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Usar seta ao mudar de direção.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Respeitar a sinalização semafórica quando existir.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Manter atenção no ambiente do cruzamento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ultrapassagem é uma manobra que só deve ser iniciada quando:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A manobra depende de segurança, visibilidade e permissão legal.",
+      "explicacaoDetalhada": "Ultrapassar exige análise do sentido contrário, da sinalização, da velocidade relativa e do espaço disponível. A simples vontade de seguir mais rápido não justifica o início da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-004",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-004",
+      "alternativas": [
+        {
+          "texto": "O condutor estiver impaciente com o veículo da frente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Houver condições seguras e a manobra for permitida.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A via tiver qualquer acostamento disponível.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O veículo ultrapassado reduzir um pouco a velocidade.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Antes de ultrapassar, o condutor deve verificar principalmente:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "É preciso observar a frente, a retaguarda, a sinalização e o sentido contrário.",
+      "explicacaoDetalhada": "Uma ultrapassagem segura exige leitura ampla da via: se há proibição pela sinalização, se há aproximação de veículos no sentido oposto, se o veículo atrás também pretende ultrapassar e se existe espaço suficiente para concluir a manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-005",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-005",
+      "alternativas": [
+        {
+          "texto": "Somente se o veículo à frente estiver lento.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Se há espaço, visibilidade, sinalização permissiva e segurança.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas a potência do próprio motor.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Se os passageiros concordam com a manobra.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Iniciar ultrapassagem em local sem visibilidade suficiente é conduta:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Sem visibilidade adequada, a ultrapassagem se torna altamente arriscada e incompatível com a direção segura.",
+      "explicacaoDetalhada": "A visibilidade é requisito central da ultrapassagem. Se o condutor não consegue perceber adequadamente o sentido contrário ou o desenvolvimento da via, a manobra não deve ser iniciada.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-006",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-006",
+      "alternativas": [
+        {
+          "texto": "Regular, desde que a velocidade seja alta.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Arriscada e incompatível com a segurança da manobra.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Aceitável em qualquer rodovia de pista simples.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Recomendada para diminuir o tempo no trecho.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ao perceber que outro veículo pretende ultrapassar, o condutor do veículo à frente deve agir com:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O comportamento do ultrapassado deve favorecer a segurança, sem criar disputa ou risco adicional.",
+      "explicacaoDetalhada": "A ultrapassagem é uma interação entre veículos. O condutor ultrapassado deve evitar atitudes que dificultem a manobra e comprometam a segurança, mantendo comportamento previsível e responsável.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-007",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-007",
+      "alternativas": [
+        {
+          "texto": "Competição, aumentando a velocidade para impedir a manobra.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Conduta previsível, sem dificultar a ultrapassagem segura.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Mudança brusca de faixa para testar o outro motorista.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Parada imediata no leito carroçável.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em cruzamentos, a decisão de avançar deve levar em conta também:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Além da preferência, é preciso observar pedestres, ciclistas e demais usuários vulneráveis.",
+      "explicacaoDetalhada": "A análise do cruzamento não envolve apenas veículos. Usuários vulneráveis podem estar atravessando ou prestes a cruzar, e sua proteção integra a leitura correta da manobra.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-008",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-008",
+      "alternativas": [
+        {
+          "texto": "A existência de usuários vulneráveis no local.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "A vontade do veículo que estiver buzinando mais.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "A cor do veículo com maior porte.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A possibilidade de ocupar a contramão temporariamente.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Ultrapassagem concluída com segurança pressupõe que o condutor retorne à faixa original:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O retorno só deve acontecer quando houver espaço e visibilidade suficientes.",
+      "explicacaoDetalhada": "Voltar cedo demais à faixa pode gerar fechamento do veículo ultrapassado. Por isso, o retorno deve ocorrer apenas quando a manobra já estiver consolidada e houver distância segura.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-009",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-009",
+      "alternativas": [
+        {
+          "texto": "Logo após igualar a dianteira ao veículo ultrapassado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Somente quando houver distância suficiente e segurança no retorno.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Sem sinalizar, para não confundir os demais.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas após acionar o pisca-alerta.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Mesmo tendo prioridade, forçar passagem em cruzamento sem assegurar as condições de segurança é:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Prioridade de passagem não autoriza comportamento imprudente.",
+      "explicacaoDetalhada": "A preferência organiza o fluxo, mas não elimina o dever de prudência. O condutor que força passagem sem observar o risco atua de forma incompatível com a segurança exigida no trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-010",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-010",
+      "alternativas": [
+        {
+          "texto": "Correto, porque a prioridade elimina o risco.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Inadequado, pois prioridade não dispensa cautela.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Aceitável apenas à noite.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Permitido sempre que o outro veículo for menor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, a ultrapassagem segura depende de o condutor agir com:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ultrapassar com segurança exige leitura completa da via e decisão responsável.",
+      "explicacaoDetalhada": "A ultrapassagem é uma das manobras mais críticas da circulação. Ela exige avaliação técnica do espaço, do tempo, da visibilidade, da sinalização e do comportamento dos demais usuários.",
+      "videoUrl": null,
+      "ordemExibicao": 10,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-011",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-011",
+      "alternativas": [
+        {
+          "texto": "Impulsividade e confiança excessiva.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Leitura completa da situação e decisão prudente.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Pressa para liberar logo a faixa contrária.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dependência exclusiva da potência do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A leitura correta de preferência de passagem e ultrapassagem no trânsito exige do condutor principalmente:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve unir conhecimento da regra e avaliação responsável do contexto real.",
+      "explicacaoDetalhada": "Saber a regra abstrata não basta. No trânsito real, é necessário interpretar a sinalização, o comportamento dos demais, a visibilidade e os riscos concretos para decidir de forma segura e legal.",
+      "videoUrl": null,
+      "ordemExibicao": 11,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-preferencia-012",
+      "fingerprint": "base-propria-oficial-legislacao-preferencia-012",
+      "alternativas": [
+        {
+          "texto": "Aplicar a regra de modo automático, sem olhar o entorno.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Combinar regra legal com avaliação real do contexto.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Seguir apenas a iniciativa do veículo maior.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Priorizar sempre a rapidez sobre a segurança.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma infração de trânsito pode ser entendida como:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Infração é o descumprimento de uma regra de trânsito prevista na legislação.",
+      "explicacaoDetalhada": "As infrações de trânsito correspondem a condutas contrárias às normas estabelecidas no CTB e em sua regulamentação. Elas geram consequências administrativas e integram o sistema de fiscalização e responsabilização.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-001",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-001",
+      "alternativas": [
+        {
+          "texto": "Uma opinião pessoal do agente sobre a forma de dirigir.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "O descumprimento de regra de trânsito prevista em lei.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas um conselho educativo sem consequência.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Qualquer situação em que haja congestionamento.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O sistema de pontuação na habilitação está relacionado:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A pontuação está associada ao registro de infrações cometidas pelo condutor.",
+      "explicacaoDetalhada": "As infrações cometidas pelo condutor repercutem em seu prontuário, dentro do sistema legal de pontuação. Esse mecanismo tem função de controle e responsabilização administrativa.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-002",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-002",
+      "alternativas": [
+        {
+          "texto": "Ao valor de mercado do veículo utilizado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Ao registro das infrações cometidas pelo condutor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A uma bonificação por boa direção em rodovias.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Ao número de viagens feitas no mês.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos gerais, quanto mais grave for a infração, maior tende a ser:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A gravidade da infração se reflete na severidade das consequências administrativas.",
+      "explicacaoDetalhada": "A legislação de trânsito estrutura as infrações de forma escalonada. Quanto maior a gravidade da conduta, maior tende a ser a resposta administrativa correspondente, inclusive no sistema de pontuação.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-003",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-003",
+      "alternativas": [
+        {
+          "texto": "A tolerância da fiscalização ao comportamento irregular.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A repercussão administrativa da conduta.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A liberdade do condutor para repetir a infração.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A dispensa de qualquer anotação no prontuário.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Cometer infrações repetidas pode indicar, do ponto de vista do sistema de trânsito, que o condutor:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A reincidência demonstra persistência de comportamento incompatível com a condução segura.",
+      "explicacaoDetalhada": "A repetição de infrações não é vista apenas como episódio isolado. Ela pode revelar padrão de comportamento inseguro ou de desrespeito às normas, justificando controle administrativo mais rigoroso.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-004",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-004",
+      "alternativas": [
+        {
+          "texto": "Tem liberdade ampliada para escolher quais regras cumprir.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Mantém padrão de conduta que pode comprometer a segurança e a regularidade.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Está automaticamente dispensado de penalidades futuras.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Será premiado se cometer infração fora do horário de pico.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A pontuação não existe para premiar ou punir subjetivamente, mas para:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela serve como mecanismo objetivo de acompanhamento da conduta do motorista.",
+      "explicacaoDetalhada": "O sistema de pontos não depende de simpatia ou opinião. Ele busca registrar objetivamente o histórico infracional do condutor e permitir medidas administrativas quando o padrão legalmente previsto for atingido.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-005",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-005",
+      "alternativas": [
+        {
+          "texto": "Acompanhar objetivamente a conduta infracional do motorista.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Definir a potência permitida do veículo do condutor.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Avaliar a aparência do veículo abordado.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir completamente o processo de fiscalização.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista legal, a infração de trânsito é diferente de acidente porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Infração é violação de norma; acidente é evento danoso ou de risco, que pode ou não decorrer de infração.",
+      "explicacaoDetalhada": "Embora possam se relacionar, infração e acidente não são a mesma coisa. A infração se refere ao descumprimento da regra; o acidente é um fato concreto de trânsito com potencial danoso.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-006",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-006",
+      "alternativas": [
+        {
+          "texto": "Todo acidente elimina automaticamente a existência de infração.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Infração é violação de norma; acidente é evento de trânsito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Acidente só existe quando há pontuação na CNH.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Infração e acidente são termos sempre equivalentes.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma boa leitura do sistema de infrações exige compreender que ele busca:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As infrações fazem parte de um mecanismo de ordem, responsabilização e proteção da segurança viária.",
+      "explicacaoDetalhada": "As normas de infração existem para proteger o interesse coletivo no trânsito. Elas organizam o comportamento dos usuários e criam consequências para condutas que aumentam risco ou desordem viária.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-007",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-007",
+      "alternativas": [
+        {
+          "texto": "Somente arrecadar valores por meio de multas.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Ordenar condutas e responsabilizar comportamentos inseguros.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Substituir totalmente a educação para o trânsito.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Atender apenas a interesses individuais de cada condutor.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Se um condutor trata a pontuação como algo irrelevante, ele ignora que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acúmulo de pontos pode gerar consequências administrativas relevantes para a habilitação.",
+      "explicacaoDetalhada": "A pontuação integra o controle da regularidade do condutor. Desconsiderá-la é ignorar um dos principais mecanismos de acompanhamento do histórico infracional e de resposta administrativa previstos pela legislação.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-008",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-008",
+      "alternativas": [
+        {
+          "texto": "Os pontos não têm nenhuma relação com a situação da habilitação.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A pontuação pode repercutir administrativamente sobre o direito de dirigir.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Pontos só existem para veículos de carga.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A pontuação só vale se houver acidente com vítima.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quanto à classificação das infrações, o condutor deve saber que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "As infrações possuem diferentes níveis de gravidade e consequências correspondentes.",
+      "explicacaoDetalhada": "A legislação não trata todas as infrações da mesma forma. Há gradação na resposta administrativa, conforme a gravidade da conduta e sua repercussão na segurança e na ordem do trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-009",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-009",
+      "alternativas": [
+        {
+          "texto": "Todas possuem exatamente a mesma importância e efeito.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Há gradação legal de gravidade e de repercussão administrativa.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A classificação depende da cor do veículo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A gravidade é definida livremente pelo condutor autuado.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, respeitar as regras de trânsito evita, entre outros efeitos:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cumprir as normas reduz o risco de infrações e a acumulação de pontos na habilitação.",
+      "explicacaoDetalhada": "Obedecer às regras não é apenas uma escolha moral: é conduta juridicamente adequada que preserva a regularidade do condutor, evita autuações e protege a segurança de todos os usuários da via.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-infracoes-010",
+      "fingerprint": "base-propria-oficial-legislacao-infracoes-010",
+      "alternativas": [
+        {
+          "texto": "A incidência de infrações e os reflexos administrativos correspondentes.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "A necessidade de observar a sinalização horizontal.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "A existência de fiscalização em cruzamentos.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A obrigação de portar documentos do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos gerais, penalidade de trânsito é:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Penalidade é consequência jurídica aplicada ao infrator nos termos da legislação.",
+      "explicacaoDetalhada": "As penalidades são respostas administrativas previstas em lei para o cometimento de infrações. Elas integram o sistema sancionatório do trânsito e não se confundem com providências operacionais imediatas.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-001",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-001",
+      "alternativas": [
+        {
+          "texto": "Uma sugestão opcional ao condutor autuado.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Uma consequência jurídica prevista para a infração.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Apenas uma forma de organizar o tráfego momentaneamente.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Um conselho verbal sem base legal.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Medida administrativa, no contexto do trânsito, está mais relacionada a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Medida administrativa corresponde a providência prática adotada pela autoridade ou agente nas hipóteses legais.",
+      "explicacaoDetalhada": "As medidas administrativas não se confundem com a penalidade em si. Elas operam como providências legais de controle, proteção da segurança ou restauração da regularidade da situação de trânsito.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-002",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-002",
+      "alternativas": [
+        {
+          "texto": "Providência prática prevista em lei para determinadas situações.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Escolha pessoal do condutor após a infração.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "A mesma coisa que recurso administrativo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituição automática de todas as penalidades.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A diferença central entre penalidade e medida administrativa é que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Penalidade sanciona; medida administrativa atua como providência operacional ou cautelar prevista em lei.",
+      "explicacaoDetalhada": "Embora possam surgir no mesmo contexto infracional, penalidade e medida administrativa têm naturezas distintas. A primeira possui caráter sancionatório; a segunda, caráter prático-operacional ou cautelar, conforme a legislação.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-003",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-003",
+      "alternativas": [
+        {
+          "texto": "Ambas são sinônimas e sempre produzem o mesmo efeito.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A penalidade sanciona e a medida administrativa opera providência legal.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A medida administrativa só existe em vias rurais.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "A penalidade depende da vontade do infrator para existir.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Quando a legislação prevê retenção ou remoção em determinada hipótese, isso é exemplo de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Providências como retenção e remoção são tratadas como medidas administrativas, conforme a hipótese legal.",
+      "explicacaoDetalhada": "Situações que exigem controle imediato do veículo ou da circulação podem ensejar providências materiais por parte da autoridade de trânsito. Essas providências se enquadram no campo das medidas administrativas previstas no CTB.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-004",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-004",
+      "alternativas": [
+        {
+          "texto": "Medida administrativa.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Categoria de habilitação.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Orientação facultativa ao infrator.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas anotação informal sem efeito jurídico.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A aplicação de penalidades e medidas administrativas no trânsito busca, entre outros objetivos:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas servem para responsabilizar condutas e proteger a ordem e a segurança viária.",
+      "explicacaoDetalhada": "O sistema não tem apenas caráter arrecadatório. Penalidades e medidas administrativas integram a política de prevenção, organização e responsabilização no trânsito, visando a redução de riscos e irregularidades.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-005",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-005",
+      "alternativas": [
+        {
+          "texto": "Responsabilizar condutas e proteger a segurança viária.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Substituir totalmente a educação para o trânsito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Eliminar a necessidade de sinalização nas vias.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Permitir exceções pessoais às regras de circulação.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Confundir penalidade com medida administrativa pode levar o condutor a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A confusão prejudica a compreensão correta das consequências jurídicas da infração.",
+      "explicacaoDetalhada": "Entender a diferença entre essas figuras é importante para compreender o funcionamento do sistema de trânsito, o procedimento administrativo e a natureza das consequências decorrentes da infração.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-006",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-006",
+      "alternativas": [
+        {
+          "texto": "Compreender melhor a lei automaticamente.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Entender de forma incorreta a resposta jurídica ao fato praticado.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Dispensar o conhecimento do CTB.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Eliminar a possibilidade de defesa administrativa.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Do ponto de vista da lógica do sistema, a medida administrativa costuma estar mais ligada à:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela se conecta à regularização, contenção de risco ou providência imediata prevista em lei.",
+      "explicacaoDetalhada": "Medidas administrativas costumam operar sobre a situação concreta de circulação, buscando restabelecer segurança, legalidade ou controle imediato da ocorrência, nos limites da lei.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-007",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-007",
+      "alternativas": [
+        {
+          "texto": "Regularização ou contenção imediata da situação prevista em lei.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Escolha econômica do condutor sobre pagar ou não a multa.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Mudança definitiva de categoria da habilitação.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Definição judicial imediata do caso.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em leitura jurídica básica, é correto afirmar que penalidades e medidas administrativas:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "São institutos distintos, embora possam coexistir na resposta legal à mesma situação.",
+      "explicacaoDetalhada": "A legislação de trânsito pode prever, em uma mesma hipótese, consequências de naturezas distintas. Por isso, é importante saber que penalidade e medida administrativa não se anulam por serem coisas diferentes.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-penalidades-008",
+      "fingerprint": "base-propria-oficial-legislacao-penalidades-008",
+      "alternativas": [
+        {
+          "texto": "São exatamente a mesma figura jurídica.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Podem coexistir, por terem naturezas distintas.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Nunca aparecem em conjunto em uma infração.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dependem sempre de decisão do proprietário do veículo.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Os crimes de trânsito diferem das infrações administrativas porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Crimes de trânsito pertencem à esfera penal, enquanto infrações administrativas se inserem no âmbito administrativo.",
+      "explicacaoDetalhada": "Embora ambos possam decorrer de comportamentos no trânsito, crimes e infrações não se confundem. A diferença central está na natureza jurídica da resposta estatal e na gravidade da conduta prevista em lei.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-001",
+      "fingerprint": "base-propria-oficial-legislacao-crimes-001",
+      "alternativas": [
+        {
+          "texto": "Crimes de trânsito têm natureza penal, e infrações têm natureza administrativa.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": true
+        },
+        {
+          "texto": "Infrações são sempre mais graves que crimes.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Crimes só existem se houver multa aplicada antes.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Não existe diferença jurídica entre as duas figuras.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "No trânsito, responsabilidade do condutor significa, entre outros aspectos:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Conduzir implica responder pelas consequências jurídicas da própria conduta.",
+      "explicacaoDetalhada": "Quem dirige assume deveres legais e sociais. Isso inclui responder por comportamentos que violem a legislação ou produzam danos, conforme a natureza administrativa, civil ou penal do caso.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-002",
+      "fingerprint": "base-propria-oficial-legislacao-crimes-002",
+      "alternativas": [
+        {
+          "texto": "Estar dispensado de responder por atos praticados ao volante.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Responder juridicamente pelos efeitos da própria conduta no trânsito.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Transferir automaticamente toda culpa ao proprietário do veículo.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Apenas obedecer ordens de outros condutores.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "A existência de direito de recurso no trânsito demonstra que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O sistema administrativo admite defesa e revisão dos atos, nos termos legais.",
+      "explicacaoDetalhada": "O direito de defesa e de recurso integra o devido processo administrativo. Isso significa que o administrado pode questionar atos e penalidades nos meios e prazos previstos na legislação.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-003",
+      "fingerprint": "base-propria-oficial-legislacao-crimes-003",
+      "alternativas": [
+        {
+          "texto": "Toda autuação é imutável e não pode ser questionada.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Há possibilidade legal de defesa e revisão administrativa.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Somente o agente pode decidir se haverá recurso.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "O recurso substitui automaticamente a obrigação de obedecer à lei.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Exercer o direito de recurso no trânsito não significa:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Recorrer é exercer defesa administrativa, e não ignorar o sistema jurídico.",
+      "explicacaoDetalhada": "O recurso existe para permitir análise e revisão, dentro das regras legais. Ele não autoriza o administrado a desconsiderar o processo ou agir como se não existissem normas e prazos aplicáveis.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-004",
+      "fingerprint": "base-propria-oficial-legislacao-crimes-004",
+      "alternativas": [
+        {
+          "texto": "Exercer uma garantia de defesa dentro do processo administrativo.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Apresentar argumentos nos meios legalmente previstos.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": false
+        },
+        {
+          "texto": "Ignorar completamente o procedimento e suas exigências.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": true
+        },
+        {
+          "texto": "Buscar revisão de ato administrativo de trânsito.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Uma boa leitura sobre crimes de trânsito e responsabilidade exige compreender que:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A condução pode gerar repercussões em diferentes esferas, conforme a gravidade e a natureza do fato.",
+      "explicacaoDetalhada": "O comportamento no trânsito pode gerar efeitos administrativos, civis e penais. Por isso, o condutor responsável deve compreender que dirigir é atividade juridicamente relevante e socialmente sensível.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-005",
+      "fingerprint": "base-propria-oficial-legislacao-crimes-005",
+      "alternativas": [
+        {
+          "texto": "Toda consequência no trânsito é sempre apenas administrativa.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "A conduta pode repercutir em mais de uma esfera jurídica.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "A responsabilidade termina quando o veículo é estacionado.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Recursos eliminam automaticamente qualquer responsabilização.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "O direito de defesa no processo administrativo de trânsito está ligado à ideia de:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O processo administrativo deve observar garantias mínimas de contraditório e ampla defesa.",
+      "explicacaoDetalhada": "A atuação estatal no trânsito não é arbitrária. A ordem jurídica assegura meios formais para questionamento de atos administrativos, dentro da legalidade e dos procedimentos previstos.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-006",
+      "fingerprint": "base-propria-oficial-legislacao-crimes-006",
+      "alternativas": [
+        {
+          "texto": "Impossibilidade de revisão dos atos de trânsito.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Garantia de contraditório e ampla defesa no processo.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Supressão de toda autoridade da administração pública.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Dispensa do cumprimento das normas viárias.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, conhecer crimes de trânsito, responsabilidade e recursos ajuda o condutor a:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O conhecimento jurídico básico reforça a direção responsável e a compreensão correta das consequências legais.",
+      "explicacaoDetalhada": "Saber como o sistema jurídico responde aos fatos de trânsito permite ao condutor agir com mais consciência, prevenir comportamentos graves e exercer adequadamente seus direitos quando necessário.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-crimes-007",
+      "fingerprint": "base-propria-oficial-legislacao-crimes-007",
+      "alternativas": [
+        {
+          "texto": "Tratar a legislação como algo irrelevante para a condução diária.",
+          "imagemUrl": null,
+          "ordem": 0,
+          "correta": false
+        },
+        {
+          "texto": "Compreender melhor deveres, riscos e possibilidades de defesa.",
+          "imagemUrl": null,
+          "ordem": 1,
+          "correta": true
+        },
+        {
+          "texto": "Escolher livremente quais normas deseja cumprir.",
+          "imagemUrl": null,
+          "ordem": 2,
+          "correta": false
+        },
+        {
+          "texto": "Substituir a necessidade de atenção no trânsito real.",
+          "imagemUrl": null,
+          "ordem": 3,
+          "correta": false
+        }
+      ]
+    }
+  ]
+}

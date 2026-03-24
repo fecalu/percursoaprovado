@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "tema": "MECANICA_BASICA",
+    "subtema": "Freios, suspensão e direção",
+    "qtde": 3,
+    "referenciaOficial": "CNH do Brasil + material didático Senatran",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/noticias/2025/12/cnh-do-brasil-como-solicitar-a-primeira-habilitacao-pelo-aplicativo",
+    "observacaoEditorial": "Lote autoral sobre sinais simples de problemas mecânicos que afetam a condução."
+  },
+  "questoes": [
+    {
+      "enunciado": "O sistema de freios deve estar sempre em boas condições porque é essencial para:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Freios em bom estado são fundamentais para reduzir velocidade e parar com segurança.",
+      "explicacaoDetalhada": "Freios eficientes permitem controlar a velocidade, responder a imprevistos e evitar colisões. Qualquer suspeita de falha deve ser tratada com seriedade, pois compromete diretamente a segurança viária.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-001",
+      "fingerprint": "base-propria-oficial-mecanica-basica-freios-001",
+      "alternativas": [
+        { "texto": "Melhorar a aparência do veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir velocidade e parar o veículo com segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Tornar o motor mais potente.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Aumentar a capacidade do porta-malas.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se o condutor notar que o veículo está puxando para um lado, isso pode indicar problema em componentes como:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Desvios na trajetória podem estar ligados a pneus, direção, alinhamento ou suspensão.",
+      "explicacaoDetalhada": "Quando o veículo não mantém trajetória regular, pode haver problema em diferentes sistemas que influenciam a dirigibilidade. Ignorar esse sinal é arriscado, porque o controle do veículo pode ficar comprometido.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-002",
+      "fingerprint": "base-propria-oficial-mecanica-basica-freios-002",
+      "alternativas": [
+        { "texto": "Somente o rádio ou o ar-condicionado.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Direção, alinhamento, pneus ou suspensão.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Exclusivamente a documentação do veículo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A pintura externa da carroceria.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Dirigir com falha perceptível nos freios, na direção ou na suspensão é perigoso porque:",
+      "imagemUrl": null,
+      "tema": "MECANICA_BASICA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Esses sistemas afetam diretamente o controle e a segurança do veículo.",
+      "explicacaoDetalhada": "Freios, direção e suspensão são sistemas centrais para a estabilidade, o controle e a resposta do veículo. Problemas neles elevam o risco de perda de controle, aumento da distância de parada e acidentes.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "mecanica-basica-freios-003",
+      "fingerprint": "base-propria-oficial-mecanica-basica-freios-003",
+      "alternativas": [
+        { "texto": "Essas falhas só atrapalham o conforto, não a segurança.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Comprometem o controle do veículo e a resposta em situações de risco.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "São irrelevantes em vias urbanas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Podem ser ignoradas se a velocidade for moderada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

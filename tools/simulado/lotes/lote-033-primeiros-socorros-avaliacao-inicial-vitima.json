@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "tema": "PRIMEIROS_SOCORROS",
+    "subtema": "Avaliação inicial da vítima",
+    "qtde": 5,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Primeiros socorros",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre observação inicial da vítima sem agravar o quadro."
+  },
+  "questoes": [
+    {
+      "enunciado": "Na avaliação inicial da vítima, um dos primeiros pontos a observar é se ela:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Consciência e respiração são dados básicos da avaliação inicial.",
+      "explicacaoDetalhada": "A avaliação inicial procura identificar sinais que ajudem a compreender a gravidade do quadro sem expor a vítima a movimentos desnecessários. Verificar se a pessoa responde e respira é parte importante dessa leitura inicial.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-001",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-001",
+      "alternativas": [
+        { "texto": "Está usando cinto de segurança.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Responde a estímulos e apresenta sinais de respiração.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Tem documentos pessoais à vista.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Consegue falar o nome do veículo envolvido.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se a vítima estiver consciente, uma atitude adequada do socorrista eventual é:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Manter comunicação calma ajuda a reduzir ansiedade e obter informações úteis.",
+      "explicacaoDetalhada": "Falar com tranquilidade pode acalmar a vítima, diminuir agitação e permitir observação mais segura do seu estado geral. Isso deve ser feito sem forçar movimentos ou manipulações desnecessárias.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-002",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-002",
+      "alternativas": [
+        { "texto": "Gritar para ver se ela reage mais rápido.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Falar com calma e observar seu estado geral.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Obrigá-la a levantar para testar se consegue andar.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Dar água imediatamente para acalmá-la.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao avaliar uma vítima após colisão, o condutor deve evitar:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A observação inicial deve ser feita sem criar novos riscos ou agravar possíveis lesões.",
+      "explicacaoDetalhada": "Movimentos bruscos e testes improvisados podem piorar lesões ocultas, especialmente em coluna, cabeça e membros. A avaliação inicial deve ser cuidadosa, priorizando sinais visíveis e comunicação segura.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-003",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-003",
+      "alternativas": [
+        { "texto": "Observar sinais aparentes de lesão.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conversar com a vítima, se ela estiver consciente.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Fazer movimentações desnecessárias para testar a condição física.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Notar se há dificuldade para respirar.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se a vítima estiver inconsciente, o socorrista eventual não deve:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Pessoa inconsciente não deve receber líquidos, alimentos ou medicação improvisada.",
+      "explicacaoDetalhada": "Oferecer água, comida ou qualquer substância a uma vítima inconsciente pode causar engasgo e agravar o quadro. A conduta correta é acionar o socorro e manter a segurança da cena e da vítima.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-004",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-004",
+      "alternativas": [
+        { "texto": "Acionar ajuda especializada.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Garantir a segurança do local.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Oferecer água ou outro líquido para estimular reação.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Observar sinais de respiração.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Na avaliação inicial da vítima, a direção mais segura é buscar informações úteis sem:",
+      "imagemUrl": null,
+      "tema": "PRIMEIROS_SOCORROS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Avaliar não significa manipular excessivamente a vítima.",
+      "explicacaoDetalhada": "A avaliação inicial em primeiros socorros no trânsito é observacional e cautelosa. O objetivo é perceber consciência, respiração, sinais visíveis de gravidade e risco imediato, evitando transformar a avaliação em intervenção perigosa.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "primeiros-socorros-avaliacao-005",
+      "fingerprint": "base-propria-oficial-primeiros-socorros-avaliacao-005",
+      "alternativas": [
+        { "texto": "Gerar agitação, exposição ou movimentação desnecessária da vítima.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Observar cuidadosamente o estado geral.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Prestar atenção a sinais visíveis de gravidade.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Comunicar-se com calma, se houver resposta.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

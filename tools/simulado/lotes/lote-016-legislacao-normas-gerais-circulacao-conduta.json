@@ -1,0 +1,212 @@
+{
+  "meta": {
+    "tema": "LEGISLACAO",
+    "subtema": "Normas gerais de circulação e conduta",
+    "qtde": 10,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Normas gerais de circulação e conduta + CTB",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre regras básicas de posicionamento, previsibilidade e comportamento do condutor."
+  },
+  "questoes": [
+    {
+      "enunciado": "Em regra geral, a circulação de veículos deve ocorrer pelo lado:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "No Brasil, a circulação ocorre, em regra, pelo lado direito da via.",
+      "explicacaoDetalhada": "A organização do trânsito brasileiro adota circulação pela direita. Essa referência é fundamental para posicionamento, ultrapassagem e leitura geral da via.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-001",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-001",
+      "alternativas": [
+        { "texto": "Esquerdo da via, salvo rodovias.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Direito da via, observada a sinalização e as exceções legais.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Centro da via, quando o fluxo estiver leve.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Acostamento, se não houver fiscalização.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Sinalizar com antecedência a intenção de mudar de direção ou faixa é importante porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A sinalização prévia torna a condução previsível para os demais usuários.",
+      "explicacaoDetalhada": "Ao indicar com antecedência a manobra pretendida, o condutor reduz o risco de surpresa, conflito e colisão, permitindo que os demais usuários reajam com segurança.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-002",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-002",
+      "alternativas": [
+        { "texto": "Dispensa a necessidade de observar retrovisores.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Torna a manobra mais previsível e segura para os demais.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Permite ao condutor ter prioridade absoluta na mudança de faixa.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Substitui a obrigação de manter distância lateral.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A mudança de faixa deve ser realizada somente quando:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Mudar de faixa exige segurança, observação e compatibilidade com a sinalização.",
+      "explicacaoDetalhada": "A troca de faixa não depende apenas da vontade do condutor. Ela deve respeitar a sinalização, a posição dos demais veículos e a possibilidade real de executar a manobra sem risco.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-003",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-003",
+      "alternativas": [
+        { "texto": "O condutor desejar ganhar tempo no percurso.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Houver condições seguras e a manobra for permitida.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "O veículo de trás estiver distante, independentemente do restante.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "A via estiver congestionada.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Manter distância de segurança do veículo à frente é conduta importante porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A distância reduz o risco de colisão traseira e amplia o tempo de reação.",
+      "explicacaoDetalhada": "A distância de segurança permite resposta adequada a frenagens, obstáculos e mudanças inesperadas no trânsito. Dirigir muito próximo ao veículo da frente aumenta o risco de sinistro.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-004",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-004",
+      "alternativas": [
+        { "texto": "Facilita a ultrapassagem sem necessidade de sinalizar.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Amplia o tempo de reação e reduz o risco de colisão.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Permite andar em velocidade sempre maior.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Elimina a necessidade de frear em emergências.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Parar o veículo em local que prejudique a circulação ou a segurança é conduta:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Paradas irregulares comprometem o fluxo e aumentam riscos no trânsito.",
+      "explicacaoDetalhada": "Parada e estacionamento devem respeitar regras próprias e a segurança do local. Imobilizar o veículo de forma indevida pode bloquear visibilidade, gerar conflitos e colocar usuários em risco.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-005",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-005",
+      "alternativas": [
+        { "texto": "Aceitável sempre que o condutor permaneça dentro do veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Irregular, pois pode prejudicar o fluxo e a segurança.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Permitida se o pisca-alerta estiver acionado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Livre em qualquer via de pouco movimento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao iniciar uma conversão, o condutor deve fazê-la de modo que sua trajetória seja:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A conversão deve ser previsível, compatível com a sinalização e segura para os demais usuários.",
+      "explicacaoDetalhada": "Conversões exigem posicionamento adequado, sinalização prévia e execução sem surpreender os demais. A trajetória deve respeitar o desenho da via e evitar invasões perigosas de espaço.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-006",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-006",
+      "alternativas": [
+        { "texto": "Ampla e imprevisível, para ganhar mais espaço.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Compatível com a via, segura e corretamente sinalizada.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Indiferente à posição dos demais veículos.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Feita apenas com base na pressa do condutor.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O acostamento, em regra, não deve ser utilizado como faixa normal de circulação porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O acostamento possui função própria e não se confunde com a pista regular de rolamento.",
+      "explicacaoDetalhada": "O acostamento integra a via com finalidade específica, ligada a segurança e apoio em situações próprias. Seu uso como faixa comum de circulação compromete a organização e a segurança viária.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-007",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-007",
+      "alternativas": [
+        { "texto": "Porque é reservado para circulação ordinária de veículos leves.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Porque não se destina, em regra, à circulação comum da via.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Porque somente ônibus podem usá-lo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Porque substitui totalmente a faixa da direita.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao aproximar-se de local com pedestres, ciclistas ou outros usuários vulneráveis, o condutor deve adotar postura:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A presença de usuários vulneráveis exige cuidado redobrado e condução mais preventiva.",
+      "explicacaoDetalhada": "As normas de circulação não podem ser lidas isoladas da proteção à vida. Em áreas com usuários vulneráveis, o comportamento do condutor deve ser mais cauteloso, previsível e responsável.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-008",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-008",
+      "alternativas": [
+        { "texto": "Mais agressiva, para liberar a via rapidamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Mais cautelosa e preventiva.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Indiferente, porque todos devem se adaptar ao veículo.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Voltada apenas à manutenção da velocidade.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "O condutor não deve iniciar manobra que possa surpreender os demais usuários porque:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A previsibilidade é um dos pilares da circulação segura.",
+      "explicacaoDetalhada": "Boa parte da segurança no trânsito depende de condutas que possam ser compreendidas e antecipadas pelos demais. Manobras súbitas aumentam drasticamente a chance de reação inadequada e colisão.",
+      "videoUrl": null,
+      "ordemExibicao": 8,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-009",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-009",
+      "alternativas": [
+        { "texto": "A surpresa melhora a fluidez do trânsito.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "A previsibilidade é essencial para a segurança viária.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Os outros usuários sempre são obrigados a adivinhar a manobra.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "O importante é apenas concluir a manobra rapidamente.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em termos práticos, obedecer às normas gerais de circulação e conduta significa:",
+      "imagemUrl": null,
+      "tema": "LEGISLACAO",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "É dirigir de forma regular, previsível, compatível com a sinalização e segura para todos.",
+      "explicacaoDetalhada": "As normas gerais estruturam o comportamento cotidiano do condutor: posição na via, manobras, prioridades, cuidado com os demais e respeito ao espaço viário. Cumpri-las é dirigir com responsabilidade social e legal.",
+      "videoUrl": null,
+      "ordemExibicao": 9,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "legislacao-circulacao-conduta-010",
+      "fingerprint": "base-propria-oficial-legislacao-circulacao-conduta-010",
+      "alternativas": [
+        { "texto": "Dirigir apenas conforme conveniência pessoal.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Conduzir de modo previsível, regular e seguro para todos.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Observar somente a vontade dos demais motoristas.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Ignorar regras quando a via parecer vazia.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

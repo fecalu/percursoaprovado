@@ -1,0 +1,72 @@
+{
+  "meta": {
+    "tema": "PLACAS",
+    "subtema": "Sinalização horizontal: faixa de pedestre, retenção e canalização",
+    "qtde": 3,
+    "referenciaOficial": "Manual Brasileiro de Sinalização de Trânsito Volume IV - Sinalização Horizontal",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/senatran/manuais-brasileiros-de-sinalizacao-de-transito",
+    "observacaoEditorial": "Lote autoral sobre elementos horizontais de organização do espaço de conflito."
+  },
+  "questoes": [
+    {
+      "enunciado": "A faixa de pedestres demarcada na pista tem a finalidade de:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ela organiza e protege a travessia de pedestres.",
+      "explicacaoDetalhada": "A demarcação orienta o local mais seguro de travessia e reforça o dever de cuidado do condutor diante de pedestres que estejam atravessando ou prestes a atravessar em condições seguras.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-001",
+      "fingerprint": "base-propria-oficial-placas-horizontal-faixa-001",
+      "alternativas": [
+        { "texto": "Reservar local de parada exclusiva para motocicletas.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Organizar e proteger a travessia de pedestres.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Indicar local permitido para retorno.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Sinalizar área exclusiva de carga e descarga.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao se aproximar de faixa de pedestres com possibilidade de travessia, a conduta defensiva correta é:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O condutor deve reduzir a velocidade e estar pronto para parar.",
+      "explicacaoDetalhada": "A faixa de pedestres não deve ser tratada apenas como marca visual. Ela sinaliza potencial conflito com usuário vulnerável e exige atenção, moderação da velocidade e prioridade quando cabível.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-002",
+      "fingerprint": "base-propria-oficial-placas-horizontal-faixa-002",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para liberar a faixa rapidamente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Reduzir a velocidade e observar a travessia.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar a buzina para acelerar o passo do pedestre.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Parar sobre a faixa para ganhar melhor visão do cruzamento.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Marcas de canalização pintadas no pavimento servem para:",
+      "imagemUrl": null,
+      "tema": "PLACAS",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Elas orientam a trajetória e delimitam áreas que não devem ser ocupadas indiscriminadamente.",
+      "explicacaoDetalhada": "A canalização organiza movimentos, separa correntes de tráfego e protege zonas de conflito ou direcionamento. O condutor deve respeitar sua função e evitar ocupar áreas não destinadas à circulação comum.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "placas-horizontal-faixa-003",
+      "fingerprint": "base-propria-oficial-placas-horizontal-faixa-003",
+      "alternativas": [
+        { "texto": "Transformar qualquer trecho em área de estacionamento temporário.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Orientar trajetórias e delimitar zonas de organização do fluxo.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Substituir a necessidade de semáforo no local.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Autorizar conversão em qualquer sentido da via.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

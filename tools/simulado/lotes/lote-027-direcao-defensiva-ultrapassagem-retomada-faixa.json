@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "tema": "DIRECAO_DEFENSIVA",
+    "subtema": "Ultrapassagem segura e retomada de faixa",
+    "qtde": 8,
+    "referenciaOficial": "Portaria SENATRAN 923/2025 > Direção defensiva",
+    "linkFonte": "https://www.gov.br/transportes/pt-br/assuntos/transito/arquivos-senatran/portarias/2025/Portaria9232025.pdf",
+    "observacaoEditorial": "Lote autoral sobre avaliação de risco, execução e encerramento seguro da ultrapassagem."
+  },
+  "questoes": [
+    {
+      "enunciado": "Antes de iniciar uma ultrapassagem, o condutor defensivo deve verificar principalmente:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Ultrapassar com segurança exige avaliar visibilidade, espaço e fluxo contrário.",
+      "explicacaoDetalhada": "A ultrapassagem é uma manobra que aumenta temporariamente a exposição ao risco. Por isso, o condutor deve conferir se há visibilidade suficiente, ausência de proibição, espaço adequado e possibilidade de retornar à faixa sem perigo.",
+      "videoUrl": null,
+      "ordemExibicao": 0,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-001",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-001",
+      "alternativas": [
+        { "texto": "Apenas a potência do seu veículo.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Somente se o veículo da frente estiver lento.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Visibilidade, espaço disponível e segurança para ida e retorno à faixa.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Se o acostamento está livre para usar como apoio.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Uma ultrapassagem em curva, aclive sem visibilidade ou trecho de risco elevado é defensivamente:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A manobra não deve ser feita quando a visibilidade ou a segurança estiverem comprometidas.",
+      "explicacaoDetalhada": "Curvas, aclives e outros trechos sem visão suficiente reduzem a capacidade de avaliar a aproximação de veículos no sentido contrário. Isso torna a ultrapassagem especialmente perigosa e incompatível com a direção defensiva.",
+      "videoUrl": null,
+      "ordemExibicao": 1,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-002",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-002",
+      "alternativas": [
+        { "texto": "Recomendada, se o veículo for mais potente.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Admissível, desde que feita rapidamente.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Insegura e deve ser evitada.", "imagemUrl": null, "ordem": 2, "correta": true },
+        { "texto": "Mais segura do que em trecho reto.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Ao perceber que outro veículo o ultrapassa, a atitude defensiva é:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "FACIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Quem está sendo ultrapassado deve facilitar a manobra segura, sem disputa.",
+      "explicacaoDetalhada": "Disputar espaço ou acelerar durante a ultrapassagem aumenta muito o risco de colisão lateral ou frontal. A direção defensiva recomenda manter comportamento previsível e não dificultar a manobra do outro condutor.",
+      "videoUrl": null,
+      "ordemExibicao": 2,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-003",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-003",
+      "alternativas": [
+        { "texto": "Aumentar a velocidade para impedir a passagem.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Manter conduta previsível e não dificultar a ultrapassagem.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Deslocar-se repentinamente para o centro da pista.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Fazer sinais bruscos para apressar o outro veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A retomada da faixa após uma ultrapassagem deve ocorrer somente quando o condutor tiver:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "O retorno à faixa precisa respeitar distância segura do veículo ultrapassado.",
+      "explicacaoDetalhada": "Retornar cedo demais pode fechar o espaço do veículo ultrapassado e provocar colisão. A direção defensiva exige avaliar se há margem suficiente para retomar a faixa com segurança e sem surpreender os demais usuários.",
+      "videoUrl": null,
+      "ordemExibicao": 3,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-004",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-004",
+      "alternativas": [
+        { "texto": "Certeza de que o outro veículo freará, se necessário.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Espaço suficiente para retornar sem fechar a trajetória do veículo ultrapassado.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ultrapassado metade do veículo ao lado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Apressado o término da manobra por buzina atrás.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em rodovia de mão dupla, a ultrapassagem exige atenção especial ao:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Em mão dupla, o risco de conflito com fluxo oposto torna a avaliação mais crítica.",
+      "explicacaoDetalhada": "Ao ocupar temporariamente a faixa de sentido contrário, o condutor precisa estimar corretamente distância, tempo de execução da manobra e aproximação de veículos que vêm em direção oposta. Erros de avaliação nessa situação são especialmente graves.",
+      "videoUrl": null,
+      "ordemExibicao": 4,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-005",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-005",
+      "alternativas": [
+        { "texto": "Fluxo de veículos no sentido contrário e tempo disponível para concluir a manobra.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Tamanho do acostamento para eventual uso na ultrapassagem.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Quantidade de passageiros no veículo ultrapassado.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Somente à velocidade do próprio veículo.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Se, durante a avaliação da manobra, surgir qualquer dúvida sobre a segurança da ultrapassagem, o condutor defensivo deve:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "MEDIA",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Na dúvida, a decisão defensiva é não ultrapassar.",
+      "explicacaoDetalhada": "Direção defensiva valoriza a redução de exposição ao risco. Se não há certeza sobre visibilidade, distância, velocidade do fluxo contrário ou espaço para retorno, a ultrapassagem não deve ser iniciada.",
+      "videoUrl": null,
+      "ordemExibicao": 5,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-006",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-006",
+      "alternativas": [
+        { "texto": "Iniciar a manobra rapidamente para não perder a oportunidade.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Aguardar condição realmente segura para realizar a ultrapassagem.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Usar a buzina e forçar passagem pela esquerda.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Fazer a manobra pelo acostamento, se ele estiver livre.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "Em fila de veículos, a ultrapassagem sucessiva e sem avaliação individual de cada situação é perigosa porque:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "Cada ultrapassagem precisa de nova leitura de risco; não existe manobra automática segura.",
+      "explicacaoDetalhada": "A presença de vários veículos pode esconder entradas laterais, pedestres, mudanças de faixa, aproximação de veículos contrários e outras variáveis. A direção defensiva exige reavaliar a segurança a cada manobra, sem agir por impulso ou hábito.",
+      "videoUrl": null,
+      "ordemExibicao": 6,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-007",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-007",
+      "alternativas": [
+        { "texto": "A fila melhora a visibilidade da pista oposta.", "imagemUrl": null, "ordem": 0, "correta": false },
+        { "texto": "Cada novo veículo e trecho muda as condições de risco da manobra.", "imagemUrl": null, "ordem": 1, "correta": true },
+        { "texto": "Ultrapassagens múltiplas sempre reduzem o tempo de exposição.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Quanto maior a fila, menor a chance de surgir imprevisto.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    },
+    {
+      "enunciado": "A ultrapassagem só é compatível com a direção defensiva quando o condutor consegue:",
+      "imagemUrl": null,
+      "tema": "DIRECAO_DEFENSIVA",
+      "dificuldade": "DIFICIL",
+      "status": "RASCUNHO",
+      "explicacaoCurta": "A manobra precisa ser necessária, legal e executada com margem real de segurança.",
+      "explicacaoDetalhada": "Não basta o desejo de passar à frente. A ultrapassagem defensiva depende de leitura correta da via, do comportamento dos demais usuários, do desempenho do próprio veículo e do respeito às regras e limitações do trecho.",
+      "videoUrl": null,
+      "ordemExibicao": 7,
+      "origem": "BASE_PROPRIA_OFICIAL",
+      "origemQuestaoId": "direcao-defensiva-ultrapassagem-008",
+      "fingerprint": "base-propria-oficial-direcao-defensiva-ultrapassagem-008",
+      "alternativas": [
+        { "texto": "Executar a manobra com segurança real, sem depender da reação dos outros.", "imagemUrl": null, "ordem": 0, "correta": true },
+        { "texto": "Confiar que o veículo em sentido contrário reduzirá a velocidade.", "imagemUrl": null, "ordem": 1, "correta": false },
+        { "texto": "Apoiar a manobra no acostamento, se necessário.", "imagemUrl": null, "ordem": 2, "correta": false },
+        { "texto": "Compensar a falta de espaço com aceleração máxima.", "imagemUrl": null, "ordem": 3, "correta": false }
+      ]
+    }
+  ]
+}

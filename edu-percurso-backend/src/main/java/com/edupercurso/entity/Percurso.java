@@ -71,6 +71,11 @@ public class Percurso {
     @Builder.Default
     private boolean destaque = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "configuracao_pontos_atencao", nullable = false)
+    @Builder.Default
+    private ConfiguracaoPontosAtencao configuracaoPontosAtencao = ConfiguracaoPontosAtencao.AUTOMATICO;
+
     @OneToMany(mappedBy = "percurso", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("ordemExibicao ASC, timestampSegundos ASC")
     @Builder.Default
@@ -105,5 +110,11 @@ public class Percurso {
         YOUTUBE,
         VIMEO,
         BUNNY
+    }
+
+    public enum ConfiguracaoPontosAtencao {
+        AUTOMATICO,
+        SEMPRE_MOSTRAR,
+        OCULTAR
     }
 }
