@@ -1,0 +1,15 @@
+ALTER TABLE planos
+    ADD COLUMN usar_checkout_personalizado BOOLEAN NOT NULL DEFAULT FALSE,
+    ADD COLUMN checkout_kicker TEXT,
+    ADD COLUMN checkout_titulo TEXT,
+    ADD COLUMN checkout_subtitulo TEXT,
+    ADD COLUMN checkout_beneficios_titulo TEXT,
+    ADD COLUMN checkout_beneficios_texto TEXT,
+    ADD COLUMN checkout_ajuda_titulo TEXT,
+    ADD COLUMN checkout_ajuda_texto TEXT,
+    ADD COLUMN checkout_confianca_texto TEXT,
+    ADD COLUMN checkout_resumo_kicker TEXT,
+    ADD COLUMN checkout_resumo_texto TEXT,
+    ADD COLUMN checkout_preco_label TEXT,
+    ADD COLUMN checkout_preco_texto TEXT,
+    ADD COLUMN checkout_seguro_texto TEXT;

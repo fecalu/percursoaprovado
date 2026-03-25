@@ -192,6 +192,18 @@ function getPlanoDestaque(duracaoDias) {
   }
 }
 
+function getPlanoApresentacao(plano) {
+  const padrao = getPlanoDestaque(plano?.duracaoDias || 0)
+
+  return {
+    selo: plano?.vitrineSelo?.trim() || padrao.selo,
+    resumo: plano?.vitrineResumo?.trim() || padrao.resumo,
+    recomendado: typeof plano?.vitrineRecomendada === 'boolean' ? plano.vitrineRecomendada : padrao.recomendado,
+    texto: plano?.vitrineTexto?.trim() || getPlanoIndicacao(plano?.duracaoDias || 0),
+    meta: plano?.vitrineMeta?.trim() || 'Pagamento unico pelo periodo escolhido',
+  }
+}
+
 function isCheckoutDoLocal(monitor, slug) {
   return Boolean(monitor?.localSlug) && monitor.localSlug === slug
 }
@@ -270,7 +282,7 @@ export default function LocalDetalhe() {
       return
     }
 
-    const recomendadoIndex = planosOrdenados.findIndex(plano => getPlanoDestaque(plano.duracaoDias).recomendado)
+    const recomendadoIndex = planosOrdenados.findIndex(plano => getPlanoApresentacao(plano).recomendado)
     setPlanoAtivoIndex(recomendadoIndex >= 0 ? recomendadoIndex : 0)
   }, [planosOrdenados])
 
@@ -444,7 +456,7 @@ export default function LocalDetalhe() {
   }
 
   function renderPlanoShowcaseCard(plano, cardState, index) {
-    const destaquePlano = getPlanoDestaque(plano.duracaoDias)
+    const destaquePlano = getPlanoApresentacao(plano)
     const palette = PLANO_SHOWCASE_PALETTE[index % PLANO_SHOWCASE_PALETTE.length]
 
     return (
@@ -475,8 +487,8 @@ export default function LocalDetalhe() {
           {destaquePlano.recomendado && <div className="plan-showcase-ribbon">Mais escolhido</div>}
           <div className="plan-showcase-name">{plano.nome}</div>
           <div className="plan-showcase-price">{fmtMoeda(plano.precoCentavos)}</div>
-          <div className="plan-showcase-copy">{getPlanoIndicacao(plano.duracaoDias)}</div>
-          <div className="plan-showcase-meta">Pagamento unico pelo periodo escolhido</div>
+          <div className="plan-showcase-copy">{destaquePlano.texto}</div>
+          <div className="plan-showcase-meta">{destaquePlano.meta}</div>
           <div className="plan-showcase-action" onClick={event => event.stopPropagation()}>
             {renderAcaoPlano(plano)}
           </div>
@@ -496,7 +508,7 @@ export default function LocalDetalhe() {
   const caixaDestaque = getCaixaDestaque(local)
   const imagemPrincipal = resolveMediaUrl(local.imagemPrincipalUrl)
   const planoAtivo = planosOrdenados[Math.min(planoAtivoIndex, Math.max(planosOrdenados.length - 1, 0))] || null
-  const destaquePlanoAtivo = planoAtivo ? getPlanoDestaque(planoAtivo.duracaoDias) : null
+  const destaquePlanoAtivo = planoAtivo ? getPlanoApresentacao(planoAtivo) : null
   const planoAnterior = planoAtivoIndex > 0 ? planosOrdenados[planoAtivoIndex - 1] : null
   const planoSeguinte = planoAtivoIndex < planosOrdenados.length - 1 ? planosOrdenados[planoAtivoIndex + 1] : null
   const checkoutAcompanhamento = checkoutMonitor ? getCheckoutAcompanhamento(checkoutMonitor) : null
@@ -683,7 +695,7 @@ export default function LocalDetalhe() {
                 <div className="plan-showcase-title">Escolha o tempo certo para estudar esse local</div>
                 {planoAtivo && (
                   <>
-                    <div className="plan-showcase-subtitle">{getPlanoIndicacao(planoAtivo.duracaoDias)}</div>
+                    <div className="plan-showcase-subtitle">{destaquePlanoAtivo?.texto}</div>
                     <div className="plan-showcase-caption">{destaquePlanoAtivo?.resumo}</div>
                   </>
                 )}

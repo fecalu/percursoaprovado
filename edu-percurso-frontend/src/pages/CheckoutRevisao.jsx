@@ -34,6 +34,26 @@ const CONFIANCA = [
   'O acesso aparece na sua biblioteca assim que o pagamento for aprovado',
 ]
 
+function interpolarCheckoutTexto(texto, contexto) {
+  return String(texto || '')
+    .replaceAll('{local}', contexto.local || '')
+    .replaceAll('{plano}', contexto.plano || '')
+    .replaceAll('{duracao}', contexto.duracao || '')
+    .replaceAll('{preco}', contexto.preco || '')
+}
+
+function parseLinhasCheckout(texto, fallback, contexto) {
+  const valor = String(texto || '').trim()
+  if (!valor) return fallback
+
+  const linhas = valor
+    .split('\n')
+    .map(item => interpolarCheckoutTexto(item.trim(), contexto))
+    .filter(Boolean)
+
+  return linhas.length ? linhas : fallback
+}
+
 export default function CheckoutRevisao() {
   const { localSlug, planoId } = useParams()
   const navigate = useNavigate()
@@ -72,6 +92,40 @@ export default function CheckoutRevisao() {
       { label: 'Acesso', value: formatPlanoDuracao(plano.duracaoDias) },
       { label: 'Pagamento', value: 'Pix ou cartao' },
     ]
+  }, [local, plano])
+
+  const checkoutCopy = useMemo(() => {
+    if (!plano || !local) return null
+
+    const duracaoFormatada = formatPlanoDuracao(plano.duracaoDias)
+    const contexto = {
+      local: local.nome || '',
+      plano: plano.nome || '',
+      duracao: duracaoFormatada,
+      preco: fmtMoeda(plano.precoCentavos),
+    }
+
+    const usarCustom = Boolean(plano.usarCheckoutPersonalizado)
+    const obterTexto = (valor, fallback) => {
+      if (!usarCustom || !String(valor || '').trim()) return interpolarCheckoutTexto(fallback, contexto)
+      return interpolarCheckoutTexto(valor, contexto)
+    }
+
+    return {
+      kicker: obterTexto(plano.checkoutKicker, 'Revise seu acesso antes de pagar'),
+      titulo: obterTexto(plano.checkoutTitulo, 'Voce esta a um passo de liberar o material do seu local de prova.'),
+      subtitulo: obterTexto(plano.checkoutSubtitulo, 'Revise o que esta incluido, confirme o periodo escolhido e siga para o pagamento com mais clareza.'),
+      beneficiosTitulo: obterTexto(plano.checkoutBeneficiosTitulo, 'O que voce vai receber'),
+      beneficios: parseLinhasCheckout(plano.checkoutBeneficiosTexto, BENEFICIOS, contexto),
+      ajudaTitulo: obterTexto(plano.checkoutAjudaTitulo, 'Como isso ajuda antes da prova'),
+      ajudaTexto: obterTexto(plano.checkoutAjudaTexto, 'O objetivo nao e decorar rua. E chegar mais preparado para entender o padrao da avaliacao, reduzir surpresa e dirigir com mais criterio no dia da prova.'),
+      confianca: parseLinhasCheckout(plano.checkoutConfiancaTexto, CONFIANCA, contexto),
+      resumoKicker: obterTexto(plano.checkoutResumoKicker, 'Resumo da compra'),
+      resumoTexto: obterTexto(plano.checkoutResumoTexto, `Material do local de prova com acesso por ${duracaoFormatada}.`),
+      precoLabel: obterTexto(plano.checkoutPrecoLabel, 'Total'),
+      precoTexto: obterTexto(plano.checkoutPrecoTexto, 'Pagamento unico pelo periodo escolhido'),
+      seguroTexto: obterTexto(plano.checkoutSeguroTexto, 'Pagamento seguro com Mercado Pago'),
+    }
   }, [local, plano])
 
   async function continuarParaPagamento() {
@@ -130,7 +184,7 @@ export default function CheckoutRevisao() {
 
   if (loading) return <div className="spinner" />
 
-  if (!local || !plano) {
+  if (!local || !plano || !checkoutCopy) {
     return (
       <div className="landing-page landing-page--eager">
         <div className="empty-state">Nao foi possivel encontrar esse plano para revisao da compra.</div>
@@ -151,38 +205,29 @@ export default function CheckoutRevisao() {
 
       <section className="checkout-review-layout fade-in">
         <div className="checkout-review-copy">
-          <div className="hero-kicker">Revise seu acesso antes de pagar</div>
-          <h1 className="checkout-review-title">Voce esta a um passo de liberar o material do seu local de prova.</h1>
-          <p className="checkout-review-subtitle">
-            Revise o que esta incluido, confirme o periodo escolhido e siga para o pagamento com mais clareza.
-          </p>
+          <div className="hero-kicker">{checkoutCopy.kicker}</div>
+          <h1 className="checkout-review-title">{checkoutCopy.titulo}</h1>
+          <p className="checkout-review-subtitle">{checkoutCopy.subtitulo}</p>
 
           <div className="checkout-review-section">
-            <div className="checkout-review-section-title">O que voce vai receber</div>
+            <div className="checkout-review-section-title">{checkoutCopy.beneficiosTitulo}</div>
             <div className="checkout-review-list">
-              {BENEFICIOS.map(item => (
+              {checkoutCopy.beneficios.map(item => (
                 <div key={item} className="checkout-review-list-item">
                   <span className="checkout-review-list-dot" />
                   <span>{item}</span>
                 </div>
               ))}
-              <div className="checkout-review-list-item">
-                <span className="checkout-review-list-dot" />
-                <span>Acesso por 1 local, durante {formatPlanoDuracao(plano.duracaoDias)}</span>
-              </div>
             </div>
           </div>
 
           <div className="checkout-review-section">
-            <div className="checkout-review-section-title">Como isso ajuda antes da prova</div>
-            <p className="checkout-review-support">
-              O objetivo nao e decorar rua. E chegar mais preparado para entender o padrao da avaliacao, reduzir
-              surpresa e dirigir com mais criterio no dia da prova.
-            </p>
+            <div className="checkout-review-section-title">{checkoutCopy.ajudaTitulo}</div>
+            <p className="checkout-review-support">{checkoutCopy.ajudaTexto}</p>
           </div>
 
           <div className="checkout-review-trust">
-            {CONFIANCA.map(item => (
+            {checkoutCopy.confianca.map(item => (
               <div key={item} className="checkout-review-trust-item">
                 <span className="checkout-review-trust-dot" />
                 <span>{item}</span>
@@ -192,11 +237,9 @@ export default function CheckoutRevisao() {
         </div>
 
         <aside className="checkout-review-summary">
-          <div className="checkout-review-summary-kicker">Resumo da compra</div>
+          <div className="checkout-review-summary-kicker">{checkoutCopy.resumoKicker}</div>
           <div className="checkout-review-summary-title">{local.nome}</div>
-          <div className="checkout-review-summary-copy">
-            Material do local de prova com acesso por {formatPlanoDuracao(plano.duracaoDias)}.
-          </div>
+          <div className="checkout-review-summary-copy">{checkoutCopy.resumoTexto}</div>
 
           <div className="checkout-review-summary-grid">
             {resumoItens.map(item => (
@@ -208,9 +251,9 @@ export default function CheckoutRevisao() {
           </div>
 
           <div className="checkout-review-price-card">
-            <div className="checkout-review-price-label">Total</div>
+            <div className="checkout-review-price-label">{checkoutCopy.precoLabel}</div>
             <div className="checkout-review-price-value">{fmtMoeda(plano.precoCentavos)}</div>
-            <div className="checkout-review-price-copy">Pagamento unico pelo periodo escolhido</div>
+            <div className="checkout-review-price-copy">{checkoutCopy.precoTexto}</div>
           </div>
 
           <div className="checkout-review-actions">
@@ -229,7 +272,7 @@ export default function CheckoutRevisao() {
             </Link>
           </div>
 
-          <div className="checkout-review-secure">Pagamento seguro com Mercado Pago</div>
+          <div className="checkout-review-secure">{checkoutCopy.seguroTexto}</div>
         </aside>
       </section>
     </div>

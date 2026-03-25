@@ -51,6 +51,9 @@ public class PercursoDTO {
         private String videoUrl;
         @NotNull
         private PontoAtencaoPercurso.ModoExibicao modoExibicao = PontoAtencaoPercurso.ModoExibicao.CLIQUE;
+        private Boolean pausarAoExibir = true;
+        private Boolean ocultarAutomaticamente = true;
+        private Integer segundosParaOcultar = 10;
         private Integer ordemExibicao = 0;
         private boolean ativo = true;
     }
@@ -67,6 +70,9 @@ public class PercursoDTO {
         private String audioUrl;
         private String videoUrl;
         private String modoExibicao;
+        private boolean pausarAoExibir;
+        private boolean ocultarAutomaticamente;
+        private Integer segundosParaOcultar;
         private Integer ordemExibicao;
         private boolean ativo;
 
@@ -82,6 +88,9 @@ public class PercursoDTO {
             response.audioUrl = ponto.getAudioUrl();
             response.videoUrl = ponto.getVideoUrl();
             response.modoExibicao = ponto.getModoExibicao().name();
+            response.pausarAoExibir = ponto.isPausarAoExibir();
+            response.ocultarAutomaticamente = ponto.isOcultarAutomaticamente();
+            response.segundosParaOcultar = ponto.getSegundosParaOcultar();
             response.ordemExibicao = ponto.getOrdemExibicao();
             response.ativo = ponto.isAtivo();
             return response;

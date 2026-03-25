@@ -67,6 +67,18 @@ public class PontoAtencaoPercurso {
     @Builder.Default
     private ModoExibicao modoExibicao = ModoExibicao.CLIQUE;
 
+    @Builder.Default
+    @Column(name = "pausar_ao_exibir", nullable = false)
+    private boolean pausarAoExibir = true;
+
+    @Builder.Default
+    @Column(name = "ocultar_automaticamente", nullable = false)
+    private boolean ocultarAutomaticamente = true;
+
+    @Builder.Default
+    @Column(name = "segundos_para_ocultar", nullable = false)
+    private Integer segundosParaOcultar = 10;
+
     @Column(name = "ordem_exibicao", nullable = false)
     @Builder.Default
     private Integer ordemExibicao = 0;

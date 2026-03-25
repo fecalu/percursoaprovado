@@ -17,6 +17,40 @@ public class PlanoService {
     private final PlanoRepository planoRepository;
     private final LocalProvaService localProvaService;
 
+    private String normalizarTextoLivre(String valor) {
+        if (valor == null) {
+            return null;
+        }
+
+        String texto = valor.trim();
+        return texto.isBlank() ? null : texto;
+    }
+
+    private void aplicarCheckoutPersonalizado(Plano plano, PlanoDTO.Request request) {
+        plano.setUsarCheckoutPersonalizado(request.isUsarCheckoutPersonalizado());
+        plano.setCheckoutKicker(normalizarTextoLivre(request.getCheckoutKicker()));
+        plano.setCheckoutTitulo(normalizarTextoLivre(request.getCheckoutTitulo()));
+        plano.setCheckoutSubtitulo(normalizarTextoLivre(request.getCheckoutSubtitulo()));
+        plano.setCheckoutBeneficiosTitulo(normalizarTextoLivre(request.getCheckoutBeneficiosTitulo()));
+        plano.setCheckoutBeneficiosTexto(normalizarTextoLivre(request.getCheckoutBeneficiosTexto()));
+        plano.setCheckoutAjudaTitulo(normalizarTextoLivre(request.getCheckoutAjudaTitulo()));
+        plano.setCheckoutAjudaTexto(normalizarTextoLivre(request.getCheckoutAjudaTexto()));
+        plano.setCheckoutConfiancaTexto(normalizarTextoLivre(request.getCheckoutConfiancaTexto()));
+        plano.setCheckoutResumoKicker(normalizarTextoLivre(request.getCheckoutResumoKicker()));
+        plano.setCheckoutResumoTexto(normalizarTextoLivre(request.getCheckoutResumoTexto()));
+        plano.setCheckoutPrecoLabel(normalizarTextoLivre(request.getCheckoutPrecoLabel()));
+        plano.setCheckoutPrecoTexto(normalizarTextoLivre(request.getCheckoutPrecoTexto()));
+        plano.setCheckoutSeguroTexto(normalizarTextoLivre(request.getCheckoutSeguroTexto()));
+    }
+
+    private void aplicarVitrinePersonalizada(Plano plano, PlanoDTO.Request request) {
+        plano.setVitrineSelo(normalizarTextoLivre(request.getVitrineSelo()));
+        plano.setVitrineResumo(normalizarTextoLivre(request.getVitrineResumo()));
+        plano.setVitrineTexto(normalizarTextoLivre(request.getVitrineTexto()));
+        plano.setVitrineMeta(normalizarTextoLivre(request.getVitrineMeta()));
+        plano.setVitrineRecomendada(request.getVitrineRecomendada());
+    }
+
     public List<PlanoDTO.Response> listar(String localSlug, boolean todos) {
         List<Plano> planos;
         if (localSlug != null && !localSlug.isBlank()) {
@@ -54,6 +88,9 @@ public class PlanoService {
                 .ativo(request.isAtivo())
                 .build();
 
+        aplicarCheckoutPersonalizado(plano, request);
+        aplicarVitrinePersonalizada(plano, request);
+
         return PlanoDTO.Response.from(planoRepository.save(plano));
     }
 
@@ -65,6 +102,8 @@ public class PlanoService {
         plano.setDuracaoDias(request.getDuracaoDias());
         plano.setPrecoCentavos(request.getPrecoCentavos());
         plano.setAtivo(request.isAtivo());
+        aplicarCheckoutPersonalizado(plano, request);
+        aplicarVitrinePersonalizada(plano, request);
 
         return PlanoDTO.Response.from(planoRepository.save(plano));
     }

@@ -171,6 +171,7 @@ export default function Player() {
   const buscaManualEmAndamentoRef = useRef(false)
   const autoConclusaoEmAndamentoRef = useRef(false)
   const promptAutoCloseInicioTempoRef = useRef(null)
+  const promptAutoCloseTempoAssistidoRef = useRef(0)
   const interrupcoesAtivasRef = useRef(true)
   const reativacaoInterrupcoesTempoRef = useRef(null)
   const currentTimeRef = useRef(0)
@@ -211,6 +212,7 @@ export default function Player() {
   useEffect(() => {
     return () => {
       promptAutoCloseInicioTempoRef.current = null
+      promptAutoCloseTempoAssistidoRef.current = 0
       liberarOrientationLock()
       sairDoFullscreenAtual()
     }
@@ -394,6 +396,7 @@ export default function Player() {
 
     if (!promptPontoId) {
       promptAutoCloseInicioTempoRef.current = null
+      promptAutoCloseTempoAssistidoRef.current = 0
     }
   }, [pontoEmPrompt, promptPontoId])
 
@@ -452,9 +455,10 @@ export default function Player() {
 
   function definirPromptPonto(id) {
     promptPontoIdRef.current = id
+    promptAutoCloseInicioTempoRef.current = null
+    promptAutoCloseTempoAssistidoRef.current = 0
     if (!id) {
       pontoEmPromptRef.current = null
-      promptAutoCloseInicioTempoRef.current = null
     }
     setPromptPontoId(id)
   }
@@ -781,9 +785,11 @@ export default function Player() {
     })
     setPontoAtencaoAtivoId(ponto.id)
 
-    pausarVideo()
+    if (ponto.pausarAoExibir ?? true) {
+      pausarVideo()
+    }
 
-    if (ponto.modoExibicao === 'AUTOMATICO') {
+    if (ponto.modoExibicao === 'AUTOMATICO' && (ponto.pausarAoExibir ?? true)) {
       requestAnimationFrame(() => {
         attentionDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       })
@@ -800,16 +806,28 @@ export default function Player() {
     currentTimeRef.current = tempoArredondado
     secondsRef.current = Math.max(secondsRef.current, Math.floor(tempoArredondado))
 
-    if (promptPontoIdRef.current) {
-      if (promptAutoCloseInicioTempoRef.current == null) {
-        promptAutoCloseInicioTempoRef.current = tempoArredondado
-      } else if (tempoArredondado - promptAutoCloseInicioTempoRef.current >= 10) {
-        definirPromptPonto(null)
-      }
-    }
-
     const tempoAnterior = previousTimeRef.current
     previousTimeRef.current = tempoArredondado
+
+    if (promptPontoIdRef.current) {
+      const pontoPromptAtual = pontoEmPromptRef.current
+      const deveAutoOcultar =
+        pontoPromptAtual?.modoExibicao === 'AUTOMATICO' &&
+        Boolean(pontoPromptAtual?.ocultarAutomaticamente ?? true)
+
+      if (deveAutoOcultar) {
+        const deltaTempo = tempoArredondado - tempoAnterior
+        if (deltaTempo > 0 && deltaTempo <= 2.5) {
+          promptAutoCloseTempoAssistidoRef.current += deltaTempo
+          const limite = Math.max(3, Math.min(20, Number(pontoPromptAtual?.segundosParaOcultar) || 10))
+          if (promptAutoCloseTempoAssistidoRef.current >= limite) {
+            definirPromptPonto(null)
+          }
+        }
+      } else {
+        promptAutoCloseTempoAssistidoRef.current = 0
+      }
+    }
 
     if (!reproducaoIniciadaRef.current) {
       return
@@ -820,6 +838,7 @@ export default function Player() {
     }
 
     if (tempoArredondado + 0.75 < tempoAnterior) {
+      promptAutoCloseTempoAssistidoRef.current = 0
       const rearmados = pontosAtencaoAtivos
         .filter(item => item.timestampSegundos <= tempoArredondado)
         .map(item => item.id)
@@ -835,6 +854,7 @@ export default function Player() {
     }
 
     if (tempoArredondado < 2 && tempoAnterior > 10) {
+      promptAutoCloseTempoAssistidoRef.current = 0
       setDisparadosIds([])
       disparadosIdsRef.current = new Set()
       definirPromptPonto(null)
@@ -1725,7 +1745,7 @@ export default function Player() {
                             checked={interrupcoesAtivas}
                             onChange={event => setInterrupcoesAtivas(event.target.checked)}
                           />
-                          <span>Pausar nos pontos de atencao</span>
+                          <span>Exibir pontos automaticamente</span>
                         </label>
                       )}
                       <div className="mini-copy">{formatarTimestamp(duracaoBase)}</div>

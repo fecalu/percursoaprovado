@@ -21,6 +21,25 @@ public class PlanoDTO {
         @NotNull
         private Integer precoCentavos;
         private boolean ativo = true;
+        private boolean usarCheckoutPersonalizado = false;
+        private String checkoutKicker;
+        private String checkoutTitulo;
+        private String checkoutSubtitulo;
+        private String checkoutBeneficiosTitulo;
+        private String checkoutBeneficiosTexto;
+        private String checkoutAjudaTitulo;
+        private String checkoutAjudaTexto;
+        private String checkoutConfiancaTexto;
+        private String checkoutResumoKicker;
+        private String checkoutResumoTexto;
+        private String checkoutPrecoLabel;
+        private String checkoutPrecoTexto;
+        private String checkoutSeguroTexto;
+        private String vitrineSelo;
+        private String vitrineResumo;
+        private String vitrineTexto;
+        private String vitrineMeta;
+        private Boolean vitrineRecomendada;
     }
 
     @Data
@@ -33,6 +52,25 @@ public class PlanoDTO {
         private Integer duracaoDias;
         private Integer precoCentavos;
         private boolean ativo;
+        private boolean usarCheckoutPersonalizado;
+        private String checkoutKicker;
+        private String checkoutTitulo;
+        private String checkoutSubtitulo;
+        private String checkoutBeneficiosTitulo;
+        private String checkoutBeneficiosTexto;
+        private String checkoutAjudaTitulo;
+        private String checkoutAjudaTexto;
+        private String checkoutConfiancaTexto;
+        private String checkoutResumoKicker;
+        private String checkoutResumoTexto;
+        private String checkoutPrecoLabel;
+        private String checkoutPrecoTexto;
+        private String checkoutSeguroTexto;
+        private String vitrineSelo;
+        private String vitrineResumo;
+        private String vitrineTexto;
+        private String vitrineMeta;
+        private Boolean vitrineRecomendada;
         private LocalDateTime criadoEm;
 
         public static Response from(Plano plano) {
@@ -45,6 +83,25 @@ public class PlanoDTO {
             response.duracaoDias = plano.getDuracaoDias();
             response.precoCentavos = plano.getPrecoCentavos();
             response.ativo = plano.isAtivo();
+            response.usarCheckoutPersonalizado = plano.isUsarCheckoutPersonalizado();
+            response.checkoutKicker = plano.getCheckoutKicker();
+            response.checkoutTitulo = plano.getCheckoutTitulo();
+            response.checkoutSubtitulo = plano.getCheckoutSubtitulo();
+            response.checkoutBeneficiosTitulo = plano.getCheckoutBeneficiosTitulo();
+            response.checkoutBeneficiosTexto = plano.getCheckoutBeneficiosTexto();
+            response.checkoutAjudaTitulo = plano.getCheckoutAjudaTitulo();
+            response.checkoutAjudaTexto = plano.getCheckoutAjudaTexto();
+            response.checkoutConfiancaTexto = plano.getCheckoutConfiancaTexto();
+            response.checkoutResumoKicker = plano.getCheckoutResumoKicker();
+            response.checkoutResumoTexto = plano.getCheckoutResumoTexto();
+            response.checkoutPrecoLabel = plano.getCheckoutPrecoLabel();
+            response.checkoutPrecoTexto = plano.getCheckoutPrecoTexto();
+            response.checkoutSeguroTexto = plano.getCheckoutSeguroTexto();
+            response.vitrineSelo = plano.getVitrineSelo();
+            response.vitrineResumo = plano.getVitrineResumo();
+            response.vitrineTexto = plano.getVitrineTexto();
+            response.vitrineMeta = plano.getVitrineMeta();
+            response.vitrineRecomendada = plano.getVitrineRecomendada();
             response.criadoEm = plano.getCriadoEm();
             return response;
         }

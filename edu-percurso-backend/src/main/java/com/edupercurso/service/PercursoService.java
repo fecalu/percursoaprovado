@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -177,21 +178,34 @@ public class PercursoService {
 
         validarPontosAtencao(pontos);
 
-        return pontos.stream()
-                .map(item -> PontoAtencaoPercurso.builder()
-                        .timestampSegundos(item.getTimestampSegundos())
-                        .titulo(item.getTitulo().trim())
-                        .descricaoCurta(normalizarTexto(item.getDescricaoCurta()))
-                        .descricaoDetalhada(normalizarTexto(item.getDescricaoDetalhada()))
-                        .tipo(item.getTipo() == null ? PontoAtencaoPercurso.Tipo.DICA_IMPORTANTE : item.getTipo())
-                        .imagemUrl(normalizarTexto(item.getImagemUrl()))
-                        .audioUrl(normalizarTexto(item.getAudioUrl()))
-                        .videoUrl(normalizarTexto(item.getVideoUrl()))
-                        .modoExibicao(item.getModoExibicao() == null ? PontoAtencaoPercurso.ModoExibicao.CLIQUE : item.getModoExibicao())
-                        .ordemExibicao(item.getOrdemExibicao() == null ? 0 : item.getOrdemExibicao())
-                        .ativo(item.isAtivo())
-                        .build())
+        List<PercursoDTO.PontoAtencaoRequest> pontosOrdenados = pontos.stream()
+                .sorted(Comparator
+                        .comparing(PercursoDTO.PontoAtencaoRequest::getTimestampSegundos, Comparator.nullsLast(Integer::compareTo))
+                        .thenComparing(PercursoDTO.PontoAtencaoRequest::getOrdemExibicao, Comparator.nullsLast(Integer::compareTo)))
                 .toList();
+
+        List<PontoAtencaoPercurso> pontosEntidade = new ArrayList<>(pontosOrdenados.size());
+        for (int index = 0; index < pontosOrdenados.size(); index++) {
+            PercursoDTO.PontoAtencaoRequest item = pontosOrdenados.get(index);
+            pontosEntidade.add(PontoAtencaoPercurso.builder()
+                    .timestampSegundos(item.getTimestampSegundos())
+                    .titulo(item.getTitulo().trim())
+                    .descricaoCurta(normalizarTexto(item.getDescricaoCurta()))
+                    .descricaoDetalhada(normalizarTexto(item.getDescricaoDetalhada()))
+                    .tipo(item.getTipo() == null ? PontoAtencaoPercurso.Tipo.DICA_IMPORTANTE : item.getTipo())
+                    .imagemUrl(normalizarTexto(item.getImagemUrl()))
+                    .audioUrl(normalizarTexto(item.getAudioUrl()))
+                    .videoUrl(normalizarTexto(item.getVideoUrl()))
+                    .modoExibicao(item.getModoExibicao() == null ? PontoAtencaoPercurso.ModoExibicao.CLIQUE : item.getModoExibicao())
+                    .pausarAoExibir(item.getPausarAoExibir() == null || item.getPausarAoExibir())
+                    .ocultarAutomaticamente(item.getOcultarAutomaticamente() == null || item.getOcultarAutomaticamente())
+                    .segundosParaOcultar(normalizarSegundosParaOcultar(item.getSegundosParaOcultar()))
+                    .ordemExibicao(index)
+                    .ativo(item.isAtivo())
+                    .build());
+        }
+
+        return pontosEntidade;
     }
 
     private void validarPontosAtencao(List<PercursoDTO.PontoAtencaoRequest> pontos) {
@@ -213,6 +227,17 @@ public class PercursoService {
 
         String texto = valor.trim();
         return texto.isBlank() ? null : texto;
+    }
+
+    private Integer normalizarSegundosParaOcultar(Integer valor) {
+        int segundos = valor == null ? 10 : valor;
+        if (segundos < 3) {
+            return 3;
+        }
+        if (segundos > 20) {
+            return 20;
+        }
+        return segundos;
     }
 
     private Percurso.VideoProvider resolverVideoProvider(PercursoDTO.Request request) {
