@@ -173,7 +173,7 @@ function getPlanoDestaque(duracaoDias) {
     return {
       selo: 'Melhor equilibrio',
       resumo: 'Tempo bom para revisar com calma e voltar quando precisar.',
-      recomendado: true,
+      recomendado: false,
     }
   }
 
@@ -282,7 +282,7 @@ export default function LocalDetalhe() {
       return
     }
 
-    const recomendadoIndex = planosOrdenados.findIndex(plano => getPlanoApresentacao(plano).recomendado)
+    const recomendadoIndex = planosOrdenados.findIndex(plano => plano?.vitrineRecomendada === true)
     setPlanoAtivoIndex(recomendadoIndex >= 0 ? recomendadoIndex : 0)
   }, [planosOrdenados])
 

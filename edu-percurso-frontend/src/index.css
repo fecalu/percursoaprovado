@@ -4392,7 +4392,7 @@ html[data-theme='light'] .landing-page--home .landing-cta {
 .plan-showcase-card {
   position: relative;
   width: min(420px, 36vw);
-  min-height: 500px;
+  height: 500px;
   padding: 1px;
   margin: 0 -1rem;
   border-radius: 30px;
@@ -4413,7 +4413,7 @@ html[data-theme='light'] .landing-page--home .landing-cta {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 498px;
+  height: 100%;
   padding: 1.35rem;
   border-radius: 29px;
   background:
@@ -4429,25 +4429,25 @@ html[data-theme='light'] .landing-page--home .landing-cta {
 
 .plan-showcase-card--left {
   z-index: 1;
-  width: min(300px, 26vw);
-  min-height: 420px;
+  width: min(420px, 36vw);
+  height: 500px;
   opacity: 0.78;
-  transform: translateX(36px) scale(0.9);
+  transform: translateX(44px) scale(0.84);
   filter: saturate(0.82);
 }
 
 .plan-showcase-card--right {
   z-index: 1;
-  width: min(300px, 26vw);
-  min-height: 420px;
+  width: min(420px, 36vw);
+  height: 500px;
   opacity: 0.78;
-  transform: translateX(-36px) scale(0.9);
+  transform: translateX(-44px) scale(0.84);
   filter: saturate(0.82);
 }
 
 .plan-showcase-card--left .plan-showcase-card-inner,
 .plan-showcase-card--right .plan-showcase-card-inner {
-  min-height: 418px;
+  height: 100%;
 }
 
 .plan-showcase-card-top {
@@ -4548,6 +4548,10 @@ html[data-theme='light'] .landing-page--home .landing-cta {
   color: rgba(255,255,255,0.82);
   font-size: 14px;
   line-height: 1.65;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .plan-showcase-meta {
@@ -4555,6 +4559,10 @@ html[data-theme='light'] .landing-page--home .landing-cta {
   color: rgba(255,255,255,0.68);
   font-size: 12px;
   line-height: 1.55;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .plan-showcase-action {
@@ -7492,16 +7500,19 @@ html[data-theme='light'] .landing-page--home .landing-cta {
 
   .plan-showcase-card {
     width: min(390px, 70vw);
+    height: 470px;
   }
 
   .plan-showcase-card--left {
-    width: min(260px, 24vw);
-    transform: translateX(28px) scale(0.88);
+    width: min(390px, 70vw);
+    height: 470px;
+    transform: translateX(34px) scale(0.8);
   }
 
   .plan-showcase-card--right {
-    width: min(260px, 24vw);
-    transform: translateX(-28px) scale(0.88);
+    width: min(390px, 70vw);
+    height: 470px;
+    transform: translateX(-34px) scale(0.8);
   }
 
   .landing-cta-actions {
@@ -7550,12 +7561,12 @@ html[data-theme='light'] .landing-page--home .landing-cta {
 
   .plan-showcase-card {
     width: min(420px, 100%);
-    min-height: 450px;
+    height: 450px;
     margin: 0;
   }
 
   .plan-showcase-card-inner {
-    min-height: 448px;
+    height: 100%;
   }
 
   .plan-showcase-card--left,
