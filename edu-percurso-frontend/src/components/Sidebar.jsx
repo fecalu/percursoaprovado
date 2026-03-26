@@ -14,6 +14,7 @@ const IconPrice = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColo
 const IconList = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 6h12M4 10h12M4 14h8" /></svg>
 const IconPlus = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="10" r="7" /><path d="M10 7v6M7 10h6" /></svg>
 const IconQuiz = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 4h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2z" /><path d="M8 8a2 2 0 1 1 3.2 1.6c-.7.5-1.2.9-1.2 1.9" /><circle cx="10" cy="13.8" r=".8" fill="currentColor" stroke="none" /></svg>
+const IconUser = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="6.5" r="3" /><path d="M4 16c1.5-2.6 3.6-4 6-4s4.5 1.4 6 4" /></svg>
 const IconMenu = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 6h12M4 10h12M4 14h12" /></svg>
 const IconClose = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M5 5l10 10M15 5L5 15" /></svg>
 
@@ -40,11 +41,13 @@ export default function Sidebar() {
       return 'Administracao'
     }
 
+    if (location.pathname.startsWith('/painel')) return 'Painel'
     if (location.pathname.startsWith('/biblioteca')) return 'Biblioteca'
     if (location.pathname.startsWith('/simulado')) return 'Simulado teorico'
     if (location.pathname.startsWith('/meus-acessos')) return 'Meus acessos'
     if (location.pathname.startsWith('/meus-pedidos')) return 'Pagamentos'
     if (location.pathname.startsWith('/meu-progresso')) return 'Meu progresso'
+    if (location.pathname.startsWith('/perfil')) return 'Perfil'
     return 'Aluno'
   }, [isAdmin, location.pathname])
 
@@ -67,6 +70,9 @@ export default function Sidebar() {
     return (
       <nav className="nav-group">
         <div className="nav-label">Aluno</div>
+        <NavLink to="/painel" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconHome /> Painel
+        </NavLink>
         <NavLink to="/biblioteca" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconLibrary /> Biblioteca
         </NavLink>
@@ -81,6 +87,9 @@ export default function Sidebar() {
         </NavLink>
         <NavLink to="/meu-progresso" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconChart /> Meu progresso
+        </NavLink>
+        <NavLink to="/perfil" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconUser /> Perfil
         </NavLink>
       </nav>
     )

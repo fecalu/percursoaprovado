@@ -11,6 +11,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import PainelAluno from './pages/PainelAluno'
+import PerfilAluno from './pages/PerfilAluno'
 import Biblioteca from './pages/Biblioteca'
 import SimuladoTeorico from './pages/SimuladoTeorico'
 import Player from './pages/Player'
@@ -42,6 +44,7 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
 
+            <Route path="/painel" element={<PrivateRoute><PainelAluno /></PrivateRoute>} />
             <Route path="/biblioteca" element={<PrivateRoute><Biblioteca /></PrivateRoute>} />
             <Route path="/simulado" element={<PrivateRoute><SimuladoTeorico /></PrivateRoute>} />
             <Route path="/percursos" element={<Navigate to="/biblioteca" replace />} />
@@ -50,6 +53,7 @@ export default function App() {
             <Route path="/meus-acessos" element={<PrivateRoute><MeusAcessos /></PrivateRoute>} />
             <Route path="/meus-pedidos" element={<PrivateRoute><MeusPedidos /></PrivateRoute>} />
             <Route path="/meu-progresso" element={<PrivateRoute><MeuProgresso /></PrivateRoute>} />
+            <Route path="/perfil" element={<PrivateRoute><PerfilAluno /></PrivateRoute>} />
 
             <Route path="/admin" element={<PrivateRoute adminOnly><AdminDashboard /></PrivateRoute>} />
             <Route path="/admin/pedidos" element={<PrivateRoute adminOnly><AdminPedidos /></PrivateRoute>} />

@@ -45,7 +45,7 @@ export default function Register() {
     setLoading(true)
     try {
       await register(form.nome, form.email, form.senha)
-      navigate('/biblioteca', { replace: true })
+      navigate('/painel', { replace: true })
     } catch (error) {
       console.error('Falha ao criar conta', error)
       setErro(extractRegisterError(error))

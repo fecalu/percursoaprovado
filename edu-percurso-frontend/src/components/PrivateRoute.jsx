@@ -6,7 +6,7 @@ export default function PrivateRoute({ children, adminOnly = false }) {
   const { user, isAdmin } = useAuth()
 
   if (!user) return <Navigate to="/login" replace />
-  if (adminOnly && !isAdmin) return <Navigate to="/biblioteca" replace />
+  if (adminOnly && !isAdmin) return <Navigate to="/painel" replace />
 
   return (
     <div className="app-shell">

@@ -16,7 +16,7 @@ export default function Login() {
     setLoading(true)
     try {
       const role = await login(form.email, form.senha)
-      navigate(role === 'ADMIN' ? '/admin' : '/biblioteca', { replace: true })
+      navigate(role === 'ADMIN' ? '/admin' : '/painel', { replace: true })
     } catch (error) {
       setErro(error.response?.data?.erro || 'Erro ao entrar. Verifique suas credenciais.')
     } finally {
