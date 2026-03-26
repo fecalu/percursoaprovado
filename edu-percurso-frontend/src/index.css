@@ -651,6 +651,12 @@ body.player-page-wide .main-content {
 .table-actions { display: flex; gap: 6px; }
 .question-row-title {
   line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .question-inline-meta {
   display: flex;
@@ -2804,7 +2810,8 @@ html[data-theme='light'] .student-library-page .library-module-progress .student
   border: 1px solid var(--border);
   border-radius: 28px;
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .checkout-admin-preview-frame.is-light-theme {
@@ -2824,8 +2831,8 @@ html[data-theme='light'] .student-library-page .library-module-progress .student
 }
 
 .checkout-admin-preview-frame.is-desktop .checkout-review-layout--admin-preview {
-  min-width: 900px;
-  grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.78fr);
+  min-width: 760px;
+  grid-template-columns: minmax(0, 1.02fr) minmax(250px, 0.82fr);
 }
 
 .checkout-admin-preview-frame.is-mobile .checkout-review-layout--admin-preview {
@@ -2903,14 +2910,44 @@ html[data-theme='light'] .checkout-admin-block {
 }
 
 @media (max-width: 1320px) {
+  .admin-grid {
+    grid-template-columns: minmax(330px, 390px) minmax(0, 1fr);
+    gap: 1.15rem;
+  }
+
+  .admin-grid--planos {
+    grid-template-columns: minmax(480px, 1.2fr) minmax(300px, 0.8fr);
+  }
+
+  .checkout-admin-preview-frame.is-desktop .checkout-review-layout--admin-preview {
+    min-width: 700px;
+    grid-template-columns: minmax(0, 1fr) minmax(235px, 0.78fr);
+  }
+}
+
+@media (max-width: 1180px) {
   .checkout-admin-blocks {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-grid--planos {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-admin-preview-frame.is-desktop .checkout-review-layout--admin-preview {
+    min-width: 0;
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 920px) {
+@media (max-width: 980px) {
+  .checkout-admin-block-head,
   .checkout-admin-preview-head {
     align-items: stretch;
+  }
+
+  .checkout-admin-block-head {
+    flex-direction: column;
   }
 
   .checkout-admin-preview-controls {
@@ -2920,11 +2957,6 @@ html[data-theme='light'] .checkout-admin-block {
 
   .checkout-admin-preview-control-label {
     text-align: left;
-  }
-
-  .checkout-admin-preview-frame.is-desktop .checkout-review-layout--admin-preview {
-    min-width: 0;
-    grid-template-columns: 1fr;
   }
 }
 
@@ -4884,9 +4916,13 @@ html[data-theme='light'] .landing-page--home .landing-cta {
 
 .admin-grid {
   display: grid;
-  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: minmax(360px, 430px) minmax(0, 1fr);
+  gap: 1.5rem;
   align-items: start;
+}
+
+.admin-grid--planos {
+  grid-template-columns: minmax(540px, 1.35fr) minmax(320px, 0.85fr);
 }
 
 .stack-list {
@@ -7487,7 +7523,7 @@ html[data-theme='light'] .landing-page--home .landing-cta {
   }
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1180px) {
   .main-content-admin {
     max-width: none;
     margin: 0;

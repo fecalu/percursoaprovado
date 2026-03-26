@@ -403,7 +403,7 @@ export default function AdminPlanos() {
       <div className="page-title">Planos</div>
       <p className="page-sub">Gerencie duracao, preco, copy de checkout e vitrine comercial de cada plano.</p>
 
-      <div className="admin-grid">
+      <div className="admin-grid admin-grid--planos">
         <div className="card">
           <div className="section-heading">{edicaoId ? 'Editar plano' : 'Novo plano'}</div>
           <form onSubmit={salvar} style={{ marginTop: '1rem' }}>

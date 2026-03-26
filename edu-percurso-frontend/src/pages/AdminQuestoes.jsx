@@ -194,7 +194,9 @@ export default function AdminQuestoes() {
           {questoesPaginadas.map(item => (
             <div key={item.id} className="table-row questoes-admin-row">
               <div className="questoes-admin-cell questoes-admin-cell--questao">
-                <div className="table-name question-row-title">{resumirEnunciado(item.enunciado)}</div>
+                <div className="table-name question-row-title" title={item.enunciado}>
+                  {resumirEnunciado(item.enunciado)}
+                </div>
                 <div className="mini-copy">{item.alternativas.length} alternativas cadastradas</div>
                 <div className="question-inline-meta">
                   {item.videoUrl && <span className="badge badge-blue">Com video</span>}
