@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { interpolateSiteText, resolveCheckoutPageConfig } from '../data/sitePageDefaults'
 import { useToast } from '../hooks/useToast'
-import { localProvaService, pedidoService, planoService } from '../services/api'
+import { configuracaoSiteService, localProvaService, pedidoService, planoService } from '../services/api'
 import { createCheckoutMonitor, notifyCheckoutMonitor, saveCheckoutMonitor } from '../utils/checkoutMonitor'
 
 function fmtMoeda(centavos) {
@@ -21,34 +22,13 @@ function formatPlanoDuracao(duracaoDias) {
   return `${duracaoDias} dias`
 }
 
-const BENEFICIOS = [
-  'Percursos mais frequentes do local',
-  'Pontos de atencao nos trechos mais importantes',
-  'Videos e apoios explicativos',
-  'Baliza, embreagem e revisao pratica',
-]
-
-const CONFIANCA = [
-  'Liberacao automatica apos a confirmacao',
-  'Pagamento processado com seguranca pelo Mercado Pago',
-  'O acesso aparece na sua biblioteca assim que o pagamento for aprovado',
-]
-
-function interpolarCheckoutTexto(texto, contexto) {
-  return String(texto || '')
-    .replaceAll('{local}', contexto.local || '')
-    .replaceAll('{plano}', contexto.plano || '')
-    .replaceAll('{duracao}', contexto.duracao || '')
-    .replaceAll('{preco}', contexto.preco || '')
-}
-
 function parseLinhasCheckout(texto, fallback, contexto) {
   const valor = String(texto || '').trim()
   if (!valor) return fallback
 
   const linhas = valor
     .split('\n')
-    .map(item => interpolarCheckoutTexto(item.trim(), contexto))
+    .map(item => interpolateSiteText(item.trim(), contexto))
     .filter(Boolean)
 
   return linhas.length ? linhas : fallback
@@ -62,17 +42,24 @@ export default function CheckoutRevisao() {
   const [loading, setLoading] = useState(true)
   const [local, setLocal] = useState(null)
   const [plano, setPlano] = useState(null)
+  const [configCheckout, setConfigCheckout] = useState(null)
   const [enviando, setEnviando] = useState(false)
 
   useEffect(() => {
     let ativo = true
 
-    Promise.all([localProvaService.buscar(localSlug), planoService.listar({ localSlug })])
-      .then(([localResp, planosResp]) => {
+    Promise.allSettled([
+      localProvaService.buscar(localSlug),
+      planoService.listar({ localSlug }),
+      configuracaoSiteService.buscarPublica(),
+    ])
+      .then(([localResp, planosResp, configResp]) => {
         if (!ativo) return
-        setLocal(localResp)
-        const planoEncontrado = planosResp.find(item => String(item.id) === String(planoId)) || null
+        setLocal(localResp.status === 'fulfilled' ? localResp.value : null)
+        const planosLista = planosResp.status === 'fulfilled' ? planosResp.value : []
+        const planoEncontrado = planosLista.find(item => String(item.id) === String(planoId)) || null
         setPlano(planoEncontrado)
+        setConfigCheckout(configResp.status === 'fulfilled' ? configResp.value?.checkout || null : null)
       })
       .finally(() => {
         if (ativo) setLoading(false)
@@ -104,29 +91,30 @@ export default function CheckoutRevisao() {
       duracao: duracaoFormatada,
       preco: fmtMoeda(plano.precoCentavos),
     }
+    const checkoutPageContent = resolveCheckoutPageConfig(configCheckout || {})
 
     const usarCustom = Boolean(plano.usarCheckoutPersonalizado)
     const obterTexto = (valor, fallback) => {
-      if (!usarCustom || !String(valor || '').trim()) return interpolarCheckoutTexto(fallback, contexto)
-      return interpolarCheckoutTexto(valor, contexto)
+      if (!usarCustom || !String(valor || '').trim()) return interpolateSiteText(fallback, contexto)
+      return interpolateSiteText(valor, contexto)
     }
 
     return {
-      kicker: obterTexto(plano.checkoutKicker, 'Revise seu acesso antes de pagar'),
-      titulo: obterTexto(plano.checkoutTitulo, 'Voce esta a um passo de liberar o material do seu local de prova.'),
-      subtitulo: obterTexto(plano.checkoutSubtitulo, 'Revise o que esta incluido, confirme o periodo escolhido e siga para o pagamento com mais clareza.'),
-      beneficiosTitulo: obterTexto(plano.checkoutBeneficiosTitulo, 'O que voce vai receber'),
-      beneficios: parseLinhasCheckout(plano.checkoutBeneficiosTexto, BENEFICIOS, contexto),
-      ajudaTitulo: obterTexto(plano.checkoutAjudaTitulo, 'Como isso ajuda antes da prova'),
-      ajudaTexto: obterTexto(plano.checkoutAjudaTexto, 'O objetivo nao e decorar rua. E chegar mais preparado para entender o padrao da avaliacao, reduzir surpresa e dirigir com mais criterio no dia da prova.'),
-      confianca: parseLinhasCheckout(plano.checkoutConfiancaTexto, CONFIANCA, contexto),
-      resumoKicker: obterTexto(plano.checkoutResumoKicker, 'Resumo da compra'),
-      resumoTexto: obterTexto(plano.checkoutResumoTexto, `Material do local de prova com acesso por ${duracaoFormatada}.`),
-      precoLabel: obterTexto(plano.checkoutPrecoLabel, 'Total'),
-      precoTexto: obterTexto(plano.checkoutPrecoTexto, 'Pagamento unico pelo periodo escolhido'),
-      seguroTexto: obterTexto(plano.checkoutSeguroTexto, 'Pagamento seguro com Mercado Pago'),
+      kicker: obterTexto(plano.checkoutKicker, checkoutPageContent.kickerPadrao),
+      titulo: obterTexto(plano.checkoutTitulo, checkoutPageContent.tituloPadrao),
+      subtitulo: obterTexto(plano.checkoutSubtitulo, checkoutPageContent.subtituloPadrao),
+      beneficiosTitulo: obterTexto(plano.checkoutBeneficiosTitulo, checkoutPageContent.beneficiosTituloPadrao),
+      beneficios: parseLinhasCheckout(plano.checkoutBeneficiosTexto, checkoutPageContent.beneficiosListaPadrao, contexto),
+      ajudaTitulo: obterTexto(plano.checkoutAjudaTitulo, checkoutPageContent.ajudaTituloPadrao),
+      ajudaTexto: obterTexto(plano.checkoutAjudaTexto, checkoutPageContent.ajudaTextoPadrao),
+      confianca: parseLinhasCheckout(plano.checkoutConfiancaTexto, checkoutPageContent.confiancaListaPadrao, contexto),
+      resumoKicker: obterTexto(plano.checkoutResumoKicker, checkoutPageContent.resumoKickerPadrao),
+      resumoTexto: obterTexto(plano.checkoutResumoTexto, checkoutPageContent.resumoTextoPadrao || `Material do local de prova com acesso por ${duracaoFormatada}.`),
+      precoLabel: obterTexto(plano.checkoutPrecoLabel, checkoutPageContent.precoLabelPadrao),
+      precoTexto: obterTexto(plano.checkoutPrecoTexto, checkoutPageContent.precoTextoPadrao),
+      seguroTexto: obterTexto(plano.checkoutSeguroTexto, checkoutPageContent.seguroTextoPadrao),
     }
-  }, [local, plano])
+  }, [configCheckout, local, plano])
 
   async function continuarParaPagamento() {
     if (!plano || !local) return

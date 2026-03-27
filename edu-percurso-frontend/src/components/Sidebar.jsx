@@ -17,6 +17,7 @@ const IconQuiz = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor
 const IconUser = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="6.5" r="3" /><path d="M4 16c1.5-2.6 3.6-4 6-4s4.5 1.4 6 4" /></svg>
 const IconMenu = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 6h12M4 10h12M4 14h12" /></svg>
 const IconClose = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M5 5l10 10M15 5L5 15" /></svg>
+const IconBrowser = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="14" height="12" rx="2" /><path d="M3 7.5h14" /><path d="M6 5.75h.01M8.75 5.75h.01M11.5 5.75h.01" /></svg>
 
 export default function Sidebar() {
   const { user, logout, isAdmin } = useAuth()
@@ -32,6 +33,7 @@ export default function Sidebar() {
 
   const mobileSectionTitle = useMemo(() => {
     if (isAdmin) {
+      if (location.pathname.startsWith('/admin/paginas/')) return 'Paginas do site'
       if (location.pathname.startsWith('/admin/percursos')) return 'Conteudos'
       if (location.pathname.startsWith('/admin/questoes')) return 'Banco de questoes'
       if (location.pathname.startsWith('/admin/locais')) return 'Locais'
@@ -101,6 +103,15 @@ export default function Sidebar() {
         <div className="nav-label">Administracao</div>
         <NavLink to="/admin" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconHome /> Dashboard
+        </NavLink>
+        <NavLink to="/admin/paginas/home" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconBrowser /> Home do site
+        </NavLink>
+        <NavLink to="/admin/paginas/local" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconBrowser /> Pagina do local
+        </NavLink>
+        <NavLink to="/admin/paginas/checkout" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconBrowser /> Checkout
         </NavLink>
         <NavLink to="/admin/percursos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconList /> Conteudos

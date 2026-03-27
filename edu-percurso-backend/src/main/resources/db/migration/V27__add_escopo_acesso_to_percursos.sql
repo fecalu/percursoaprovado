@@ -1,0 +1,2 @@
+ALTER TABLE percursos
+    ADD COLUMN escopo_acesso VARCHAR(30) NOT NULL DEFAULT 'DIRECAO';

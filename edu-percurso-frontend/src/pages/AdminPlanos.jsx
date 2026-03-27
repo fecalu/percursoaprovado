@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { localProvaService, planoService } from '../services/api'
+import { CHECKOUT_PAGE_DEFAULTS, interpolateSiteText, resolveCheckoutPageConfig } from '../data/sitePageDefaults'
+import { configuracaoSiteService, localProvaService, planoService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import { formatPlanoDuracao } from '../utils/formatters'
 
@@ -31,17 +32,6 @@ const VAZIO = {
 }
 
 const CHECKOUT_VARIAVEIS = '{local}, {plano}, {duracao}, {preco}'
-const CHECKOUT_BENEFICIOS_PADRAO = [
-  'Percursos mais frequentes do local',
-  'Pontos de atencao nos trechos mais importantes',
-  'Videos e apoios explicativos',
-  'Baliza, embreagem e revisao pratica',
-]
-const CHECKOUT_CONFIANCA_PADRAO = [
-  'Liberacao automatica apos a confirmacao',
-  'Pagamento processado com seguranca pelo Mercado Pago',
-  'O acesso aparece na sua biblioteca assim que o pagamento for aprovado',
-]
 
 function fmtMoeda(centavos) {
   return new Intl.NumberFormat('pt-BR', {
@@ -73,45 +63,37 @@ function reaisParaCentavos(valor) {
   return Math.round(numero * 100)
 }
 
-function interpolarCheckoutTexto(texto, contexto) {
-  return String(texto || '')
-    .replaceAll('{local}', contexto.local || '')
-    .replaceAll('{plano}', contexto.plano || '')
-    .replaceAll('{duracao}', contexto.duracao || '')
-    .replaceAll('{preco}', contexto.preco || '')
-}
-
 function parseLinhasCheckout(texto, fallback, contexto) {
   const valor = String(texto || '').trim()
   if (!valor) return fallback
 
   const linhas = valor
     .split('\n')
-    .map(item => interpolarCheckoutTexto(item.trim(), contexto))
+    .map(item => interpolateSiteText(item.trim(), contexto))
     .filter(Boolean)
 
   return linhas.length ? linhas : fallback
 }
 
-function getCheckoutPadrao() {
+function getCheckoutPadrao(checkoutPageDefaults) {
   return {
-    kicker: 'Revise seu acesso antes de pagar',
-    titulo: 'Voce esta a um passo de liberar o material do seu local de prova.',
-    subtitulo: 'Revise o que esta incluido, confirme o periodo escolhido e siga para o pagamento com mais clareza.',
-    beneficiosTitulo: 'O que voce vai receber',
-    beneficios: CHECKOUT_BENEFICIOS_PADRAO,
-    ajudaTitulo: 'Como isso ajuda antes da prova',
-    ajudaTexto: 'O objetivo nao e decorar rua. E chegar mais preparado para entender o padrao da avaliacao, reduzir surpresa e dirigir com mais criterio no dia da prova.',
-    resumoKicker: 'Resumo da compra',
-    resumoTexto: 'Material do local de prova com acesso por {duracao}.',
-    precoLabel: 'Total',
-    precoTexto: 'Pagamento unico pelo periodo escolhido',
-    seguroTexto: 'Pagamento seguro com Mercado Pago',
+    kicker: checkoutPageDefaults.kickerPadrao,
+    titulo: checkoutPageDefaults.tituloPadrao,
+    subtitulo: checkoutPageDefaults.subtituloPadrao,
+    beneficiosTitulo: checkoutPageDefaults.beneficiosTituloPadrao,
+    beneficios: checkoutPageDefaults.beneficiosListaPadrao,
+    ajudaTitulo: checkoutPageDefaults.ajudaTituloPadrao,
+    ajudaTexto: checkoutPageDefaults.ajudaTextoPadrao,
+    resumoKicker: checkoutPageDefaults.resumoKickerPadrao,
+    resumoTexto: checkoutPageDefaults.resumoTextoPadrao,
+    precoLabel: checkoutPageDefaults.precoLabelPadrao,
+    precoTexto: checkoutPageDefaults.precoTextoPadrao,
+    seguroTexto: checkoutPageDefaults.seguroTextoPadrao,
   }
 }
 
-function getCheckoutBlocosPadrao() {
-  const defaults = getCheckoutPadrao()
+function getCheckoutBlocosPadrao(checkoutPageDefaults) {
+  const defaults = getCheckoutPadrao(checkoutPageDefaults)
 
   return {
     hero: {
@@ -128,7 +110,7 @@ function getCheckoutBlocosPadrao() {
       checkoutAjudaTexto: defaults.ajudaTexto,
     },
     confianca: {
-      checkoutConfiancaTexto: CHECKOUT_CONFIANCA_PADRAO.join('\n'),
+      checkoutConfiancaTexto: checkoutPageDefaults.confiancaListaPadrao.join('\n'),
     },
     resumo: {
       checkoutResumoKicker: defaults.resumoKicker,
@@ -223,6 +205,7 @@ function temVitrinePersonalizada(plano) {
 export default function AdminPlanos() {
   const [locais, setLocais] = useState([])
   const [planos, setPlanos] = useState([])
+  const [configCheckout, setConfigCheckout] = useState(null)
   const [form, setForm] = useState(VAZIO)
   const [edicaoId, setEdicaoId] = useState(null)
   const [previewModo, setPreviewModo] = useState('desktop')
@@ -232,15 +215,21 @@ export default function AdminPlanos() {
   const { show, ToastEl } = useToast()
 
   useEffect(() => {
-    Promise.all([
+    Promise.allSettled([
       localProvaService.listar({ todos: true }),
       planoService.listar({ todos: true }),
+      configuracaoSiteService.buscarAdmin(),
     ])
-      .then(([locaisResp, planosResp]) => {
-        setLocais(locaisResp)
-        setPlanos(planosResp)
-        if (!form.localProvaId && locaisResp[0]) {
-          setForm(current => ({ ...current, localProvaId: locaisResp[0].id }))
+      .then(([locaisResp, planosResp, configResp]) => {
+        const locaisLista = locaisResp.status === 'fulfilled' ? locaisResp.value : []
+        const planosLista = planosResp.status === 'fulfilled' ? planosResp.value : []
+
+        setLocais(locaisLista)
+        setPlanos(planosLista)
+        setConfigCheckout(configResp.status === 'fulfilled' ? configResp.value?.checkout || null : null)
+
+        if (!form.localProvaId && locaisLista[0]) {
+          setForm(current => ({ ...current, localProvaId: locaisLista[0].id }))
         }
       })
       .finally(() => setLoading(false))
@@ -261,7 +250,14 @@ export default function AdminPlanos() {
     () => getVitrinePadrao(Number(form.duracaoDias) || 0),
     [form.duracaoDias]
   )
-  const checkoutDefaults = useMemo(() => getCheckoutPadrao(), [])
+  const checkoutPageDefaults = useMemo(
+    () => resolveCheckoutPageConfig(configCheckout || CHECKOUT_PAGE_DEFAULTS),
+    [configCheckout]
+  )
+  const checkoutDefaults = useMemo(
+    () => getCheckoutPadrao(checkoutPageDefaults),
+    [checkoutPageDefaults]
+  )
   const checkoutPreview = useMemo(() => {
     const precoCentavos = reaisParaCentavos(form.precoReais)
     const contexto = {
@@ -272,8 +268,8 @@ export default function AdminPlanos() {
     }
     const usarCustom = Boolean(form.usarCheckoutPersonalizado)
     const obterTexto = (valor, fallback) => {
-      if (!usarCustom || !String(valor || '').trim()) return interpolarCheckoutTexto(fallback, contexto)
-      return interpolarCheckoutTexto(valor, contexto)
+      if (!usarCustom || !String(valor || '').trim()) return interpolateSiteText(fallback, contexto)
+      return interpolateSiteText(valor, contexto)
     }
 
     return {
@@ -284,7 +280,7 @@ export default function AdminPlanos() {
       beneficios: parseLinhasCheckout(form.checkoutBeneficiosTexto, checkoutDefaults.beneficios, contexto),
       ajudaTitulo: obterTexto(form.checkoutAjudaTitulo, checkoutDefaults.ajudaTitulo),
       ajudaTexto: obterTexto(form.checkoutAjudaTexto, checkoutDefaults.ajudaTexto),
-      confianca: parseLinhasCheckout(form.checkoutConfiancaTexto, CHECKOUT_CONFIANCA_PADRAO, contexto),
+      confianca: parseLinhasCheckout(form.checkoutConfiancaTexto, checkoutPageDefaults.confiancaListaPadrao, contexto),
       resumoKicker: obterTexto(form.checkoutResumoKicker, checkoutDefaults.resumoKicker),
       resumoTexto: obterTexto(form.checkoutResumoTexto, checkoutDefaults.resumoTexto),
       precoLabel: obterTexto(form.checkoutPrecoLabel, checkoutDefaults.precoLabel),
@@ -293,7 +289,7 @@ export default function AdminPlanos() {
       precoCentavos: Number.isFinite(precoCentavos) ? precoCentavos : 0,
       contexto,
     }
-  }, [checkoutDefaults, form, localSelecionado])
+  }, [checkoutDefaults, checkoutPageDefaults, form, localSelecionado])
 
   async function recarregarPlanos() {
     setPlanos(await planoService.listar({ todos: true }))
@@ -340,7 +336,7 @@ export default function AdminPlanos() {
   }
 
   function copiarBlocoPadrao(bloco) {
-    const valores = getCheckoutBlocosPadrao()[bloco]
+    const valores = getCheckoutBlocosPadrao(checkoutPageDefaults)[bloco]
     if (!valores) return
 
     setForm(current => ({
@@ -579,7 +575,7 @@ export default function AdminPlanos() {
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Itens de confianca (1 por linha)</label>
-                    <textarea className="form-textarea" value={form.checkoutConfiancaTexto} onChange={event => setForm(current => ({ ...current, checkoutConfiancaTexto: event.target.value }))} placeholder={CHECKOUT_CONFIANCA_PADRAO.join('\n')} />
+                    <textarea className="form-textarea" value={form.checkoutConfiancaTexto} onChange={event => setForm(current => ({ ...current, checkoutConfiancaTexto: event.target.value }))} placeholder={checkoutPageDefaults.confiancaListaPadrao.join('\n')} />
                   </div>
                 </div>
 

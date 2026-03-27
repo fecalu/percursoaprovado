@@ -1,0 +1,2 @@
+ALTER TABLE planos
+    ADD COLUMN linha_produto VARCHAR(30) NOT NULL DEFAULT 'DIRECAO';

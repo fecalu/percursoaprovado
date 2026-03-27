@@ -2,8 +2,9 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import RevealSection from '../components/RevealSection'
 import { useAuth } from '../context/AuthContext'
+import { interpolateSiteText, resolveLocalPageConfig } from '../data/sitePageDefaults'
 import { useToast } from '../hooks/useToast'
-import { localProvaService, pedidoService, planoService } from '../services/api'
+import { configuracaoSiteService, localProvaService, pedidoService, planoService } from '../services/api'
 import {
   formatDataHoraCurta,
   formatPagamentoStatus,
@@ -52,18 +53,39 @@ function getMensagemDisponibilidade(local) {
   return ''
 }
 
-function getTituloComercial(local) {
-  return local?.tituloComercial?.trim() || `Prepare-se melhor para a prova em ${local?.nome}.`
+function getTituloComercial(local, localPageContent) {
+  if (local?.tituloComercial?.trim()) return local.tituloComercial.trim()
+
+  return (
+    interpolateSiteText(localPageContent?.heroFallbackTitulo, {
+      local: local?.nome,
+      cidade: local?.cidade,
+      descricao: local?.descricao,
+    }) || `Prepare-se melhor para a prova em ${local?.nome}.`
+  )
 }
 
-function getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade) {
+function getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade, localPageContent) {
   if (local?.subtituloComercial?.trim()) return local.subtituloComercial.trim()
 
-  if (compraLiberada) {
-    return 'Escolha o periodo que combina melhor com sua data de prova e com o ritmo em que voce quer revisar.'
+  const contexto = {
+    local: local?.nome,
+    cidade: local?.cidade,
+    descricao: local?.descricao,
+    mensagem: mensagemDisponibilidade,
   }
 
-  return `${local?.descricao || ''} ${mensagemDisponibilidade}`.trim()
+  if (compraLiberada) {
+    return (
+      interpolateSiteText(localPageContent?.heroFallbackSubtituloDisponivel, contexto)
+      || 'Escolha o periodo que combina melhor com sua data de prova e com o ritmo em que voce quer revisar.'
+    )
+  }
+
+  return (
+    interpolateSiteText(localPageContent?.heroFallbackSubtituloIndisponivel, contexto)
+    || `${local?.descricao || ''} ${mensagemDisponibilidade}`.trim()
+  )
 }
 
 function getPlanoIndicacao(duracaoDias) {
@@ -141,7 +163,7 @@ const PLANO_SHOWCASE_PALETTE = [
   },
 ]
 
-function getCaixaDestaque(local) {
+function getCaixaDestaque(local, localPageContent) {
   const itens = [local?.boxItem1, local?.boxItem2, local?.boxItem3]
     .map(item => item?.trim())
     .filter(Boolean)
@@ -150,7 +172,19 @@ function getCaixaDestaque(local) {
   const observacao = local?.boxObservacao?.trim()
 
   if (!titulo && itens.length === 0 && !observacao) {
-    return null
+    const itensFallback = [
+      localPageContent?.boxFallbackItem1,
+      localPageContent?.boxFallbackItem2,
+      localPageContent?.boxFallbackItem3,
+    ]
+      .map(item => item?.trim())
+      .filter(Boolean)
+
+    return {
+      titulo: localPageContent?.boxFallbackTitulo?.trim() || 'Destaques deste acesso',
+      itens: itensFallback,
+      observacao: localPageContent?.boxFallbackObservacao?.trim() || '',
+    }
   }
 
   return {
@@ -251,6 +285,7 @@ export default function LocalDetalhe() {
   const { show, ToastEl } = useToast()
   const [local, setLocal] = useState(null)
   const [planos, setPlanos] = useState([])
+  const [configLocalPage, setConfigLocalPage] = useState(null)
   const [loading, setLoading] = useState(true)
   const [checkoutMonitor, setCheckoutMonitor] = useState(null)
   const [sincronizandoCheckout, setSincronizandoCheckout] = useState(false)
@@ -268,12 +303,27 @@ export default function LocalDetalhe() {
   }, [checkoutMonitor])
 
   useEffect(() => {
-    Promise.all([localProvaService.buscar(slug), planoService.listar({ localSlug: slug })])
-      .then(([localResp, planosResp]) => {
-        setLocal(localResp)
-        setPlanos(planosResp)
+    let ativo = true
+
+    Promise.allSettled([
+      localProvaService.buscar(slug),
+      planoService.listar({ localSlug: slug }),
+      configuracaoSiteService.buscarPublica(),
+    ])
+      .then(([localResp, planosResp, configResp]) => {
+        if (!ativo) return
+
+        setLocal(localResp.status === 'fulfilled' ? localResp.value : null)
+        setPlanos(planosResp.status === 'fulfilled' ? planosResp.value : [])
+        setConfigLocalPage(configResp.status === 'fulfilled' ? configResp.value?.localPage || null : null)
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        if (ativo) setLoading(false)
+      })
+
+    return () => {
+      ativo = false
+    }
   }, [slug])
 
   useEffect(() => {
@@ -502,15 +552,29 @@ export default function LocalDetalhe() {
 
   const compraLiberada = local.statusComercial === 'DISPONIVEL'
   const mensagemDisponibilidade = getMensagemDisponibilidade(local)
-  const planoInicial = planosOrdenados[0]
-  const tituloComercial = getTituloComercial(local)
-  const subtituloComercial = getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade)
-  const caixaDestaque = getCaixaDestaque(local)
+  const localPageContent = resolveLocalPageConfig(configLocalPage || {})
+  const localPageContext = {
+    local: local?.nome,
+    cidade: local?.cidade,
+    descricao: local?.descricao,
+    mensagem: mensagemDisponibilidade,
+  }
+  const tituloComercial = getTituloComercial(local, localPageContent)
+  const subtituloComercial = getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade, localPageContent)
+  const caixaDestaque = getCaixaDestaque(local, localPageContent)
   const imagemPrincipal = resolveMediaUrl(local.imagemPrincipalUrl)
   const planoAtivo = planosOrdenados[Math.min(planoAtivoIndex, Math.max(planosOrdenados.length - 1, 0))] || null
   const destaquePlanoAtivo = planoAtivo ? getPlanoApresentacao(planoAtivo) : null
   const planoAnterior = planoAtivoIndex > 0 ? planosOrdenados[planoAtivoIndex - 1] : null
   const planoSeguinte = planoAtivoIndex < planosOrdenados.length - 1 ? planosOrdenados[planoAtivoIndex + 1] : null
+  const usarIntroPlanosNoHero = compraLiberada && planosOrdenados.length > 0
+  const tituloHero = usarIntroPlanosNoHero
+    ? interpolateSiteText(localPageContent.secaoPlanosTitulo, localPageContext)
+    : tituloComercial
+  const subtituloHero = usarIntroPlanosNoHero
+    ? interpolateSiteText(localPageContent.secaoPlanosSubtitulo, localPageContext)
+    : subtituloComercial
+  const resumoHero = usarIntroPlanosNoHero ? destaquePlanoAtivo?.resumo || '' : ''
   const checkoutAcompanhamento = checkoutMonitor ? getCheckoutAcompanhamento(checkoutMonitor) : null
   const checkoutSituacao = checkoutMonitor
     ? formatSituacaoPedido(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
@@ -519,23 +583,12 @@ export default function LocalDetalhe() {
     ? getSituacaoPedidoBadgeClass(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
     : 'badge-gray'
   const checkoutEtapa = checkoutMonitor ? getCheckoutMonitorStage(checkoutMonitor) : 'IDLE'
-  const saibaMaisLocal = [
-    {
-      titulo: 'O que voce vai encontrar',
-      copy: 'Esse acesso foi organizado para mostrar o que mais ajuda antes da prova, sem excesso de informacao aberta de uma vez.',
-      pontos: HERO_DESTAQUES_LOCAL,
-    },
-    {
-      titulo: 'Como isso ajuda no dia da prova',
-      copy: 'O foco nao e decorar rua. E dirigir com mais leitura, menos surpresa e mais criterio durante a avaliacao.',
-      pontos: BENEFICIOS_DO_ACESSO.map(item => `${item.titulo}: ${item.descricao}`),
-    },
-    {
-      titulo: 'Compra e liberacao',
-      copy: 'A compra e simples e o acesso aparece automaticamente assim que o pagamento e confirmado.',
-      pontos: COMPRA_SEGURA_ITENS.map(item => `${item.titulo}: ${item.descricao}`),
-    },
-  ]
+  const saibaMaisLocal = localPageContent.saibaMaisItens
+  const secaoPlanosFaixas = [
+    localPageContent.secaoPlanosFaixa1,
+    localPageContent.secaoPlanosFaixa2,
+    localPageContent.secaoPlanosFaixa3,
+  ].filter(Boolean)
 
   return (
     <div className="landing-page landing-page--eager">
@@ -547,30 +600,16 @@ export default function LocalDetalhe() {
         Voltar para os locais
       </Link>
 
-      <section className="hero-shell hero-shell--local hero-shell--single fade-in">
-        <div className="hero-copy">
-          <div className="hero-kicker">Preparacao por local de prova</div>
-          <div className="local-hero-topline">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.55rem', alignItems: 'center' }}>
-              <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
-                {formatStatusComercialLocal(local.statusComercial)}
-              </span>
-              <span className="hero-inline-copy">{local.cidade}</span>
-              {compraLiberada && planoInicial && (
-                <span className="hero-inline-copy">A partir de {fmtMoeda(planoInicial.precoCentavos)}</span>
-              )}
-            </div>
-          </div>
-          <h1 className="hero-title">{tituloComercial}</h1>
-          <p className="hero-subtitle">{subtituloComercial}</p>
-          <div className="hero-actions">
-            <Link className="btn btn-primary" to={user ? (isAdmin ? '/admin' : '/biblioteca') : '/login'}>
-              {user ? (isAdmin ? 'Abrir administracao' : 'Ver minha biblioteca') : 'Entrar ou criar conta'}
-            </Link>
-            <Link className="btn btn-ghost" to={user ? (isAdmin ? '/admin/pedidos' : '/meus-pedidos') : '/register'}>
-              {user ? 'Ver meus pagamentos' : 'Criar conta'}
-            </Link>
-          </div>
+      <section className="hero-shell hero-shell--local hero-shell--single hero-shell--local-compact fade-in">
+        <div className="local-hero-floating-meta">
+          <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
+            {formatStatusComercialLocal(local.statusComercial)}
+          </span>
+          <span className="hero-inline-copy">{local.cidade}</span>
+        </div>
+        <div className={`hero-copy ${usarIntroPlanosNoHero ? 'hero-copy--centered' : ''}`}>
+          <h1 className="hero-title">{tituloHero}</h1>
+          <p className="hero-subtitle">{subtituloHero}</p>
         </div>
       </section>
 
@@ -657,7 +696,7 @@ export default function LocalDetalhe() {
         </RevealSection>
       )}
 
-      <RevealSection as="section" className="landing-section" delay={40} eager>
+      <RevealSection as="section" className="landing-section landing-section--local-offer" delay={40} eager>
         {!compraLiberada && (
           <>
             <div className="page-title">Disponibilidade do local</div>
@@ -691,16 +730,7 @@ export default function LocalDetalhe() {
         ) : (
           <div className="local-offer-layout">
             <div className="plan-showcase">
-              <div className="plan-showcase-head">
-                <div className="plan-showcase-title">Escolha o tempo certo para estudar esse local</div>
-                {planoAtivo && (
-                  <>
-                    <div className="plan-showcase-subtitle">{destaquePlanoAtivo?.texto}</div>
-                    <div className="plan-showcase-caption">{destaquePlanoAtivo?.resumo}</div>
-                  </>
-                )}
-              </div>
-
+              {resumoHero && <div className="local-plan-intro">{resumoHero}</div>}
               <div
                 className="plan-showcase-stage"
                 onTouchStart={event => iniciarSwipePlanos(event.touches[0]?.clientX ?? 0)}
@@ -743,9 +773,11 @@ export default function LocalDetalhe() {
               </div>
 
               <div className="landing-inline-strip landing-inline-strip--compact plan-showcase-strip">
-                <div className="landing-inline-chip">Pagamento unico</div>
-                <div className="landing-inline-chip">Liberacao automatica apos a confirmacao</div>
-                <div className="landing-inline-chip">1 local por compra</div>
+                {secaoPlanosFaixas.map(item => (
+                  <div key={item} className="landing-inline-chip">
+                    {interpolateSiteText(item, localPageContext)}
+                  </div>
+                ))}
               </div>
             </div>
             {caixaDestaque && (
@@ -757,18 +789,24 @@ export default function LocalDetalhe() {
                     className="local-offer-box-image"
                   />
                 )}
-                <div className="local-offer-box-title">{caixaDestaque.titulo}</div>
+                <div className="local-offer-box-title">
+                  {interpolateSiteText(caixaDestaque.titulo, localPageContext)}
+                </div>
                 {caixaDestaque.itens.length > 0 && (
                   <div className="local-offer-box-list">
                     {caixaDestaque.itens.map(item => (
                       <div key={item} className="local-offer-box-item">
                         <span className="local-offer-box-dot" />
-                        <span>{item}</span>
+                        <span>{interpolateSiteText(item, localPageContext)}</span>
                       </div>
                     ))}
                   </div>
                 )}
-                {caixaDestaque.observacao && <div className="local-offer-box-note">{caixaDestaque.observacao}</div>}
+                {caixaDestaque.observacao && (
+                  <div className="local-offer-box-note">
+                    {interpolateSiteText(caixaDestaque.observacao, localPageContext)}
+                  </div>
+                )}
               </aside>
             )}
           </div>
@@ -778,8 +816,12 @@ export default function LocalDetalhe() {
       <RevealSection as="section" className="landing-section" delay={70} eager>
         <div className="section-title-row">
           <div>
-            <div className="section-heading">Saiba mais sobre esse acesso</div>
-            <div className="section-copy">Abra apenas os detalhes que voce quiser consultar depois de olhar os planos.</div>
+            <div className="section-heading">
+              {interpolateSiteText(localPageContent.saibaMaisTitulo, localPageContext)}
+            </div>
+            <div className="section-copy">
+              {interpolateSiteText(localPageContent.saibaMaisSubtitulo, localPageContext)}
+            </div>
           </div>
         </div>
 
@@ -787,17 +829,17 @@ export default function LocalDetalhe() {
           {saibaMaisLocal.map(item => (
             <details key={item.titulo} className="learn-more-item">
               <summary className="learn-more-summary">
-                <span className="learn-more-title">{item.titulo}</span>
+                <span className="learn-more-title">{interpolateSiteText(item.titulo, localPageContext)}</span>
                 <span className="learn-more-toggle">Abrir</span>
               </summary>
 
               <div className="learn-more-body">
-                <div className="learn-more-copy">{item.copy}</div>
+                <div className="learn-more-copy">{interpolateSiteText(item.copy, localPageContext)}</div>
                 <div className="learn-more-points">
                   {item.pontos.map(ponto => (
                     <div key={ponto} className="learn-more-point">
                       <span className="learn-more-point-dot" />
-                      <span>{ponto}</span>
+                      <span>{interpolateSiteText(ponto, localPageContext)}</span>
                     </div>
                   ))}
                 </div>

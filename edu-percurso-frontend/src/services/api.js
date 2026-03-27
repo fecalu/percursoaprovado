@@ -86,6 +86,14 @@ export const localProvaService = {
   excluir: id => api.delete(`/locais-prova/${id}`),
 }
 
+export const configuracaoSiteService = {
+  buscarPublica: () => api.get('/configuracoes-site').then(response => response.data),
+  buscarAdmin: () => api.get('/admin/configuracoes-site').then(response => response.data),
+  atualizarHome: data => api.put('/admin/configuracoes-site/home', data).then(response => response.data),
+  atualizarLocalPage: data => api.put('/admin/configuracoes-site/local-page', data).then(response => response.data),
+  atualizarCheckout: data => api.put('/admin/configuracoes-site/checkout', data).then(response => response.data),
+}
+
 export const planoService = {
   listar: params => api.get(`/planos${toSearchParams(params)}`).then(response => response.data),
   criar: data => api.post('/planos', data).then(response => response.data),
