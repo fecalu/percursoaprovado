@@ -863,7 +863,10 @@ export default function LocalDetalhe() {
             <details key={item.titulo} className="learn-more-item">
               <summary className="learn-more-summary">
                 <span className="learn-more-title">{interpolateSiteText(item.titulo, localPageContext)}</span>
-                <span className="learn-more-toggle">Abrir</span>
+                <span className="learn-more-toggle">
+                  <span className="learn-more-toggle-open">Abrir</span>
+                  <span className="learn-more-toggle-close">Fechar</span>
+                </span>
               </summary>
 
               <div className="learn-more-body">

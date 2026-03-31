@@ -5180,6 +5180,7 @@ html[data-theme='light'] .landing-topbar-link:hover {
 .learn-more-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   padding: 0.38rem 0.72rem;
   border-radius: 999px;
   background: rgba(255,255,255,0.04);
@@ -5190,8 +5191,20 @@ html[data-theme='light'] .landing-topbar-link:hover {
   text-transform: uppercase;
 }
 
+.learn-more-toggle-close {
+  display: none;
+}
+
 .learn-more-item[open] .learn-more-toggle {
   background: rgba(45,224,154,0.12);
+}
+
+.learn-more-item[open] .learn-more-toggle-open {
+  display: none;
+}
+
+.learn-more-item[open] .learn-more-toggle-close {
+  display: inline;
 }
 
 .learn-more-body {

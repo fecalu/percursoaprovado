@@ -343,7 +343,10 @@ export default function Home() {
             <details key={item.pergunta} className="learn-more-item">
               <summary className="learn-more-summary">
                 <span className="learn-more-title">{item.pergunta}</span>
-                <span className="learn-more-toggle">Abrir</span>
+                <span className="learn-more-toggle">
+                  <span className="learn-more-toggle-open">Abrir</span>
+                  <span className="learn-more-toggle-close">Fechar</span>
+                </span>
               </summary>
 
               <div className="learn-more-body">
