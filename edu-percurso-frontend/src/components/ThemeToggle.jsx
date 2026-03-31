@@ -13,13 +13,13 @@ const IconMoon = () => (
   </svg>
 )
 
-export default function ThemeToggle({ compact = false }) {
+export default function ThemeToggle({ compact = false, iconOnly = false }) {
   const { theme, toggleTheme, isLight } = useTheme()
 
   return (
     <button
       type="button"
-      className={`theme-toggle${compact ? ' theme-toggle--compact' : ''}`}
+      className={`theme-toggle${compact ? ' theme-toggle--compact' : ''}${iconOnly ? ' theme-toggle--icon-only' : ''}`}
       onClick={toggleTheme}
       aria-label={isLight ? 'Ativar tema escuro' : 'Ativar tema claro'}
       title={isLight ? 'Ativar tema escuro' : 'Ativar tema claro'}
@@ -27,7 +27,7 @@ export default function ThemeToggle({ compact = false }) {
       <span className="theme-toggle-icon">
         {isLight ? <IconMoon /> : <IconSun />}
       </span>
-      <span className="theme-toggle-label">
+      <span className="theme-toggle-label" aria-hidden={iconOnly}>
         {theme === 'light' ? 'Tema claro' : 'Tema escuro'}
       </span>
     </button>

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import BrandLogo from '../components/BrandLogo'
+import LandingFooter from '../components/LandingFooter'
 import RevealSection from '../components/RevealSection'
+import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import { interpolateSiteText, resolveLocalPageConfig } from '../data/sitePageDefaults'
 import { useToast } from '../hooks/useToast'
@@ -589,23 +592,47 @@ export default function LocalDetalhe() {
     localPageContent.secaoPlanosFaixa2,
     localPageContent.secaoPlanosFaixa3,
   ].filter(Boolean)
+  const localResumoCompra = [local?.cidade, local?.nome].filter(Boolean).join(' - ')
 
   return (
-    <div className="landing-page landing-page--eager">
+    <div className="landing-page landing-page--eager landing-page--local">
       {ToastEl}
-      <Link className="back-link" to="/">
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M13 4L6 10l7 6" />
-        </svg>
-        Voltar para os locais
-      </Link>
+
+      <section className="landing-topbar landing-topbar--simple fade-in">
+        <Link className="landing-topbar-brand" to="/">
+          <BrandLogo variant="landing" showTagline />
+        </Link>
+
+        <div className="landing-topbar-actions">
+          <ThemeToggle compact iconOnly />
+          {user ? (
+            <>
+              <Link className="btn btn-ghost btn-sm" to={isAdmin ? '/admin/pedidos' : '/meus-acessos'}>
+                {isAdmin ? 'Pedidos' : 'Meus acessos'}
+              </Link>
+              <Link className="btn btn-primary btn-sm" to={isAdmin ? '/admin' : '/biblioteca'}>
+                {isAdmin ? 'Abrir painel' : 'Minha biblioteca'}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="btn btn-ghost btn-sm" to="/login">
+                Entrar
+              </Link>
+              <Link className="btn btn-primary btn-sm" to="/register">
+                Criar conta
+              </Link>
+            </>
+          )}
+        </div>
+      </section>
 
       <section className="hero-shell hero-shell--local hero-shell--single hero-shell--local-compact fade-in">
         <div className="local-hero-floating-meta">
           <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
             {formatStatusComercialLocal(local.statusComercial)}
           </span>
-          <span className="hero-inline-copy">{local.cidade}</span>
+          <span className="hero-inline-copy hero-inline-copy--local">{localResumoCompra}</span>
         </div>
         <div className={`hero-copy ${usarIntroPlanosNoHero ? 'hero-copy--centered' : ''}`}>
           <h1 className="hero-title">{tituloHero}</h1>
@@ -782,26 +809,32 @@ export default function LocalDetalhe() {
             </div>
             {caixaDestaque && (
               <aside className="local-offer-box local-offer-box--support">
-                {imagemPrincipal && (
-                  <img
-                    src={imagemPrincipal}
-                    alt={`Destaque visual do local ${local.nome}`}
-                    className="local-offer-box-image"
-                  />
-                )}
-                <div className="local-offer-box-title">
-                  {interpolateSiteText(caixaDestaque.titulo, localPageContext)}
-                </div>
-                {caixaDestaque.itens.length > 0 && (
-                  <div className="local-offer-box-list">
-                    {caixaDestaque.itens.map(item => (
-                      <div key={item} className="local-offer-box-item">
-                        <span className="local-offer-box-dot" />
-                        <span>{interpolateSiteText(item, localPageContext)}</span>
+                <div className="local-offer-box-main">
+                  <div className="local-offer-box-copy">
+                    <div className="local-offer-box-title">
+                      {interpolateSiteText(caixaDestaque.titulo, localPageContext)}
+                    </div>
+                    {caixaDestaque.itens.length > 0 && (
+                      <div className="local-offer-box-list">
+                        {caixaDestaque.itens.map(item => (
+                          <div key={item} className="local-offer-box-item">
+                            <span className="local-offer-box-dot" />
+                            <span>{interpolateSiteText(item, localPageContext)}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
+                  {imagemPrincipal && (
+                    <div className="local-offer-box-media">
+                      <img
+                        src={imagemPrincipal}
+                        alt={`Destaque visual do local ${local.nome}`}
+                        className="local-offer-box-image"
+                      />
+                    </div>
+                  )}
+                </div>
                 {caixaDestaque.observacao && (
                   <div className="local-offer-box-note">
                     {interpolateSiteText(caixaDestaque.observacao, localPageContext)}
@@ -848,6 +881,8 @@ export default function LocalDetalhe() {
           ))}
         </div>
       </RevealSection>
+
+      <LandingFooter sectionPrefix="/" />
     </div>
   )
 }
