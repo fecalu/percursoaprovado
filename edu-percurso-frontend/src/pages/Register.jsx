@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/BrandLogo'
+import { resolveAuthDestination } from '../utils/authRedirects'
 
 function extractRegisterError(error) {
   const data = error.response?.data
@@ -30,6 +31,7 @@ function extractRegisterError(error) {
 export default function Register() {
   const { register } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [form, setForm] = useState({ nome: '', email: '', senha: '' })
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
@@ -44,8 +46,8 @@ export default function Register() {
     setErro('')
     setLoading(true)
     try {
-      await register(form.nome, form.email, form.senha)
-      navigate('/painel', { replace: true })
+      const role = await register(form.nome, form.email, form.senha)
+      navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
       console.error('Falha ao criar conta', error)
       setErro(extractRegisterError(error))
@@ -109,7 +111,7 @@ export default function Register() {
         </form>
 
         <div className="auth-footer">
-          Ja tem conta? <Link to="/login">Entrar</Link>
+          Ja tem conta? <Link to="/login" state={location.state}>Entrar</Link>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import BrandLogo from '../components/BrandLogo'
 import { authService } from '../services/api'
 
@@ -21,6 +21,7 @@ function extractApiError(error) {
 }
 
 export default function ForgotPassword() {
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState('')
@@ -79,7 +80,7 @@ export default function ForgotPassword() {
         </form>
 
         <div className="auth-footer">
-          Lembrou sua senha? <Link to="/login">Voltar para o login</Link>
+          Lembrou sua senha? <Link to="/login" state={location.state}>Voltar para o login</Link>
         </div>
       </div>
     </div>

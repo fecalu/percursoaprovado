@@ -289,6 +289,8 @@ export default function LocalDetalhe() {
   const [local, setLocal] = useState(null)
   const [planos, setPlanos] = useState([])
   const [configLocalPage, setConfigLocalPage] = useState(null)
+  const [erroCarregamento, setErroCarregamento] = useState('')
+  const [erroPlanos, setErroPlanos] = useState('')
   const [loading, setLoading] = useState(true)
   const [checkoutMonitor, setCheckoutMonitor] = useState(null)
   const [sincronizandoCheckout, setSincronizandoCheckout] = useState(false)
@@ -316,8 +318,25 @@ export default function LocalDetalhe() {
       .then(([localResp, planosResp, configResp]) => {
         if (!ativo) return
 
-        setLocal(localResp.status === 'fulfilled' ? localResp.value : null)
-        setPlanos(planosResp.status === 'fulfilled' ? planosResp.value : [])
+        if (localResp.status === 'fulfilled') {
+          setLocal(localResp.value)
+          setErroCarregamento('')
+        } else if (localResp.reason?.response?.status === 404) {
+          setLocal(null)
+          setErroCarregamento('')
+        } else {
+          setLocal(null)
+          setErroCarregamento('Nao foi possivel carregar esse local agora. Recarregue a pagina e tente novamente em instantes.')
+        }
+
+        if (planosResp.status === 'fulfilled') {
+          setPlanos(planosResp.value)
+          setErroPlanos('')
+        } else {
+          setPlanos([])
+          setErroPlanos('Nao foi possivel carregar os planos desse local agora.')
+        }
+
         setConfigLocalPage(configResp.status === 'fulfilled' ? configResp.value?.localPage || null : null)
       })
       .finally(() => {
@@ -454,7 +473,11 @@ export default function LocalDetalhe() {
   function renderAcaoPlano(plano) {
     if (!user) {
       return (
-        <Link className="btn btn-primary" to="/register">
+        <Link
+          className="btn btn-primary"
+          to="/register"
+          state={{ returnTo: `/checkout/revisao/${slug}/${plano.id}` }}
+        >
           Criar conta e continuar
         </Link>
       )
@@ -551,6 +574,16 @@ export default function LocalDetalhe() {
   }
 
   if (loading) return <div className="spinner" />
+  if (erroCarregamento) {
+    return (
+      <div className="empty-state">
+        <div>Nao foi possivel carregar esse local agora.</div>
+        <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => window.location.reload()}>
+          Tentar novamente
+        </button>
+      </div>
+    )
+  }
   if (!local) return <div className="empty-state">Local de prova nao encontrado.</div>
 
   const compraLiberada = local.statusComercial === 'DISPONIVEL'
@@ -751,6 +784,13 @@ export default function LocalDetalhe() {
                 </button>
               </div>
             )}
+          </div>
+        ) : erroPlanos ? (
+          <div className="empty-state">
+            <div>{erroPlanos}</div>
+            <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => window.location.reload()}>
+              Recarregar planos
+            </button>
           </div>
         ) : planosOrdenados.length === 0 ? (
           <div className="empty-state">Esse local ainda nao possui planos ativos.</div>

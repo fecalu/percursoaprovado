@@ -51,6 +51,7 @@ export default function Home() {
   const [planos, setPlanos] = useState([])
   const [percursos, setPercursos] = useState([])
   const [configHome, setConfigHome] = useState(null)
+  const [erroLocais, setErroLocais] = useState('')
   const [loading, setLoading] = useState(true)
   const [locaisPagina, setLocaisPagina] = useState(() => getLocaisPorPagina(window.innerWidth))
   const [locaisInicio, setLocaisInicio] = useState(0)
@@ -67,7 +68,13 @@ export default function Home() {
       .then(([locaisResp, planosResp, percursosResp, configResp]) => {
         if (!ativo) return
 
-        setLocais(locaisResp.status === 'fulfilled' ? locaisResp.value : [])
+        if (locaisResp.status === 'fulfilled') {
+          setLocais(locaisResp.value)
+          setErroLocais('')
+        } else {
+          setLocais([])
+          setErroLocais('Nao foi possivel carregar os locais de prova agora. Recarregue a pagina e tente novamente em instantes.')
+        }
         setPlanos(planosResp.status === 'fulfilled' ? planosResp.value : [])
         setPercursos(percursosResp.status === 'fulfilled' ? percursosResp.value : [])
         setConfigHome(configResp.status === 'fulfilled' ? configResp.value?.home || null : null)
@@ -231,6 +238,13 @@ export default function Home() {
 
           {loading ? (
             <div className="spinner" />
+          ) : erroLocais ? (
+            <div className="empty-state">
+              <div>{erroLocais}</div>
+              <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => window.location.reload()}>
+                Tentar novamente
+              </button>
+            </div>
           ) : locaisOrdenados.length === 0 ? (
             <div className="empty-state">Nenhum local de prova cadastrado ainda.</div>
           ) : (

@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/BrandLogo'
+import { resolveAuthDestination } from '../utils/authRedirects'
 
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [form, setForm] = useState({ email: '', senha: '' })
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,7 +18,7 @@ export default function Login() {
     setLoading(true)
     try {
       const role = await login(form.email, form.senha)
-      navigate(role === 'ADMIN' ? '/admin' : '/painel', { replace: true })
+      navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
       setErro(error.response?.data?.erro || 'Erro ao entrar. Verifique suas credenciais.')
     } finally {
@@ -57,7 +59,7 @@ export default function Login() {
           </div>
 
           <div className="auth-meta-row">
-            <Link className="auth-inline-link" to="/forgot-password">
+            <Link className="auth-inline-link" to="/forgot-password" state={location.state}>
               Esqueci minha senha
             </Link>
           </div>
@@ -74,7 +76,7 @@ export default function Login() {
         </form>
 
         <div className="auth-footer">
-          Nao tem conta? <Link to="/register">Criar conta gratuita</Link>
+          Nao tem conta? <Link to="/register" state={location.state}>Criar conta gratuita</Link>
         </div>
       </div>
     </div>
