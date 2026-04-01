@@ -126,7 +126,7 @@ public class AuthService {
 
         Usuario usuarioComMesmoEmail = usuarioRepository.findByEmailIgnoreCase(googleAccount.getEmail()).orElse(null);
         if (usuarioComMesmoEmail != null) {
-            throw new IllegalArgumentException("Ja existe uma conta com esse e-mail. Entre com sua senha e depois conecte o Google pelo perfil.");
+            throw new IllegalArgumentException("Ja existe uma conta com esse e-mail. Entre com sua senha para acessar.");
         }
 
         Usuario novoUsuario = Usuario.builder()
