@@ -2,6 +2,7 @@ package com.edupercurso.controller;
 
 import com.edupercurso.dto.AuthDTO;
 import com.edupercurso.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,18 @@ public class AuthController {
     @PostMapping("/google")
     public ResponseEntity<AuthDTO.LoginResponse> loginComGoogle(@Valid @RequestBody AuthDTO.GoogleLoginRequest req) {
         return ResponseEntity.ok(authService.loginComGoogle(req));
+    }
+
+    @PostMapping("/google/code")
+    public ResponseEntity<AuthDTO.LoginResponse> loginComGoogleCode(
+            @Valid @RequestBody AuthDTO.GoogleCodeLoginRequest req,
+            HttpServletRequest request
+    ) {
+        return ResponseEntity.ok(authService.loginComGoogleCode(
+                req,
+                request.getHeader("Origin"),
+                request.getHeader("X-Requested-With")
+        ));
     }
 
     @PostMapping("/forgot-password")

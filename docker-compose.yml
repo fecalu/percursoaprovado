@@ -49,6 +49,7 @@ services:
       MP_WEBHOOK_SECRET:          ${MP_WEBHOOK_SECRET:-}
       APP_STORAGE_PATH:           /app/storage
       GOOGLE_WEB_CLIENT_ID:       ${GOOGLE_WEB_CLIENT_ID:-}
+      GOOGLE_WEB_CLIENT_SECRET:   ${GOOGLE_WEB_CLIENT_SECRET:-}
     expose:
       - "8080"
     volumes:

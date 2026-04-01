@@ -65,7 +65,24 @@ public class AuthService {
 
     public AuthDTO.LoginResponse loginComGoogle(AuthDTO.GoogleLoginRequest req) {
         GoogleAuthService.GoogleAccount googleAccount = googleAuthService.validarCredential(req.getCredential());
+        return loginOuRegistrarContaGoogle(googleAccount);
+    }
 
+    public AuthDTO.LoginResponse loginComGoogleCode(
+            AuthDTO.GoogleCodeLoginRequest req,
+            String originHeader,
+            String requestedWith
+    ) {
+        GoogleAuthService.GoogleAccount googleAccount = googleAuthService.trocarCodePorConta(
+                req.getCode(),
+                req.getRedirectUri(),
+                originHeader,
+                requestedWith
+        );
+        return loginOuRegistrarContaGoogle(googleAccount);
+    }
+
+    private AuthDTO.LoginResponse loginOuRegistrarContaGoogle(GoogleAuthService.GoogleAccount googleAccount) {
         Usuario usuarioVinculado = usuarioRepository.findByGoogleSub(googleAccount.getGoogleSub()).orElse(null);
         if (usuarioVinculado != null) {
             if (usuarioVinculado.getRole() != Usuario.Role.ALUNO) {

@@ -20,7 +20,7 @@ nano .env.hostinger
 3. Preencha o `.env.hostinger`
 - `DB_USER`, `DB_PASS` e `JWT_SECRET` com valores fortes
 - `APP_BASE_URL=https://percursoaprovado.com.br`
-- `GOOGLE_WEB_CLIENT_ID` e `VITE_GOOGLE_CLIENT_ID` com o Web Client ID do Google
+- `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_WEB_CLIENT_SECRET` e `VITE_GOOGLE_CLIENT_ID` com as credenciais Web do Google
 - `MP_PUBLIC_KEY`, `MP_ACCESS_TOKEN` e `MP_WEBHOOK_SECRET` com as credenciais novas
 
 4. Suba a stack isolada
@@ -76,7 +76,7 @@ nano .env.hostinger.homolog
 2. Preencha a homologacao
 - `DB_USER`, `DB_PASS` e `JWT_SECRET` com valores fortes
 - `APP_BASE_URL=https://homolog.percursoaprovado.com.br`
-- `GOOGLE_WEB_CLIENT_ID` e `VITE_GOOGLE_CLIENT_ID` com o Web Client ID do Google
+- `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_WEB_CLIENT_SECRET` e `VITE_GOOGLE_CLIENT_ID` com as credenciais Web do Google
 - `MP_PUBLIC_KEY`, `MP_ACCESS_TOKEN` e `MP_WEBHOOK_SECRET` com as credenciais de teste
 
 3. Suba a stack isolada da homologacao

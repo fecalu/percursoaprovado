@@ -39,7 +39,11 @@ function normalizarArgsListar(arg) {
 
 export const authService = {
   login: data => api.post('/auth/login', data).then(response => response.data),
-  googleLogin: data => api.post('/auth/google', data).then(response => response.data),
+  googleLogin: data => api.post('/auth/google/code', data, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+  }).then(response => response.data),
   register: data => api.post('/auth/register', data).then(response => response.data),
   forgotPassword: data => api.post('/auth/forgot-password', data).then(response => response.data),
   resetPassword: data => api.post('/auth/reset-password', data).then(response => response.data),

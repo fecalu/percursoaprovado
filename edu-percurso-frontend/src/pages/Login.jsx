@@ -16,11 +16,11 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
 
-  async function handleGoogleCredential(credential) {
+  async function handleGoogleCode(code) {
     setErro('')
     setGoogleLoading(true)
     try {
-      const role = await loginWithGoogle(credential)
+      const role = await loginWithGoogle(code, window.location.origin)
       navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
       setErro(extractAuthError(error, 'Nao foi possivel entrar com Google.'))
@@ -100,7 +100,8 @@ export default function Login() {
             <div className="auth-social-stack">
               <GoogleAuthButton
                 clientId={googleClientId}
-                onCredential={handleGoogleCredential}
+                onCode={handleGoogleCode}
+                disabled={loading || googleLoading}
                 onError={message => setErro(message)}
               />
               {googleLoading && <div className="auth-google-status">Entrando com Google...</div>}

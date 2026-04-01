@@ -46,6 +46,7 @@ services:
       MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
       APP_STORAGE_PATH: /app/storage
       GOOGLE_WEB_CLIENT_ID: ${GOOGLE_WEB_CLIENT_ID:-}
+      GOOGLE_WEB_CLIENT_SECRET: ${GOOGLE_WEB_CLIENT_SECRET:-}
     ports:
       - "127.0.0.1:8081:8080"
     volumes:

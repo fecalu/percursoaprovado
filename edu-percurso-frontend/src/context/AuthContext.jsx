@@ -26,8 +26,8 @@ export function AuthProvider({ children }) {
     return data.role
   }, [persistAuth])
 
-  const loginWithGoogle = useCallback(async credential => {
-    const data = await authService.googleLogin({ credential })
+  const loginWithGoogle = useCallback(async (code, redirectUri) => {
+    const data = await authService.googleLogin({ code, redirectUri })
     persistAuth(data)
     return data.role
   }, [persistAuth])

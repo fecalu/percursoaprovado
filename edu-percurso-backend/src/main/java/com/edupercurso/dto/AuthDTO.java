@@ -38,6 +38,15 @@ public class AuthDTO {
     }
 
     @Data
+    public static class GoogleCodeLoginRequest {
+        @NotBlank(message = "Nao foi possivel validar o login com Google.")
+        private String code;
+
+        @NotBlank(message = "Nao foi possivel validar a origem do login com Google.")
+        private String redirectUri;
+    }
+
+    @Data
     public static class ForgotPasswordRequest {
         @NotBlank(message = "Informe seu e-mail.")
         @Email(message = "Informe um e-mail valido.")

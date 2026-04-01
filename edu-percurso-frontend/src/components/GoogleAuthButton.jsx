@@ -5,7 +5,7 @@ let googleScriptPromise
 
 function loadGoogleScript() {
   if (typeof window === 'undefined') return Promise.resolve()
-  if (window.google?.accounts?.id) return Promise.resolve()
+  if (window.google?.accounts?.oauth2) return Promise.resolve()
   if (googleScriptPromise) return googleScriptPromise
 
   googleScriptPromise = new Promise((resolve, reject) => {
@@ -36,65 +36,79 @@ function loadGoogleScript() {
   return googleScriptPromise
 }
 
-export default function GoogleAuthButton({ clientId, onCredential, onError }) {
-  const shellRef = useRef(null)
-  const buttonRef = useRef(null)
-  const credentialHandlerRef = useRef(onCredential)
+function GoogleMark() {
+  return (
+    <svg className="auth-google-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#EA4335" d="M12.24 10.285V14.4h5.88c-.255 1.365-1.62 4.005-5.88 4.005-3.54 0-6.42-2.925-6.42-6.54s2.88-6.54 6.42-6.54c2.01 0 3.36.855 4.125 1.59l2.82-2.73C17.385 2.52 15.075 1.5 12.24 1.5 6.945 1.5 2.64 5.805 2.64 11.1s4.305 9.6 9.6 9.6c5.535 0 9.21-3.885 9.21-9.36 0-.63-.075-1.11-.165-1.575z" />
+      <path fill="#34A853" d="M2.64 6.69l3.39 2.49c.915-1.815 2.79-3.075 5.205-3.075 2.01 0 3.36.855 4.125 1.59l2.82-2.73C17.385 2.52 15.075 1.5 12.24 1.5c-3.69 0-6.825 2.1-8.415 5.19z" />
+      <path fill="#FBBC05" d="M12.24 20.7c2.76 0 5.085-.915 6.78-2.49l-3.135-2.565c-.84.585-1.95 1.005-3.645 1.005-4.245 0-5.595-2.865-5.805-4.305l-3.42 2.64C4.59 18.42 8.07 20.7 12.24 20.7z" />
+      <path fill="#4285F4" d="M21.45 11.34c0-.63-.075-1.11-.165-1.575H12.24v4.115h5.88c-.285 1.455-1.14 2.685-2.235 3.54l3.135 2.565c1.815-1.68 2.43-4.155 2.43-6.645z" />
+    </svg>
+  )
+}
+
+function mapGooglePopupError(type) {
+  if (type === 'popup_failed_to_open') {
+    return 'Nao foi possivel abrir a janela do Google. Verifique se o navegador bloqueou popups.'
+  }
+  if (type === 'popup_closed') {
+    return 'A janela do Google foi fechada antes da conclusao do login.'
+  }
+  return 'Nao foi possivel iniciar o login com Google agora.'
+}
+
+export default function GoogleAuthButton({ clientId, disabled = false, onCode, onError }) {
+  const codeClientRef = useRef(null)
+  const codeHandlerRef = useRef(onCode)
   const errorHandlerRef = useRef(onError)
   const [isReady, setIsReady] = useState(false)
+  const [isOpening, setIsOpening] = useState(false)
 
   useEffect(() => {
-    credentialHandlerRef.current = onCredential
-  }, [onCredential])
+    codeHandlerRef.current = onCode
+  }, [onCode])
 
   useEffect(() => {
     errorHandlerRef.current = onError
   }, [onError])
 
   useEffect(() => {
-    if (!clientId || !buttonRef.current || !shellRef.current) return undefined
+    if (!clientId) return undefined
 
     let cancelled = false
-    let readyTimer
     setIsReady(false)
 
     loadGoogleScript()
       .then(() => {
-        if (cancelled || !buttonRef.current || !window.google?.accounts?.id) return
+        if (cancelled || !window.google?.accounts?.oauth2) return
 
-        const availableWidth = Math.floor(shellRef.current.getBoundingClientRect().width || 320)
-        const buttonWidth = Math.max(220, Math.min(320, availableWidth))
-
-        window.google.accounts.id.initialize({
+        codeClientRef.current = window.google.accounts.oauth2.initCodeClient({
           client_id: clientId,
+          scope: 'openid email profile',
+          ux_mode: 'popup',
+          select_account: true,
           callback: response => {
-            const credential = typeof response?.credential === 'string' ? response.credential.trim() : ''
-            if (!credential) {
-              errorHandlerRef.current?.('Nao foi possivel validar a conta Google.')
+            setIsOpening(false)
+            if (response?.error) {
+              errorHandlerRef.current?.(response.error_description || 'Nao foi possivel validar o login com Google.')
               return
             }
-            credentialHandlerRef.current?.(credential)
+
+            const code = typeof response?.code === 'string' ? response.code.trim() : ''
+            if (!code) {
+              errorHandlerRef.current?.('Nao foi possivel validar o login com Google.')
+              return
+            }
+
+            codeHandlerRef.current?.(code)
           },
-          ux_mode: 'popup',
-          auto_select: false,
-          cancel_on_tap_outside: true,
+          error_callback: error => {
+            setIsOpening(false)
+            errorHandlerRef.current?.(mapGooglePopupError(error?.type))
+          },
         })
 
-        buttonRef.current.innerHTML = ''
-        window.google.accounts.id.renderButton(buttonRef.current, {
-          type: 'standard',
-          theme: 'outline',
-          size: 'medium',
-          text: 'continue_with',
-          shape: 'pill',
-          logo_alignment: 'left',
-          locale: 'pt_BR',
-          width: buttonWidth,
-        })
-
-        readyTimer = window.setTimeout(() => {
-          if (!cancelled) setIsReady(true)
-        }, 40)
+        setIsReady(true)
       })
       .catch(() => {
         if (cancelled) return
@@ -103,20 +117,26 @@ export default function GoogleAuthButton({ clientId, onCredential, onError }) {
 
     return () => {
       cancelled = true
-      if (readyTimer) {
-        window.clearTimeout(readyTimer)
-      }
-      if (buttonRef.current) {
-        buttonRef.current.innerHTML = ''
-      }
     }
   }, [clientId])
+
+  function handleClick() {
+    if (!codeClientRef.current || disabled || isOpening) return
+    setIsOpening(true)
+    codeClientRef.current.requestCode()
+  }
 
   if (!clientId) return null
 
   return (
-    <div ref={shellRef} className={`google-auth-button-shell${isReady ? ' is-ready' : ''}`}>
-      <div ref={buttonRef} className="google-auth-button" />
-    </div>
+    <button
+      type="button"
+      className="auth-google-button"
+      onClick={handleClick}
+      disabled={disabled || !isReady || isOpening}
+    >
+      <GoogleMark />
+      <span>{isOpening ? 'Abrindo Google...' : 'Continuar com Google'}</span>
+    </button>
   )
 }
