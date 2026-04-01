@@ -1,44 +1,44 @@
 export const HOME_PAGE_DEFAULTS = {
-  heroKicker: 'Preparacao pratica por local de prova',
-  heroTitulo: 'Descubra os percursos mais frequentes da sua prova pratica.',
+  heroKicker: 'Preparação prática por local de prova',
+  heroTitulo: 'Descubra os percursos mais frequentes da sua prova prática.',
   heroSubtitulo:
-    'Prepare-se com mais confianca usando videos reais, simulacoes e orientacoes baseadas nos trajetos mais recorrentes e no que mais pesa na avaliacao.',
+    'Prepare-se com mais confiança usando vídeos reais, simulações e orientações baseadas nos trajetos mais recorrentes e no que mais pesa na avaliação.',
   heroBotaoPrimarioTexto: 'Escolher meu local de prova',
   heroBotaoSecundarioTexto: 'Ver como funciona',
   heroVideoUrl: '',
-  heroVideoTitulo: 'Demonstracao da plataforma',
+  heroVideoTitulo: 'Demonstração da plataforma',
   secaoLocaisTitulo: 'Escolha seu local de prova',
   secaoLocaisSubtitulo:
-    'Temos o mapeamento dos principais polos ja disponiveis. Encontre o seu e comece a estudar com mais criterio.',
-  faqTitulo: 'Duvidas comuns antes da compra',
+    'Temos o mapeamento dos principais polos já disponíveis. Encontre o seu e comece a estudar com mais critério.',
+  faqTitulo: 'Dúvidas comuns antes da compra',
   faqSubtitulo:
-    'Abra apenas o que voce quiser consultar e mantenha a pagina mais leve para navegar.',
+    'Abra apenas o que você quiser consultar e mantenha a página mais leve para navegar.',
   faqItens: [
     {
       pergunta: 'Como funciona a plataforma?',
       resposta:
-        'Voce escolhe o local da sua prova, libera o acesso e revisa os percursos mais frequentes, pontos de atencao e modulos praticos antes do exame.',
+        'Você escolhe o local da sua prova, libera o acesso e revisa os percursos mais frequentes, pontos de atenção e módulos práticos antes do exame.',
     },
     {
       pergunta: 'Isso garante o trajeto exato da minha prova?',
       resposta:
-        'Nao. O foco e mostrar os percursos mais frequentes observados na pratica para voce chegar menos surpreso e mais preparado.',
+        'Não. O foco é mostrar os percursos mais frequentes observados na prática para você chegar menos surpreso e mais preparado.',
     },
     {
       pergunta: 'Comprei um local. Tenho acesso aos outros?',
       resposta:
-        'Cada compra libera apenas um local de prova, pelo periodo escolhido. Se quiser outro local, a compra e separada.',
+        'Cada compra libera apenas um local de prova, pelo período escolhido. Se quiser outro local, a compra é separada.',
     },
     {
       pergunta: 'O que acontece depois do pagamento?',
       resposta:
-        'Assim que o Mercado Pago confirma o pagamento, o acesso e liberado automaticamente na sua conta.',
+        'Assim que o Mercado Pago confirma o pagamento, o acesso é liberado automaticamente na sua conta.',
     },
   ],
   ctaFinalKicker: 'Comece pelo seu local',
-  ctaFinalTitulo: 'Quanto antes voce estudar o padrao da prova, mais seguro chega no dia.',
+  ctaFinalTitulo: 'Quanto antes você estudar o padrão da prova, mais seguro chega no dia.',
   ctaFinalTexto:
-    'Escolha o local de prova, veja o que ja esta liberado e comece a revisar com mais criterio, menos ansiedade e mais confianca.',
+    'Escolha o local de prova, veja o que já está liberado e comece a revisar com mais critério, menos ansiedade e mais confiança.',
   ctaFinalBotaoPrimarioTexto: 'Ver locais liberados',
   ctaFinalBotaoSecundarioTexto: 'Criar conta e acompanhar',
 }
@@ -46,51 +46,51 @@ export const HOME_PAGE_DEFAULTS = {
 export const LOCAL_PAGE_DEFAULTS = {
   heroFallbackTitulo: 'Prepare-se melhor para a prova em {local}.',
   heroFallbackSubtituloDisponivel:
-    'Escolha o periodo que combina melhor com sua data de prova e com o ritmo em que voce quer revisar.',
+    'Escolha o período que combina melhor com sua data de prova e com o ritmo em que você quer revisar.',
   heroFallbackSubtituloIndisponivel: '{descricao} {mensagem}',
   secaoPlanosTitulo: 'Escolha o tempo certo para estudar esse local',
   secaoPlanosSubtitulo:
-    'Compare duracao, contexto e preco antes de seguir para o checkout.',
-  secaoPlanosFaixa1: 'Pagamento unico',
-  secaoPlanosFaixa2: 'Liberacao automatica apos a confirmacao',
+    'Compare duração, contexto e preço antes de seguir para o checkout.',
+  secaoPlanosFaixa1: 'Pagamento único',
+  secaoPlanosFaixa2: 'Liberação automática após a confirmação',
   secaoPlanosFaixa3: '1 local por compra',
-  boxFallbackTitulo: 'O que voce vai encontrar neste acesso',
-  boxFallbackItem1: 'Percursos mais frequentes e simulacao da prova',
+  boxFallbackTitulo: 'O que você vai encontrar neste acesso',
+  boxFallbackItem1: 'Percursos mais frequentes e simulação da prova',
   boxFallbackItem2: 'Baliza, embreagem e erros que mais tiram pontos',
   boxFallbackItem3: 'Acesso organizado para revisar no seu ritmo',
   boxFallbackObservacao:
     'O acesso aparece automaticamente na sua conta assim que o pagamento for confirmado.',
   saibaMaisTitulo: 'Saiba mais sobre esse acesso',
   saibaMaisSubtitulo:
-    'Abra apenas os detalhes que voce quiser consultar depois de olhar os planos.',
+    'Abra apenas os detalhes que você quiser consultar depois de olhar os planos.',
   saibaMaisItens: [
     {
-      titulo: 'O que voce vai encontrar',
+      titulo: 'O que você vai encontrar',
       copy:
-        'Esse acesso foi organizado para mostrar o que mais ajuda antes da prova, sem excesso de informacao aberta de uma vez.',
+        'Esse acesso foi organizado para mostrar o que mais ajuda antes da prova, sem excesso de informação aberta de uma vez.',
       pontos: [
-        'Percursos mais frequentes e simulacao da prova',
+        'Percursos mais frequentes e simulação da prova',
         'Baliza, embreagem e erros que mais tiram pontos',
       ],
     },
     {
       titulo: 'Como isso ajuda no dia da prova',
       copy:
-        'O foco nao e decorar rua. E dirigir com mais leitura, menos surpresa e mais criterio durante a avaliacao.',
+        'O foco não é decorar rua. É dirigir com mais leitura, menos surpresa e mais critério durante a avaliação.',
       pontos: [
         'Menos surpresa ao entender como a prova costuma acontecer',
-        'Mais leitura da avaliacao para saber o que exige mais atencao',
-        'Mais confianca para dirigir com calma, criterio e preparo',
+        'Mais leitura da avaliação para saber o que exige mais atenção',
+        'Mais confiança para dirigir com calma, critério e preparo',
       ],
     },
     {
-      titulo: 'Compra e liberacao',
+      titulo: 'Compra e liberação',
       copy:
-        'A compra e simples e o acesso aparece automaticamente assim que o pagamento e confirmado.',
+        'A compra é simples e o acesso aparece automaticamente assim que o pagamento é confirmado.',
       pontos: [
-        'Compra unica sem renovacao automatica',
-        'Pagamento por Pix ou cartao via Mercado Pago',
-        'Liberacao automatica apos a confirmacao',
+        'Compra única sem renovação automática',
+        'Pagamento por Pix ou cartão via Mercado Pago',
+        'Liberação automática após a confirmação',
       ],
     },
   ],
@@ -98,28 +98,28 @@ export const LOCAL_PAGE_DEFAULTS = {
 
 export const CHECKOUT_PAGE_DEFAULTS = {
   kickerPadrao: 'Revise seu acesso antes de pagar',
-  tituloPadrao: 'Voce esta a um passo de liberar o material do seu local de prova.',
+  tituloPadrao: 'Você está a um passo de liberar o material do seu local de prova.',
   subtituloPadrao:
-    'Revise o que esta incluido, confirme o periodo escolhido e siga para o pagamento com mais clareza.',
-  beneficiosTituloPadrao: 'O que voce vai receber',
+    'Revise o que está incluído, confirme o período escolhido e siga para o pagamento com mais clareza.',
+  beneficiosTituloPadrao: 'O que você vai receber',
   beneficiosListaPadrao: [
     'Percursos mais frequentes do local',
-    'Pontos de atencao nos trechos mais importantes',
-    'Videos e apoios explicativos',
-    'Baliza, embreagem e revisao pratica',
+    'Pontos de atenção nos trechos mais importantes',
+    'Vídeos e apoios explicativos',
+    'Baliza, embreagem e revisão prática',
   ],
   ajudaTituloPadrao: 'Como isso ajuda antes da prova',
   ajudaTextoPadrao:
-    'O objetivo nao e decorar rua. E chegar mais preparado para entender o padrao da avaliacao, reduzir surpresa e dirigir com mais criterio no dia da prova.',
+    'O objetivo não é decorar rua. É chegar mais preparado para entender o padrão da avaliação, reduzir surpresa e dirigir com mais critério no dia da prova.',
   confiancaListaPadrao: [
-    'Liberacao automatica apos a confirmacao',
-    'Pagamento processado com seguranca pelo Mercado Pago',
+    'Liberação automática após a confirmação',
+    'Pagamento processado com segurança pelo Mercado Pago',
     'O acesso aparece na sua biblioteca assim que o pagamento for aprovado',
   ],
   resumoKickerPadrao: 'Resumo da compra',
   resumoTextoPadrao: 'Material do local de prova com acesso por {duracao}.',
   precoLabelPadrao: 'Total',
-  precoTextoPadrao: 'Pagamento unico pelo periodo escolhido',
+  precoTextoPadrao: 'Pagamento único pelo período escolhido',
   seguroTextoPadrao: 'Pagamento seguro com Mercado Pago',
 }
 

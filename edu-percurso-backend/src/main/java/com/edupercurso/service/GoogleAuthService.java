@@ -50,7 +50,7 @@ public class GoogleAuthService {
         try {
             GoogleIdToken idToken = buildVerifier(clientId).verify(credential);
             if (idToken == null) {
-                throw new IllegalArgumentException("Nao foi possivel validar a conta Google.");
+                throw new IllegalArgumentException("Não foi possível validar a conta Google.");
             }
             return mapearPayload(idToken.getPayload());
         } catch (GeneralSecurityException | IOException ex) {
@@ -60,7 +60,7 @@ public class GoogleAuthService {
 
     public GoogleAccount trocarCodePorConta(String code, String redirectUri, String originHeader, String requestedWith) {
         if (!"XMLHttpRequest".equalsIgnoreCase(normalize(requestedWith))) {
-            throw new IllegalArgumentException("Requisicao invalida para login com Google.");
+            throw new IllegalArgumentException("Requisição inválida para login com Google.");
         }
 
         String clientId = requireClientId();
@@ -72,13 +72,13 @@ public class GoogleAuthService {
             if (tokenResponse.idToken() != null && !tokenResponse.idToken().isBlank()) {
                 GoogleIdToken idToken = buildVerifier(clientId).verify(tokenResponse.idToken());
                 if (idToken == null) {
-                    throw new IllegalArgumentException("Nao foi possivel validar a conta Google.");
+                    throw new IllegalArgumentException("Não foi possível validar a conta Google.");
                 }
                 return mapearPayload(idToken.getPayload());
             }
 
             if (tokenResponse.accessToken() == null || tokenResponse.accessToken().isBlank()) {
-                throw new IllegalArgumentException("Nao foi possivel validar a conta Google.");
+                throw new IllegalArgumentException("Não foi possível validar a conta Google.");
             }
 
             return buscarContaViaUserInfo(tokenResponse.accessToken());
@@ -114,7 +114,7 @@ public class GoogleAuthService {
             GoogleOAuthError error = objectMapper.readValue(response.body(), GoogleOAuthError.class);
             throw new IllegalArgumentException(
                     error.errorDescription() == null || error.errorDescription().isBlank()
-                            ? "Nao foi possivel validar a conta Google."
+                            ? "Não foi possível validar a conta Google."
                             : "Google: " + error.errorDescription()
             );
         }
@@ -130,13 +130,13 @@ public class GoogleAuthService {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
-            throw new IllegalArgumentException("Nao foi possivel validar a conta Google.");
+            throw new IllegalArgumentException("Não foi possível validar a conta Google.");
         }
 
         GoogleUserInfo userInfo = objectMapper.readValue(response.body(), GoogleUserInfo.class);
         String email = normalizarEmail(userInfo.email());
         if (email.isEmpty()) {
-            throw new IllegalArgumentException("A conta Google informada nao possui um e-mail valido.");
+            throw new IllegalArgumentException("A conta Google informada não possui um e-mail válido.");
         }
         if (!Boolean.TRUE.equals(userInfo.emailVerified())) {
             throw new IllegalArgumentException("Sua conta Google precisa ter o e-mail verificado.");
@@ -166,7 +166,7 @@ public class GoogleAuthService {
     private GoogleAccount mapearPayload(GoogleIdToken.Payload payload) {
         String email = normalizarEmail(payload.getEmail());
         if (email.isEmpty()) {
-            throw new IllegalArgumentException("A conta Google informada nao possui um e-mail valido.");
+            throw new IllegalArgumentException("A conta Google informada não possui um e-mail válido.");
         }
         if (!Boolean.TRUE.equals(payload.getEmailVerified())) {
             throw new IllegalArgumentException("Sua conta Google precisa ter o e-mail verificado.");
@@ -191,7 +191,7 @@ public class GoogleAuthService {
     private String requireClientId() {
         String clientId = googleWebClientId == null ? "" : googleWebClientId.trim();
         if (clientId.isEmpty()) {
-            throw new IllegalStateException("Login com Google nao configurado no servidor.");
+            throw new IllegalStateException("Login com Google não configurado no servidor.");
         }
         return clientId;
     }
@@ -199,7 +199,7 @@ public class GoogleAuthService {
     private String requireClientSecret() {
         String clientSecret = googleWebClientSecret == null ? "" : googleWebClientSecret.trim();
         if (clientSecret.isEmpty()) {
-            throw new IllegalStateException("Login com Google nao configurado no servidor.");
+            throw new IllegalStateException("Login com Google não configurado no servidor.");
         }
         return clientSecret;
     }
@@ -211,12 +211,12 @@ public class GoogleAuthService {
     private String validarRedirectUri(String redirectUri, String originHeader) {
         String normalizedRedirect = normalizeOrigin(redirectUri);
         if (normalizedRedirect.isBlank()) {
-            throw new IllegalArgumentException("Origem invalida para login com Google.");
+            throw new IllegalArgumentException("Origem inválida para login com Google.");
         }
 
         String normalizedOriginHeader = normalizeOrigin(originHeader);
         if (!normalizedOriginHeader.isBlank() && !Objects.equals(normalizedRedirect, normalizedOriginHeader)) {
-            throw new IllegalArgumentException("Origem invalida para login com Google.");
+            throw new IllegalArgumentException("Origem inválida para login com Google.");
         }
 
         Set<String> allowedOrigins = new LinkedHashSet<>();
@@ -234,7 +234,7 @@ public class GoogleAuthService {
         allowedOrigins.add("http://127.0.0.1:5173");
 
         if (!allowedOrigins.contains(normalizedRedirect)) {
-            throw new IllegalArgumentException("Origem invalida para login com Google.");
+            throw new IllegalArgumentException("Origem inválida para login com Google.");
         }
 
         return normalizedRedirect;

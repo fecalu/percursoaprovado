@@ -1,4 +1,4 @@
-export function extractAuthError(error, fallback = 'Nao foi possivel concluir a autenticacao.') {
+export function extractAuthError(error, fallback = 'Não foi possível concluir a autenticação.') {
   const data = error?.response?.data
 
   if (typeof data?.erro === 'string' && data.erro.trim()) {
@@ -14,7 +14,7 @@ export function extractAuthError(error, fallback = 'Nao foi possivel concluir a 
 
   if (typeof error?.message === 'string' && error.message.trim()) {
     if (error.message === 'Network Error') {
-      return 'Nao foi possivel conectar ao servidor. Recarregue a pagina e tente novamente.'
+      return 'Não foi possível conectar ao servidor. Recarregue a página e tente novamente.'
     }
     return error.message
   }

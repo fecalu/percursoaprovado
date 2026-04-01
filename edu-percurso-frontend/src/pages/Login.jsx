@@ -23,7 +23,7 @@ export default function Login() {
       const role = await loginWithGoogle(code, window.location.origin)
       navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
-      setErro(extractAuthError(error, 'Nao foi possivel entrar com Google.'))
+      setErro(extractAuthError(error, 'Não foi possível entrar com Google.'))
     } finally {
       setGoogleLoading(false)
     }
@@ -48,7 +48,7 @@ export default function Login() {
       <div className="auth-card fade-in">
         <BrandLogo variant="auth" />
         <h1 className="auth-heading">Bem-vindo de volta</h1>
-        <p className="auth-sub">Entre para acessar seus locais de prova e modulos de apoio.</p>
+        <p className="auth-sub">Entre para acessar seus locais de prova e módulos de apoio.</p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -110,7 +110,7 @@ export default function Login() {
         )}
 
         <div className="auth-footer">
-          Nao tem conta? <Link to="/register" state={location.state}>Criar conta gratuita</Link>
+          Não tem conta? <Link to="/register" state={location.state}>Criar conta gratuita</Link>
         </div>
       </div>
     </div>

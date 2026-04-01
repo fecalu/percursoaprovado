@@ -16,7 +16,7 @@ import {
 
 const MOTIVOS_CANCELAMENTO = [
   'Comprei o local errado',
-  'Nao vou mais fazer a prova nesse local',
+  'Não vou mais fazer a prova nesse local',
   'Tive problema no acesso',
   'Outro motivo',
 ]
@@ -39,10 +39,10 @@ function formatResumoAluno(item) {
   const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
 
   if (situacao === 'SOLICITACAO_EM_ANALISE') {
-    return 'Sua solicitacao foi enviada e esta em analise.'
+    return 'Sua solicitação foi enviada e está em análise.'
   }
   if (situacao === 'REEMBOLSO_PENDENTE') {
-    return 'Sua solicitacao foi aprovada. O acesso foi encerrado e o reembolso esta em andamento.'
+    return 'Sua solicitação foi aprovada. O acesso foi encerrado e o reembolso está em andamento.'
   }
   if (situacao === 'REEMBOLSADO') {
     return 'O valor foi devolvido ao seu meio de pagamento.'
@@ -51,7 +51,7 @@ function formatResumoAluno(item) {
     return 'O pagamento foi estornado pelo meio de pagamento.'
   }
   if (situacao === 'PAGAMENTO_MANTIDO') {
-    return 'Sua solicitacao foi negada e o acesso continua ativo.'
+    return 'Sua solicitação foi negada e o acesso continua ativo.'
   }
   return ''
 }
@@ -113,11 +113,11 @@ export default function MeusPedidos() {
         motivo: motivoCancelamento,
         observacaoAluno: observacaoCancelamento,
       })
-      show('Solicitacao enviada com sucesso. Agora ela aparece para analise do atendimento.')
+      show('Solicitação enviada com sucesso. Agora ela aparece para análise do atendimento.')
       fecharSolicitacao()
       await carregar()
     } catch (error) {
-      show(error.response?.data?.erro || 'Erro ao enviar solicitacao de cancelamento.', 'error')
+      show(error.response?.data?.erro || 'Erro ao enviar solicitação de cancelamento.', 'error')
     } finally {
       setSolicitandoId('')
     }
@@ -155,7 +155,7 @@ export default function MeusPedidos() {
           <div>
             <div className="page-title">Meus pagamentos</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Acompanhe seus pedidos, retome pagamentos pendentes e envie solicitacoes de cancelamento dentro do prazo.
+              Acompanhe seus pedidos, retome pagamentos pendentes e envie solicitações de cancelamento dentro do prazo.
             </p>
           </div>
 
@@ -184,12 +184,12 @@ export default function MeusPedidos() {
         <div className="student-filter-card student-filter-card--inline" style={{ marginBottom: '1.5rem' }}>
           <div className="student-filter-copy-wrap">
             <div className="student-filter-title">Como liberar seu acesso</div>
-            <div className="student-filter-copy">Se houver pedido pendente, o caminho continua simples e automatico.</div>
+            <div className="student-filter-copy">Se houver pedido pendente, o caminho continua simples e automático.</div>
           </div>
           <div className="student-help-steps">
             <div className="student-help-step">1. Clique em Pagar agora no pedido pendente.</div>
-            <div className="student-help-step">2. Finalize o checkout no Mercado Pago usando Pix ou cartao.</div>
-            <div className="student-help-step">3. Depois da confirmacao, seu acesso aparece em Meus acessos e na Biblioteca.</div>
+            <div className="student-help-step">2. Finalize o checkout no Mercado Pago usando Pix ou cartão.</div>
+            <div className="student-help-step">3. Depois da confirmação, seu acesso aparece em Meus acessos e na Biblioteca.</div>
           </div>
         </div>
       )}
@@ -197,7 +197,7 @@ export default function MeusPedidos() {
       {pedidos.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">+</div>
-          Voce ainda nao iniciou nenhuma compra.
+          Você ainda não iniciou nenhuma compra.
           <div style={{ marginTop: '1rem' }}>
             <button className="btn btn-primary" onClick={() => navigate('/')}>
               Ver locais de prova
@@ -237,7 +237,7 @@ export default function MeusPedidos() {
                   )}
                   {item.solicitacaoCancelamentoStatus && (
                     <div className="student-detail-item">
-                      <span className="student-detail-label">Solicitacao</span>
+                      <span className="student-detail-label">Solicitação</span>
                       <span className="student-detail-value">{formatSolicitacaoCancelamentoStatus(item.solicitacaoCancelamentoStatus)}</span>
                     </div>
                   )}
@@ -245,13 +245,13 @@ export default function MeusPedidos() {
 
                 {item.status === 'PAGO' && item.podeSolicitarCancelamento && (
                   <div className="student-inline-note" style={{ marginTop: '0.9rem' }}>
-                    Voce pode solicitar cancelamento ate {formatDataHoraCurta(item.prazoCancelamentoExpiraEm)}.
+                    Você pode solicitar cancelamento até {formatDataHoraCurta(item.prazoCancelamentoExpiraEm)}.
                   </div>
                 )}
 
                 {item.status === 'PAGO' && !item.podeSolicitarCancelamento && !item.solicitacaoCancelamentoStatus && item.prazoCancelamentoExpiraEm && (
                   <div className="student-inline-note" style={{ marginTop: '0.9rem' }}>
-                    O prazo de 7 dias para solicitar cancelamento desse pagamento ja expirou.
+                    O prazo de 7 dias para solicitar cancelamento desse pagamento já expirou.
                   </div>
                 )}
 
@@ -324,7 +324,7 @@ export default function MeusPedidos() {
               Pedido {pedidoSolicitacao.referencia} - {pedidoSolicitacao.localProvaNome}
             </div>
             <div className="mini-copy">
-              Esse pedido pode ser solicitado ate {formatDataHoraCurta(pedidoSolicitacao.prazoCancelamentoExpiraEm)}.
+              Esse pedido pode ser solicitado até {formatDataHoraCurta(pedidoSolicitacao.prazoCancelamentoExpiraEm)}.
             </div>
 
             <label className="form-group" style={{ marginTop: '1rem' }}>
@@ -337,10 +337,10 @@ export default function MeusPedidos() {
             </label>
 
             <label className="form-group">
-              <span className="form-label">Observacao</span>
+              <span className="form-label">Observação</span>
               <textarea
                 rows="4"
-                placeholder="Se quiser, explique rapidamente o motivo da solicitacao."
+                placeholder="Se quiser, explique rapidamente o motivo da solicitação."
                 value={observacaoCancelamento}
                 onChange={event => setObservacaoCancelamento(event.target.value)}
               />
@@ -355,7 +355,7 @@ export default function MeusPedidos() {
                 onClick={enviarSolicitacaoCancelamento}
                 disabled={solicitandoId === pedidoSolicitacao.id}
               >
-                {solicitandoId === pedidoSolicitacao.id ? 'Enviando...' : 'Confirmar solicitacao'}
+                {solicitandoId === pedidoSolicitacao.id ? 'Enviando...' : 'Confirmar solicitação'}
               </button>
             </div>
           </div>

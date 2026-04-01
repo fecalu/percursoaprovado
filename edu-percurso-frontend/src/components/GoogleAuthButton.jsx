@@ -49,12 +49,12 @@ function GoogleMark() {
 
 function mapGooglePopupError(type) {
   if (type === 'popup_failed_to_open') {
-    return 'Nao foi possivel abrir a janela do Google. Verifique se o navegador bloqueou popups.'
+    return 'Não foi possível abrir a janela do Google. Verifique se o navegador bloqueou pop-ups.'
   }
   if (type === 'popup_closed') {
-    return 'A janela do Google foi fechada antes da conclusao do login.'
+    return 'A janela do Google foi fechada antes da conclusão do login.'
   }
-  return 'Nao foi possivel iniciar o login com Google agora.'
+  return 'Não foi possível iniciar o login com Google agora.'
 }
 
 export default function GoogleAuthButton({ clientId, disabled = false, onCode, onError }) {
@@ -90,13 +90,13 @@ export default function GoogleAuthButton({ clientId, disabled = false, onCode, o
           callback: response => {
             setIsOpening(false)
             if (response?.error) {
-              errorHandlerRef.current?.(response.error_description || 'Nao foi possivel validar o login com Google.')
+              errorHandlerRef.current?.(response.error_description || 'Não foi possível validar o login com Google.')
               return
             }
 
             const code = typeof response?.code === 'string' ? response.code.trim() : ''
             if (!code) {
-              errorHandlerRef.current?.('Nao foi possivel validar o login com Google.')
+              errorHandlerRef.current?.('Não foi possível validar o login com Google.')
               return
             }
 
@@ -112,7 +112,7 @@ export default function GoogleAuthButton({ clientId, disabled = false, onCode, o
       })
       .catch(() => {
         if (cancelled) return
-        errorHandlerRef.current?.('Nao foi possivel carregar o login com Google agora.')
+        errorHandlerRef.current?.('Não foi possível carregar o login com Google agora.')
       })
 
     return () => {

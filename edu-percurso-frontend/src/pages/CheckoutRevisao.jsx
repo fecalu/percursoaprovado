@@ -14,8 +14,8 @@ function fmtMoeda(centavos) {
 }
 
 function formatPlanoDuracao(duracaoDias) {
-  if (!duracaoDias) return 'Periodo escolhido'
-  if (duracaoDias === 30) return '1 mes'
+  if (!duracaoDias) return 'Período escolhido'
+  if (duracaoDias === 30) return '1 mês'
   if (duracaoDias === 90) return '3 meses'
   if (duracaoDias === 180) return '6 meses'
   if (duracaoDias === 365) return '12 meses'
@@ -77,7 +77,7 @@ export default function CheckoutRevisao() {
       { label: 'Local', value: local?.nome || '-' },
       { label: 'Plano', value: plano.nome },
       { label: 'Acesso', value: formatPlanoDuracao(plano.duracaoDias) },
-      { label: 'Pagamento', value: 'Pix ou cartao' },
+      { label: 'Pagamento', value: 'Pix ou cartão' },
     ]
   }, [local, plano])
 
@@ -145,12 +145,12 @@ export default function CheckoutRevisao() {
         if (abaCheckout) {
           abaCheckout.opener = null
           abaCheckout.location.href = pedido.checkoutUrl
-          show('Checkout aberto em outra aba. Vamos acompanhar a confirmacao por aqui.')
+          show('Checkout aberto em outra aba. Vamos acompanhar a confirmação por aqui.')
           navigate(`/locais/${localSlug}`)
           return
         }
 
-        show('Seu navegador bloqueou a nova aba. Vamos abrir o checkout nesta mesma pagina.')
+        show('Seu navegador bloqueou a nova aba. Vamos abrir o checkout nesta mesma página.')
         window.location.href = pedido.checkoutUrl
         return
       }
@@ -160,7 +160,7 @@ export default function CheckoutRevisao() {
       setTimeout(() => navigate('/meus-pedidos'), 500)
     } catch (error) {
       if (abaCheckout) abaCheckout.close()
-      const mensagem = error.response?.data?.erro || 'Nao foi possivel iniciar a compra.'
+      const mensagem = error.response?.data?.erro || 'Não foi possível iniciar a compra.'
       show(mensagem, 'error')
       if (mensagem.includes('pedido pendente')) {
         setTimeout(() => navigate('/meus-pedidos'), 800)
@@ -175,7 +175,7 @@ export default function CheckoutRevisao() {
   if (!local || !plano || !checkoutCopy) {
     return (
       <div className="landing-page landing-page--eager">
-        <div className="empty-state">Nao foi possivel encontrar esse plano para revisao da compra.</div>
+        <div className="empty-state">Não foi possível encontrar esse plano para revisão da compra.</div>
       </div>
     )
   }

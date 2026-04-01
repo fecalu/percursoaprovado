@@ -56,9 +56,9 @@ export default function PainelAluno() {
       return {
         badgeClass: 'badge-green',
         badgeLabel: 'Acesso ativo',
-        meta: `Valido ate ${formatDataCurta(ultimoAcessoAtivo.fimEm)}`,
+        meta: `Válido até ${formatDataCurta(ultimoAcessoAtivo.fimEm)}`,
         title: ultimoAcessoAtivo.localProvaNome,
-        copy: `Seu plano ${ultimoAcessoAtivo.planoNome} esta liberado por ${formatPlanoDuracao(ultimoAcessoAtivo.duracaoDias)}. Abra sua biblioteca e continue seus estudos do jeito mais rapido.`,
+        copy: `Seu plano ${ultimoAcessoAtivo.planoNome} está liberado por ${formatPlanoDuracao(ultimoAcessoAtivo.duracaoDias)}. Abra sua biblioteca e continue seus estudos do jeito mais rápido.`,
         primaryLabel: 'Abrir biblioteca',
         primaryAction: () => navigate('/biblioteca'),
         secondaryLabel: 'Ver meus acessos',
@@ -72,7 +72,7 @@ export default function PainelAluno() {
         badgeLabel: 'Pagamento pendente',
         meta: ultimoPedidoPendente.localProvaNome,
         title: 'Finalize sua compra para liberar o acesso',
-        copy: `Existe um pedido do plano ${ultimoPedidoPendente.planoNome} aguardando confirmacao. Assim que o pagamento entrar, o material aparece automaticamente na sua biblioteca.`,
+        copy: `Existe um pedido do plano ${ultimoPedidoPendente.planoNome} aguardando confirmação. Assim que o pagamento entrar, o material aparece automaticamente na sua biblioteca.`,
         primaryLabel: 'Ir para pagamentos',
         primaryAction: () => navigate('/meus-pedidos'),
         secondaryLabel: 'Ver local',
@@ -83,10 +83,10 @@ export default function PainelAluno() {
     return {
       badgeClass: 'badge-blue',
       badgeLabel: 'Comece agora',
-      meta: 'Sua conta esta pronta',
+      meta: 'Sua conta está pronta',
       title: 'Escolha um local e libere seu material',
-      copy: 'Quando voce contratar um plano, seus conteudos, pagamentos e acessos ficam organizados aqui no painel para acompanhar tudo com mais clareza.',
-      primaryLabel: 'Ver locais disponiveis',
+      copy: 'Quando você contratar um plano, seus conteúdos, pagamentos e acessos ficam organizados aqui no painel para acompanhar tudo com mais clareza.',
+      primaryLabel: 'Ver locais disponíveis',
       primaryAction: () => navigate('/'),
       secondaryLabel: pedidos.length > 0 ? 'Ver meus pagamentos' : '',
       secondaryAction: () => navigate('/meus-pedidos'),
@@ -105,8 +105,8 @@ export default function PainelAluno() {
         meta: totalAcessosAtivos > 0 ? pluralizar(totalAcessosAtivos, 'acesso ativo', 'acessos ativos') : 'Sem plano ativo agora',
         title: 'Biblioteca',
         copy: totalAcessosAtivos > 0
-          ? 'Acesse todo o material liberado, revise percursos e continue seus estudos sem precisar procurar a proxima etapa.'
-          : 'Assim que um plano estiver ativo, sua biblioteca vira o centro do seu estudo com todos os conteudos liberados.',
+          ? 'Acesse todo o material liberado, revise percursos e continue seus estudos sem precisar procurar a próxima etapa.'
+          : 'Assim que um plano estiver ativo, sua biblioteca vira o centro do seu estudo com todos os conteúdos liberados.',
         ctaLabel: totalAcessosAtivos > 0 ? 'Abrir biblioteca' : 'Ver locais',
         ctaAction: () => navigate(totalAcessosAtivos > 0 ? '/biblioteca' : '/'),
       },
@@ -114,9 +114,9 @@ export default function PainelAluno() {
         id: 'acessos',
         badgeClass: totalAcessosAtivos > 0 ? 'badge-blue' : 'badge-gray',
         badgeLabel: totalAcessosAtivos > 0 ? 'Em andamento' : 'Sem acesso ativo',
-        meta: totalAcessosAtivos > 0 ? 'Validades e planos em um so lugar' : 'Veja historico e validade',
+        meta: totalAcessosAtivos > 0 ? 'Validades e planos em um só lugar' : 'Veja histórico e validade',
         title: 'Meus acessos',
-        copy: 'Consulte quais locais estao liberados, por quanto tempo cada acesso continua valendo e o que ja foi encerrado.',
+        copy: 'Consulte quais locais estão liberados, por quanto tempo cada acesso continua valendo e o que já foi encerrado.',
         ctaLabel: 'Ver acessos',
         ctaAction: () => navigate('/meus-acessos'),
       },
@@ -124,9 +124,9 @@ export default function PainelAluno() {
         id: 'pagamentos',
         badgeClass: totalPedidosPendentes > 0 ? 'badge-warn' : 'badge-blue',
         badgeLabel: totalPedidosPendentes > 0 ? 'Pagamento pendente' : 'Tudo organizado',
-        meta: totalPedidosPendentes > 0 ? pluralizar(totalPedidosPendentes, 'pedido aguardando pagamento', 'pedidos aguardando pagamento') : 'Historico e comprovacoes',
+        meta: totalPedidosPendentes > 0 ? pluralizar(totalPedidosPendentes, 'pedido aguardando pagamento', 'pedidos aguardando pagamento') : 'Histórico e comprovações',
         title: 'Meus pagamentos',
-        copy: 'Acompanhe compras, pagamentos pendentes, pedidos concluidos e solicitacoes ligadas ao seu acesso.',
+        copy: 'Acompanhe compras, pagamentos pendentes, pedidos concluídos e solicitações ligadas ao seu acesso.',
         ctaLabel: 'Ver pagamentos',
         ctaAction: () => navigate('/meus-pedidos'),
       },
@@ -142,7 +142,7 @@ export default function PainelAluno() {
           <div>
             <div className="page-title">Seu painel</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Veja seus acessos, continue seus estudos e acompanhe sua conta em um so lugar.
+              Veja seus acessos, continue seus estudos e acompanhe sua conta em um só lugar.
             </p>
           </div>
 
@@ -157,7 +157,7 @@ export default function PainelAluno() {
             </div>
             <div className="student-kpi-pill">
               <span className="student-kpi-pill-value">{pedidos.length}</span>
-              <span className="student-kpi-pill-label">Pedidos no historico</span>
+              <span className="student-kpi-pill-label">Pedidos no histórico</span>
             </div>
           </div>
         </section>

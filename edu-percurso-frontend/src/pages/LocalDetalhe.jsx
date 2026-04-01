@@ -45,13 +45,13 @@ function getStatusBadgeClass(statusComercial) {
 function getMensagemDisponibilidade(local) {
   if (local?.mensagemPublica) return local.mensagemPublica
   if (local?.statusComercial === 'EM_BREVE') {
-    return 'Estamos finalizando os conteudos desse local. Assim que tudo estiver pronto, a compra sera liberada.'
+    return 'Estamos finalizando os conteúdos desse local. Assim que tudo estiver pronto, a compra será liberada.'
   }
   if (local?.statusComercial === 'PAUSADO') {
-    return 'As vendas desse local estao temporariamente pausadas. Tente novamente em outro momento.'
+    return 'As vendas desse local estão temporariamente pausadas. Tente novamente em outro momento.'
   }
   if (local?.statusComercial === 'RASCUNHO') {
-    return 'Esse local ainda esta em rascunho e nao foi aberto ao publico.'
+    return 'Esse local ainda está em rascunho e não foi aberto ao público.'
   }
   return ''
 }
@@ -81,7 +81,7 @@ function getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade, l
   if (compraLiberada) {
     return (
       interpolateSiteText(localPageContent?.heroFallbackSubtituloDisponivel, contexto)
-      || 'Escolha o periodo que combina melhor com sua data de prova e com o ritmo em que voce quer revisar.'
+      || 'Escolha o período que combina melhor com sua data de prova e com o ritmo em que você quer revisar.'
     )
   }
 
@@ -93,35 +93,35 @@ function getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade, l
 
 function getPlanoIndicacao(duracaoDias) {
   if (duracaoDias <= 30) return 'Ideal para quem vai fazer a prova em breve.'
-  if (duracaoDias <= 90) return 'Bom para revisar com calma nas proximas semanas.'
+  if (duracaoDias <= 90) return 'Bom para revisar com calma nas próximas semanas.'
   if (duracaoDias <= 180) return 'Mais tempo para praticar, revisar e voltar quando precisar.'
-  return 'Acesso mais longo para uma preparacao estendida.'
+  return 'Acesso mais longo para uma preparação estendida.'
 }
 
 function getPlanoPontosCurtos(duracaoDias) {
   const horizonte =
     duracaoDias <= 30
-      ? 'Revisao rapida antes da prova'
+      ? 'Revisão rápida antes da prova'
       : duracaoDias <= 90
         ? 'Mais tempo para revisar com calma'
         : duracaoDias <= 180
-          ? 'Mais folga para repetir o conteudo'
-          : 'Preparacao estendida no seu ritmo'
+          ? 'Mais folga para repetir o conteúdo'
+          : 'Preparação estendida no seu ritmo'
 
-  return ['Percurso real e simulacao', 'Baliza, embreagem e erros comuns', horizonte]
+  return ['Percurso real e simulação', 'Baliza, embreagem e erros comuns', horizonte]
 }
 
 const COMPRA_SEGURA_ITENS = [
   {
-    titulo: 'Compra unica',
-    descricao: 'Voce escolhe o periodo e paga uma vez, sem renovacao automatica.',
+    titulo: 'Compra única',
+    descricao: 'Você escolhe o período e paga uma vez, sem renovação automática.',
   },
   {
-    titulo: 'Liberacao automatica',
-    descricao: 'Assim que o pagamento e confirmado, o acesso aparece na sua conta.',
+    titulo: 'Liberação automática',
+    descricao: 'Assim que o pagamento é confirmado, o acesso aparece na sua conta.',
   },
   {
-    titulo: 'Pix ou cartao',
+    titulo: 'Pix ou cartão',
     descricao: 'Pagamento pelo Mercado Pago com fluxo simples e reconhecido pelo aluno.',
   },
 ]
@@ -129,20 +129,20 @@ const COMPRA_SEGURA_ITENS = [
 const BENEFICIOS_DO_ACESSO = [
   {
     titulo: 'Menos surpresa no dia da prova',
-    descricao: 'Voce estuda os percursos mais frequentes, os pontos de atencao e como a prova costuma acontecer nesse local.',
+    descricao: 'Você estuda os percursos mais frequentes, os pontos de atenção e como a prova costuma acontecer nesse local.',
   },
   {
-    titulo: 'Mais criterio ao dirigir',
-    descricao: 'O foco e entender o que costuma ser avaliado, os erros que mais tiram pontos e como dirigir com mais consciencia.',
+    titulo: 'Mais critério ao dirigir',
+    descricao: 'O foco é entender o que costuma ser avaliado, os erros que mais tiram pontos e como dirigir com mais consciência.',
   },
   {
-    titulo: 'Mais seguranca para revisar',
-    descricao: 'Voce volta ao conteudo durante o periodo escolhido e revisa no seu ritmo, sem depender de memoria solta.',
+    titulo: 'Mais segurança para revisar',
+    descricao: 'Você volta ao conteúdo durante o período escolhido e revisa no seu ritmo, sem depender de memória solta.',
   },
 ]
 
 const HERO_DESTAQUES_LOCAL = [
-  'Percursos mais frequentes e simulacao da prova',
+  'Percursos mais frequentes e simulação da prova',
   'Baliza, embreagem e erros que mais tiram pontos',
 ]
 
@@ -217,14 +217,14 @@ function getPlanoDestaque(duracaoDias) {
   if (duracaoDias <= 180) {
     return {
       selo: 'Mais tempo de preparo',
-      resumo: 'Ideal para quem quer estudar com mais folga e repetir o conteudo.',
+      resumo: 'Ideal para quem quer estudar com mais folga e repetir o conteúdo.',
       recomendado: false,
     }
   }
 
   return {
-    selo: 'Preparacao estendida',
-    resumo: 'Acesso longo para quem prefere deixar o conteudo sempre disponivel.',
+    selo: 'Preparação estendida',
+    resumo: 'Acesso longo para quem prefere deixar o conteúdo sempre disponível.',
     recomendado: false,
   }
 }
@@ -237,7 +237,7 @@ function getPlanoApresentacao(plano) {
     resumo: plano?.vitrineResumo?.trim() || padrao.resumo,
     recomendado: typeof plano?.vitrineRecomendada === 'boolean' ? plano.vitrineRecomendada : padrao.recomendado,
     texto: plano?.vitrineTexto?.trim() || getPlanoIndicacao(plano?.duracaoDias || 0),
-    meta: plano?.vitrineMeta?.trim() || 'Pagamento unico pelo periodo escolhido',
+    meta: plano?.vitrineMeta?.trim() || 'Pagamento único pelo período escolhido',
   }
 }
 
@@ -259,7 +259,7 @@ function getCheckoutAcompanhamento(monitor) {
     return {
       variant: 'success',
       kicker: 'Pagamento confirmado',
-      titulo: 'Pagamento concluido com sucesso',
+      titulo: 'Pagamento concluído com sucesso',
       texto: 'O Mercado Pago confirmou esse pagamento. Seu acesso deve aparecer automaticamente na sua conta.',
     }
   }
@@ -267,17 +267,17 @@ function getCheckoutAcompanhamento(monitor) {
   if (etapa === 'FAILED') {
     return {
       variant: 'danger',
-      kicker: 'Pagamento nao concluido',
-      titulo: 'Ainda nao conseguimos confirmar esse pagamento',
-      texto: 'Confira o status em Meus pagamentos. Se precisar, voce pode retomar ou iniciar uma nova tentativa.',
+      kicker: 'Pagamento não concluído',
+      titulo: 'Ainda não conseguimos confirmar esse pagamento',
+      texto: 'Confira o status em Meus pagamentos. Se precisar, você pode retomar ou iniciar uma nova tentativa.',
     }
   }
 
   return {
     variant: 'pending',
     kicker: 'Pagamento em andamento',
-    titulo: 'Estamos aguardando a confirmacao do Mercado Pago',
-    texto: 'Finalize o checkout na outra aba. Assim que a confirmacao chegar, esta tela se atualiza automaticamente.',
+    titulo: 'Estamos aguardando a confirmação do Mercado Pago',
+    texto: 'Finalize o checkout na outra aba. Assim que a confirmação chegar, esta tela se atualiza automaticamente.',
   }
 }
 
@@ -326,7 +326,7 @@ export default function LocalDetalhe() {
           setErroCarregamento('')
         } else {
           setLocal(null)
-          setErroCarregamento('Nao foi possivel carregar esse local agora. Recarregue a pagina e tente novamente em instantes.')
+          setErroCarregamento('Não foi possível carregar esse local agora. Recarregue a página e tente novamente em instantes.')
         }
 
         if (planosResp.status === 'fulfilled') {
@@ -334,7 +334,7 @@ export default function LocalDetalhe() {
           setErroPlanos('')
         } else {
           setPlanos([])
-          setErroPlanos('Nao foi possivel carregar os planos desse local agora.')
+          setErroPlanos('Não foi possível carregar os planos desse local agora.')
         }
 
         setConfigLocalPage(configResp.status === 'fulfilled' ? configResp.value?.localPage || null : null)
@@ -393,15 +393,15 @@ export default function LocalDetalhe() {
 
       if (etapaAnterior !== proximaEtapa) {
         if (proximaEtapa === 'SUCCESS') {
-          show('Pagamento confirmado. Seu acesso ja deve aparecer na sua conta.')
+          show('Pagamento confirmado. Seu acesso já deve aparecer na sua conta.')
         }
         if (proximaEtapa === 'FAILED') {
-          show('O Mercado Pago ainda nao confirmou esse pagamento.', 'error')
+          show('O Mercado Pago ainda não confirmou esse pagamento.', 'error')
         }
       }
     } catch (error) {
       if (manual) {
-        show(error.response?.data?.erro || 'Nao foi possivel atualizar o status do pagamento.', 'error')
+        show(error.response?.data?.erro || 'Não foi possível atualizar o status do pagamento.', 'error')
       }
     } finally {
       if (manual) {
@@ -577,14 +577,14 @@ export default function LocalDetalhe() {
   if (erroCarregamento) {
     return (
       <div className="empty-state">
-        <div>Nao foi possivel carregar esse local agora.</div>
+        <div>Não foi possível carregar esse local agora.</div>
         <button className="btn btn-primary" style={{ marginTop: '1rem' }} onClick={() => window.location.reload()}>
           Tentar novamente
         </button>
       </div>
     )
   }
-  if (!local) return <div className="empty-state">Local de prova nao encontrado.</div>
+  if (!local) return <div className="empty-state">Local de prova não encontrado.</div>
 
   const compraLiberada = local.statusComercial === 'DISPONIVEL'
   const mensagemDisponibilidade = getMensagemDisponibilidade(local)
@@ -761,7 +761,7 @@ export default function LocalDetalhe() {
           <>
             <div className="page-title">Disponibilidade do local</div>
             <p className="page-sub">
-              Esse local aparece no site, mas a compra fica bloqueada ate o administrador liberar as vendas.
+              Esse local aparece no site, mas a compra fica bloqueada até o administrador liberar as vendas.
             </p>
           </>
         )}
@@ -772,7 +772,7 @@ export default function LocalDetalhe() {
               <span className={`badge ${getStatusBadgeClass(local.statusComercial)}`}>
                 {formatStatusComercialLocal(local.statusComercial)}
               </span>
-              <span className="table-name">Compra indisponivel no momento</span>
+              <span className="table-name">Compra indisponível no momento</span>
             </div>
             <div className="mini-copy" style={{ marginTop: '0.9rem' }}>
               {mensagemDisponibilidade}
@@ -793,7 +793,7 @@ export default function LocalDetalhe() {
             </button>
           </div>
         ) : planosOrdenados.length === 0 ? (
-          <div className="empty-state">Esse local ainda nao possui planos ativos.</div>
+          <div className="empty-state">Esse local ainda não possui planos ativos.</div>
         ) : (
           <div className="local-offer-layout">
             <div className="plan-showcase">
@@ -820,13 +820,13 @@ export default function LocalDetalhe() {
                   className="plan-showcase-arrow plan-showcase-arrow--next"
                   onClick={irParaProximoPlano}
                   disabled={planoAtivoIndex === planosOrdenados.length - 1}
-                  aria-label="Ver proximo plano"
+                  aria-label="Ver próximo plano"
                 >
                   <span aria-hidden="true">→</span>
                 </button>
               </div>
 
-              <div className="plan-showcase-dots" role="tablist" aria-label="Selecao de planos">
+              <div className="plan-showcase-dots" role="tablist" aria-label="Seleção de planos">
                 {planosOrdenados.map((plano, index) => (
                   <button
                     key={plano.id}

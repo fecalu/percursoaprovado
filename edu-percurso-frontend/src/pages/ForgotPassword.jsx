@@ -17,7 +17,7 @@ function extractApiError(error) {
     }
   }
 
-  return 'Nao foi possivel enviar o link agora. Tente novamente em instantes.'
+  return 'Não foi possível enviar o link agora. Tente novamente em instantes.'
 }
 
 export default function ForgotPassword() {
@@ -36,7 +36,7 @@ export default function ForgotPassword() {
     try {
       const response = await authService.forgotPassword({ email })
       setSucesso(
-        response.mensagem || 'Se esse e-mail estiver cadastrado, enviaremos as instrucoes para redefinir sua senha.'
+        response.mensagem || 'Se esse e-mail estiver cadastrado, enviaremos as instruções para redefinir sua senha.'
       )
     } catch (error) {
       setErro(extractApiError(error))
@@ -75,7 +75,7 @@ export default function ForgotPassword() {
             style={{ width: '100%', justifyContent: 'center' }}
             disabled={loading}
           >
-            {loading ? 'Enviando link...' : 'Enviar link de redefinicao'}
+            {loading ? 'Enviando link...' : 'Enviar link de redefinição'}
           </button>
         </form>
 

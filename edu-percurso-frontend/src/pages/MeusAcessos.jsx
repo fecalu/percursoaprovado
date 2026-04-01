@@ -35,7 +35,7 @@ export default function MeusAcessos() {
           <div>
             <div className="page-title">Meus acessos</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Veja quais locais estao liberados, ate quando sua validade vai e o que voce pode abrir agora.
+              Veja quais locais estão liberados, até quando sua validade vai e o que você pode abrir agora.
             </p>
           </div>
 
@@ -55,10 +55,10 @@ export default function MeusAcessos() {
       {ativas.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">+</div>
-          Voce ainda nao tem nenhum acesso liberado.
+          Você ainda não tem nenhum acesso liberado.
           <div style={{ marginTop: '1rem' }}>
             <button className="btn btn-primary" onClick={() => navigate('/')}>
-              Ver locais disponiveis
+              Ver locais disponíveis
             </button>
             <button className="btn btn-ghost" onClick={() => navigate('/meus-pedidos')} style={{ marginLeft: '0.75rem' }}>
               Ver meus pagamentos
@@ -85,11 +85,11 @@ export default function MeusAcessos() {
               <div className="student-card-copy">Acesso liberado no plano {item.planoNome}.</div>
               <div className="student-detail-list">
                 <div className="student-detail-item">
-                  <span className="student-detail-label">Periodo</span>
+                  <span className="student-detail-label">Período</span>
                   <span className="student-detail-value">{formatPlanoDuracao(item.duracaoDias)}</span>
                 </div>
                 <div className="student-detail-item">
-                  <span className="student-detail-label">Inicio</span>
+                  <span className="student-detail-label">Início</span>
                   <span className="student-detail-value">{formatDataCurta(item.inicioEm)}</span>
                 </div>
                 <div className="student-detail-item">
@@ -121,7 +121,7 @@ export default function MeusAcessos() {
           >
             <div className="library-section-heading">
               <div className="section-heading">Acessos encerrados</div>
-              <div className="section-copy">Historico de acessos que ja terminaram ou foram cancelados.</div>
+              <div className="section-copy">Histórico de acessos que já terminaram ou foram cancelados.</div>
             </div>
 
             <div className="library-section-meta">

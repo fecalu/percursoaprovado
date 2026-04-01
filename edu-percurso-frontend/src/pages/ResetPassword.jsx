@@ -17,7 +17,7 @@ function extractApiError(error) {
     }
   }
 
-  return 'Nao foi possivel atualizar a senha agora. Tente novamente.'
+  return 'Não foi possível atualizar a senha agora. Tente novamente.'
 }
 
 export default function ResetPassword() {
@@ -35,7 +35,7 @@ export default function ResetPassword() {
     setSucesso('')
 
     if (!token) {
-      setErro('Link de redefinicao invalido ou incompleto.')
+      setErro('Link de redefinição inválido ou incompleto.')
       return
     }
 
@@ -45,14 +45,14 @@ export default function ResetPassword() {
     }
 
     if (form.novaSenha !== form.confirmarSenha) {
-      setErro('As senhas nao conferem.')
+      setErro('As senhas não conferem.')
       return
     }
 
     setLoading(true)
     try {
       await authService.resetPassword({ token, novaSenha: form.novaSenha })
-      setSucesso('Senha atualizada com sucesso. Voce ja pode entrar com a nova senha.')
+      setSucesso('Senha atualizada com sucesso. Você já pode entrar com a nova senha.')
       setTimeout(() => navigate('/login', { replace: true }), 1200)
     } catch (error) {
       setErro(extractApiError(error))
@@ -74,7 +74,7 @@ export default function ResetPassword() {
             <input
               className="form-input"
               type="password"
-              placeholder="Minimo 6 caracteres"
+              placeholder="Mínimo 6 caracteres"
               value={form.novaSenha}
               onChange={event => setForm(current => ({ ...current, novaSenha: event.target.value }))}
               required

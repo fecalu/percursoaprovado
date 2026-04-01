@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 @Service
@@ -23,13 +24,14 @@ public class AuthService {
     public AuthDTO.LoginResponse registrar(AuthDTO.RegisterRequest req) {
         String email = normalizarEmail(req.getEmail());
         String nome = normalizarNome(req.getNome());
+        LocalDateTime aceiteEm = LocalDateTime.now();
 
         Usuario usuarioExistente = usuarioRepository.findByEmailIgnoreCase(email).orElse(null);
         if (usuarioExistente != null) {
             if (usuarioExistente.getAuthProvider() == Usuario.AuthProvider.GOOGLE) {
-                throw new IllegalArgumentException("Esse e-mail ja foi cadastrado com Google. Use Continuar com Google.");
+                throw new IllegalArgumentException("Esse e-mail já foi cadastrado com Google. Use Continuar com Google.");
             }
-            throw new IllegalArgumentException("E-mail ja cadastrado.");
+            throw new IllegalArgumentException("E-mail já cadastrado.");
         }
 
         Usuario usuario = Usuario.builder()
@@ -38,6 +40,8 @@ public class AuthService {
                 .senhaHash(passwordEncoder.encode(req.getSenha()))
                 .authProvider(Usuario.AuthProvider.LOCAL)
                 .emailVerificado(false)
+                .termosAceitosEm(aceiteEm)
+                .politicaPrivacidadeAceitaEm(aceiteEm)
                 .role(Usuario.Role.ALUNO)
                 .build();
 
@@ -50,14 +54,14 @@ public class AuthService {
         String email = normalizarEmail(req.getEmail());
 
         Usuario usuario = usuarioRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new IllegalArgumentException("Credenciais invalidas."));
+                .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas."));
 
         if (usuario.getAuthProvider() == Usuario.AuthProvider.GOOGLE || usuario.getSenhaHash() == null || usuario.getSenhaHash().isBlank()) {
             throw new IllegalArgumentException("Essa conta usa Google. Entre com Continuar com Google.");
         }
 
         if (!passwordEncoder.matches(req.getSenha(), usuario.getSenhaHash())) {
-            throw new IllegalArgumentException("Credenciais invalidas.");
+            throw new IllegalArgumentException("Credenciais inválidas.");
         }
 
         return criarRespostaLogin(usuario);
@@ -65,7 +69,7 @@ public class AuthService {
 
     public AuthDTO.LoginResponse loginComGoogle(AuthDTO.GoogleLoginRequest req) {
         GoogleAuthService.GoogleAccount googleAccount = googleAuthService.validarCredential(req.getCredential());
-        return loginOuRegistrarContaGoogle(googleAccount);
+        return loginOuRegistrarContaGoogle(googleAccount, false);
     }
 
     public AuthDTO.LoginResponse loginComGoogleCode(
@@ -79,14 +83,14 @@ public class AuthService {
                 originHeader,
                 requestedWith
         );
-        return loginOuRegistrarContaGoogle(googleAccount);
+        return loginOuRegistrarContaGoogle(googleAccount, Boolean.TRUE.equals(req.getAceitouTermos()));
     }
 
-    private AuthDTO.LoginResponse loginOuRegistrarContaGoogle(GoogleAuthService.GoogleAccount googleAccount) {
+    private AuthDTO.LoginResponse loginOuRegistrarContaGoogle(GoogleAuthService.GoogleAccount googleAccount, boolean aceitouTermos) {
         Usuario usuarioVinculado = usuarioRepository.findByGoogleSub(googleAccount.getGoogleSub()).orElse(null);
         if (usuarioVinculado != null) {
             if (usuarioVinculado.getRole() != Usuario.Role.ALUNO) {
-                throw new IllegalArgumentException("Login com Google nao disponivel para essa conta.");
+                throw new IllegalArgumentException("Login com Google não disponível para essa conta.");
             }
 
             boolean precisaAtualizar = false;
@@ -98,7 +102,7 @@ public class AuthService {
                     && usuarioRepository.findByEmailIgnoreCase(googleAccount.getEmail())
                     .filter(outro -> !outro.getId().equals(usuarioVinculado.getId()))
                     .isPresent()) {
-                throw new IllegalArgumentException("Ja existe outra conta vinculada a esse e-mail.");
+                throw new IllegalArgumentException("Já existe outra conta vinculada a esse e-mail.");
             }
             if (!googleAccount.getEmail().equalsIgnoreCase(usuarioVinculado.getEmail())) {
                 usuarioVinculado.setEmail(googleAccount.getEmail());
@@ -126,8 +130,13 @@ public class AuthService {
 
         Usuario usuarioComMesmoEmail = usuarioRepository.findByEmailIgnoreCase(googleAccount.getEmail()).orElse(null);
         if (usuarioComMesmoEmail != null) {
-            throw new IllegalArgumentException("Ja existe uma conta com esse e-mail. Entre com sua senha para acessar.");
+            throw new IllegalArgumentException("Já existe uma conta com esse e-mail. Entre com sua senha para acessar.");
         }
+        if (!aceitouTermos) {
+            throw new IllegalArgumentException("Para criar sua conta com Google, aceite os Termos de Uso e a Política de Privacidade.");
+        }
+
+        LocalDateTime aceiteEm = LocalDateTime.now();
 
         Usuario novoUsuario = Usuario.builder()
                 .nome(googleAccount.getNome())
@@ -137,6 +146,8 @@ public class AuthService {
                 .googleSub(googleAccount.getGoogleSub())
                 .avatarUrl(googleAccount.getAvatarUrl())
                 .emailVerificado(googleAccount.isEmailVerificado())
+                .termosAceitosEm(aceiteEm)
+                .politicaPrivacidadeAceitaEm(aceiteEm)
                 .role(Usuario.Role.ALUNO)
                 .build();
 

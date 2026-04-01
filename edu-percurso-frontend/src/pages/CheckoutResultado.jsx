@@ -17,16 +17,16 @@ function useQuery() {
 
 const MENSAGENS = {
   sucesso: {
-    titulo: 'Pagamento em confirmacao',
+    titulo: 'Pagamento em confirmação',
     texto: 'Recebemos o retorno do Mercado Pago e estamos confirmando seu pagamento.',
   },
   pendente: {
     titulo: 'Pagamento pendente',
-    texto: 'Seu pagamento ainda esta em analise ou aguardando confirmacao.',
+    texto: 'Seu pagamento ainda está em análise ou aguardando confirmação.',
   },
   falha: {
-    titulo: 'Pagamento nao concluido',
-    texto: 'Voce pode tentar novamente pelo seu historico de pagamentos.',
+    titulo: 'Pagamento não concluído',
+    texto: 'Você pode tentar novamente pelo seu histórico de pagamentos.',
   },
 }
 
@@ -91,7 +91,7 @@ export default function CheckoutResultado() {
         })
       })
       .catch(error => {
-        setErro(error.response?.data?.erro || 'Ainda estamos aguardando a confirmacao do pagamento.')
+        setErro(error.response?.data?.erro || 'Ainda estamos aguardando a confirmação do pagamento.')
       })
       .finally(() => setLoading(false))
   }, [externalReference, paymentId, status, user])
@@ -141,7 +141,7 @@ export default function CheckoutResultado() {
                   Entrar
                 </Link>
                 <Link className="btn btn-ghost" to="/">
-                  Voltar ao inicio
+                  Voltar ao início
                 </Link>
               </>
             )}
@@ -149,11 +149,11 @@ export default function CheckoutResultado() {
         </div>
 
         <div className="hero-panel">
-          <div className="hero-panel-title">Proximos passos</div>
+          <div className="hero-panel-title">Próximos passos</div>
           <div className="hero-list">
-            <div className="hero-list-item">Se o pagamento for aprovado, seu acesso sera liberado automaticamente.</div>
+            <div className="hero-list-item">Se o pagamento for aprovado, seu acesso será liberado automaticamente.</div>
             <div className="hero-list-item">Se ainda estiver pendente, acompanhe o status em Meus pagamentos.</div>
-            <div className="hero-list-item">Se o checkout foi interrompido, voce pode retomar o pagamento pela area Meus pagamentos.</div>
+            <div className="hero-list-item">Se o checkout foi interrompido, você pode retomar o pagamento pela área Meus pagamentos.</div>
           </div>
         </div>
       </section>

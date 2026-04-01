@@ -9,6 +9,8 @@ import CheckoutRevisao from './pages/CheckoutRevisao'
 import CheckoutResultado from './pages/CheckoutResultado'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import TermosDeUso from './pages/TermosDeUso'
+import PoliticaPrivacidade from './pages/PoliticaPrivacidade'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import PainelAluno from './pages/PainelAluno'
@@ -44,6 +46,8 @@ export default function App() {
             <Route path="/checkout/:status" element={<CheckoutResultado />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/termos-de-uso" element={<TermosDeUso />} />
+            <Route path="/politica-de-privacidade" element={<PoliticaPrivacidade />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
 

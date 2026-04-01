@@ -27,14 +27,14 @@ export default function MeuProgresso() {
           <div>
             <div className="page-title">Meu progresso</div>
             <p className="page-sub" style={{ marginBottom: 0 }}>
-              Acompanhe o que voce iniciou, concluiu e o que ainda falta revisar com mais calma.
+              Acompanhe o que você iniciou, concluiu e o que ainda falta revisar com mais calma.
             </p>
           </div>
 
           <div className="student-kpi-strip">
             <div className="student-kpi-pill">
               <span className="student-kpi-pill-value">{concluidos}</span>
-              <span className="student-kpi-pill-label">Concluidos</span>
+              <span className="student-kpi-pill-label">Concluídos</span>
             </div>
             <div className="student-kpi-pill">
               <span className="student-kpi-pill-value">{emAndamento}</span>
@@ -51,7 +51,7 @@ export default function MeuProgresso() {
       {itens.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">+</div>
-          Voce ainda nao assistiu nenhum conteudo.
+          Você ainda não assistiu nenhum conteúdo.
           <div style={{ marginTop: '1rem' }}>
             <button className="btn btn-primary" onClick={() => navigate('/biblioteca')}>
               Ver biblioteca
@@ -62,8 +62,8 @@ export default function MeuProgresso() {
         <section className="content-section">
           <div className="section-title-row">
             <div>
-              <div className="section-heading">Conteudos acompanhados</div>
-              <div className="section-copy">Volte rapidamente para o que ainda falta revisar ou reveja o que ja concluiu.</div>
+              <div className="section-heading">Conteúdos acompanhados</div>
+              <div className="section-copy">Volte rapidamente para o que ainda falta revisar ou reveja o que já concluiu.</div>
             </div>
           </div>
 
@@ -79,10 +79,10 @@ export default function MeuProgresso() {
                   <div className="table-name">{item.percursoTitulo}</div>
                   <div className="student-progress-copy">
                     {item.concluido
-                      ? 'Conteudo concluido. Voce pode rever quando quiser.'
+                      ? 'Conteúdo concluído. Você pode rever quando quiser.'
                       : pct > 0
-                        ? `Voce ja assistiu ${pct}% desse conteudo.`
-                        : 'Ainda nao iniciado.'}
+                        ? `Você já assistiu ${pct}% desse conteúdo.`
+                        : 'Ainda não iniciado.'}
                   </div>
                   <div className="student-progress-meta">
                     <span>{formatDuracaoMinutos(item.segundosAssistidos)} assistidos</span>
@@ -96,11 +96,11 @@ export default function MeuProgresso() {
                 </div>
                 <div className="student-progress-side">
                   {item.concluido
-                    ? <span className="badge badge-green">Concluido</span>
+                    ? <span className="badge badge-green">Concluído</span>
                     : <span className="badge badge-gray">{pct}%</span>
                   }
                   <button className="btn btn-primary" onClick={() => navigate(`/conteudos/${item.percursoId}`)}>
-                    {item.concluido ? 'Rever conteudo' : pct > 0 ? 'Continuar' : 'Comecar'}
+                    {item.concluido ? 'Rever conteúdo' : pct > 0 ? 'Continuar' : 'Começar'}
                   </button>
                 </div>
               </div>

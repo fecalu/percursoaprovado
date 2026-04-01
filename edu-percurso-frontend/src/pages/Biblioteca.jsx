@@ -105,7 +105,7 @@ export default function Biblioteca() {
     const progressoItem = progressoMap.get(item.id)
     if (!progressoItem) {
       return {
-        label: 'Nao iniciado',
+        label: 'Não iniciado',
         toneClass: 'is-neutral',
         concluido: false,
         progressoPercentual: 0,
@@ -127,7 +127,7 @@ export default function Biblioteca() {
       : 0
 
     return {
-      label: progressoPercentual > 0 ? 'Em andamento' : 'Nao iniciado',
+      label: progressoPercentual > 0 ? 'Em andamento' : 'Não iniciado',
       toneClass: progressoPercentual > 0 ? 'is-active' : 'is-neutral',
       concluido: false,
       progressoPercentual,
@@ -162,7 +162,7 @@ export default function Biblioteca() {
                   </span>
                 </div>
                 <div className="library-lesson-title">{item.titulo}</div>
-                <div className="library-lesson-copy">{item.resumo || item.descricao || 'Conteudo sem resumo cadastrado.'}</div>
+                <div className="library-lesson-copy">{item.resumo || item.descricao || 'Conteúdo sem resumo cadastrado.'}</div>
                 <div className="library-lesson-meta">
                   <span>{formatDuracaoMinutos(item.duracaoSegundos)}</span>
                   {status.progressoPercentual > 0 && !status.concluido && (
@@ -171,7 +171,7 @@ export default function Biblioteca() {
                 </div>
               </div>
 
-              <div className="library-lesson-action">{status.concluido ? 'Rever' : status.progressoPercentual > 0 ? 'Continuar' : 'Comecar'}</div>
+              <div className="library-lesson-action">{status.concluido ? 'Rever' : status.progressoPercentual > 0 ? 'Continuar' : 'Começar'}</div>
             </button>
           )
         })}
@@ -179,7 +179,7 @@ export default function Biblioteca() {
     )
   }
 
-  function renderSecao({ chave, titulo, subtitulo, itens, destaque = 'modulos' }) {
+  function renderSecao({ chave, titulo, subtitulo, itens, destaque = 'módulos' }) {
     const aberta = secaoEstaAberta(chave)
     const concluidos = itens.filter(item => resolverStatusAula(item).concluido).length
     const duracaoTotal = itens.reduce((acc, item) => acc + (item.duracaoSegundos || 0), 0)
@@ -200,13 +200,13 @@ export default function Biblioteca() {
               <div className="library-module-caption">
                 <span>{itens.length} {destaque}</span>
                 <span>{formatDuracaoMinutos(duracaoTotal)}</span>
-                <span>{concluidos} concluidas</span>
+                <span>{concluidos} concluídas</span>
               </div>
             </div>
           </div>
 
           <div className="library-module-meta">
-            <span className="library-module-progress-copy">{concluidos} de {itens.length} aulas concluidas</span>
+            <span className="library-module-progress-copy">{concluidos} de {itens.length} aulas concluídas</span>
             <span className="library-module-toggle-label">{aberta ? 'Fechar aulas' : 'Abrir aulas'}</span>
           </div>
         </button>
@@ -215,7 +215,7 @@ export default function Biblioteca() {
           <div className="student-progress-bar">
             <div className="student-progress-fill" style={{ width: `${progressoPercentual}%` }} />
           </div>
-          <div className="mini-copy">{concluidos} de {itens.length} aulas concluidas</div>
+          <div className="mini-copy">{concluidos} de {itens.length} aulas concluídas</div>
         </div>
 
         {aberta && <div className="library-module-body">{renderAulas(itens)}</div>}
@@ -233,7 +233,7 @@ export default function Biblioteca() {
             {assinaturasAtivas.map(item => (
               <div key={item.id} className="student-chip student-chip--compact">
                 <div className="student-chip-title">{item.localProvaNome}</div>
-                <div className="student-chip-copy">Ativo ate {formatDataCurta(item.fimEm)}</div>
+                <div className="student-chip-copy">Ativo até {formatDataCurta(item.fimEm)}</div>
               </div>
             ))}
           </div>
@@ -242,7 +242,7 @@ export default function Biblioteca() {
         <div className="student-filter-card student-filter-card--inline">
           <input
             className="form-input student-filter-input--slim"
-            placeholder="Buscar por modulo, aula, local ou tipo..."
+            placeholder="Buscar por módulo, aula, local ou tipo..."
             value={filtro}
             onChange={event => setFiltro(event.target.value)}
           />
@@ -252,7 +252,7 @@ export default function Biblioteca() {
       {assinaturasAtivas.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">+</div>
-          Sua biblioteca ainda esta vazia porque voce nao possui um plano ativo.
+          Sua biblioteca ainda está vazia porque você não possui um plano ativo.
           <div style={{ marginTop: '1rem' }}>
             <button className="btn btn-primary" onClick={() => navigate('/')}>
               Ver locais de prova
@@ -262,14 +262,14 @@ export default function Biblioteca() {
       ) : filtrados.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">?</div>
-          Nenhum conteudo encontrado com esse filtro.
+          Nenhum conteúdo encontrado com esse filtro.
         </div>
       ) : (
         <>
           {conteudosGerais.length > 0 && (
             renderSecao({
               chave: 'geral',
-              titulo: 'Modulos gerais',
+              titulo: 'Módulos gerais',
               subtitulo: 'Baliza, embreagem, erros que mais tiram pontos e o que costuma ser avaliado.',
               itens: conteudosGerais,
             })
@@ -279,9 +279,9 @@ export default function Biblioteca() {
             renderSecao({
               chave: `local-${secao.slug}`,
               titulo: secao.nome,
-              subtitulo: 'Percursos mais frequentes, pontos de atencao e orientacoes praticas desse local.',
+              subtitulo: 'Percursos mais frequentes, pontos de atenção e orientações práticas desse local.',
               itens: secao.itens,
-              destaque: 'conteudos',
+              destaque: 'conteúdos',
             })
           ))}
         </>

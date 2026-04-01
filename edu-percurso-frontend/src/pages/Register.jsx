@@ -10,20 +10,26 @@ export default function Register() {
   const { register, loginWithGoogle } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [form, setForm] = useState({ nome: '', email: '', senha: '' })
+  const [form, setForm] = useState({ nome: '', email: '', senha: '', aceitouTermos: false })
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
+  const termosHref = '/termos-de-uso'
+  const privacidadeHref = '/politica-de-privacidade'
 
   async function handleGoogleCode(code) {
+    if (!form.aceitouTermos) {
+      setErro('Para criar sua conta, aceite os Termos de Uso e a Política de Privacidade.')
+      return
+    }
     setErro('')
     setGoogleLoading(true)
     try {
-      const role = await loginWithGoogle(code, window.location.origin)
+      const role = await loginWithGoogle(code, window.location.origin, true)
       navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
-      setErro(extractAuthError(error, 'Nao foi possivel criar sua conta com Google.'))
+      setErro(extractAuthError(error, 'Não foi possível criar sua conta com Google.'))
     } finally {
       setGoogleLoading(false)
     }
@@ -35,11 +41,15 @@ export default function Register() {
       setErro('A senha deve ter pelo menos 6 caracteres.')
       return
     }
+    if (!form.aceitouTermos) {
+      setErro('Para criar sua conta, aceite os Termos de Uso e a Política de Privacidade.')
+      return
+    }
 
     setErro('')
     setLoading(true)
     try {
-      const role = await register(form.nome, form.email, form.senha)
+      const role = await register(form.nome, form.email, form.senha, true)
       navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
       console.error('Falha ao criar conta', error)
@@ -92,6 +102,26 @@ export default function Register() {
             />
           </div>
 
+          <label className="auth-consent-check">
+            <input
+              type="checkbox"
+              checked={form.aceitouTermos}
+              onChange={event => setForm(current => ({ ...current, aceitouTermos: event.target.checked }))}
+              disabled={loading || googleLoading}
+            />
+            <span>
+              Li e aceito os{' '}
+              <a href={termosHref} target="_blank" rel="noreferrer">
+                Termos de Uso
+              </a>{' '}
+              e a{' '}
+              <a href={privacidadeHref} target="_blank" rel="noreferrer">
+                Política de Privacidade
+              </a>
+              .
+            </span>
+          </label>
+
           {erro && <div className="form-error" style={{ marginBottom: '1rem' }}>{erro}</div>}
 
           <button
@@ -112,7 +142,7 @@ export default function Register() {
               <GoogleAuthButton
                 clientId={googleClientId}
                 onCode={handleGoogleCode}
-                disabled={loading || googleLoading}
+                disabled={loading || googleLoading || !form.aceitouTermos}
                 onError={message => setErro(message)}
               />
               {googleLoading && <div className="auth-google-status">Conectando com Google...</div>}
@@ -121,7 +151,7 @@ export default function Register() {
         )}
 
         <div className="auth-footer">
-          Ja tem conta? <Link to="/login" state={location.state}>Entrar</Link>
+          Já tem conta? <Link to="/login" state={location.state}>Entrar</Link>
         </div>
       </div>
     </div>

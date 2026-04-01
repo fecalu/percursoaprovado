@@ -11,18 +11,18 @@ import { resolveMediaUrl } from '../utils/media'
 
 function getCardLinha(local) {
   if (local.statusComercial === 'DISPONIVEL') {
-    return 'Percursos mais frequentes e revisao pratica desse local.'
+    return 'Percursos mais frequentes e revisão prática desse local.'
   }
 
   if (local.statusComercial === 'EM_BREVE') {
-    return 'Esse local sera liberado assim que o conteudo estiver pronto.'
+    return 'Esse local será liberado assim que o conteúdo estiver pronto.'
   }
 
   if (local.statusComercial === 'PAUSADO') {
-    return 'As vendas desse local estao pausadas no momento.'
+    return 'As vendas desse local estão pausadas no momento.'
   }
 
-  return 'Local em configuracao administrativa.'
+  return 'Local em configuração administrativa.'
 }
 
 function getCardCta(local) {
@@ -73,7 +73,7 @@ export default function Home() {
           setErroLocais('')
         } else {
           setLocais([])
-          setErroLocais('Nao foi possivel carregar os locais de prova agora. Recarregue a pagina e tente novamente em instantes.')
+          setErroLocais('Não foi possível carregar os locais de prova agora. Recarregue a página e tente novamente em instantes.')
         }
         setPlanos(planosResp.status === 'fulfilled' ? planosResp.value : [])
         setPercursos(percursosResp.status === 'fulfilled' ? percursosResp.value : [])
@@ -210,7 +210,7 @@ export default function Home() {
               <p className="home-local-showcase-sub">{homeContent.secaoLocaisSubtitulo}</p>
             </div>
 
-            <div className="home-local-showcase-nav" aria-label="Navegacao dos locais de prova">
+            <div className="home-local-showcase-nav" aria-label="Navegação dos locais de prova">
               <button
                 type="button"
                 className="home-local-showcase-nav-btn"
@@ -227,7 +227,7 @@ export default function Home() {
                 className="home-local-showcase-nav-btn"
                 onClick={() => setLocaisInicio(atual => Math.min(ultimoInicioLocais, atual + 1))}
                 disabled={locaisInicio >= ultimoInicioLocais}
-                aria-label="Ver proximos locais"
+                aria-label="Ver próximos locais"
               >
                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="m9.5 6.5 5 5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -260,14 +260,14 @@ export default function Home() {
                 const imagemLocal = resolveMediaUrl(local.imagemCardUrl || local.imagemPrincipalUrl)
                 const tituloCard = local.tituloComercial?.trim() || local.nome
                 const metaPrincipal = estaDisponivel
-                  ? totalAulas > 0
+                      ? totalAulas > 0
                     ? `${String(totalAulas).padStart(2, '0')} ${totalAulas === 1 ? 'Aula' : 'Aulas'}`
                     : 'Planos em breve'
                   : local.statusComercial === 'PAUSADO'
                     ? 'Vendas pausadas'
                     : local.statusComercial === 'EM_BREVE'
                       ? 'Em breve'
-                      : 'Em configuracao'
+                      : 'Em configuração'
                 const exibirBadge = local.id === localMaisProcuradoId && estaDisponivel
 
                 return (

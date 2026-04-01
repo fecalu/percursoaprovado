@@ -45,6 +45,12 @@ public class Usuario {
     @Column(name = "senha_alterada_em")
     private LocalDateTime senhaAlteradaEm;
 
+    @Column(name = "termos_aceitos_em")
+    private LocalDateTime termosAceitosEm;
+
+    @Column(name = "politica_privacidade_aceita_em")
+    private LocalDateTime politicaPrivacidadeAceitaEm;
+
     @CreationTimestamp
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
