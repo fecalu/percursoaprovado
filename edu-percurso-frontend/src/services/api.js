@@ -116,6 +116,11 @@ export const assinaturaService = {
   cancelarAdmin: (id, data) => api.post(`/admin/assinaturas/${id}/cancelar`, data).then(response => response.data),
 }
 
+export const usuarioAdminService = {
+  listar: params => api.get(`/admin/usuarios${toSearchParams(params)}`).then(response => response.data),
+  excluirAlunoTeste: data => api.post('/admin/usuarios/excluir-aluno-teste', data).then(response => response.data),
+}
+
 export const uploadService = {
   enviarThumbnail: file => {
     const formData = new FormData()

@@ -13,4 +13,6 @@ public interface SolicitacaoCancelamentoRepository extends JpaRepository<Solicit
     boolean existsByPedidoId(UUID pedidoId);
     List<SolicitacaoCancelamento> findByPedidoIdIn(Collection<UUID> pedidoIds);
     List<SolicitacaoCancelamento> findAllByOrderByCriadoEmDesc();
+    long countByUsuarioId(UUID usuarioId);
+    void deleteAllByUsuarioId(UUID usuarioId);
 }

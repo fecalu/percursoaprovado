@@ -105,6 +105,7 @@ export default function Login() {
                 onError={message => setErro(message)}
               />
               {googleLoading && <div className="auth-google-status">Entrando com Google...</div>}
+              <div className="auth-google-status">Primeiro acesso? Use a tela Criar conta para entrar com Google.</div>
             </div>
           </>
         )}

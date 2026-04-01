@@ -9,5 +9,7 @@ import java.util.UUID;
 
 public interface ProgressoRepository extends JpaRepository<ProgressoAluno, UUID> {
     List<ProgressoAluno> findByUsuarioId(UUID usuarioId);
+    long countByUsuarioId(UUID usuarioId);
+    void deleteAllByUsuarioId(UUID usuarioId);
     Optional<ProgressoAluno> findByUsuarioIdAndPercursoId(UUID usuarioId, UUID percursoId);
 }

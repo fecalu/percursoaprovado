@@ -57,10 +57,11 @@ function mapGooglePopupError(type) {
   return 'Não foi possível iniciar o login com Google agora.'
 }
 
-export default function GoogleAuthButton({ clientId, disabled = false, onCode, onError }) {
+export default function GoogleAuthButton({ clientId, disabled = false, onCode, onError, onBeforeStart }) {
   const codeClientRef = useRef(null)
   const codeHandlerRef = useRef(onCode)
   const errorHandlerRef = useRef(onError)
+  const beforeStartHandlerRef = useRef(onBeforeStart)
   const [isReady, setIsReady] = useState(false)
   const [isOpening, setIsOpening] = useState(false)
 
@@ -71,6 +72,10 @@ export default function GoogleAuthButton({ clientId, disabled = false, onCode, o
   useEffect(() => {
     errorHandlerRef.current = onError
   }, [onError])
+
+  useEffect(() => {
+    beforeStartHandlerRef.current = onBeforeStart
+  }, [onBeforeStart])
 
   useEffect(() => {
     if (!clientId) return undefined
@@ -121,7 +126,9 @@ export default function GoogleAuthButton({ clientId, disabled = false, onCode, o
   }, [clientId])
 
   function handleClick() {
-    if (!codeClientRef.current || disabled || isOpening) return
+    if (disabled || isOpening) return
+    if (beforeStartHandlerRef.current?.() === false) return
+    if (!codeClientRef.current) return
     setIsOpening(true)
     codeClientRef.current.requestCode()
   }

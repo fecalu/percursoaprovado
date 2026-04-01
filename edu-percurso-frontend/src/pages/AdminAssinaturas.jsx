@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { assinaturaService, localProvaService, planoService } from '../services/api'
+import { assinaturaService, localProvaService, planoService, usuarioAdminService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import {
   formatAssinaturaPagamentoStatus,
@@ -88,6 +88,8 @@ export default function AdminAssinaturas() {
   const [salvandoDetalhe, setSalvandoDetalhe] = useState(false)
   const [prorrogando, setProrrogando] = useState(false)
   const [cancelando, setCancelando] = useState(false)
+  const [emailExclusaoTeste, setEmailExclusaoTeste] = useState('')
+  const [excluindoAlunoTeste, setExcluindoAlunoTeste] = useState(false)
   const { show, ToastEl } = useToast()
 
   async function carregarDetalhe(id) {
@@ -236,6 +238,36 @@ export default function AdminAssinaturas() {
       show(error.response?.data?.erro || 'Erro ao cancelar acesso.', 'error')
     } finally {
       setCancelando(false)
+    }
+  }
+
+  async function excluirAlunoTeste(event) {
+    event.preventDefault()
+
+    const email = emailExclusaoTeste.trim().toLowerCase()
+    if (!email) {
+      show('Informe o e-mail do aluno que você quer remover.', 'error')
+      return
+    }
+
+    if (!confirm(`Excluir completamente o aluno ${email} e todo o histórico ligado a ele? Essa ação é irreversível.`)) {
+      return
+    }
+
+    setExcluindoAlunoTeste(true)
+    try {
+      const response = await usuarioAdminService.excluirAlunoTeste({ email })
+      show(
+        `${response.mensagem} Pedidos: ${response.pedidosExcluidos}, assinaturas: ${response.assinaturasExcluidas}, progresso: ${response.progressoExcluido}.`
+      )
+      setEmailExclusaoTeste('')
+
+      const limparSelecaoAtual = detalhe?.usuarioEmail?.toLowerCase() === email
+      await carregarTudo(limparSelecaoAtual ? null : selectedId)
+    } catch (error) {
+      show(error.response?.data?.erro || 'Erro ao excluir aluno de teste.', 'error')
+    } finally {
+      setExcluindoAlunoTeste(false)
     }
   }
 
@@ -722,6 +754,42 @@ export default function AdminAssinaturas() {
               {salvando ? 'Liberando...' : 'Liberar acesso'}
             </button>
           </form>
+
+          <div className="card" style={{ marginTop: '1rem', padding: '1rem', background: 'rgba(224,85,85,0.08)' }}>
+            <div className="section-heading" style={{ fontSize: 16 }}>Ferramenta de teste</div>
+            <p className="section-copy">
+              Exclua um aluno de teste pelo e-mail e limpe pedidos, assinaturas, progresso, respostas e tokens para repetir o fluxo de cadastro e compra.
+            </p>
+
+            <form onSubmit={excluirAlunoTeste} style={{ marginTop: '1rem' }}>
+              <div className="form-group">
+                <label className="form-label">E-mail do aluno de teste</label>
+                <input
+                  className="form-input"
+                  type="email"
+                  placeholder="aluno.teste@email.com"
+                  value={emailExclusaoTeste}
+                  onChange={event => setEmailExclusaoTeste(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-actions">
+                {detalhe?.usuarioEmail && (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setEmailExclusaoTeste(detalhe.usuarioEmail)}
+                  >
+                    Usar e-mail do detalhe
+                  </button>
+                )}
+                <button className="btn btn-danger" type="submit" disabled={excluindoAlunoTeste}>
+                  {excluindoAlunoTeste ? 'Excluindo...' : 'Excluir aluno de teste'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </>

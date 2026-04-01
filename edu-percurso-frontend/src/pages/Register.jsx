@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/BrandLogo'
@@ -17,16 +17,58 @@ export default function Register() {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
   const termosHref = '/termos-de-uso'
   const privacidadeHref = '/politica-de-privacidade'
+  const consentRef = useRef(null)
+  const consentInputRef = useRef(null)
+  const consentHighlightTimerRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (consentHighlightTimerRef.current) {
+        window.clearTimeout(consentHighlightTimerRef.current)
+      }
+    }
+  }, [])
+
+  function chamarAtencaoParaTermos() {
+    setErro('Para criar sua conta, aceite os Termos de Uso e a Política de Privacidade.')
+
+    const consentElement = consentRef.current
+    if (consentElement) {
+      consentElement.classList.remove('is-required-attention')
+      void consentElement.offsetWidth
+      consentElement.classList.add('is-required-attention')
+      consentElement.scrollIntoView({ behavior: 'auto', block: 'nearest' })
+    }
+
+    consentInputRef.current?.focus()
+
+    if (consentHighlightTimerRef.current) {
+      window.clearTimeout(consentHighlightTimerRef.current)
+    }
+
+    consentHighlightTimerRef.current = window.setTimeout(() => {
+      consentRef.current?.classList.remove('is-required-attention')
+    }, 520)
+  }
+
+  function validarAceiteAntesDoGoogle() {
+    if (form.aceitouTermos) {
+      return true
+    }
+
+    chamarAtencaoParaTermos()
+    return false
+  }
 
   async function handleGoogleCode(code) {
     if (!form.aceitouTermos) {
-      setErro('Para criar sua conta, aceite os Termos de Uso e a Política de Privacidade.')
+      chamarAtencaoParaTermos()
       return
     }
     setErro('')
     setGoogleLoading(true)
     try {
-      const role = await loginWithGoogle(code, window.location.origin, true)
+      const role = await loginWithGoogle(code, window.location.origin, true, true)
       navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
       setErro(extractAuthError(error, 'Não foi possível criar sua conta com Google.'))
@@ -42,7 +84,7 @@ export default function Register() {
       return
     }
     if (!form.aceitouTermos) {
-      setErro('Para criar sua conta, aceite os Termos de Uso e a Política de Privacidade.')
+      chamarAtencaoParaTermos()
       return
     }
 
@@ -102,8 +144,9 @@ export default function Register() {
             />
           </div>
 
-          <label className="auth-consent-check">
+          <label className="auth-consent-check" ref={consentRef}>
             <input
+              ref={consentInputRef}
               type="checkbox"
               checked={form.aceitouTermos}
               onChange={event => setForm(current => ({ ...current, aceitouTermos: event.target.checked }))}
@@ -142,8 +185,9 @@ export default function Register() {
               <GoogleAuthButton
                 clientId={googleClientId}
                 onCode={handleGoogleCode}
-                disabled={loading || googleLoading || !form.aceitouTermos}
+                disabled={loading || googleLoading}
                 onError={message => setErro(message)}
+                onBeforeStart={validarAceiteAntesDoGoogle}
               />
               {googleLoading && <div className="auth-google-status">Conectando com Google...</div>}
             </div>

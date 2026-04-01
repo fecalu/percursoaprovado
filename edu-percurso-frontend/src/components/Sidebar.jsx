@@ -38,6 +38,7 @@ export default function Sidebar() {
       if (location.pathname.startsWith('/admin/questoes')) return 'Banco de questoes'
       if (location.pathname.startsWith('/admin/locais')) return 'Locais'
       if (location.pathname.startsWith('/admin/planos')) return 'Planos'
+      if (location.pathname.startsWith('/admin/usuarios')) return 'Usuarios'
       if (location.pathname.startsWith('/admin/pedidos')) return 'Pedidos'
       if (location.pathname.startsWith('/admin/assinaturas')) return 'Assinaturas'
       return 'Administracao'
@@ -124,6 +125,9 @@ export default function Sidebar() {
         </NavLink>
         <NavLink to="/admin/planos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconPrice /> Planos
+        </NavLink>
+        <NavLink to="/admin/usuarios" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconUser /> Usuarios
         </NavLink>
         <NavLink to="/admin/pedidos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconCart /> Pedidos e pagamentos

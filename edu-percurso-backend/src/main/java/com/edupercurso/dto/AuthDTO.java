@@ -50,6 +50,7 @@ public class AuthDTO {
         private String redirectUri;
 
         private Boolean aceitouTermos;
+        private Boolean modoCadastro;
     }
 
     @Data

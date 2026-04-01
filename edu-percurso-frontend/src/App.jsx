@@ -30,6 +30,7 @@ import AdminQuestaoForm from './pages/AdminQuestaoForm'
 import AdminLocais from './pages/AdminLocais'
 import AdminPlanos from './pages/AdminPlanos'
 import AdminAssinaturas from './pages/AdminAssinaturas'
+import AdminUsuarios from './pages/AdminUsuarios'
 import AdminPaginaHome from './pages/AdminPaginaHome'
 import AdminPaginaLocal from './pages/AdminPaginaLocal'
 import AdminPaginaCheckout from './pages/AdminPaginaCheckout'
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="/admin/locais" element={<PrivateRoute adminOnly><AdminLocais /></PrivateRoute>} />
             <Route path="/admin/planos" element={<PrivateRoute adminOnly><AdminPlanos /></PrivateRoute>} />
             <Route path="/admin/assinaturas" element={<PrivateRoute adminOnly><AdminAssinaturas /></PrivateRoute>} />
+            <Route path="/admin/usuarios" element={<PrivateRoute adminOnly><AdminUsuarios /></PrivateRoute>} />
             <Route path="/admin/paginas/home" element={<PrivateRoute adminOnly><AdminPaginaHome /></PrivateRoute>} />
             <Route path="/admin/paginas/local" element={<PrivateRoute adminOnly><AdminPaginaLocal /></PrivateRoute>} />
             <Route path="/admin/paginas/checkout" element={<PrivateRoute adminOnly><AdminPaginaCheckout /></PrivateRoute>} />

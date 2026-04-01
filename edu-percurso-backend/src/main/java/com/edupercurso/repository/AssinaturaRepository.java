@@ -3,14 +3,18 @@ package com.edupercurso.repository;
 import com.edupercurso.entity.Assinatura;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
 public interface AssinaturaRepository extends JpaRepository<Assinatura, UUID> {
     List<Assinatura> findAllByOrderByCriadoEmDesc();
     List<Assinatura> findByUsuarioIdOrderByFimEmDesc(UUID usuarioId);
+    long countByUsuarioId(UUID usuarioId);
+    void deleteAllByUsuarioId(UUID usuarioId);
 
     @Query("""
             select a
@@ -46,4 +50,11 @@ public interface AssinaturaRepository extends JpaRepository<Assinatura, UUID> {
               and a.fimEm >= :agora
             """)
     boolean existsQualquerAssinaturaAtiva(UUID usuarioId, LocalDateTime agora);
+
+    @Query("""
+            select distinct a.usuario.id
+            from Assinatura a
+            where a.usuario.id in :usuarioIds
+            """)
+    List<UUID> findUsuarioIdsComAssinaturas(@Param("usuarioIds") Collection<UUID> usuarioIds);
 }

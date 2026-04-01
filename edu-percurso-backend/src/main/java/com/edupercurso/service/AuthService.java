@@ -69,7 +69,7 @@ public class AuthService {
 
     public AuthDTO.LoginResponse loginComGoogle(AuthDTO.GoogleLoginRequest req) {
         GoogleAuthService.GoogleAccount googleAccount = googleAuthService.validarCredential(req.getCredential());
-        return loginOuRegistrarContaGoogle(googleAccount, false);
+        return loginOuRegistrarContaGoogle(googleAccount, false, false);
     }
 
     public AuthDTO.LoginResponse loginComGoogleCode(
@@ -83,10 +83,18 @@ public class AuthService {
                 originHeader,
                 requestedWith
         );
-        return loginOuRegistrarContaGoogle(googleAccount, Boolean.TRUE.equals(req.getAceitouTermos()));
+        return loginOuRegistrarContaGoogle(
+                googleAccount,
+                Boolean.TRUE.equals(req.getAceitouTermos()),
+                Boolean.TRUE.equals(req.getModoCadastro())
+        );
     }
 
-    private AuthDTO.LoginResponse loginOuRegistrarContaGoogle(GoogleAuthService.GoogleAccount googleAccount, boolean aceitouTermos) {
+    private AuthDTO.LoginResponse loginOuRegistrarContaGoogle(
+            GoogleAuthService.GoogleAccount googleAccount,
+            boolean aceitouTermos,
+            boolean modoCadastro
+    ) {
         Usuario usuarioVinculado = usuarioRepository.findByGoogleSub(googleAccount.getGoogleSub()).orElse(null);
         if (usuarioVinculado != null) {
             if (usuarioVinculado.getRole() != Usuario.Role.ALUNO) {
@@ -131,6 +139,9 @@ public class AuthService {
         Usuario usuarioComMesmoEmail = usuarioRepository.findByEmailIgnoreCase(googleAccount.getEmail()).orElse(null);
         if (usuarioComMesmoEmail != null) {
             throw new IllegalArgumentException("Já existe uma conta com esse e-mail. Entre com sua senha para acessar.");
+        }
+        if (!modoCadastro) {
+            throw new IllegalArgumentException("Não encontramos uma conta vinculada a este Google. Toque em Criar conta para continuar.");
         }
         if (!aceitouTermos) {
             throw new IllegalArgumentException("Para criar sua conta com Google, aceite os Termos de Uso e a Política de Privacidade.");
