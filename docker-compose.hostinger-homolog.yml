@@ -36,6 +36,7 @@ services:
       MP_PUBLIC_KEY: ${MP_PUBLIC_KEY}
       MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
       MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET}
+      GOOGLE_WEB_CLIENT_ID: ${GOOGLE_WEB_CLIENT_ID:-}
     ports:
       - "127.0.0.1:8082:8080"
     healthcheck:
@@ -50,6 +51,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_URL: /api
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
     container_name: percursoaprovado_hml_frontend
     restart: unless-stopped
     depends_on:

@@ -38,7 +38,12 @@ public class PasswordResetService {
 
     @Transactional
     public void solicitarRedefinicao(String email) {
-        usuarioRepository.findByEmail(email).ifPresent(usuario -> {
+        usuarioRepository.findByEmailIgnoreCase(email == null ? "" : email.trim()).ifPresent(usuario -> {
+            if (usuario.getAuthProvider() == Usuario.AuthProvider.GOOGLE
+                    && (usuario.getSenhaHash() == null || usuario.getSenhaHash().isBlank())) {
+                return;
+            }
+
             invalidarTokensPendentes(usuario, LocalDateTime.now());
 
             String token = gerarToken();

@@ -22,8 +22,21 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "senha_hash", nullable = false)
+    @Column(name = "senha_hash")
     private String senhaHash;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider", nullable = false)
+    private AuthProvider authProvider;
+
+    @Column(name = "google_sub")
+    private String googleSub;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "email_verificado", nullable = false)
+    private boolean emailVerificado;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -38,5 +51,9 @@ public class Usuario {
 
     public enum Role {
         ALUNO, ADMIN
+    }
+
+    public enum AuthProvider {
+        LOCAL, GOOGLE
     }
 }

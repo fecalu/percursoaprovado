@@ -3,14 +3,31 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/BrandLogo'
 import { resolveAuthDestination } from '../utils/authRedirects'
+import GoogleAuthButton from '../components/GoogleAuthButton'
+import { extractAuthError } from '../utils/authErrors'
 
 export default function Login() {
-  const { login } = useAuth()
+  const { login, loginWithGoogle } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [form, setForm] = useState({ email: '', senha: '' })
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
+
+  async function handleGoogleCredential(credential) {
+    setErro('')
+    setGoogleLoading(true)
+    try {
+      const role = await loginWithGoogle(credential)
+      navigate(resolveAuthDestination(role, location.state), { replace: true })
+    } catch (error) {
+      setErro(extractAuthError(error, 'Nao foi possivel entrar com Google.'))
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -20,7 +37,7 @@ export default function Login() {
       const role = await login(form.email, form.senha)
       navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
-      setErro(error.response?.data?.erro || 'Erro ao entrar. Verifique suas credenciais.')
+      setErro(extractAuthError(error, 'Erro ao entrar. Verifique suas credenciais.'))
     } finally {
       setLoading(false)
     }
@@ -32,6 +49,22 @@ export default function Login() {
         <BrandLogo variant="auth" />
         <h1 className="auth-heading">Bem-vindo de volta</h1>
         <p className="auth-sub">Entre para acessar seus locais de prova e modulos de apoio.</p>
+
+        {googleClientId && (
+          <>
+            <div className="auth-social-stack">
+              <GoogleAuthButton
+                clientId={googleClientId}
+                onCredential={handleGoogleCredential}
+                onError={message => setErro(message)}
+              />
+              {googleLoading && <div className="auth-google-status">Entrando com Google...</div>}
+            </div>
+            <div className="auth-divider">
+              <span>ou continue com e-mail</span>
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -69,7 +102,7 @@ export default function Login() {
           <button
             className="btn btn-primary"
             style={{ width: '100%', justifyContent: 'center' }}
-            disabled={loading}
+            disabled={loading || googleLoading}
           >
             {loading ? 'Entrando...' : 'Entrar'}
           </button>

@@ -10,7 +10,9 @@ COPY edu-percurso-frontend/ ./
 
 # variável para apontar para o backend em produção
 ARG VITE_API_URL=/api
+ARG VITE_GOOGLE_CLIENT_ID=
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
 RUN node ./node_modules/vite/bin/vite.js build
 

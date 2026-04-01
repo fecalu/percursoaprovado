@@ -113,6 +113,13 @@
             <version>${mercadopago.sdk.version}</version>
         </dependency>
 
+        <!-- Google Sign-In / ID token verification -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.7.2</version>
+        </dependency>
+
         <!-- Testes -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

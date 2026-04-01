@@ -24,6 +24,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(req));
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<AuthDTO.LoginResponse> loginComGoogle(@Valid @RequestBody AuthDTO.GoogleLoginRequest req) {
+        return ResponseEntity.ok(authService.loginComGoogle(req));
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<AuthDTO.MessageResponse> forgotPassword(@Valid @RequestBody AuthDTO.ForgotPasswordRequest req) {
         authService.solicitarRedefinicao(req);

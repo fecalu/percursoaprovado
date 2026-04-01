@@ -9,21 +9,34 @@ export function AuthProvider({ children }) {
     return stored ? JSON.parse(stored) : null
   })
 
+  const persistAuth = useCallback(data => {
+    const userData = {
+      nome: data.nome,
+      role: data.role,
+      provider: data.provider || 'LOCAL',
+    }
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('user', JSON.stringify(userData))
+    setUser(userData)
+  }, [])
+
   const login = useCallback(async (email, senha) => {
     const data = await authService.login({ email, senha })
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify({ nome: data.nome, role: data.role }))
-    setUser({ nome: data.nome, role: data.role })
+    persistAuth(data)
     return data.role
-  }, [])
+  }, [persistAuth])
+
+  const loginWithGoogle = useCallback(async credential => {
+    const data = await authService.googleLogin({ credential })
+    persistAuth(data)
+    return data.role
+  }, [persistAuth])
 
   const register = useCallback(async (nome, email, senha) => {
     const data = await authService.register({ nome, email, senha })
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify({ nome: data.nome, role: data.role }))
-    setUser({ nome: data.nome, role: data.role })
+    persistAuth(data)
     return data.role
-  }, [])
+  }, [persistAuth])
 
   const logout = useCallback(() => {
     localStorage.removeItem('token')
@@ -32,7 +45,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isAdmin: user?.role === 'ADMIN' }}>
+    <AuthContext.Provider value={{ user, login, loginWithGoogle, register, logout, isAdmin: user?.role === 'ADMIN' }}>
       {children}
     </AuthContext.Provider>
   )

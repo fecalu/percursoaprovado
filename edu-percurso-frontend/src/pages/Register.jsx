@@ -3,38 +3,31 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/BrandLogo'
 import { resolveAuthDestination } from '../utils/authRedirects'
-
-function extractRegisterError(error) {
-  const data = error.response?.data
-
-  if (typeof data?.erro === 'string' && data.erro.trim()) {
-    return data.erro
-  }
-
-  if (data && typeof data === 'object') {
-    const firstMessage = Object.values(data).find(value => typeof value === 'string' && value.trim())
-    if (firstMessage) {
-      return firstMessage
-    }
-  }
-
-  if (typeof error?.message === 'string' && error.message.trim()) {
-    if (error.message === 'Network Error') {
-      return 'Nao foi possivel conectar ao servidor. Recarregue a pagina e tente novamente.'
-    }
-    return error.message
-  }
-
-  return 'Erro ao criar conta. Tente novamente.'
-}
+import GoogleAuthButton from '../components/GoogleAuthButton'
+import { extractAuthError } from '../utils/authErrors'
 
 export default function Register() {
-  const { register } = useAuth()
+  const { register, loginWithGoogle } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [form, setForm] = useState({ nome: '', email: '', senha: '' })
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
+  const [googleLoading, setGoogleLoading] = useState(false)
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
+
+  async function handleGoogleCredential(credential) {
+    setErro('')
+    setGoogleLoading(true)
+    try {
+      const role = await loginWithGoogle(credential)
+      navigate(resolveAuthDestination(role, location.state), { replace: true })
+    } catch (error) {
+      setErro(extractAuthError(error, 'Nao foi possivel criar sua conta com Google.'))
+    } finally {
+      setGoogleLoading(false)
+    }
+  }
 
   async function handleSubmit(event) {
     event.preventDefault()
@@ -50,7 +43,7 @@ export default function Register() {
       navigate(resolveAuthDestination(role, location.state), { replace: true })
     } catch (error) {
       console.error('Falha ao criar conta', error)
-      setErro(extractRegisterError(error))
+      setErro(extractAuthError(error, 'Erro ao criar conta. Tente novamente.'))
     } finally {
       setLoading(false)
     }
@@ -62,6 +55,22 @@ export default function Register() {
         <BrandLogo variant="auth" />
         <h1 className="auth-heading">Criar conta</h1>
         <p className="auth-sub">Crie sua conta para acompanhar o local real da sua prova.</p>
+
+        {googleClientId && (
+          <>
+            <div className="auth-social-stack">
+              <GoogleAuthButton
+                clientId={googleClientId}
+                onCredential={handleGoogleCredential}
+                onError={message => setErro(message)}
+              />
+              {googleLoading && <div className="auth-google-status">Conectando com Google...</div>}
+            </div>
+            <div className="auth-divider">
+              <span>ou continue com e-mail</span>
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -104,7 +113,7 @@ export default function Register() {
           <button
             className="btn btn-primary"
             style={{ width: '100%', justifyContent: 'center' }}
-            disabled={loading}
+            disabled={loading || googleLoading}
           >
             {loading ? 'Criando conta...' : 'Criar conta'}
           </button>

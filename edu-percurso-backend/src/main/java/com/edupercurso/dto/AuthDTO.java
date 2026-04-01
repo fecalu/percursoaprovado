@@ -32,6 +32,12 @@ public class AuthDTO {
     }
 
     @Data
+    public static class GoogleLoginRequest {
+        @NotBlank(message = "Nao foi possivel validar a conta Google.")
+        private String credential;
+    }
+
+    @Data
     public static class ForgotPasswordRequest {
         @NotBlank(message = "Informe seu e-mail.")
         @Email(message = "Informe um e-mail valido.")
@@ -61,11 +67,13 @@ public class AuthDTO {
         private String token;
         private String nome;
         private String role;
+        private String provider;
 
-        public LoginResponse(String token, String nome, Usuario.Role role) {
+        public LoginResponse(String token, String nome, Usuario.Role role, Usuario.AuthProvider provider) {
             this.token = token;
             this.nome = nome;
             this.role = role.name();
+            this.provider = provider.name();
         }
     }
 }
