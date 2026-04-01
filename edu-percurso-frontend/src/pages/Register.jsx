@@ -56,22 +56,6 @@ export default function Register() {
         <h1 className="auth-heading">Criar conta</h1>
         <p className="auth-sub">Crie sua conta para acompanhar o local real da sua prova.</p>
 
-        {googleClientId && (
-          <>
-            <div className="auth-social-stack">
-              <GoogleAuthButton
-                clientId={googleClientId}
-                onCredential={handleGoogleCredential}
-                onError={message => setErro(message)}
-              />
-              {googleLoading && <div className="auth-google-status">Conectando com Google...</div>}
-            </div>
-            <div className="auth-divider">
-              <span>ou continue com e-mail</span>
-            </div>
-          </>
-        )}
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Nome completo</label>
@@ -118,6 +102,22 @@ export default function Register() {
             {loading ? 'Criando conta...' : 'Criar conta'}
           </button>
         </form>
+
+        {googleClientId && (
+          <>
+            <div className="auth-divider">
+              <span>ou continue com Google</span>
+            </div>
+            <div className="auth-social-stack">
+              <GoogleAuthButton
+                clientId={googleClientId}
+                onCredential={handleGoogleCredential}
+                onError={message => setErro(message)}
+              />
+              {googleLoading && <div className="auth-google-status">Conectando com Google...</div>}
+            </div>
+          </>
+        )}
 
         <div className="auth-footer">
           Ja tem conta? <Link to="/login" state={location.state}>Entrar</Link>

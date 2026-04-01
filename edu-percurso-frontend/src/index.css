@@ -1199,11 +1199,13 @@ body.player-page-wide .main-content {
   margin-bottom: 1.4rem;
 }
 .google-auth-button-shell {
-  min-height: 40px;
+  width: 100%;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
+  visibility: visible;
+  opacity: 1;
 }
 .google-auth-button-shell.is-ready {
   opacity: 1;
@@ -1213,6 +1215,10 @@ body.player-page-wide .main-content {
   display: flex;
   justify-content: center;
   width: 100%;
+}
+.google-auth-button > div,
+.google-auth-button iframe {
+  max-width: 320px !important;
 }
 .auth-google-status {
   margin-top: -0.1rem;
@@ -1224,7 +1230,7 @@ body.player-page-wide .main-content {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  margin: 0 0 1.5rem;
+  margin: 1.35rem 0 1.5rem;
   color: var(--text-2);
   font-size: 11px;
   font-weight: 700;

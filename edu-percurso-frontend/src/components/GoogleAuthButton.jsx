@@ -37,6 +37,7 @@ function loadGoogleScript() {
 }
 
 export default function GoogleAuthButton({ clientId, onCredential, onError }) {
+  const shellRef = useRef(null)
   const buttonRef = useRef(null)
   const credentialHandlerRef = useRef(onCredential)
   const errorHandlerRef = useRef(onError)
@@ -51,14 +52,18 @@ export default function GoogleAuthButton({ clientId, onCredential, onError }) {
   }, [onError])
 
   useEffect(() => {
-    if (!clientId || !buttonRef.current) return undefined
+    if (!clientId || !buttonRef.current || !shellRef.current) return undefined
 
     let cancelled = false
+    let readyTimer
     setIsReady(false)
 
     loadGoogleScript()
       .then(() => {
         if (cancelled || !buttonRef.current || !window.google?.accounts?.id) return
+
+        const availableWidth = Math.floor(shellRef.current.getBoundingClientRect().width || 320)
+        const buttonWidth = Math.max(220, Math.min(320, availableWidth))
 
         window.google.accounts.id.initialize({
           client_id: clientId,
@@ -84,11 +89,12 @@ export default function GoogleAuthButton({ clientId, onCredential, onError }) {
           shape: 'pill',
           logo_alignment: 'left',
           locale: 'pt_BR',
+          width: buttonWidth,
         })
 
-        requestAnimationFrame(() => {
+        readyTimer = window.setTimeout(() => {
           if (!cancelled) setIsReady(true)
-        })
+        }, 40)
       })
       .catch(() => {
         if (cancelled) return
@@ -97,6 +103,9 @@ export default function GoogleAuthButton({ clientId, onCredential, onError }) {
 
     return () => {
       cancelled = true
+      if (readyTimer) {
+        window.clearTimeout(readyTimer)
+      }
       if (buttonRef.current) {
         buttonRef.current.innerHTML = ''
       }
@@ -106,7 +115,7 @@ export default function GoogleAuthButton({ clientId, onCredential, onError }) {
   if (!clientId) return null
 
   return (
-    <div className={`google-auth-button-shell${isReady ? ' is-ready' : ''}`}>
+    <div ref={shellRef} className={`google-auth-button-shell${isReady ? ' is-ready' : ''}`}>
       <div ref={buttonRef} className="google-auth-button" />
     </div>
   )

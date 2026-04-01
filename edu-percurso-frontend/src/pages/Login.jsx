@@ -50,22 +50,6 @@ export default function Login() {
         <h1 className="auth-heading">Bem-vindo de volta</h1>
         <p className="auth-sub">Entre para acessar seus locais de prova e modulos de apoio.</p>
 
-        {googleClientId && (
-          <>
-            <div className="auth-social-stack">
-              <GoogleAuthButton
-                clientId={googleClientId}
-                onCredential={handleGoogleCredential}
-                onError={message => setErro(message)}
-              />
-              {googleLoading && <div className="auth-google-status">Entrando com Google...</div>}
-            </div>
-            <div className="auth-divider">
-              <span>ou continue com e-mail</span>
-            </div>
-          </>
-        )}
-
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">E-mail</label>
@@ -107,6 +91,22 @@ export default function Login() {
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
+
+        {googleClientId && (
+          <>
+            <div className="auth-divider">
+              <span>ou continue com Google</span>
+            </div>
+            <div className="auth-social-stack">
+              <GoogleAuthButton
+                clientId={googleClientId}
+                onCredential={handleGoogleCredential}
+                onError={message => setErro(message)}
+              />
+              {googleLoading && <div className="auth-google-status">Entrando com Google...</div>}
+            </div>
+          </>
+        )}
 
         <div className="auth-footer">
           Nao tem conta? <Link to="/register" state={location.state}>Criar conta gratuita</Link>
