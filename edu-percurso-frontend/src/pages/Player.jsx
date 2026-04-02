@@ -1454,20 +1454,32 @@ export default function Player() {
         {isMobileViewport && pontosAtencaoAtivos.length > 0 ? (
           <button
             type="button"
-            className="player-attention-rail-head player-attention-rail-head--toggle"
+            className={`player-attention-rail-head player-attention-rail-head--toggle${pontosMobileAbertos ? ' is-open' : ''}`}
             onClick={() => setPontosMobileAbertos(current => !current)}
             aria-expanded={pontosMobileAbertos}
           >
-            <div className="player-side-title-row">
-              <div className="player-side-title">Pontos de atenção</div>
-              <div className="player-attention-rail-head-actions">
+            <div className="player-module-toggle-main">
+              <div className="player-side-title-row">
+                <div className="player-side-title">Pontos de atenção</div>
                 <span className="player-side-count">{pontosAtencaoAtivos.length}</span>
-                <span className={`player-attention-rail-indicator${pontosMobileAbertos ? ' is-open' : ''}`} aria-hidden="true">
-                  ▾
-                </span>
               </div>
+              <div className="player-attention-rail-summary">{resumoPontosMobile}</div>
             </div>
-            <div className="player-side-copy player-attention-rail-summary">{resumoPontosMobile}</div>
+            <div className="player-module-toggle-side">
+              <span className="player-module-toggle-label">{pontosMobileAbertos ? 'Ocultar' : 'Ver pontos'}</span>
+              <svg
+                className="player-module-toggle-chevron"
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="M5 7l5 6 5-6" />
+              </svg>
+            </div>
           </button>
         ) : (
           <div className="player-attention-rail-head">
@@ -1814,6 +1826,10 @@ export default function Player() {
                 </div>
               )}
 
+              {isMobileViewport && renderCardPontosAtencao()}
+
+              {isMobileViewport && renderNavegacaoModulo()}
+
               {resumoPrincipal && (
                 <div className="player-stage-summary">
                   <p className="player-copy player-copy--stage">
@@ -1821,30 +1837,29 @@ export default function Player() {
                   </p>
                 </div>
               )}
+
+              {isMobileViewport && descricaoComplementar && (
+                <p className="player-secondary-copy">
+                  {descricaoComplementar}
+                </p>
+              )}
             </div>
 
-            {renderNavegacaoModulo()}
+            {!isMobileViewport && renderNavegacaoModulo()}
           </div>
 
           {exibirRailPontosDesktop && renderCardPontosAtencao()}
         </div>
 
-        <div className="player-layout">
-          <div>
-            {descricaoComplementar && (
+        {!isMobileViewport && descricaoComplementar && (
+          <div className="player-layout player-layout--single">
+            <div>
               <p className="player-secondary-copy">
                 {descricaoComplementar}
               </p>
-            )}
-
-          </div>
-
-          {isMobileViewport && (
-            <div className="player-side-stack">
-              {renderCardPontosAtencao()}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </>
   )
