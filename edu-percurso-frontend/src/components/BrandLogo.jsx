@@ -3,7 +3,7 @@ export default function BrandLogo({ variant = 'sidebar', showTagline = false }) 
     <div className={`brand-logo brand-logo--${variant}`}>
       <svg
         className="brand-logo-mark"
-        viewBox="0 0 720 250"
+        viewBox="-28 -6 776 262"
         role="img"
         aria-label="Percurso Aprovado"
       >
@@ -40,7 +40,7 @@ export default function BrandLogo({ variant = 'sidebar', showTagline = false }) 
           fill="currentColor"
         />
       </svg>
-      {showTagline && <div className="brand-logo-tagline">Locais reais de prova pratica</div>}
+      {showTagline && <div className="brand-logo-tagline">Locais reais de prova</div>}
     </div>
   )
 }

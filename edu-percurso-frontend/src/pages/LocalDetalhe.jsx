@@ -641,10 +641,27 @@ export default function LocalDetalhe() {
           {user ? (
             <>
               <Link className="btn btn-ghost btn-sm" to={isAdmin ? '/admin/pedidos' : '/meus-acessos'}>
-                {isAdmin ? 'Pedidos' : 'Meus acessos'}
+                {isAdmin ? (
+                  'Pedidos'
+                ) : (
+                  <>
+                    <span className="btn-label-full">Meus acessos</span>
+                    <span className="btn-label-compact">Acessos</span>
+                  </>
+                )}
               </Link>
               <Link className="btn btn-primary btn-sm" to={isAdmin ? '/admin' : '/biblioteca'}>
-                {isAdmin ? 'Abrir painel' : 'Minha biblioteca'}
+                {isAdmin ? (
+                  <>
+                    <span className="btn-label-full">Abrir painel</span>
+                    <span className="btn-label-compact">Painel</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="btn-label-full">Minha biblioteca</span>
+                    <span className="btn-label-compact">Biblioteca</span>
+                  </>
+                )}
               </Link>
             </>
           ) : (

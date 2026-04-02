@@ -286,12 +286,13 @@ body.player-page-wide .main-content {
 }
 .brand-logo--landing {
   max-width: 235px;
-  align-items: flex-start;
+  align-items: center;
 }
 .brand-logo-mark {
   display: block;
   width: 100%;
   height: auto;
+  overflow: visible;
 }
 .brand-logo-tagline {
   margin-top: 0.15rem;
@@ -1496,7 +1497,7 @@ body.player-page-wide .main-content {
 }
 
 .landing-topbar .brand-logo-tagline {
-  text-align: left;
+  text-align: center;
 }
 
 .landing-topbar-nav {
@@ -1531,6 +1532,10 @@ body.player-page-wide .main-content {
 .landing-topbar-actions .btn {
   min-height: 40px;
   padding: 0.58rem 0.95rem;
+}
+
+.btn-label-compact {
+  display: none;
 }
 
 .landing-topbar--simple {
@@ -9505,12 +9510,12 @@ html[data-theme='light'] .landing-topbar-link:hover {
   }
 
   .landing-topbar .brand-logo--landing {
-    max-width: min(40vw, 158px);
-    align-items: flex-start;
+    max-width: min(34vw, 142px);
+    align-items: center;
   }
 
   .landing-topbar .brand-logo-tagline {
-    text-align: left;
+    text-align: center;
   }
 
   .landing-topbar-actions {
@@ -9518,6 +9523,7 @@ html[data-theme='light'] .landing-topbar-link:hover {
     flex-direction: row;
     flex-shrink: 0;
     gap: 0.45rem;
+    justify-content: flex-start;
   }
 
   .landing-topbar-actions .btn {
@@ -9537,6 +9543,14 @@ html[data-theme='light'] .landing-topbar-link:hover {
 
   .landing-topbar .theme-toggle-label {
     display: none;
+  }
+
+  .landing-topbar .btn-label-full {
+    display: none;
+  }
+
+  .landing-topbar .btn-label-compact {
+    display: inline;
   }
 
   .checkout-watch-card {
@@ -9964,6 +9978,10 @@ html[data-theme='light'] .landing-topbar-link:hover {
 
   .landing-footer-brand {
     max-width: none;
+  }
+
+  .landing-footer .brand-logo--landing {
+    max-width: min(100%, 154px);
   }
 
   .landing-footer-bottom {
