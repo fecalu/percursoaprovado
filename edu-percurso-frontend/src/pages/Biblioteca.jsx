@@ -4,6 +4,32 @@ import { assinaturaService, percursoService, progressoService } from '../service
 import ContentThumbnail from '../components/ContentThumbnail'
 import { formatDataCurta, formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
 
+function compararTexto(a = '', b = '') {
+  return a.localeCompare(b, 'pt-BR', { sensitivity: 'base' })
+}
+
+function ordenarAulas(a, b) {
+  const ordemA = a.ordemExibicao ?? 0
+  const ordemB = b.ordemExibicao ?? 0
+
+  if (ordemA !== ordemB) {
+    return ordemA - ordemB
+  }
+
+  return compararTexto(a.titulo, b.titulo)
+}
+
+function ordenarModulos(a, b) {
+  const ordemA = a.ordemExibicao ?? Number.MAX_SAFE_INTEGER
+  const ordemB = b.ordemExibicao ?? Number.MAX_SAFE_INTEGER
+
+  if (ordemA !== ordemB) {
+    return ordemA - ordemB
+  }
+
+  return compararTexto(a.titulo, b.titulo)
+}
+
 export default function Biblioteca() {
   const navigate = useNavigate()
   const [conteudos, setConteudos] = useState([])
@@ -51,37 +77,87 @@ export default function Biblioteca() {
     return map
   }, [progresso])
 
-  const { conteudosGerais, secoesLocais } = useMemo(() => {
-    const gerais = []
-    const agrupados = {}
+  const { modulosGerais, secoesLocais } = useMemo(() => {
+    const modulosGeraisMap = new Map()
+    const secoesLocaisMap = new Map()
 
     filtrados.forEach(item => {
+      const categoriaChave = item.categoriaId || 'sem-modulo'
+      const categoriaTitulo = item.categoriaNome || 'Sem módulo'
+      const categoriaOrdemExibicao = item.categoriaOrdemExibicao ?? Number.MAX_SAFE_INTEGER
+
       if (!item.localProvaId) {
-        gerais.push(item)
+        if (!modulosGeraisMap.has(categoriaChave)) {
+          modulosGeraisMap.set(categoriaChave, {
+            chave: `geral-${categoriaChave}`,
+            titulo: categoriaTitulo,
+            ordemExibicao: categoriaOrdemExibicao,
+            subtitulo: item.categoriaId
+              ? 'Aulas gerais deste módulo, liberadas para qualquer plano ativo.'
+              : 'Aulas gerais que ainda precisam ser organizadas em um módulo.',
+            itens: [],
+          })
+        }
+
+        modulosGeraisMap.get(categoriaChave).itens.push(item)
         return
       }
 
-      if (!agrupados[item.localProvaSlug]) {
-        agrupados[item.localProvaSlug] = {
+      const localChave = item.localProvaSlug || item.localProvaId
+      if (!secoesLocaisMap.has(localChave)) {
+        secoesLocaisMap.set(localChave, {
+          chave: `local-${localChave}`,
           slug: item.localProvaSlug,
           nome: item.localProvaNome,
-          itens: [],
-        }
+          modulosMap: new Map(),
+        })
       }
 
-      agrupados[item.localProvaSlug].itens.push(item)
+      const secaoLocal = secoesLocaisMap.get(localChave)
+
+      if (!secaoLocal.modulosMap.has(categoriaChave)) {
+        secaoLocal.modulosMap.set(categoriaChave, {
+          chave: `local-${localChave}-${categoriaChave}`,
+          titulo: categoriaTitulo,
+          ordemExibicao: categoriaOrdemExibicao,
+          subtitulo: item.categoriaId
+            ? `Aulas deste módulo para ${item.localProvaNome}.`
+            : `Aulas de ${item.localProvaNome} que ainda precisam ser organizadas em um módulo.`,
+          itens: [],
+        })
+      }
+
+      secaoLocal.modulosMap.get(categoriaChave).itens.push(item)
     })
 
     return {
-      conteudosGerais: gerais,
-      secoesLocais: Object.values(agrupados),
+      modulosGerais: Array.from(modulosGeraisMap.values())
+        .map(modulo => ({
+          ...modulo,
+          itens: [...modulo.itens].sort(ordenarAulas),
+        }))
+        .sort(ordenarModulos),
+      secoesLocais: Array.from(secoesLocaisMap.values())
+        .map(secao => ({
+          ...secao,
+          modulos: Array.from(secao.modulosMap.values())
+            .map(modulo => ({
+              ...modulo,
+              itens: [...modulo.itens].sort(ordenarAulas),
+            }))
+            .sort(ordenarModulos),
+        }))
+        .sort((a, b) => compararTexto(a.nome, b.nome)),
     }
   }, [filtrados])
 
   const filtroAtivo = filtro.trim().length > 0
 
   useEffect(() => {
-    const chavesAtivas = new Set(['geral', ...secoesLocais.map(secao => `local-${secao.slug}`)])
+    const chavesAtivas = new Set([
+      ...modulosGerais.map(modulo => modulo.chave),
+      ...secoesLocais.flatMap(secao => secao.modulos.map(modulo => modulo.chave)),
+    ])
 
     setSecoesAbertas(prev => {
       const proximo = {}
@@ -90,7 +166,7 @@ export default function Biblioteca() {
       })
       return proximo
     })
-  }, [secoesLocais])
+  }, [modulosGerais, secoesLocais])
 
   function alternarSecao(chave) {
     setSecoesAbertas(prev => ({ ...prev, [chave]: !prev[chave] }))
@@ -114,7 +190,7 @@ export default function Biblioteca() {
 
     if (progressoItem.concluido) {
       return {
-        label: 'Concluido',
+        label: 'Concluído',
         toneClass: 'is-complete',
         concluido: true,
         progressoPercentual: 100,
@@ -179,26 +255,26 @@ export default function Biblioteca() {
     )
   }
 
-  function renderSecao({ chave, titulo, subtitulo, itens, destaque = 'módulos' }) {
-    const aberta = secaoEstaAberta(chave)
-    const concluidos = itens.filter(item => resolverStatusAula(item).concluido).length
-    const duracaoTotal = itens.reduce((acc, item) => acc + (item.duracaoSegundos || 0), 0)
-    const progressoPercentual = itens.length > 0 ? Math.round((concluidos / itens.length) * 100) : 0
+  function renderModulo(modulo) {
+    const aberta = secaoEstaAberta(modulo.chave)
+    const concluidos = modulo.itens.filter(item => resolverStatusAula(item).concluido).length
+    const duracaoTotal = modulo.itens.reduce((acc, item) => acc + (item.duracaoSegundos || 0), 0)
+    const progressoPercentual = modulo.itens.length > 0 ? Math.round((concluidos / modulo.itens.length) * 100) : 0
 
     return (
-      <section key={chave} className="library-module-card">
+      <section key={modulo.chave} className="library-module-card">
         <button
           type="button"
           className="library-module-toggle"
-          onClick={() => alternarSecao(chave)}
+          onClick={() => alternarSecao(modulo.chave)}
           aria-expanded={aberta}
         >
           <div className="library-module-hero">
             <div className="library-module-heading">
-              <div className="section-heading">{titulo}</div>
-              <div className="section-copy">{subtitulo}</div>
+              <div className="section-heading">{modulo.titulo}</div>
+              <div className="section-copy">{modulo.subtitulo}</div>
               <div className="library-module-caption">
-                <span>{itens.length} {destaque}</span>
+                <span>{modulo.itens.length} aulas</span>
                 <span>{formatDuracaoMinutos(duracaoTotal)}</span>
                 <span>{concluidos} concluídas</span>
               </div>
@@ -206,7 +282,7 @@ export default function Biblioteca() {
           </div>
 
           <div className="library-module-meta">
-            <span className="library-module-progress-copy">{concluidos} de {itens.length} aulas concluídas</span>
+            <span className="library-module-progress-copy">{concluidos} de {modulo.itens.length} aulas concluídas</span>
             <span className="library-module-toggle-label">{aberta ? 'Fechar aulas' : 'Abrir aulas'}</span>
           </div>
         </button>
@@ -215,10 +291,36 @@ export default function Biblioteca() {
           <div className="student-progress-bar">
             <div className="student-progress-fill" style={{ width: `${progressoPercentual}%` }} />
           </div>
-          <div className="mini-copy">{concluidos} de {itens.length} aulas concluídas</div>
+          <div className="mini-copy">{concluidos} de {modulo.itens.length} aulas concluídas</div>
         </div>
 
-        {aberta && <div className="library-module-body">{renderAulas(itens)}</div>}
+        {aberta && <div className="library-module-body">{renderAulas(modulo.itens)}</div>}
+      </section>
+    )
+  }
+
+  function renderBloco({ chave, titulo, subtitulo, modulos }) {
+    const totalAulas = modulos.reduce((acc, modulo) => acc + modulo.itens.length, 0)
+
+    return (
+      <section key={chave} className="library-section-card">
+        <div className="library-section-toggle library-section-toggle--static">
+          <div>
+            <div className="section-heading">{titulo}</div>
+            <div className="section-copy">{subtitulo}</div>
+          </div>
+
+          <div className="library-section-meta">
+            <span className="card-tag">{modulos.length} módulos</span>
+            <span className="library-section-toggle-label">{totalAulas} aulas</span>
+          </div>
+        </div>
+
+        <div className="library-section-body">
+          <div className="student-grid">
+            {modulos.map(renderModulo)}
+          </div>
+        </div>
       </section>
     )
   }
@@ -266,24 +368,19 @@ export default function Biblioteca() {
         </div>
       ) : (
         <>
-          {conteudosGerais.length > 0 && (
-            renderSecao({
-              chave: 'geral',
-              titulo: 'Módulos gerais',
-              subtitulo: 'Baliza, embreagem, erros que mais tiram pontos e o que costuma ser avaliado.',
-              itens: conteudosGerais,
-            })
-          )}
+          {modulosGerais.length > 0 && renderBloco({
+            chave: 'gerais',
+            titulo: 'Módulos gerais',
+            subtitulo: 'Aulas que ajudam em qualquer local, sem precisar repetir o mesmo conteúdo em cada percurso.',
+            modulos: modulosGerais,
+          })}
 
-          {secoesLocais.map(secao => (
-            renderSecao({
-              chave: `local-${secao.slug}`,
-              titulo: secao.nome,
-              subtitulo: 'Percursos mais frequentes, pontos de atenção e orientações práticas desse local.',
-              itens: secao.itens,
-              destaque: 'conteúdos',
-            })
-          ))}
+          {secoesLocais.map(secao => renderBloco({
+            chave: secao.chave,
+            titulo: secao.nome,
+            subtitulo: 'Módulos específicos deste local, organizados por tema para facilitar a navegação.',
+            modulos: secao.modulos,
+          }))}
         </>
       )}
     </div>

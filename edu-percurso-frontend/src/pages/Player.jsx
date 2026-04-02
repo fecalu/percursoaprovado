@@ -85,6 +85,22 @@ function resolverFontePlayer({ videoProvider, videoUrl, videoAssetId }) {
   return null
 }
 
+function resolverChaveEscopo(item) {
+  if (item?.localProvaId) return `local:${item.localProvaId}`
+  if (item?.localProvaSlug) return `local:${item.localProvaSlug}`
+  return 'geral'
+}
+
+function resolverChaveModulo(item) {
+  return `${resolverChaveEscopo(item)}:${item?.categoriaId || 'sem-modulo'}`
+}
+
+function resolverResumoModulo(item) {
+  const tituloModulo = item?.categoriaNome || 'Sem módulo'
+  const contextoModulo = item?.localProvaNome || 'Geral'
+  return `${tituloModulo} • ${contextoModulo}`
+}
+
 async function tentarTravarLandscape() {
   if (!screen.orientation?.lock) return
   try {
@@ -432,10 +448,11 @@ export default function Player() {
       return String(a?.titulo || '').localeCompare(String(b?.titulo || ''), 'pt-BR')
     }
 
+    const chaveModuloAtual = resolverChaveModulo(percurso)
+
     const relacionados = percursosDisponiveis.filter(item => {
       if (!item?.id) return false
-      if (percurso.localProvaSlug) return item.localProvaSlug === percurso.localProvaSlug
-      return !item.localProvaSlug
+      return resolverChaveModulo(item) === chaveModuloAtual
     })
 
     if (!relacionados.some(item => String(item.id) === String(percurso.id))) {
@@ -444,6 +461,7 @@ export default function Player() {
 
     return [...relacionados].sort(ordenarPercursos)
   }, [percursosDisponiveis, percurso])
+  const resumoModuloAtual = useMemo(() => resolverResumoModulo(percurso), [percurso])
   const indiceConteudoAtual = useMemo(() => (
     conteudosDoModulo.findIndex(item => String(item.id) === String(percurso?.id))
   ), [conteudosDoModulo, percurso?.id])
@@ -1516,7 +1534,6 @@ export default function Player() {
 
     const posicaoAtual = indiceConteudoAtual >= 0 ? indiceConteudoAtual + 1 : 1
     const resumoModulo = `${posicaoAtual} de ${conteudosDoModulo.length} aulas`
-    const aulaAtual = indiceConteudoAtual >= 0 ? conteudosDoModulo[indiceConteudoAtual] : percurso
     const moduloNavExpandida = moduloNavAberta
 
     return (
@@ -1530,10 +1547,10 @@ export default function Player() {
           >
             <div className="player-module-toggle-main">
               <div className="player-module-list-title-row">
-                <div className="player-module-list-title">Aulas do modulo</div>
+                <div className="player-module-list-title">Aulas do módulo</div>
                 <span className="player-module-list-count">{resumoModulo}</span>
               </div>
-              <div className="player-module-toggle-summary">{aulaAtual?.titulo}</div>
+              <div className="player-module-toggle-summary">{resumoModuloAtual}</div>
             </div>
             <div className="player-module-toggle-side">
               <span className="player-module-toggle-label">{moduloNavAberta ? 'Ocultar' : 'Ver aulas'}</span>

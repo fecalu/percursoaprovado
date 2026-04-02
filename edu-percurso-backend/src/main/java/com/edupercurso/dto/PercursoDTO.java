@@ -109,6 +109,7 @@ public class PercursoDTO {
         private boolean ativo;
         private UUID categoriaId;
         private String categoriaNome;
+        private Integer categoriaOrdemExibicao;
         private UUID localProvaId;
         private String localProvaNome;
         private String localProvaSlug;
@@ -148,6 +149,7 @@ public class PercursoDTO {
             if (percurso.getCategoria() != null) {
                 response.categoriaId = percurso.getCategoria().getId();
                 response.categoriaNome = percurso.getCategoria().getNome();
+                response.categoriaOrdemExibicao = percurso.getCategoria().getOrdemExibicao();
             }
             if (percurso.getLocalProva() != null) {
                 response.localProvaId = percurso.getLocalProva().getId();

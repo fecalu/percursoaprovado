@@ -91,6 +91,7 @@ export const questaoService = {
 export const categoriaService = {
   listar: () => api.get('/categorias').then(response => response.data),
   criar: data => api.post('/categorias', data).then(response => response.data),
+  atualizar: (id, data) => api.put(`/categorias/${id}`, data).then(response => response.data),
 }
 
 export const progressoService = {

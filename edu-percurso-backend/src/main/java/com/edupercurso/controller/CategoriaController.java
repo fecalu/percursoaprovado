@@ -10,8 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/categorias")
@@ -22,7 +24,7 @@ public class CategoriaController {
 
     @GetMapping
     public ResponseEntity<List<Categoria>> listar() {
-        return ResponseEntity.ok(categoriaRepository.findAll());
+        return ResponseEntity.ok(categoriaRepository.findAllByOrderByOrdemExibicaoAscNomeAsc());
     }
 
     @PostMapping
@@ -31,14 +33,39 @@ public class CategoriaController {
         Categoria categoria = Categoria.builder()
                 .nome(req.getNome())
                 .descricao(req.getDescricao())
+                .ordemExibicao(resolverOrdemExibicao(req.getOrdemExibicao()))
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(categoriaRepository.save(categoria));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Categoria> atualizar(@PathVariable UUID id, @Valid @RequestBody CategoriaRequest req) {
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoria nao encontrada."));
+
+        categoria.setNome(req.getNome());
+        categoria.setDescricao(req.getDescricao());
+        categoria.setOrdemExibicao(resolverOrdemExibicao(req.getOrdemExibicao()));
+
+        return ResponseEntity.ok(categoriaRepository.save(categoria));
+    }
+
+    private Integer resolverOrdemExibicao(Integer ordemExibicao) {
+        if (ordemExibicao != null) {
+            return Math.max(0, ordemExibicao);
+        }
+
+        return categoriaRepository.findTopByOrderByOrdemExibicaoDesc()
+                .map(Categoria::getOrdemExibicao)
+                .orElse(0) + 1;
     }
 
     @Data
     public static class CategoriaRequest {
         @NotBlank private String nome;
         private String descricao;
+        private Integer ordemExibicao;
     }
 }

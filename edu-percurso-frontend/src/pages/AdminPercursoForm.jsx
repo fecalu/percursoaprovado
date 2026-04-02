@@ -153,6 +153,7 @@ export default function AdminPercursoForm() {
   const [uploadingPointField, setUploadingPointField] = useState('')
   const [pontoAtencaoAbertoIndex, setPontoAtencaoAbertoIndex] = useState(null)
   const [erros, setErros] = useState({})
+  const escopoConteudo = form.localProvaId ? 'LOCAL' : 'GERAL'
 
   useEffect(() => {
     Promise.all([
@@ -208,6 +209,15 @@ export default function AdminPercursoForm() {
   function set(field, value) {
     setForm(current => ({ ...current, [field]: value }))
     setErros(current => ({ ...current, [field]: undefined }))
+  }
+
+  function setEscopoConteudo(escopo) {
+    if (escopo === 'GERAL') {
+      set('localProvaId', '')
+      return
+    }
+
+    set('localProvaId', form.localProvaId || '')
   }
 
   function setPontoAtencao(index, field, value) {
@@ -432,16 +442,16 @@ export default function AdminPercursoForm() {
         Voltar
       </button>
 
-      <div className="page-title">{isEdicao ? 'Editar conteudo' : 'Novo conteudo'}</div>
-      <p className="page-sub">Cadastre videos gerais ou vincule o conteudo a um local de prova especifico.</p>
+      <div className="page-title">{isEdicao ? 'Editar aula' : 'Nova aula'}</div>
+      <p className="page-sub">Cadastre aulas gerais ou vincule o conteudo a um local especifico, organizando tudo por modulo.</p>
 
       <div className="card" style={{ maxWidth: 760 }}>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label className="form-label">Titulo *</label>
+            <label className="form-label">Titulo da aula *</label>
             <input
               className="form-input"
-              placeholder="Ex: Simulacao completa na Vila Palmeira"
+              placeholder="Ex: Troca de marcha no cruzamento principal"
               value={form.titulo}
               onChange={event => set('titulo', event.target.value)}
             />
@@ -449,6 +459,56 @@ export default function AdminPercursoForm() {
           </div>
 
           <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Escopo do conteudo</label>
+              <select
+                className="form-select"
+                value={escopoConteudo}
+                onChange={event => setEscopoConteudo(event.target.value)}
+              >
+                <option value="GERAL">Geral</option>
+                <option value="LOCAL">Local especifico</option>
+              </select>
+              <div className="mini-copy">Use Geral para aulas que servem para todos os locais de prova.</div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Local de prova</label>
+              <select
+                className="form-select"
+                value={form.localProvaId}
+                onChange={event => set('localProvaId', event.target.value)}
+                disabled={escopoConteudo !== 'LOCAL'}
+              >
+                <option value="">{escopoConteudo === 'LOCAL' ? 'Selecione o local' : 'Nao se aplica'}</option>
+                {locais.map(local => (
+                  <option key={local.id} value={local.id}>{local.nome}</option>
+                ))}
+              </select>
+              <div className="mini-copy">
+                {escopoConteudo === 'LOCAL'
+                  ? 'Essa aula aparecera apenas para quem tiver acesso a esse local.'
+                  : 'Conteudos gerais nao ficam presos a um local especifico.'}
+              </div>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Modulo</label>
+              <select
+                className="form-select"
+                value={form.categoriaId}
+                onChange={event => set('categoriaId', event.target.value)}
+              >
+                <option value="">Selecione o modulo</option>
+                {categorias.map(categoria => (
+                  <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>
+                ))}
+              </select>
+              <div className="mini-copy">Use o modulo para separar aulas como Percursos, Teorico pratico e Pegadinhas.</div>
+            </div>
+
             <div className="form-group">
               <label className="form-label">Tipo de conteudo</label>
               <select
@@ -461,38 +521,9 @@ export default function AdminPercursoForm() {
                 ))}
               </select>
             </div>
-
-            <div className="form-group">
-              <label className="form-label">Local de prova</label>
-              <select
-                className="form-select"
-                value={form.localProvaId}
-                onChange={event => set('localProvaId', event.target.value)}
-              >
-                <option value="">Conteudo geral</option>
-                {locais.map(local => (
-                  <option key={local.id} value={local.id}>{local.nome}</option>
-                ))}
-              </select>
-              <div className="mini-copy">Deixe em branco para baliza, embreagem e outros modulos gerais.</div>
-            </div>
           </div>
 
           <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Categoria</label>
-              <select
-                className="form-select"
-                value={form.categoriaId}
-                onChange={event => set('categoriaId', event.target.value)}
-              >
-                <option value="">Sem categoria</option>
-                {categorias.map(categoria => (
-                  <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>
-                ))}
-              </select>
-            </div>
-
             <div className="form-group">
               <label className="form-label">Provedor do video</label>
               <select
@@ -505,9 +536,7 @@ export default function AdminPercursoForm() {
                 ))}
               </select>
             </div>
-          </div>
 
-          <div className="form-row">
             <div className="form-group">
               <label className="form-label">Duracao (minutos)</label>
               <input
@@ -519,7 +548,9 @@ export default function AdminPercursoForm() {
                 onChange={event => set('duracaoSegundos', event.target.value)}
               />
             </div>
+          </div>
 
+          <div className="form-row">
             <div className="form-group">
               <label className="form-label">Ordem de exibicao</label>
               <input
@@ -529,7 +560,10 @@ export default function AdminPercursoForm() {
                 value={form.ordemExibicao}
                 onChange={event => set('ordemExibicao', event.target.value)}
               />
+              <div className="mini-copy">Define a ordem da aula dentro do modulo.</div>
             </div>
+
+            <div className="form-group" />
           </div>
 
           <div className="form-group">

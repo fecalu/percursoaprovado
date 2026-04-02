@@ -7868,6 +7868,10 @@ html[data-theme='light'] .landing-topbar-link:hover {
   font: inherit;
 }
 
+.library-section-toggle--static {
+  cursor: default;
+}
+
 .library-section-meta {
   display: inline-flex;
   align-items: center;

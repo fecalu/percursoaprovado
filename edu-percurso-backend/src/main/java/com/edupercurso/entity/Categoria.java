@@ -18,4 +18,8 @@ public class Categoria {
     private String nome;
 
     private String descricao;
+
+    @Column(name = "ordem_exibicao", nullable = false)
+    @Builder.Default
+    private Integer ordemExibicao = 0;
 }

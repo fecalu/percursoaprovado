@@ -23,14 +23,14 @@ export default function AdminPercursos() {
   }
 
   async function excluir(id, titulo) {
-    if (!confirm(`Excluir "${titulo}"?`)) return
+    if (!confirm(`Excluir a aula "${titulo}"?`)) return
 
     try {
       await percursoService.excluir(id)
       setPercursos(prev => prev.filter(item => item.id !== id))
-      show('Conteudo excluido com sucesso.')
+      show('Aula excluida com sucesso.')
     } catch {
-      show('Erro ao excluir conteudo.', 'error')
+      show('Erro ao excluir aula.', 'error')
     }
   }
 
@@ -40,36 +40,38 @@ export default function AdminPercursos() {
       <>
       {ToastEl}
       <div className="admin-page-head">
-        <div className="page-title">Conteudos</div>
+        <div className="page-title">Aulas</div>
         <button className="btn btn-primary" onClick={() => navigate('/admin/percursos/novo')}>
-          + Novo conteudo
+          + Nova aula
         </button>
       </div>
-      <p className="page-sub">Gerencie os videos gerais e os conteudos vinculados a cada local de prova.</p>
+      <p className="page-sub">Gerencie aulas gerais e aulas vinculadas a cada local, organizando tudo por modulo.</p>
 
       {percursos.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">+</div>
-          Nenhum conteudo cadastrado ainda.
+          Nenhuma aula cadastrada ainda.
         </div>
       ) : (
         <div className="table-wrap">
-          <div className="table-head" style={{ gridTemplateColumns: '2.2fr 1.2fr 1.1fr 0.8fr 140px' }}>
-            <span>Conteudo</span>
-            <span>Local</span>
+          <div className="table-head" style={{ gridTemplateColumns: '2fr 1.1fr 1.1fr 1fr 0.8fr 140px' }}>
+            <span>Aula</span>
+            <span>Modulo</span>
+            <span>Escopo</span>
             <span>Tipo</span>
             <span>Duracao</span>
             <span>Acoes</span>
           </div>
           {percursos.map(item => (
-            <div key={item.id} className="table-row" style={{ gridTemplateColumns: '2.2fr 1.2fr 1.1fr 0.8fr 140px' }}>
+            <div key={item.id} className="table-row" style={{ gridTemplateColumns: '2fr 1.1fr 1.1fr 1fr 0.8fr 140px' }}>
               <div>
                 <div className="table-name">{item.titulo}</div>
-                <div className="mini-copy">{item.categoriaNome || 'Sem categoria'}</div>
+                <div className="mini-copy">{item.ativo ? 'Aula ativa' : 'Aula inativa'}</div>
                 <span className={`badge ${item.ativo ? 'badge-green' : 'badge-gray'}`} style={{ marginTop: 4 }}>
                   {item.ativo ? 'Ativo' : 'Inativo'}
                 </span>
               </div>
+              <span className="table-cat">{item.categoriaNome || 'Sem modulo'}</span>
               <span className="table-cat">{item.localProvaNome || 'Geral'}</span>
               <span className="table-cat">{formatTipoConteudo(item.tipoConteudo)}</span>
               <span className="table-dur">{formatDuracaoMinutos(item.duracaoSegundos)}</span>
