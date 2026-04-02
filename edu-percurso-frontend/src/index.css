@@ -6945,9 +6945,15 @@ html[data-theme='light'] .landing-topbar-link:hover {
   min-width: 0;
 }
 
-.library-lesson-thumb .content-thumb-card {
+.library-lesson-thumb .content-thumb-card,
+.library-lesson-thumb .card-thumb {
   border-radius: 18px;
   overflow: hidden;
+}
+
+.library-lesson-thumb .card-thumb-image,
+.library-lesson-thumb .card-thumb-overlay {
+  border-radius: inherit;
 }
 
 .library-lesson-row.is-concluded .library-lesson-thumb .content-thumb-image,
