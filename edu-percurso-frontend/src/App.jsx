@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import PrivateRoute from './components/PrivateRoute'
+import ScrollToTop from './components/ScrollToTop'
 
 import Home from './pages/Home'
 import LocalDetalhe from './pages/LocalDetalhe'
@@ -40,6 +41,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/locais/:slug" element={<LocalDetalhe />} />
