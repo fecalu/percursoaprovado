@@ -91,9 +91,10 @@ export default function Biblioteca() {
           modulosGeraisMap.set(categoriaChave, {
             chave: `geral-${categoriaChave}`,
             titulo: categoriaTitulo,
+            contexto: 'Geral',
             ordemExibicao: categoriaOrdemExibicao,
             subtitulo: item.categoriaId
-              ? 'Aulas gerais deste módulo, liberadas para qualquer plano ativo.'
+              ? 'Conteúdo liberado para qualquer plano ativo.'
               : 'Aulas gerais que ainda precisam ser organizadas em um módulo.',
             itens: [],
           })
@@ -119,9 +120,10 @@ export default function Biblioteca() {
         secaoLocal.modulosMap.set(categoriaChave, {
           chave: `local-${localChave}-${categoriaChave}`,
           titulo: categoriaTitulo,
+          contexto: item.localProvaNome,
           ordemExibicao: categoriaOrdemExibicao,
           subtitulo: item.categoriaId
-            ? `Aulas deste módulo para ${item.localProvaNome}.`
+            ? 'Conteúdo organizado para este local.'
             : `Aulas de ${item.localProvaNome} que ainda precisam ser organizadas em um módulo.`,
           itens: [],
         })
@@ -271,6 +273,7 @@ export default function Biblioteca() {
         >
           <div className="library-module-hero">
             <div className="library-module-heading">
+              <div className="library-module-eyebrow">{modulo.contexto}</div>
               <div className="section-heading">{modulo.titulo}</div>
               <div className="section-copy">{modulo.subtitulo}</div>
               <div className="library-module-caption">
@@ -305,14 +308,14 @@ export default function Biblioteca() {
     return (
       <section key={chave} className="library-section-card">
         <div className="library-section-toggle library-section-toggle--static">
-          <div>
+          <div className="library-section-intro">
             <div className="section-heading">{titulo}</div>
             <div className="section-copy">{subtitulo}</div>
           </div>
 
           <div className="library-section-meta">
-            <span className="card-tag">{modulos.length} módulos</span>
-            <span className="library-section-toggle-label">{totalAulas} aulas</span>
+            <span className="library-section-meta-item">{modulos.length} módulos</span>
+            <span className="library-section-meta-item">{totalAulas} aulas</span>
           </div>
         </div>
 
