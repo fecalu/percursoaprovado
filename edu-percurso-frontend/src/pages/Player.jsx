@@ -197,6 +197,7 @@ export default function Player() {
   const [explicacaoPontoAbertaId, setExplicacaoPontoAbertaId] = useState(null)
   const [interrupcoesAtivas, setInterrupcoesAtivas] = useState(true)
   const [moduloNavAberta, setModuloNavAberta] = useState(false)
+  const [pontosMobileAbertos, setPontosMobileAbertos] = useState(false)
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -276,6 +277,7 @@ export default function Player() {
     setExplicacaoPontoAbertaId(null)
     setInterrupcoesAtivas(true)
     setModuloNavAberta(false)
+    setPontosMobileAbertos(false)
     disparadosIdsRef.current = new Set()
     secondsRef.current = 0
     reproducaoIniciadaRef.current = false
@@ -505,6 +507,7 @@ export default function Player() {
   function abrirPonto(ponto, { rolar = false } = {}) {
     if (!ponto) return
     promptAutoCloseInicioTempoRef.current = null
+    if (isMobileViewport) setPontosMobileAbertos(true)
     setPontoAtencaoAtivoId(ponto.id)
     setPontoExpandidoId(ponto.id)
     irParaSegundo(ponto.timestampSegundos)
@@ -628,6 +631,7 @@ export default function Player() {
   function abrirVideoPonto(ponto, { pausar = true, rolar = false } = {}) {
     if (!ponto) return
     promptAutoCloseInicioTempoRef.current = null
+    if (isMobileViewport) setPontosMobileAbertos(true)
     setPontoAtencaoAtivoId(ponto.id)
     setPontoExpandidoId(ponto.id)
     definirPromptPonto(null)
@@ -1423,9 +1427,6 @@ export default function Player() {
                   <div className="attention-point-item-head">
                     <div className="attention-point-item-title">{item.titulo}</div>
                   </div>
-                  {item.descricaoCurta && (
-                    <div className="attention-point-item-copy">{item.descricaoCurta}</div>
-                  )}
                 </div>
               </button>
 
@@ -1440,23 +1441,53 @@ export default function Player() {
   function renderCardPontosAtencao() {
     if (!exibirAreaPontos) return null
 
+    const exibirListaNoMobile = !isMobileViewport || pontosMobileAbertos || !pontosAtencaoAtivos.length
+    const resumoPontosMobile = pontosMobileAbertos
+      ? 'Toque em um ponto para ver os detalhes.'
+      : 'Abra a lista para ver todos os pontos marcados neste vídeo.'
+
     return (
-      <aside className={`player-attention-rail${!pontosAtencaoAtivos.length ? ' is-empty' : ''}`} ref={attentionDetailRef}>
-        <div className="player-attention-rail-head">
-          <div className="player-side-title-row">
-            <div className="player-side-title">Pontos de atencao</div>
-            <span className="player-side-count">{pontosAtencaoAtivos.length}</span>
-          </div>
-        </div>
-        <div className="player-attention-rail-body">
-          {pontosAtencaoAtivos.length ? (
-            renderPainelPontos()
-          ) : (
-            <div className="attention-point-empty">
-              <div className="attention-point-empty-title">Sem pontos de atencao neste video</div>
+      <aside
+        className={`player-attention-rail${!pontosAtencaoAtivos.length ? ' is-empty' : ''}${isMobileViewport && !exibirListaNoMobile ? ' is-collapsed-mobile' : ''}`}
+        ref={attentionDetailRef}
+      >
+        {isMobileViewport && pontosAtencaoAtivos.length > 0 ? (
+          <button
+            type="button"
+            className="player-attention-rail-head player-attention-rail-head--toggle"
+            onClick={() => setPontosMobileAbertos(current => !current)}
+            aria-expanded={pontosMobileAbertos}
+          >
+            <div className="player-side-title-row">
+              <div className="player-side-title">Pontos de atenção</div>
+              <div className="player-attention-rail-head-actions">
+                <span className="player-side-count">{pontosAtencaoAtivos.length}</span>
+                <span className={`player-attention-rail-indicator${pontosMobileAbertos ? ' is-open' : ''}`} aria-hidden="true">
+                  ▾
+                </span>
+              </div>
             </div>
-          )}
-        </div>
+            <div className="player-side-copy player-attention-rail-summary">{resumoPontosMobile}</div>
+          </button>
+        ) : (
+          <div className="player-attention-rail-head">
+            <div className="player-side-title-row">
+              <div className="player-side-title">Pontos de atenção</div>
+              <span className="player-side-count">{pontosAtencaoAtivos.length}</span>
+            </div>
+          </div>
+        )}
+        {exibirListaNoMobile && (
+          <div className="player-attention-rail-body">
+            {pontosAtencaoAtivos.length ? (
+              renderPainelPontos()
+            ) : (
+              <div className="attention-point-empty">
+                <div className="attention-point-empty-title">Sem pontos de atenção neste vídeo</div>
+              </div>
+            )}
+          </div>
+        )}
       </aside>
     )
   }
