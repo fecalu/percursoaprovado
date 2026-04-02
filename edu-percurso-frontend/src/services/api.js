@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { buildReturnTo } from '../utils/authRedirects'
 
 const api = axios.create({ baseURL: '/api' })
 
@@ -16,7 +17,21 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+
+      const pathname = window.location.pathname || '/'
+      const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].includes(pathname)
+      const isAdminPage = pathname.startsWith('/admin')
+
+      if (!isAuthPage) {
+        const search = new URLSearchParams()
+        if (!isAdminPage) {
+          const returnTo = buildReturnTo(window.location.pathname, window.location.search, window.location.hash)
+          search.set('returnTo', returnTo)
+        }
+
+        const href = search.toString() ? `/login?${search.toString()}` : '/login'
+        window.location.assign(href)
+      }
     }
     return Promise.reject(error)
   }

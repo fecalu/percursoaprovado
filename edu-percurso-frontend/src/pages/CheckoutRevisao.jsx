@@ -122,7 +122,7 @@ export default function CheckoutRevisao() {
     if (!user) {
       navigate('/login', {
         state: {
-          redirectTo: `/checkout/revisao/${localSlug}/${planoId}`,
+          returnTo: `/checkout/revisao/${localSlug}/${planoId}`,
         },
       })
       return

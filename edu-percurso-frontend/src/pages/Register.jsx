@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/BrandLogo'
-import { resolveAuthDestination } from '../utils/authRedirects'
 import GoogleAuthButton from '../components/GoogleAuthButton'
+import { useAuth } from '../context/AuthContext'
 import { extractAuthError } from '../utils/authErrors'
+import { resolveAuthDestination } from '../utils/authRedirects'
 
 export default function Register() {
   const { register, loginWithGoogle } = useAuth()
@@ -65,11 +65,12 @@ export default function Register() {
       chamarAtencaoParaTermos()
       return
     }
+
     setErro('')
     setGoogleLoading(true)
     try {
       const role = await loginWithGoogle(code, window.location.origin, true, true)
-      navigate(resolveAuthDestination(role, location.state), { replace: true })
+      navigate(resolveAuthDestination(role, location.state, location.search), { replace: true })
     } catch (error) {
       setErro(extractAuthError(error, 'Não foi possível criar sua conta com Google.'))
     } finally {
@@ -79,10 +80,12 @@ export default function Register() {
 
   async function handleSubmit(event) {
     event.preventDefault()
+
     if (form.senha.length < 6) {
       setErro('A senha deve ter pelo menos 6 caracteres.')
       return
     }
+
     if (!form.aceitouTermos) {
       chamarAtencaoParaTermos()
       return
@@ -92,7 +95,7 @@ export default function Register() {
     setLoading(true)
     try {
       const role = await register(form.nome, form.email, form.senha, true)
-      navigate(resolveAuthDestination(role, location.state), { replace: true })
+      navigate(resolveAuthDestination(role, location.state, location.search), { replace: true })
     } catch (error) {
       console.error('Falha ao criar conta', error)
       setErro(extractAuthError(error, 'Erro ao criar conta. Tente novamente.'))
@@ -137,7 +140,7 @@ export default function Register() {
             <input
               className="form-input"
               type="password"
-              placeholder="Minimo 6 caracteres"
+              placeholder="Mínimo 6 caracteres"
               value={form.senha}
               onChange={event => setForm(current => ({ ...current, senha: event.target.value }))}
               required
@@ -195,7 +198,7 @@ export default function Register() {
         )}
 
         <div className="auth-footer">
-          Já tem conta? <Link to="/login" state={location.state}>Entrar</Link>
+          Já tem conta? <Link to={`/login${location.search}`} state={location.state}>Entrar</Link>
         </div>
       </div>
     </div>

@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import BrandLogo from '../components/BrandLogo'
-import { resolveAuthDestination } from '../utils/authRedirects'
 import GoogleAuthButton from '../components/GoogleAuthButton'
+import { useAuth } from '../context/AuthContext'
 import { extractAuthError } from '../utils/authErrors'
+import { resolveAuthDestination } from '../utils/authRedirects'
 
 export default function Login() {
   const { login, loginWithGoogle } = useAuth()
@@ -21,7 +21,7 @@ export default function Login() {
     setGoogleLoading(true)
     try {
       const role = await loginWithGoogle(code, window.location.origin)
-      navigate(resolveAuthDestination(role, location.state), { replace: true })
+      navigate(resolveAuthDestination(role, location.state, location.search), { replace: true })
     } catch (error) {
       setErro(extractAuthError(error, 'Não foi possível entrar com Google.'))
     } finally {
@@ -35,7 +35,7 @@ export default function Login() {
     setLoading(true)
     try {
       const role = await login(form.email, form.senha)
-      navigate(resolveAuthDestination(role, location.state), { replace: true })
+      navigate(resolveAuthDestination(role, location.state, location.search), { replace: true })
     } catch (error) {
       setErro(extractAuthError(error, 'Erro ao entrar. Verifique suas credenciais.'))
     } finally {
@@ -76,7 +76,7 @@ export default function Login() {
           </div>
 
           <div className="auth-meta-row">
-            <Link className="auth-inline-link" to="/forgot-password" state={location.state}>
+            <Link className="auth-inline-link" to={`/forgot-password${location.search}`} state={location.state}>
               Esqueci minha senha
             </Link>
           </div>
@@ -111,7 +111,7 @@ export default function Login() {
         )}
 
         <div className="auth-footer">
-          Não tem conta? <Link to="/register" state={location.state}>Criar conta gratuita</Link>
+          Não tem conta? <Link to={`/register${location.search}`} state={location.state}>Criar conta gratuita</Link>
         </div>
       </div>
     </div>

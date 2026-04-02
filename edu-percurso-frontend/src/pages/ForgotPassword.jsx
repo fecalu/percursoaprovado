@@ -80,7 +80,7 @@ export default function ForgotPassword() {
         </form>
 
         <div className="auth-footer">
-          Lembrou sua senha? <Link to="/login" state={location.state}>Voltar para o login</Link>
+          Lembrou sua senha? <Link to={`/login${location.search}`} state={location.state}>Voltar para o login</Link>
         </div>
       </div>
     </div>
