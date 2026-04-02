@@ -488,6 +488,13 @@ export default function Player() {
   }
 
   function voltarParaVideoPrincipal() {
+    if (isMobileViewport) {
+      setVideoExplicativoAberto(false)
+      setExplicacaoPontoAbertaId(null)
+      setPontoExpandidoId(null)
+      definirPromptPonto(null)
+    }
+
     requestAnimationFrame(() => {
       playerShellRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
