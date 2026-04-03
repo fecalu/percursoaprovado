@@ -161,7 +161,8 @@ export default function AdminPercursoForm() {
   const [pontoAtencaoAbertoIndex, setPontoAtencaoAbertoIndex] = useState(null)
   const [etapasAbertas, setEtapasAbertas] = useState(ETAPAS_INICIAIS)
   const [erros, setErros] = useState({})
-  const escopoConteudo = form.localProvaId ? 'LOCAL' : 'GERAL'
+  const [escopoConteudo, setEscopoConteudoState] = useState('GERAL')
+  const [ultimoLocalProvaId, setUltimoLocalProvaId] = useState('')
 
   useEffect(() => {
     Promise.all([
@@ -174,6 +175,9 @@ export default function AdminPercursoForm() {
         setLocais(locaisResp)
 
         if (!percursoResp) return
+
+        setEscopoConteudoState(percursoResp.localProvaId ? 'LOCAL' : 'GERAL')
+        setUltimoLocalProvaId(percursoResp.localProvaId || '')
 
         setForm({
           titulo: percursoResp.titulo || '',
@@ -217,15 +221,27 @@ export default function AdminPercursoForm() {
   function set(field, value) {
     setForm(current => ({ ...current, [field]: value }))
     setErros(current => ({ ...current, [field]: undefined }))
+
+    if (field === 'localProvaId' && value) {
+      setUltimoLocalProvaId(value)
+    }
   }
 
   function setEscopoConteudo(escopo) {
     if (escopo === 'GERAL') {
+      if (form.localProvaId) {
+        setUltimoLocalProvaId(form.localProvaId)
+      }
+
+      setEscopoConteudoState('GERAL')
       set('localProvaId', '')
       return
     }
 
-    set('localProvaId', form.localProvaId || '')
+    setEscopoConteudoState('LOCAL')
+    if (!form.localProvaId && ultimoLocalProvaId) {
+      set('localProvaId', ultimoLocalProvaId)
+    }
   }
 
   function setPontoAtencao(index, field, value) {
