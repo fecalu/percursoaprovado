@@ -33,15 +33,15 @@ export default function Sidebar() {
 
   const mobileSectionTitle = useMemo(() => {
     if (isAdmin) {
-      if (location.pathname.startsWith('/admin/paginas/')) return 'Paginas do site'
-      if (location.pathname.startsWith('/admin/percursos')) return 'Conteudos'
+      if (location.pathname.startsWith('/admin/paginas/')) return 'Site'
+      if (location.pathname.startsWith('/admin/percursos')) return 'Aulas'
       if (location.pathname.startsWith('/admin/modulos')) return 'Modulos'
-      if (location.pathname.startsWith('/admin/questoes')) return 'Banco de questoes'
-      if (location.pathname.startsWith('/admin/locais')) return 'Locais'
-      if (location.pathname.startsWith('/admin/planos')) return 'Planos'
-      if (location.pathname.startsWith('/admin/usuarios')) return 'Usuarios'
-      if (location.pathname.startsWith('/admin/pedidos')) return 'Pedidos'
-      if (location.pathname.startsWith('/admin/assinaturas')) return 'Assinaturas'
+      if (location.pathname.startsWith('/admin/questoes')) return 'Questoes'
+      if (location.pathname.startsWith('/admin/locais')) return 'Comercial'
+      if (location.pathname.startsWith('/admin/planos')) return 'Comercial'
+      if (location.pathname.startsWith('/admin/usuarios')) return 'Operacao'
+      if (location.pathname.startsWith('/admin/pedidos')) return 'Operacao'
+      if (location.pathname.startsWith('/admin/assinaturas')) return 'Operacao'
       return 'Administracao'
     }
 
@@ -101,48 +101,63 @@ export default function Sidebar() {
 
   function renderAdminNav() {
     return (
-      <nav className="nav-group">
-        <div className="nav-label">Administracao</div>
-        <NavLink to="/admin" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconHome /> Dashboard
-        </NavLink>
-        <NavLink to="/admin/paginas/home" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconBrowser /> Home do site
-        </NavLink>
-        <NavLink to="/admin/paginas/local" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconBrowser /> Pagina do local
-        </NavLink>
-        <NavLink to="/admin/paginas/checkout" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconBrowser /> Checkout
-        </NavLink>
-        <NavLink to="/admin/percursos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconList /> Conteudos
-        </NavLink>
-        <NavLink to="/admin/modulos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconList /> Modulos
-        </NavLink>
-        <NavLink to="/admin/questoes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconQuiz /> Banco de questoes
-        </NavLink>
-        <NavLink to="/admin/locais" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconMap /> Locais
-        </NavLink>
-        <NavLink to="/admin/planos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconPrice /> Planos
-        </NavLink>
-        <NavLink to="/admin/usuarios" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconUser /> Usuarios
-        </NavLink>
-        <NavLink to="/admin/pedidos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconCart /> Pedidos e pagamentos
-        </NavLink>
-        <NavLink to="/admin/assinaturas" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconPass /> Assinaturas
-        </NavLink>
-        <NavLink to="/admin/percursos/novo" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconPlus /> Novo conteudo
-        </NavLink>
-      </nav>
+      <>
+        <nav className="nav-group">
+          <div className="nav-label">Visao geral</div>
+          <NavLink to="/admin" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconHome /> Dashboard
+          </NavLink>
+        </nav>
+
+        <nav className="nav-group">
+          <div className="nav-label">Site</div>
+          <NavLink to="/admin/paginas/home" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconBrowser /> Home
+          </NavLink>
+          <NavLink to="/admin/paginas/local" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconBrowser /> Pagina do local
+          </NavLink>
+          <NavLink to="/admin/paginas/checkout" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconBrowser /> Checkout
+          </NavLink>
+        </nav>
+
+        <nav className="nav-group">
+          <div className="nav-label">Conteudo</div>
+          <NavLink to="/admin/percursos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconList /> Aulas
+          </NavLink>
+          <NavLink to="/admin/modulos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconList /> Modulos
+          </NavLink>
+          <NavLink to="/admin/questoes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconQuiz /> Banco de questoes
+          </NavLink>
+        </nav>
+
+        <nav className="nav-group">
+          <div className="nav-label">Comercial</div>
+          <NavLink to="/admin/locais" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconMap /> Locais
+          </NavLink>
+          <NavLink to="/admin/planos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconPrice /> Planos
+          </NavLink>
+        </nav>
+
+        <nav className="nav-group">
+          <div className="nav-label">Operacao</div>
+          <NavLink to="/admin/usuarios" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconUser /> Usuarios
+          </NavLink>
+          <NavLink to="/admin/pedidos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconCart /> Pedidos
+          </NavLink>
+          <NavLink to="/admin/assinaturas" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            <IconPass /> Assinaturas
+          </NavLink>
+        </nav>
+      </>
     )
   }
 

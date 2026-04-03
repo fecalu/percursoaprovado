@@ -216,19 +216,19 @@ body.mobile-drawer-open {
 
 .mobile-sidebar-drawer .nav-group {
   padding: 0 0.65rem;
-  margin-bottom: 1.1rem;
+  margin-bottom: 0.72rem;
 }
 
 .mobile-sidebar-drawer .nav-label {
   padding: 0 0.8rem;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.24rem;
 }
 
 .mobile-sidebar-drawer .nav-item {
-  padding: 0.78rem 0.82rem;
+  padding: 0.72rem 0.82rem;
   border-radius: 14px;
   font-size: 13px;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.12rem;
 }
 
 .mobile-sidebar-drawer .nav-item.active {
@@ -305,7 +305,7 @@ body.player-page-wide .main-content {
 
 .nav-group {
   padding: 0 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.72rem;
 }
 .nav-label {
   font-size: 10px;
@@ -314,20 +314,20 @@ body.player-page-wide .main-content {
   text-transform: uppercase;
   letter-spacing: 1px;
   padding: 0 0.75rem;
-  margin-bottom: 6px;
+  margin-bottom: 0.14rem;
 }
 .nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: var(--radius);
   font-size: 14px;
   color: var(--text-2);
   cursor: pointer;
   text-decoration: none;
   transition: background var(--transition), color var(--transition);
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   border: none;
   background: none;
   width: 100%;
@@ -1967,6 +1967,7 @@ html[data-theme='light'] .mobile-sidebar-drawer .nav-item.active {
   background: rgba(21,159,112,0.1);
   color: var(--accent);
 }
+
 
 html[data-theme='light'] .user-avatar {
   background: rgba(21,159,112,0.12);
