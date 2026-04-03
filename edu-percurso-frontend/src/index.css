@@ -1045,6 +1045,77 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
   align-content: start;
 }
 
+.admin-modulos-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.admin-modulos-item {
+  display: grid;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.02);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+}
+
+.admin-modulos-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(45,224,154,0.16);
+}
+
+.admin-modulos-item.is-active {
+  border-color: rgba(45,224,154,0.22);
+  background: rgba(45,224,154,0.08);
+  box-shadow: inset 0 0 0 1px rgba(45,224,154,0.08);
+}
+
+.admin-modulos-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-modulos-item-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.admin-modulos-item-copy {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.admin-modulos-empty {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.02);
+}
+
+.admin-modulos-textarea {
+  min-height: 110px;
+}
+
+.admin-modulos-preview {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
 /* ── Player ──────────────────────────────────────────────────────────────── */
 .player-stage-shell {
   position: relative;

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { percursoService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import { formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
@@ -8,7 +8,10 @@ export default function AdminPercursos() {
   const [percursos, setPercursos] = useState([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { show, ToastEl } = useToast()
+  const moduloId = searchParams.get('moduloId') || ''
+  const moduloNome = searchParams.get('moduloNome') || ''
 
   useEffect(() => {
     carregar()
@@ -21,6 +24,11 @@ export default function AdminPercursos() {
       setLoading(false)
     }
   }
+
+  const percursosFiltrados = useMemo(() => {
+    if (!moduloId) return percursos
+    return percursos.filter(item => item.categoriaId === moduloId)
+  }, [percursos, moduloId])
 
   async function excluir(id, titulo) {
     if (!confirm(`Excluir a aula "${titulo}"?`)) return
@@ -37,20 +45,41 @@ export default function AdminPercursos() {
   if (loading) return <div className="spinner" />
 
   return (
-      <>
+    <>
       {ToastEl}
       <div className="admin-page-head">
-        <div className="page-title">Aulas</div>
+        <div>
+          <div className="page-title">{moduloId ? 'Aulas do módulo' : 'Aulas'}</div>
+          {moduloId ? (
+            <div className="mini-copy" style={{ marginTop: 6 }}>
+              {moduloNome ? `Filtrando por módulo: ${moduloNome}` : 'Filtrando pela seleção vinda da tela de módulos.'}
+            </div>
+          ) : null}
+        </div>
         <button className="btn btn-primary" onClick={() => navigate('/admin/percursos/novo')}>
           + Nova aula
         </button>
       </div>
       <p className="page-sub">Gerencie aulas gerais e aulas vinculadas a cada local, organizando tudo por modulo.</p>
 
-      {percursos.length === 0 ? (
+      {moduloId ? (
+        <div className="admin-inline-note" style={{ marginBottom: '1rem' }}>
+          <strong>{percursosFiltrados.length}</strong> aula(s) encontrada(s) neste módulo.
+          <button
+            className="btn btn-ghost"
+            type="button"
+            style={{ marginLeft: '0.85rem' }}
+            onClick={() => setSearchParams({})}
+          >
+            Limpar filtro
+          </button>
+        </div>
+      ) : null}
+
+      {percursosFiltrados.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">+</div>
-          Nenhuma aula cadastrada ainda.
+          {moduloId ? 'Nenhuma aula encontrada para este módulo.' : 'Nenhuma aula cadastrada ainda.'}
         </div>
       ) : (
         <div className="table-wrap">
@@ -62,7 +91,7 @@ export default function AdminPercursos() {
             <span>Duracao</span>
             <span>Acoes</span>
           </div>
-          {percursos.map(item => (
+          {percursosFiltrados.map(item => (
             <div key={item.id} className="table-row" style={{ gridTemplateColumns: '2fr 1.1fr 1.1fr 1fr 0.8fr 140px' }}>
               <div>
                 <div className="table-name">{item.titulo}</div>

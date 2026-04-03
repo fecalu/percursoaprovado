@@ -35,6 +35,7 @@ export default function Sidebar() {
     if (isAdmin) {
       if (location.pathname.startsWith('/admin/paginas/')) return 'Paginas do site'
       if (location.pathname.startsWith('/admin/percursos')) return 'Conteudos'
+      if (location.pathname.startsWith('/admin/modulos')) return 'Modulos'
       if (location.pathname.startsWith('/admin/questoes')) return 'Banco de questoes'
       if (location.pathname.startsWith('/admin/locais')) return 'Locais'
       if (location.pathname.startsWith('/admin/planos')) return 'Planos'
@@ -116,6 +117,9 @@ export default function Sidebar() {
         </NavLink>
         <NavLink to="/admin/percursos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconList /> Conteudos
+        </NavLink>
+        <NavLink to="/admin/modulos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconList /> Modulos
         </NavLink>
         <NavLink to="/admin/questoes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconQuiz /> Banco de questoes

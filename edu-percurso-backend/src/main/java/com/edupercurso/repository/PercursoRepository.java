@@ -8,5 +8,7 @@ import java.util.UUID;
 
 public interface PercursoRepository extends JpaRepository<Percurso, UUID> {
     List<Percurso> findByAtivoTrue();
+    List<Percurso> findByCategoriaId(UUID categoriaId);
     List<Percurso> findByCategoriaIdAndAtivoTrue(UUID categoriaId);
+    long countByCategoriaId(UUID categoriaId);
 }

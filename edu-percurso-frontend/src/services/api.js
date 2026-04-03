@@ -92,6 +92,8 @@ export const categoriaService = {
   listar: () => api.get('/categorias').then(response => response.data),
   criar: data => api.post('/categorias', data).then(response => response.data),
   atualizar: (id, data) => api.put(`/categorias/${id}`, data).then(response => response.data),
+  moverAulas: (id, data) => api.post(`/categorias/${id}/mover-aulas`, data).then(response => response.data),
+  excluir: id => api.delete(`/categorias/${id}`),
 }
 
 export const progressoService = {
