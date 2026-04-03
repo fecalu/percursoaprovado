@@ -29,6 +29,7 @@ public class PercursoService {
     private final AssinaturaService assinaturaService;
     private final AcessoConteudoService acessoConteudoService;
     private final BunnyStreamService bunnyStreamService;
+    private final GrupoAcessoService grupoAcessoService;
 
     @Transactional(readOnly = true)
     public List<PercursoDTO.Response> listar(String email,
@@ -78,6 +79,7 @@ public class PercursoService {
                 .duracaoSegundos(request.getDuracaoSegundos())
                 .ativo(request.isAtivo())
                 .categoria(resolverCategoria(request.getCategoriaId()))
+                .gruposAcesso(new java.util.LinkedHashSet<>(grupoAcessoService.buscarPorIds(request.getGruposAcessoIds())))
                 .localProva(resolverLocalProva(request.getLocalProvaId()))
                 .tipoConteudo(request.getTipoConteudo() == null ? Percurso.TipoConteudo.PERCURSO_REAL : request.getTipoConteudo())
                 .resumo(request.getResumo())
@@ -106,6 +108,7 @@ public class PercursoService {
         percurso.setDuracaoSegundos(request.getDuracaoSegundos());
         percurso.setAtivo(request.isAtivo());
         percurso.setCategoria(resolverCategoria(request.getCategoriaId()));
+        percurso.substituirGruposAcesso(grupoAcessoService.buscarPorIds(request.getGruposAcessoIds()));
         percurso.setLocalProva(resolverLocalProva(request.getLocalProvaId()));
         percurso.setTipoConteudo(request.getTipoConteudo() == null ? Percurso.TipoConteudo.PERCURSO_REAL : request.getTipoConteudo());
         percurso.setResumo(request.getResumo());

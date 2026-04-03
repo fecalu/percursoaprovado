@@ -27,6 +27,7 @@ import AdminPedidos from './pages/AdminPedidos'
 import AdminPercursos from './pages/AdminPercursos'
 import AdminPercursoForm from './pages/AdminPercursoForm'
 import AdminModulos from './pages/AdminModulos'
+import AdminGruposAcesso from './pages/AdminGruposAcesso'
 import AdminQuestoes from './pages/AdminQuestoes'
 import AdminQuestaoForm from './pages/AdminQuestaoForm'
 import AdminLocais from './pages/AdminLocais'
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="/admin/percursos/novo" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
             <Route path="/admin/percursos/:id/editar" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
             <Route path="/admin/modulos" element={<PrivateRoute adminOnly><AdminModulos /></PrivateRoute>} />
+            <Route path="/admin/grupos-acesso" element={<PrivateRoute adminOnly><AdminGruposAcesso /></PrivateRoute>} />
             <Route path="/admin/questoes" element={<PrivateRoute adminOnly><AdminQuestoes /></PrivateRoute>} />
             <Route path="/admin/questoes/nova" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
             <Route path="/admin/questoes/:id/editar" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />

@@ -23,6 +23,7 @@ public class PercursoDTO {
         private String videoAssetId;
         private Integer duracaoSegundos;
         private UUID categoriaId;
+        private List<UUID> gruposAcessoIds;
         private UUID localProvaId;
         private Percurso.TipoConteudo tipoConteudo = Percurso.TipoConteudo.PERCURSO_REAL;
         private String resumo;
@@ -110,6 +111,8 @@ public class PercursoDTO {
         private UUID categoriaId;
         private String categoriaNome;
         private Integer categoriaOrdemExibicao;
+        private List<UUID> gruposAcessoIds;
+        private List<String> gruposAcessoNomes;
         private UUID localProvaId;
         private String localProvaNome;
         private String localProvaSlug;
@@ -151,6 +154,12 @@ public class PercursoDTO {
                 response.categoriaNome = percurso.getCategoria().getNome();
                 response.categoriaOrdemExibicao = percurso.getCategoria().getOrdemExibicao();
             }
+            response.gruposAcessoIds = percurso.getGruposAcesso().stream()
+                    .map(grupoAcesso -> grupoAcesso.getId())
+                    .toList();
+            response.gruposAcessoNomes = percurso.getGruposAcesso().stream()
+                    .map(grupoAcesso -> grupoAcesso.getNome())
+                    .toList();
             if (percurso.getLocalProva() != null) {
                 response.localProvaId = percurso.getLocalProva().getId();
                 response.localProvaNome = percurso.getLocalProva().getNome();

@@ -96,6 +96,13 @@ export const categoriaService = {
   excluir: id => api.delete(`/categorias/${id}`),
 }
 
+export const grupoAcessoService = {
+  listar: () => api.get('/admin/grupos-acesso').then(response => response.data),
+  criar: data => api.post('/admin/grupos-acesso', data).then(response => response.data),
+  atualizar: (id, data) => api.put(`/admin/grupos-acesso/${id}`, data).then(response => response.data),
+  excluir: id => api.delete(`/admin/grupos-acesso/${id}`),
+}
+
 export const progressoService = {
   meu: () => api.get('/progresso/meu').then(response => response.data),
   salvar: data => api.post('/progresso', data).then(response => response.data),

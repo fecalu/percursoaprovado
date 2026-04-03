@@ -6,7 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -53,6 +55,16 @@ public class Percurso {
     @JoinColumn(name = "local_prova_id")
     private LocalProva localProva;
 
+    @ManyToMany
+    @JoinTable(
+            name = "percursos_grupos_acesso",
+            joinColumns = @JoinColumn(name = "percurso_id"),
+            inverseJoinColumns = @JoinColumn(name = "grupo_acesso_id")
+    )
+    @OrderBy("ordemExibicao ASC, nome ASC")
+    @Builder.Default
+    private Set<GrupoAcesso> gruposAcesso = new LinkedHashSet<>();
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_conteudo", nullable = false)
     @Builder.Default
@@ -95,6 +107,15 @@ public class Percurso {
             ponto.setPercurso(this);
             this.pontosAtencao.add(ponto);
         });
+    }
+
+    public void substituirGruposAcesso(List<GrupoAcesso> novosGrupos) {
+        this.gruposAcesso.clear();
+        if (novosGrupos == null) {
+            return;
+        }
+
+        this.gruposAcesso.addAll(novosGrupos);
     }
 
     public enum TipoConteudo {

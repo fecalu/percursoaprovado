@@ -1141,6 +1141,68 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
   line-height: 1.5;
 }
 
+.admin-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-access-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.9rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-soft);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), transform var(--transition);
+}
+
+.admin-access-item:hover {
+  border-color: var(--border-md);
+  transform: translateY(-1px);
+}
+
+.admin-access-item.is-selected {
+  border-color: color-mix(in srgb, var(--accent) 54%, var(--border));
+  background: color-mix(in srgb, var(--accent-dim) 65%, var(--surface-soft));
+}
+
+.admin-access-item input {
+  width: 16px;
+  height: 16px;
+  margin-top: 0.15rem;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+.admin-access-item-body {
+  min-width: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.admin-access-item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.admin-access-item-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.admin-access-item-copy {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
 .admin-modulos-empty {
   display: grid;
   gap: 0.35rem;

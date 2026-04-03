@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { categoriaService, localProvaService, percursoService, uploadService } from '../services/api'
+import { categoriaService, grupoAcessoService, localProvaService, percursoService, uploadService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import { formatTipoConteudo } from '../utils/formatters'
 
@@ -14,6 +14,7 @@ const VAZIO = {
   thumbnailUrl: '',
   duracaoSegundos: '',
   categoriaId: '',
+  gruposAcessoIds: [],
   localProvaId: '',
   tipoConteudo: 'PERCURSO_REAL',
   ordemExibicao: '0',
@@ -152,6 +153,7 @@ export default function AdminPercursoForm() {
 
   const [form, setForm] = useState(VAZIO)
   const [categorias, setCategorias] = useState([])
+  const [gruposAcesso, setGruposAcesso] = useState([])
   const [locais, setLocais] = useState([])
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
@@ -167,11 +169,13 @@ export default function AdminPercursoForm() {
   useEffect(() => {
     Promise.all([
       categoriaService.listar(),
+      grupoAcessoService.listar(),
       localProvaService.listar({ todos: true }),
       isEdicao ? percursoService.buscar(id) : Promise.resolve(null),
     ])
-      .then(([categoriasResp, locaisResp, percursoResp]) => {
+      .then(([categoriasResp, gruposAcessoResp, locaisResp, percursoResp]) => {
         setCategorias(categoriasResp)
+        setGruposAcesso(gruposAcessoResp)
         setLocais(locaisResp)
 
         if (!percursoResp) return
@@ -189,6 +193,7 @@ export default function AdminPercursoForm() {
           thumbnailUrl: percursoResp.thumbnailUrl || '',
           duracaoSegundos: percursoResp.duracaoSegundos ? String(Math.floor(percursoResp.duracaoSegundos / 60)) : '',
           categoriaId: percursoResp.categoriaId || '',
+          gruposAcessoIds: percursoResp.gruposAcessoIds || [],
           localProvaId: percursoResp.localProvaId || '',
           tipoConteudo: percursoResp.tipoConteudo || 'PERCURSO_REAL',
           ordemExibicao: String(percursoResp.ordemExibicao ?? 0),
@@ -252,6 +257,20 @@ export default function AdminPercursoForm() {
       )),
     }))
     setErros(current => ({ ...current, pontosAtencao: undefined }))
+  }
+
+  function alternarGrupoAcesso(grupoId) {
+    setForm(current => {
+      const idsAtuais = Array.isArray(current.gruposAcessoIds) ? current.gruposAcessoIds : []
+      const possuiGrupo = idsAtuais.includes(grupoId)
+
+      return {
+        ...current,
+        gruposAcessoIds: possuiGrupo
+          ? idsAtuais.filter(idAtual => idAtual !== grupoId)
+          : [...idsAtuais, grupoId],
+      }
+    })
   }
 
   function adicionarPontoAtencao() {
@@ -412,6 +431,7 @@ export default function AdminPercursoForm() {
       thumbnailUrl: form.thumbnailUrl.trim() || null,
       duracaoSegundos: form.duracaoSegundos ? Number(form.duracaoSegundos) * 60 : null,
       categoriaId: form.categoriaId || null,
+      gruposAcessoIds: form.gruposAcessoIds,
       localProvaId: form.localProvaId || null,
       tipoConteudo: form.tipoConteudo,
       ordemExibicao: Number(form.ordemExibicao) || 0,
@@ -476,6 +496,7 @@ export default function AdminPercursoForm() {
   const pontoAtencaoSelecionadoPosicao = pontosAtencaoOrdenados.findIndex(({ index }) => index === pontoAtencaoAbertoIndex) + 1
   const thumbnailPreviewUrl = form.thumbnailUrl.trim()
   const categoriaSelecionada = categorias.find(item => item.id === form.categoriaId) || null
+  const gruposAcessoSelecionados = gruposAcesso.filter(item => form.gruposAcessoIds.includes(item.id))
   const localSelecionado = locais.find(item => item.id === form.localProvaId) || null
   const totalPontosCadastrados = form.pontosAtencao.length
   const totalPontosAtivos = form.pontosAtencao.filter(item => item.ativo).length
@@ -1014,6 +1035,49 @@ export default function AdminPercursoForm() {
             </div>
 
             <div className="form-group" />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Grupos de acesso</label>
+            <div className="mini-copy" style={{ marginBottom: '0.7rem' }}>
+              Modulo define como a aula aparece. Grupos de acesso definem quais planos poderao liberar esta aula.
+            </div>
+
+            {gruposAcesso.length ? (
+              <div className="admin-access-grid">
+                {gruposAcesso.map(grupo => {
+                  const selecionado = form.gruposAcessoIds.includes(grupo.id)
+
+                  return (
+                    <label key={grupo.id} className={`admin-access-item${selecionado ? ' is-selected' : ''}`}>
+                      <input
+                        type="checkbox"
+                        checked={selecionado}
+                        onChange={() => alternarGrupoAcesso(grupo.id)}
+                      />
+                      <div className="admin-access-item-body">
+                        <div className="admin-access-item-title-row">
+                          <span className="admin-access-item-title">{grupo.nome}</span>
+                          {!grupo.ativo && <span className="card-tag">Inativo</span>}
+                        </div>
+                        <div className="admin-access-item-copy">
+                          {grupo.descricao?.trim() || grupo.codigo}
+                        </div>
+                      </div>
+                    </label>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="admin-inline-note">
+                <strong>Nenhum grupo de acesso cadastrado.</strong>
+                <span>Crie primeiro os grupos em Admin &gt; Grupos de acesso para comecar a classificar as aulas.</span>
+              </div>
+            )}
+
+            <div className="mini-copy" style={{ marginTop: '0.65rem' }}>
+              Selecionados: {gruposAcessoSelecionados.length ? gruposAcessoSelecionados.map(item => item.nome).join(', ') : 'Nenhum grupo marcado ainda.'}
+            </div>
           </div>
           </div>
           )}

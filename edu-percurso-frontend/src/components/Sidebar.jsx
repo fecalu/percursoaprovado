@@ -51,10 +51,11 @@ export default function Sidebar() {
     {
       key: 'conteudo',
       label: 'Conteudo',
-      match: pathname => pathname.startsWith('/admin/percursos') || pathname.startsWith('/admin/modulos') || pathname.startsWith('/admin/questoes'),
+      match: pathname => pathname.startsWith('/admin/percursos') || pathname.startsWith('/admin/modulos') || pathname.startsWith('/admin/grupos-acesso') || pathname.startsWith('/admin/questoes'),
       items: [
         { to: '/admin/percursos', icon: IconList, label: 'Aulas' },
         { to: '/admin/modulos', icon: IconList, label: 'Modulos' },
+        { to: '/admin/grupos-acesso', icon: IconPass, label: 'Grupos de acesso' },
         { to: '/admin/questoes', icon: IconQuiz, label: 'Banco de questoes' },
       ],
     },
@@ -89,6 +90,7 @@ export default function Sidebar() {
       if (location.pathname.startsWith('/admin/paginas/')) return 'Site'
       if (location.pathname.startsWith('/admin/percursos')) return 'Aulas'
       if (location.pathname.startsWith('/admin/modulos')) return 'Modulos'
+      if (location.pathname.startsWith('/admin/grupos-acesso')) return 'Conteudo'
       if (location.pathname.startsWith('/admin/questoes')) return 'Questoes'
       if (location.pathname.startsWith('/admin/locais')) return 'Comercial'
       if (location.pathname.startsWith('/admin/planos')) return 'Comercial'
