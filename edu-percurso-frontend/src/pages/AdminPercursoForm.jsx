@@ -43,6 +43,13 @@ const TIPOS_PONTO_ATENCAO = [
 ]
 
 const MODOS_PONTO_ATENCAO = ['CLIQUE', 'AUTOMATICO', 'APENAS_LISTA']
+const ETAPAS_INICIAIS = {
+  detalhes: false,
+  distribuicao: false,
+  video: false,
+  pontos: false,
+  publicacao: false,
+}
 
 function criarPontoAtencaoVazio(ordem = 0) {
   return {
@@ -152,6 +159,7 @@ export default function AdminPercursoForm() {
   const [enviandoVideoBunny, setEnviandoVideoBunny] = useState(false)
   const [uploadingPointField, setUploadingPointField] = useState('')
   const [pontoAtencaoAbertoIndex, setPontoAtencaoAbertoIndex] = useState(null)
+  const [etapasAbertas, setEtapasAbertas] = useState(ETAPAS_INICIAIS)
   const [erros, setErros] = useState({})
   const escopoConteudo = form.localProvaId ? 'LOCAL' : 'GERAL'
 
@@ -236,6 +244,7 @@ export default function AdminPercursoForm() {
       ...current,
       pontosAtencao: [...current.pontosAtencao, criarPontoAtencaoVazio(current.pontosAtencao.length)],
     }))
+    setEtapasAbertas(current => ({ ...current, pontos: true }))
     setPontoAtencaoAbertoIndex(proximoIndex)
   }
 
@@ -253,7 +262,15 @@ export default function AdminPercursoForm() {
   }
 
   function alternarPontoAtencao(index) {
-    setPontoAtencaoAbertoIndex(current => (current === index ? null : index))
+    setEtapasAbertas(current => ({ ...current, pontos: true }))
+    setPontoAtencaoAbertoIndex(current => (current === index ? current : index))
+  }
+
+  function alternarEtapa(chave) {
+    setEtapasAbertas(current => ({
+      ...current,
+      [chave]: !current[chave],
+    }))
   }
 
   function validar() {
@@ -269,6 +286,15 @@ export default function AdminPercursoForm() {
     }
 
     setErros(novosErros)
+
+    if (novosErros.titulo) {
+      setEtapasAbertas(current => ({ ...current, detalhes: true }))
+    }
+
+    if (novosErros.videoUrl || novosErros.videoAssetId) {
+      setEtapasAbertas(current => ({ ...current, video: true }))
+    }
+
     return Object.keys(novosErros).length === 0
   }
 
@@ -428,7 +454,322 @@ export default function AdminPercursoForm() {
       .sort((a, b) => ordenarPontosAtencao(a.ponto, b.ponto)),
     [form.pontosAtencao]
   )
+  const pontoAtencaoSelecionado = pontoAtencaoAbertoIndex != null
+    ? form.pontosAtencao[pontoAtencaoAbertoIndex] || null
+    : null
+  const pontoAtencaoSelecionadoPosicao = pontosAtencaoOrdenados.findIndex(({ index }) => index === pontoAtencaoAbertoIndex) + 1
   const thumbnailPreviewUrl = form.thumbnailUrl.trim()
+  const categoriaSelecionada = categorias.find(item => item.id === form.categoriaId) || null
+  const localSelecionado = locais.find(item => item.id === form.localProvaId) || null
+  const totalPontosCadastrados = form.pontosAtencao.length
+  const totalPontosAtivos = form.pontosAtencao.filter(item => item.ativo).length
+  const caminhoBiblioteca = escopoConteudo === 'LOCAL'
+    ? `Biblioteca > ${localSelecionado?.nome || 'Local especifico'} > ${categoriaSelecionada?.nome || 'Sem modulo'}`
+    : `Biblioteca > Modulos gerais > ${categoriaSelecionada?.nome || 'Sem modulo'}`
+
+  useEffect(() => {
+    if (!form.pontosAtencao.length) {
+      if (pontoAtencaoAbertoIndex != null) setPontoAtencaoAbertoIndex(null)
+      return
+    }
+
+    const indiceExiste = pontoAtencaoAbertoIndex != null && form.pontosAtencao[pontoAtencaoAbertoIndex]
+    if (!indiceExiste) {
+      setPontoAtencaoAbertoIndex(pontosAtencaoOrdenados[0]?.index ?? 0)
+    }
+  }, [form.pontosAtencao, pontoAtencaoAbertoIndex, pontosAtencaoOrdenados])
+
+  function renderEtapaHeader(chave, etapa, titulo, descricao) {
+    const aberta = etapasAbertas[chave]
+
+    return (
+      <button
+        className={`admin-aula-section-toggle${aberta ? ' is-open' : ''}`}
+        type="button"
+        onClick={() => alternarEtapa(chave)}
+        aria-expanded={aberta}
+      >
+        <div className="admin-aula-section-head">
+          <div className="admin-aula-section-kicker">Etapa {etapa}</div>
+          <div className="section-heading">{titulo}</div>
+          <div className="section-copy">{descricao}</div>
+        </div>
+        <span className="admin-aula-section-chevron" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M5 8l5 5 5-5" />
+          </svg>
+        </span>
+      </button>
+    )
+  }
+
+  function renderPontoAtencaoSelecionado() {
+    if (!pontoAtencaoSelecionado) {
+      return (
+        <div className="attention-admin-empty attention-admin-empty--editor">
+          <div className="attention-admin-empty-title">Selecione um ponto</div>
+          <div className="mini-copy">Escolha um ponto na coluna ao lado ou crie um novo para editar titulo, tempo, midias e comportamento.</div>
+        </div>
+      )
+    }
+
+    return (
+      <>
+        <div className="attention-admin-head">
+          <div>
+            <div className="attention-admin-kicker">Ponto {pontoAtencaoSelecionadoPosicao}</div>
+            <div className="attention-admin-title">{pontoAtencaoSelecionado.titulo.trim() || 'Novo ponto de atencao'}</div>
+          </div>
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => removerPontoAtencao(pontoAtencaoAbertoIndex)}
+          >
+            Remover
+          </button>
+        </div>
+
+        <div className="attention-admin-meta">
+          <span className="card-tag">{formatarTipoPonto(pontoAtencaoSelecionado.tipo)}</span>
+          <span className="card-tag">{formatarModoPonto(pontoAtencaoSelecionado.modoExibicao)}</span>
+          <span className="card-tag">{formatarTimestamp(pontoAtencaoSelecionado.timestampSegundos)}</span>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">Titulo</label>
+            <input
+              className="form-input"
+              placeholder="Ex: Ponto em que o examinador costuma observar a troca de marcha"
+              value={pontoAtencaoSelecionado.titulo}
+              onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'titulo', event.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Tempo no video (segundos)</label>
+            <input
+              className="form-input"
+              type="number"
+              min="0"
+              placeholder="Ex: 125"
+              value={pontoAtencaoSelecionado.timestampSegundos}
+              onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'timestampSegundos', event.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">Tipo</label>
+            <select
+              className="form-select"
+              value={pontoAtencaoSelecionado.tipo}
+              onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'tipo', event.target.value)}
+            >
+              {TIPOS_PONTO_ATENCAO.map(tipo => (
+                <option key={tipo} value={tipo}>{formatarTipoPonto(tipo)}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Modo de exibicao</label>
+            <select
+              className="form-select"
+              value={pontoAtencaoSelecionado.modoExibicao}
+              onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'modoExibicao', event.target.value)}
+            >
+              {MODOS_PONTO_ATENCAO.map(modo => (
+                <option key={modo} value={modo}>{formatarModoPonto(modo)}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {pontoAtencaoSelecionado.modoExibicao === 'AUTOMATICO' && (
+          <div className="form-group">
+            <label className="form-label">Ao aparecer automaticamente</label>
+            <div style={{ display: 'grid', gap: 10 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={pontoAtencaoSelecionado.pausarAoExibir}
+                  onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'pausarAoExibir', event.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+                />
+                <span className="form-label" style={{ margin: 0 }}>Pausar o video ao exibir esse ponto</span>
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={pontoAtencaoSelecionado.ocultarAutomaticamente}
+                  onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'ocultarAutomaticamente', event.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+                />
+                <span className="form-label" style={{ margin: 0 }}>Ocultar automaticamente quando o video estiver reproduzindo</span>
+              </label>
+            </div>
+            <div className="mini-copy">
+              Se o video estiver pausado, a contagem nao corre. Se o aluno der play, o aviso pode sumir sozinho depois do tempo definido.
+            </div>
+
+            {pontoAtencaoSelecionado.ocultarAutomaticamente && (
+              <div className="form-row" style={{ marginTop: 12 }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label className="form-label">Ocultar apos (segundos de reproducao)</label>
+                  <input
+                    className="form-input"
+                    type="number"
+                    min="3"
+                    max="20"
+                    value={pontoAtencaoSelecionado.segundosParaOcultar}
+                    onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'segundosParaOcultar', event.target.value)}
+                  />
+                  <div className="mini-copy">Use entre 3 e 20 segundos. O padrao recomendado e 10.</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="form-group">
+          <label className="form-label">Descricao curta</label>
+          <textarea
+            className="form-textarea"
+            placeholder="Resumo rapido do ponto importante."
+            value={pontoAtencaoSelecionado.descricaoCurta}
+            onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'descricaoCurta', event.target.value)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Descricao detalhada</label>
+          <textarea
+            className="form-textarea"
+            style={{ minHeight: 110 }}
+            placeholder="Detalhe melhor o que o aluno deve observar nesse trecho."
+            value={pontoAtencaoSelecionado.descricaoDetalhada}
+            onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'descricaoDetalhada', event.target.value)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Audio explicativo</label>
+          <div className="question-media-stack">
+            <input
+              className="form-input"
+              type="file"
+              accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg,.mp3,.m4a,.ogg"
+              onChange={event => handlePontoAudioUpload(pontoAtencaoAbertoIndex, event)}
+              disabled={uploadingPointField === `ponto-audio-${pontoAtencaoAbertoIndex}`}
+            />
+            <input
+              className="form-input"
+              placeholder="/media/audios/... ou URL publica do audio"
+              value={pontoAtencaoSelecionado.audioUrl}
+              onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'audioUrl', event.target.value)}
+            />
+            <div className="mini-copy">
+              Use para uma explicacao falada curta, como se o instrutor comentasse esse trecho.
+              {uploadingPointField === `ponto-audio-${pontoAtencaoAbertoIndex}` ? ' Enviando audio...' : ''}
+            </div>
+            {pontoAtencaoSelecionado.audioUrl && (
+              <div className="question-media-preview-wrap question-media-preview-wrap--audio">
+                <audio
+                  className="question-audio-preview"
+                  controls
+                  preload="none"
+                  src={pontoAtencaoSelecionado.audioUrl}
+                />
+                <div className="question-audio-actions">
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setPontoAtencao(pontoAtencaoAbertoIndex, 'audioUrl', '')}
+                  >
+                    Remover audio
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">Upload da imagem de apoio</label>
+            <div className="question-media-stack">
+              <input
+                className="form-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={event => handlePontoImagemUpload(pontoAtencaoAbertoIndex, event)}
+                disabled={uploadingPointField === `ponto-${pontoAtencaoAbertoIndex}`}
+              />
+              <input
+                className="form-input"
+                placeholder="/media/... ou URL publica da imagem"
+                value={pontoAtencaoSelecionado.imagemUrl}
+                onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'imagemUrl', event.target.value)}
+              />
+              <div className="mini-copy">
+                Use para placas, referencias visuais ou detalhes de um trecho.
+                {uploadingPointField === `ponto-${pontoAtencaoAbertoIndex}` ? ' Enviando imagem...' : ''}
+              </div>
+              {pontoAtencaoSelecionado.imagemUrl && (
+                <div className="question-media-preview-wrap">
+                  <img
+                    src={pontoAtencaoSelecionado.imagemUrl}
+                    alt={`Preview do ponto ${pontoAtencaoSelecionadoPosicao}`}
+                    className="question-media-preview question-media-preview--option"
+                  />
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setPontoAtencao(pontoAtencaoAbertoIndex, 'imagemUrl', '')}
+                  >
+                    Remover imagem
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Video explicativo opcional</label>
+            <input
+              className="form-input"
+              placeholder="https://youtube.com/watch?v=... ou embed do Bunny"
+              value={pontoAtencaoSelecionado.videoUrl}
+              onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'videoUrl', event.target.value)}
+            />
+            <div className="mini-copy">
+              Aceita YouTube, Vimeo e Bunny. Quando a URL for compativel, o video abre dentro da plataforma.
+            </div>
+            {pontoAtencaoSelecionado.videoUrl.trim() && !videoExplicativoEhEmbedavel(pontoAtencaoSelecionado.videoUrl) && (
+              <div className="form-error">
+                Essa URL nao parece ser de YouTube, Vimeo ou embed do Bunny. Nesse caso, o aluno vai abrir o link fora da plataforma.
+              </div>
+            )}
+
+            <div className="form-row" style={{ marginTop: 12 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginTop: 28 }}>
+                <input
+                  type="checkbox"
+                  checked={pontoAtencaoSelecionado.ativo}
+                  onChange={event => setPontoAtencao(pontoAtencaoAbertoIndex, 'ativo', event.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
+                />
+                <span className="form-label" style={{ margin: 0 }}>Ponto ativo</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </>
+    )
+  }
 
   if (loading) return <div className="spinner" />
 
@@ -445,8 +786,100 @@ export default function AdminPercursoForm() {
       <div className="page-title">{isEdicao ? 'Editar aula' : 'Nova aula'}</div>
       <p className="page-sub">Cadastre aulas gerais ou vincule o conteudo a um local especifico, organizando tudo por modulo.</p>
 
-      <div className="card" style={{ maxWidth: 760 }}>
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="admin-aula-layout">
+        <aside className="admin-aula-column admin-aula-column--left">
+          <div className="card admin-aula-context-card">
+            {thumbnailPreviewUrl ? (
+              <img
+                src={thumbnailPreviewUrl}
+                alt="Preview da aula"
+                className="admin-aula-context-image"
+              />
+            ) : (
+              <div className="admin-aula-context-placeholder">
+                {form.titulo.trim().slice(0, 2).toUpperCase() || 'A'}
+              </div>
+            )}
+
+            <div className="admin-aula-context-kicker">{isEdicao ? 'Aula em edicao' : 'Nova aula'}</div>
+            <div className="admin-aula-context-title">{form.titulo.trim() || 'Defina o titulo da aula'}</div>
+            <div className="admin-aula-context-copy">{categoriaSelecionada?.nome || 'Sem modulo'} • {escopoConteudo === 'LOCAL' ? 'Local especifico' : 'Geral'}</div>
+          </div>
+
+          <div className="card admin-aula-nav-card">
+            <div className="admin-aula-card-title">Fluxo da edicao</div>
+            <div className="admin-aula-nav-list">
+              <div className="admin-aula-nav-item is-active">Detalhes da aula</div>
+              <div className="admin-aula-nav-item">Distribuicao e modulo</div>
+              <div className="admin-aula-nav-item">Video, thumbnail e player</div>
+              <div className="admin-aula-nav-item">Pontos de atencao</div>
+              <div className="admin-aula-nav-item">Publicacao</div>
+            </div>
+          </div>
+        </aside>
+
+        <div className="card admin-aula-summary-bar">
+          {thumbnailPreviewUrl ? (
+            <img
+              src={thumbnailPreviewUrl}
+              alt="Preview da aula"
+              className="admin-aula-summary-thumb"
+            />
+          ) : (
+            <div className="admin-aula-summary-thumb admin-aula-summary-thumb--placeholder">
+              {form.titulo.trim() || 'Sua aula vai aparecer aqui'}
+            </div>
+          )}
+
+          <div className="admin-aula-summary-main">
+            <div className="admin-aula-summary-title">{form.titulo.trim() || 'Titulo da aula'}</div>
+            <div className="admin-aula-badge-strip admin-aula-summary-badges">
+              <span className="card-tag">{escopoConteudo === 'LOCAL' ? 'Local' : 'Geral'}</span>
+              <span className="card-tag">{categoriaSelecionada?.nome || 'Sem modulo'}</span>
+              <span className="card-tag">{form.ativo ? 'Ativo' : 'Inativo'}</span>
+            </div>
+            <div className="admin-aula-summary-copy">{form.resumo.trim() || 'Resumo curto para cards e biblioteca.'}</div>
+          </div>
+
+          <div className="admin-aula-summary-meta">
+            <div className="admin-aula-summary-item admin-aula-summary-item--wide">
+              <div className="form-label">Onde aparece</div>
+              <div className="mini-copy">{caminhoBiblioteca}</div>
+            </div>
+            <div className="admin-aula-summary-item">
+              <div className="form-label">Video</div>
+              <div className="mini-copy">{formatarVideoProvider(form.videoProvider)}</div>
+            </div>
+            <div className="admin-aula-summary-item">
+              <div className="form-label">Duracao</div>
+              <div className="mini-copy">{form.duracaoSegundos ? `${form.duracaoSegundos} min` : '-'}</div>
+            </div>
+            <div className="admin-aula-summary-item">
+              <div className="form-label">Local</div>
+              <div className="mini-copy">{localSelecionado?.nome || 'Nao se aplica'}</div>
+            </div>
+            <div className="admin-aula-summary-item">
+              <div className="form-label">Pontos</div>
+              <div className="mini-copy">{totalPontosAtivos} de {totalPontosCadastrados} ativos</div>
+            </div>
+          </div>
+
+          <div className="admin-aula-summary-actions">
+            <button className="btn btn-primary" type="submit" disabled={salvando || enviandoThumbnail || enviandoVideoBunny}>
+              {salvando ? 'Salvando...' : isEdicao ? 'Salvar alteracoes' : 'Criar conteudo'}
+            </button>
+            <button className="btn btn-ghost" type="button" onClick={() => navigate('/admin/percursos')}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+
+        <div className="admin-aula-column admin-aula-column--main">
+          <div className="card admin-aula-form-card">
+          <div className={`admin-aula-section${etapasAbertas.detalhes ? ' is-open' : ''}`}>
+            {renderEtapaHeader('detalhes', 1, 'Detalhes da aula', 'Defina o titulo e a base textual antes de configurar modulo, video e pontos de atencao.')}
+          {etapasAbertas.detalhes && (
+          <div className="admin-aula-section-body">
           <div className="form-group">
             <label className="form-label">Titulo da aula *</label>
             <input
@@ -457,6 +890,34 @@ export default function AdminPercursoForm() {
             />
             {erros.titulo && <div className="form-error">{erros.titulo}</div>}
           </div>
+
+          <div className="form-group">
+            <label className="form-label">Resumo</label>
+            <textarea
+              className="form-textarea admin-aula-textarea--compact"
+              placeholder="Resumo curto para cards e Biblioteca."
+              value={form.resumo}
+              onChange={event => set('resumo', event.target.value)}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Descricao</label>
+            <textarea
+              className="form-textarea admin-aula-textarea--compact admin-aula-textarea--descricao"
+              placeholder="Explique o que o aluno vai observar neste video."
+              value={form.descricao}
+              onChange={event => set('descricao', event.target.value)}
+            />
+          </div>
+          </div>
+          )}
+          </div>
+
+          <div className={`admin-aula-section${etapasAbertas.distribuicao ? ' is-open' : ''}`}>
+            {renderEtapaHeader('distribuicao', 2, 'Distribuicao e modulo', 'Escolha o escopo da aula, o local quando necessario e o modulo onde ela deve aparecer.')}
+          {etapasAbertas.distribuicao && (
+          <div className="admin-aula-section-body">
 
           <div className="form-row">
             <div className="form-group">
@@ -525,6 +986,30 @@ export default function AdminPercursoForm() {
 
           <div className="form-row">
             <div className="form-group">
+              <label className="form-label">Ordem de exibicao</label>
+              <input
+                className="form-input"
+                type="number"
+                min="0"
+                value={form.ordemExibicao}
+                onChange={event => set('ordemExibicao', event.target.value)}
+              />
+              <div className="mini-copy">Define a ordem da aula dentro do modulo.</div>
+            </div>
+
+            <div className="form-group" />
+          </div>
+          </div>
+          )}
+          </div>
+
+          <div className={`admin-aula-section${etapasAbertas.video ? ' is-open' : ''}`}>
+            {renderEtapaHeader('video', 3, 'Video, thumbnail e player', 'Configure o provedor, a duracao, a imagem da aula e como o player deve apresentar os pontos de atencao.')}
+          {etapasAbertas.video && (
+          <div className="admin-aula-section-body">
+
+          <div className="form-row">
+            <div className="form-group">
               <label className="form-label">Provedor do video</label>
               <select
                 className="form-select"
@@ -548,22 +1033,6 @@ export default function AdminPercursoForm() {
                 onChange={event => set('duracaoSegundos', event.target.value)}
               />
             </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Ordem de exibicao</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                value={form.ordemExibicao}
-                onChange={event => set('ordemExibicao', event.target.value)}
-              />
-              <div className="mini-copy">Define a ordem da aula dentro do modulo.</div>
-            </div>
-
-            <div className="form-group" />
           </div>
 
           <div className="form-group">
@@ -641,26 +1110,6 @@ export default function AdminPercursoForm() {
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Resumo</label>
-            <textarea
-              className="form-textarea"
-              placeholder="Resumo curto para cards e biblioteca."
-              value={form.resumo}
-              onChange={event => set('resumo', event.target.value)}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Descricao</label>
-            <textarea
-              className="form-textarea"
-              placeholder="Explique o que o aluno vai observar nesse video."
-              value={form.descricao}
-              onChange={event => set('descricao', event.target.value)}
-            />
-          </div>
-
           {form.videoProvider === 'BUNNY' ? (
             <>
               <div className="form-group">
@@ -719,306 +1168,75 @@ export default function AdminPercursoForm() {
               {erros.videoUrl && <div className="form-error">{erros.videoUrl}</div>}
             </div>
           )}
-
-          <div className="form-group">
-            <div className="section-heading">Pontos de atencao</div>
-            <div className="mini-copy" style={{ marginTop: '0.35rem' }}>
-              Cadastre alertas, detalhes importantes, placas e observacoes que vao apoiar o aluno dentro desse modulo.
-            </div>
-
-            <div className="attention-admin-list">
-              {pontosAtencaoOrdenados.map(({ ponto, index }, posicaoVisual) => {
-                const isAberto = pontoAtencaoAbertoIndex === index
-
-                return (
-                  <div key={ponto.id || index} className={`attention-admin-card${isAberto ? ' is-open' : ''}`}>
-                    <button
-                      type="button"
-                      className={`attention-admin-toggle${isAberto ? ' is-open' : ''}`}
-                      onClick={() => alternarPontoAtencao(index)}
-                      aria-expanded={isAberto}
-                    >
-                      <div className="attention-admin-toggle-title">
-                        {ponto.titulo.trim() || 'Novo ponto de atencao'}
-                      </div>
-                      <svg
-                        className="attention-admin-toggle-chevron"
-                        width="18"
-                        height="18"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path d="M5 7l5 6 5-6" />
-                      </svg>
-                    </button>
-
-                    {isAberto && (
-                      <>
-                        <div className="attention-admin-head">
-                          <div>
-                            <div className="attention-admin-kicker">Ponto {posicaoVisual + 1}</div>
-                          </div>
-                          <button
-                            className="btn btn-ghost"
-                            type="button"
-                            onClick={() => removerPontoAtencao(index)}
-                          >
-                            Remover
-                          </button>
-                        </div>
-
-                        <div className="attention-admin-meta">
-                          <span className="card-tag">{formatarTipoPonto(ponto.tipo)}</span>
-                          <span className="card-tag">{formatarModoPonto(ponto.modoExibicao)}</span>
-                          <span className="card-tag">{formatarTimestamp(ponto.timestampSegundos)}</span>
-                        </div>
-
-                        <div className="form-row">
-                          <div className="form-group">
-                            <label className="form-label">Titulo</label>
-                            <input
-                              className="form-input"
-                              placeholder="Ex: Ponto em que o examinador costuma observar a troca de marcha"
-                              value={ponto.titulo}
-                              onChange={event => setPontoAtencao(index, 'titulo', event.target.value)}
-                            />
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Tempo no video (segundos)</label>
-                            <input
-                              className="form-input"
-                              type="number"
-                              min="0"
-                              placeholder="Ex: 125"
-                              value={ponto.timestampSegundos}
-                              onChange={event => setPontoAtencao(index, 'timestampSegundos', event.target.value)}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="form-row">
-                          <div className="form-group">
-                            <label className="form-label">Tipo</label>
-                            <select
-                              className="form-select"
-                              value={ponto.tipo}
-                              onChange={event => setPontoAtencao(index, 'tipo', event.target.value)}
-                            >
-                              {TIPOS_PONTO_ATENCAO.map(tipo => (
-                                <option key={tipo} value={tipo}>{formatarTipoPonto(tipo)}</option>
-                              ))}
-                            </select>
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Modo de exibicao</label>
-                            <select
-                              className="form-select"
-                              value={ponto.modoExibicao}
-                              onChange={event => setPontoAtencao(index, 'modoExibicao', event.target.value)}
-                            >
-                              {MODOS_PONTO_ATENCAO.map(modo => (
-                                <option key={modo} value={modo}>{formatarModoPonto(modo)}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-
-                        {ponto.modoExibicao === 'AUTOMATICO' && (
-                          <div className="form-group">
-                            <label className="form-label">Ao aparecer automaticamente</label>
-                            <div style={{ display: 'grid', gap: 10 }}>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                                <input
-                                  type="checkbox"
-                                  checked={ponto.pausarAoExibir}
-                                  onChange={event => setPontoAtencao(index, 'pausarAoExibir', event.target.checked)}
-                                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
-                                />
-                                <span className="form-label" style={{ margin: 0 }}>Pausar o video ao exibir esse ponto</span>
-                              </label>
-
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-                                <input
-                                  type="checkbox"
-                                  checked={ponto.ocultarAutomaticamente}
-                                  onChange={event => setPontoAtencao(index, 'ocultarAutomaticamente', event.target.checked)}
-                                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
-                                />
-                                <span className="form-label" style={{ margin: 0 }}>Ocultar automaticamente quando o video estiver reproduzindo</span>
-                              </label>
-                            </div>
-                            <div className="mini-copy">
-                              Se o video estiver pausado, a contagem nao corre. Se o aluno der play, o aviso pode sumir sozinho depois do tempo definido.
-                            </div>
-
-                            {ponto.ocultarAutomaticamente && (
-                              <div className="form-row" style={{ marginTop: 12 }}>
-                                <div className="form-group" style={{ marginBottom: 0 }}>
-                                  <label className="form-label">Ocultar apos (segundos de reproducao)</label>
-                                  <input
-                                    className="form-input"
-                                    type="number"
-                                    min="3"
-                                    max="20"
-                                    value={ponto.segundosParaOcultar}
-                                    onChange={event => setPontoAtencao(index, 'segundosParaOcultar', event.target.value)}
-                                  />
-                                  <div className="mini-copy">Use entre 3 e 20 segundos. O padrao recomendado e 10.</div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="form-group">
-                          <label className="form-label">Descricao curta</label>
-                          <textarea
-                            className="form-textarea"
-                            placeholder="Resumo rapido do ponto importante."
-                            value={ponto.descricaoCurta}
-                            onChange={event => setPontoAtencao(index, 'descricaoCurta', event.target.value)}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label className="form-label">Descricao detalhada</label>
-                          <textarea
-                            className="form-textarea"
-                            style={{ minHeight: 110 }}
-                            placeholder="Detalhe melhor o que o aluno deve observar nesse trecho."
-                            value={ponto.descricaoDetalhada}
-                            onChange={event => setPontoAtencao(index, 'descricaoDetalhada', event.target.value)}
-                          />
-                        </div>
-
-                        <div className="form-group">
-                          <label className="form-label">Audio explicativo</label>
-                          <div className="question-media-stack">
-                            <input
-                              className="form-input"
-                              type="file"
-                              accept="audio/mpeg,audio/mp4,audio/x-m4a,audio/ogg,.mp3,.m4a,.ogg"
-                              onChange={event => handlePontoAudioUpload(index, event)}
-                              disabled={uploadingPointField === `ponto-audio-${index}`}
-                            />
-                            <input
-                              className="form-input"
-                              placeholder="/media/audios/... ou URL publica do audio"
-                              value={ponto.audioUrl}
-                              onChange={event => setPontoAtencao(index, 'audioUrl', event.target.value)}
-                            />
-                            <div className="mini-copy">
-                              Use para uma explicacao falada curta, como se o instrutor comentasse esse trecho.
-                              {uploadingPointField === `ponto-audio-${index}` ? ' Enviando audio...' : ''}
-                            </div>
-                            {ponto.audioUrl && (
-                              <div className="question-media-preview-wrap">
-                                <audio
-                                  className="question-audio-preview"
-                                  controls
-                                  preload="none"
-                                  src={ponto.audioUrl}
-                                />
-                                <button
-                                  className="btn btn-ghost"
-                                  type="button"
-                                  onClick={() => setPontoAtencao(index, 'audioUrl', '')}
-                                >
-                                  Remover audio
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="form-row">
-                          <div className="form-group">
-                            <label className="form-label">Upload da imagem de apoio</label>
-                            <div className="question-media-stack">
-                              <input
-                                className="form-input"
-                                type="file"
-                                accept="image/png,image/jpeg,image/webp"
-                                onChange={event => handlePontoImagemUpload(index, event)}
-                                disabled={uploadingPointField === `ponto-${index}`}
-                              />
-                              <input
-                                className="form-input"
-                                placeholder="/media/... ou URL publica da imagem"
-                                value={ponto.imagemUrl}
-                                onChange={event => setPontoAtencao(index, 'imagemUrl', event.target.value)}
-                              />
-                              <div className="mini-copy">
-                                Use para placas, referencias visuais ou detalhes de um trecho.
-                                {uploadingPointField === `ponto-${index}` ? ' Enviando imagem...' : ''}
-                              </div>
-                              {ponto.imagemUrl && (
-                                <div className="question-media-preview-wrap">
-                                  <img
-                                    src={ponto.imagemUrl}
-                                    alt={`Preview do ponto ${posicaoVisual + 1}`}
-                                    className="question-media-preview question-media-preview--option"
-                                  />
-                                  <button
-                                    className="btn btn-ghost"
-                                    type="button"
-                                    onClick={() => setPontoAtencao(index, 'imagemUrl', '')}
-                                  >
-                                    Remover imagem
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          <div className="form-group">
-                            <label className="form-label">Video explicativo opcional</label>
-                            <input
-                              className="form-input"
-                              placeholder="https://youtube.com/watch?v=... ou embed do Bunny"
-                              value={ponto.videoUrl}
-                              onChange={event => setPontoAtencao(index, 'videoUrl', event.target.value)}
-                            />
-                            <div className="mini-copy">
-                              Aceita YouTube, Vimeo e Bunny. Quando a URL for compativel, o video abre dentro da plataforma.
-                            </div>
-                            {ponto.videoUrl.trim() && !videoExplicativoEhEmbedavel(ponto.videoUrl) && (
-                              <div className="form-error">
-                                Essa URL nao parece ser de YouTube, Vimeo ou embed do Bunny. Nesse caso, o aluno vai abrir o link fora da plataforma.
-                              </div>
-                            )}
-
-                            <div className="form-row" style={{ marginTop: 12 }}>
-                              <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginTop: 28 }}>
-                                <input
-                                  type="checkbox"
-                                  checked={ponto.ativo}
-                                  onChange={event => setPontoAtencao(index, 'ativo', event.target.checked)}
-                                  style={{ width: 16, height: 16, accentColor: 'var(--accent)' }}
-                                />
-                                <span className="form-label" style={{ margin: 0 }}>Ponto ativo</span>
-                              </label>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            <div style={{ marginTop: 14 }}>
-              <button className="btn btn-ghost" type="button" onClick={adicionarPontoAtencao}>
-                Adicionar ponto de atencao
-              </button>
-            </div>
+          </div>
+          )}
           </div>
 
+          <div className={`admin-aula-section${etapasAbertas.pontos ? ' is-open' : ''}`}>
+            {renderEtapaHeader('pontos', 4, 'Pontos de atencao', 'Cadastre alertas, placas, referencias visuais e observacoes do examinador para enriquecer a experiencia do aluno.')}
+          {etapasAbertas.pontos && (
+          <div className="admin-aula-section-body">
+
+          <div className="form-group">
+            <div className="attention-admin-workspace">
+              <div className="attention-admin-sidebar">
+                <div className="attention-admin-sidebar-head">
+                  <div>
+                    <div className="form-label">Pontos cadastrados</div>
+                    <div className="mini-copy">{totalPontosCadastrados} ponto(s) nesta aula</div>
+                  </div>
+                  <button className="btn btn-ghost" type="button" onClick={adicionarPontoAtencao}>
+                    Novo ponto
+                  </button>
+                </div>
+
+                <div className="attention-admin-sidebar-list">
+                  {pontosAtencaoOrdenados.length ? (
+                    pontosAtencaoOrdenados.map(({ ponto, index }, posicaoVisual) => {
+                      const isSelecionado = pontoAtencaoAbertoIndex === index
+
+                      return (
+                        <button
+                          key={ponto.id || index}
+                          type="button"
+                          className={`attention-admin-list-item${isSelecionado ? ' is-active' : ''}`}
+                          onClick={() => alternarPontoAtencao(index)}
+                        >
+                          <div className="attention-admin-list-item-top">
+                            <span className="attention-admin-list-index">Ponto {posicaoVisual + 1}</span>
+                            <span className="card-tag">{formatarTimestamp(ponto.timestampSegundos)}</span>
+                          </div>
+                          <div className="attention-admin-list-title">{ponto.titulo.trim() || 'Novo ponto de atencao'}</div>
+                          <div className="attention-admin-list-meta">
+                            <span className="card-tag">{formatarTipoPonto(ponto.tipo)}</span>
+                            <span className="card-tag">{formatarModoPonto(ponto.modoExibicao)}</span>
+                            {!ponto.ativo && <span className="card-tag">Inativo</span>}
+                          </div>
+                        </button>
+                      )
+                    })
+                  ) : (
+                    <div className="attention-admin-empty">
+                      <div className="attention-admin-empty-title">Nenhum ponto cadastrado</div>
+                      <div className="mini-copy">Adicione o primeiro ponto para comecar a guiar o aluno dentro do video.</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="attention-admin-editor">
+                {renderPontoAtencaoSelecionado()}
+              </div>
+              </div>
+            </div>
+          </div>
+          )}
+          </div>
+
+          <div className={`admin-aula-section${etapasAbertas.publicacao ? ' is-open' : ''}`}>
+            {renderEtapaHeader('publicacao', 5, 'Publicacao', 'Finalize a aula escolhendo se ela deve ficar ativa e se merece destaque na experiencia do aluno.')}
+          {etapasAbertas.publicacao && (
+          <div className="admin-aula-section-body">
           <div className="form-row">
             <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
               <input
@@ -1040,8 +1258,11 @@ export default function AdminPercursoForm() {
               <span className="form-label" style={{ margin: 0 }}>Conteudo ativo</span>
             </label>
           </div>
+          </div>
+          )}
+          </div>
 
-          <div className="form-actions">
+          <div className="form-actions admin-aula-actions-footer">
             <button className="btn btn-primary" type="submit" disabled={salvando || enviandoThumbnail || enviandoVideoBunny}>
               {salvando ? 'Salvando...' : (enviandoThumbnail || enviandoVideoBunny) ? 'Aguarde o upload...' : isEdicao ? 'Salvar alteracoes' : 'Criar conteudo'}
             </button>
@@ -1049,8 +1270,75 @@ export default function AdminPercursoForm() {
               Cancelar
             </button>
           </div>
-        </form>
-      </div>
+          </div>
+        </div>
+
+        <aside className="admin-aula-column admin-aula-column--right">
+          <div className="card admin-aula-side-card admin-aula-side-card--sticky">
+            <div className="admin-aula-card-title">Resumo rapido</div>
+
+            {thumbnailPreviewUrl ? (
+              <img
+                src={thumbnailPreviewUrl}
+                alt="Preview da aula"
+                className="admin-aula-preview-image"
+              />
+            ) : (
+              <div className="admin-aula-preview-placeholder">
+                {form.titulo.trim() || 'Sua aula vai aparecer aqui'}
+              </div>
+            )}
+
+            <div className="admin-aula-side-title">{form.titulo.trim() || 'Titulo da aula'}</div>
+            <div className="admin-aula-side-copy">{form.resumo.trim() || 'Resumo curto para cards e biblioteca.'}</div>
+
+            <div className="admin-aula-badge-strip">
+              <span className="card-tag">{escopoConteudo === 'LOCAL' ? 'Local' : 'Geral'}</span>
+              <span className="card-tag">{categoriaSelecionada?.nome || 'Sem modulo'}</span>
+              <span className="card-tag">{form.ativo ? 'Ativo' : 'Inativo'}</span>
+            </div>
+
+            <div className="stack-list">
+              <div className="stack-row">
+                <div>
+                  <div className="form-label">Onde aparece</div>
+                  <div className="mini-copy">{caminhoBiblioteca}</div>
+                </div>
+              </div>
+              <div className="stack-row">
+                <div>
+                  <div className="form-label">Video</div>
+                  <div className="mini-copy">{formatarVideoProvider(form.videoProvider)}</div>
+                </div>
+                <div className="mini-copy">{form.duracaoSegundos ? `${form.duracaoSegundos} min` : '-'}</div>
+              </div>
+              <div className="stack-row">
+                <div>
+                  <div className="form-label">Local</div>
+                  <div className="mini-copy">{localSelecionado?.nome || 'Nao se aplica'}</div>
+                </div>
+                <div className="mini-copy">{formatTipoConteudo(form.tipoConteudo)}</div>
+              </div>
+              <div className="stack-row">
+                <div>
+                  <div className="form-label">Pontos</div>
+                  <div className="mini-copy">{formatarConfiguracaoPontosAtencao(form.configuracaoPontosAtencao)}</div>
+                </div>
+                <div className="mini-copy">{totalPontosAtivos} de {totalPontosCadastrados} ativos</div>
+              </div>
+            </div>
+
+            <div className="admin-aula-side-actions">
+              <button className="btn btn-primary" type="submit" disabled={salvando || enviandoThumbnail || enviandoVideoBunny}>
+                {salvando ? 'Salvando...' : isEdicao ? 'Salvar alteracoes' : 'Criar conteudo'}
+              </button>
+              <button className="btn btn-ghost" type="button" onClick={() => navigate('/admin/percursos')}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </aside>
+      </form>
     </>
   )
 }
