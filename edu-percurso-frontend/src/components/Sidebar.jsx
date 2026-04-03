@@ -12,24 +12,77 @@ const IconChart = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColo
 const IconMap = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 4l4 2 4-2v12l-4 2-4-2-4 2V6l4-2z" /><path d="M10 6v12" /></svg>
 const IconPrice = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 6h10l-1 8H6L5 6z" /><path d="M7 6V4h6v2" /></svg>
 const IconList = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 6h12M4 10h12M4 14h8" /></svg>
-const IconPlus = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="10" r="7" /><path d="M10 7v6M7 10h6" /></svg>
 const IconQuiz = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 4h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2z" /><path d="M8 8a2 2 0 1 1 3.2 1.6c-.7.5-1.2.9-1.2 1.9" /><circle cx="10" cy="13.8" r=".8" fill="currentColor" stroke="none" /></svg>
 const IconUser = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="6.5" r="3" /><path d="M4 16c1.5-2.6 3.6-4 6-4s4.5 1.4 6 4" /></svg>
 const IconMenu = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 6h12M4 10h12M4 14h12" /></svg>
 const IconClose = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M5 5l10 10M15 5L5 15" /></svg>
 const IconBrowser = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="14" height="12" rx="2" /><path d="M3 7.5h14" /><path d="M6 5.75h.01M8.75 5.75h.01M11.5 5.75h.01" /></svg>
+const IconChevron = ({ open }) => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" className={`nav-group-chevron${open ? ' is-open' : ''}`}><path d="M7 5.5l5 4.5-5 4.5" /></svg>
 
 export default function Sidebar() {
   const { user, logout, isAdmin } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [adminGroupsOpen, setAdminGroupsOpen] = useState({
+    site: false,
+    conteudo: false,
+    comercial: false,
+    operacao: false,
+  })
 
   const initials = user?.nome
     ? user.nome.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
     : '?'
 
   const hideMobileHeader = location.pathname.startsWith('/conteudos/')
+
+  const adminGroupDefinitions = useMemo(() => ([
+    {
+      key: 'site',
+      label: 'Site',
+      match: pathname => pathname.startsWith('/admin/paginas/'),
+      items: [
+        { to: '/admin/paginas/home', icon: IconBrowser, label: 'Home' },
+        { to: '/admin/paginas/local', icon: IconBrowser, label: 'Pagina do local' },
+        { to: '/admin/paginas/checkout', icon: IconBrowser, label: 'Checkout' },
+      ],
+    },
+    {
+      key: 'conteudo',
+      label: 'Conteudo',
+      match: pathname => pathname.startsWith('/admin/percursos') || pathname.startsWith('/admin/modulos') || pathname.startsWith('/admin/questoes'),
+      items: [
+        { to: '/admin/percursos', icon: IconList, label: 'Aulas' },
+        { to: '/admin/modulos', icon: IconList, label: 'Modulos' },
+        { to: '/admin/questoes', icon: IconQuiz, label: 'Banco de questoes' },
+      ],
+    },
+    {
+      key: 'comercial',
+      label: 'Comercial',
+      match: pathname => pathname.startsWith('/admin/locais') || pathname.startsWith('/admin/planos'),
+      items: [
+        { to: '/admin/locais', icon: IconMap, label: 'Locais' },
+        { to: '/admin/planos', icon: IconPrice, label: 'Planos' },
+      ],
+    },
+    {
+      key: 'operacao',
+      label: 'Operacao',
+      match: pathname => pathname.startsWith('/admin/usuarios') || pathname.startsWith('/admin/pedidos') || pathname.startsWith('/admin/assinaturas'),
+      items: [
+        { to: '/admin/usuarios', icon: IconUser, label: 'Usuarios' },
+        { to: '/admin/pedidos', icon: IconCart, label: 'Pedidos' },
+        { to: '/admin/assinaturas', icon: IconPass, label: 'Assinaturas' },
+      ],
+    },
+  ]), [])
+
+  const activeAdminGroupKey = useMemo(() => {
+    if (!isAdmin) return null
+    return adminGroupDefinitions.find(group => group.match(location.pathname))?.key || null
+  }, [adminGroupDefinitions, isAdmin, location.pathname])
 
   const mobileSectionTitle = useMemo(() => {
     if (isAdmin) {
@@ -60,6 +113,16 @@ export default function Sidebar() {
   }, [location.pathname])
 
   useEffect(() => {
+    if (!isAdmin || !activeAdminGroupKey) return
+
+    setAdminGroupsOpen(current => (
+      current[activeAdminGroupKey]
+        ? current
+        : { ...current, [activeAdminGroupKey]: true }
+    ))
+  }, [activeAdminGroupKey, isAdmin])
+
+  useEffect(() => {
     document.body.classList.toggle('mobile-drawer-open', drawerOpen)
     return () => document.body.classList.remove('mobile-drawer-open')
   }, [drawerOpen])
@@ -68,6 +131,13 @@ export default function Sidebar() {
     setDrawerOpen(false)
     logout()
     navigate('/login')
+  }
+
+  function toggleAdminGroup(groupKey) {
+    setAdminGroupsOpen(current => ({
+      ...current,
+      [groupKey]: !current[groupKey],
+    }))
   }
 
   function renderStudentNav() {
@@ -109,54 +179,36 @@ export default function Sidebar() {
           </NavLink>
         </nav>
 
-        <nav className="nav-group">
-          <div className="nav-label">Site</div>
-          <NavLink to="/admin/paginas/home" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconBrowser /> Home
-          </NavLink>
-          <NavLink to="/admin/paginas/local" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconBrowser /> Pagina do local
-          </NavLink>
-          <NavLink to="/admin/paginas/checkout" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconBrowser /> Checkout
-          </NavLink>
-        </nav>
+        {adminGroupDefinitions.map(group => {
+          const isOpen = adminGroupsOpen[group.key]
+          const isActiveGroup = activeAdminGroupKey === group.key
 
-        <nav className="nav-group">
-          <div className="nav-label">Conteudo</div>
-          <NavLink to="/admin/percursos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconList /> Aulas
-          </NavLink>
-          <NavLink to="/admin/modulos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconList /> Modulos
-          </NavLink>
-          <NavLink to="/admin/questoes" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconQuiz /> Banco de questoes
-          </NavLink>
-        </nav>
+          return (
+            <nav key={group.key} className={`nav-group nav-group--collapsible${isActiveGroup ? ' is-active-group' : ''}`}>
+              <button
+                type="button"
+                className={`nav-group-toggle${isOpen ? ' is-open' : ''}`}
+                onClick={() => toggleAdminGroup(group.key)}
+              >
+                <span className="nav-label">{group.label}</span>
+                <IconChevron open={isOpen} />
+              </button>
 
-        <nav className="nav-group">
-          <div className="nav-label">Comercial</div>
-          <NavLink to="/admin/locais" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconMap /> Locais
-          </NavLink>
-          <NavLink to="/admin/planos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconPrice /> Planos
-          </NavLink>
-        </nav>
-
-        <nav className="nav-group">
-          <div className="nav-label">Operacao</div>
-          <NavLink to="/admin/usuarios" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconUser /> Usuarios
-          </NavLink>
-          <NavLink to="/admin/pedidos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconCart /> Pedidos
-          </NavLink>
-          <NavLink to="/admin/assinaturas" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            <IconPass /> Assinaturas
-          </NavLink>
-        </nav>
+              {isOpen ? (
+                <div className="nav-group-body">
+                  {group.items.map(item => {
+                    const Icon = item.icon
+                    return (
+                      <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                        <Icon /> {item.label}
+                      </NavLink>
+                    )
+                  })}
+                </div>
+              ) : null}
+            </nav>
+          )
+        })}
       </>
     )
   }
