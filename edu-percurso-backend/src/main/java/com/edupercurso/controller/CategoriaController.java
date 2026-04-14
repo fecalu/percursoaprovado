@@ -1,13 +1,9 @@
 package com.edupercurso.controller;
 
 import com.edupercurso.entity.Categoria;
-import com.edupercurso.entity.Assinatura;
 import com.edupercurso.entity.Percurso;
 import com.edupercurso.repository.CategoriaRepository;
 import com.edupercurso.repository.PercursoRepository;
-import com.edupercurso.service.AcessoConteudoService;
-import com.edupercurso.service.AssinaturaService;
-import com.edupercurso.service.UsuarioLookupService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -16,17 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/categorias")
@@ -35,41 +27,10 @@ public class CategoriaController {
 
     private final CategoriaRepository categoriaRepository;
     private final PercursoRepository percursoRepository;
-    private final AssinaturaService assinaturaService;
-    private final AcessoConteudoService acessoConteudoService;
-    private final UsuarioLookupService usuarioLookupService;
 
     @GetMapping
-    public ResponseEntity<List<Categoria>> listar(
-            @AuthenticationPrincipal String email,
-            Authentication authentication) {
-        List<Categoria> categorias = categoriaRepository.findAllByOrderByOrdemExibicaoAscNomeAsc();
-
-        if (ehAdmin(authentication)) {
-            return ResponseEntity.ok(categorias);
-        }
-
-        if (email == null || email.isBlank()) {
-            return ResponseEntity.ok(List.of());
-        }
-
-        List<Assinatura> assinaturasAtivas = assinaturaService.listarAtivas(
-                usuarioLookupService.buscarPorEmail(email).getId()
-        );
-
-        if (assinaturasAtivas.isEmpty()) {
-            return ResponseEntity.ok(List.of());
-        }
-
-        Set<UUID> categoriasLiberadas = percursoRepository.findByAtivoTrue().stream()
-                .filter(percurso -> percurso.getCategoria() != null)
-                .filter(percurso -> acessoConteudoService.podeAcessarNaListagem(percurso, assinaturasAtivas))
-                .map(percurso -> percurso.getCategoria().getId())
-                .collect(Collectors.toSet());
-
-        return ResponseEntity.ok(categorias.stream()
-                .filter(categoria -> categoriasLiberadas.contains(categoria.getId()))
-                .toList());
+    public ResponseEntity<List<Categoria>> listar() {
+        return ResponseEntity.ok(categoriaRepository.findAllByOrderByOrdemExibicaoAscNomeAsc());
     }
 
     @PostMapping
@@ -168,10 +129,5 @@ public class CategoriaController {
     @Data
     public static class MoverAulasRequest {
         @NotNull private UUID categoriaDestinoId;
-    }
-
-    private boolean ehAdmin(Authentication authentication) {
-        return authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 }
