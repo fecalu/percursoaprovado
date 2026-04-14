@@ -5,6 +5,7 @@ import com.edupercurso.entity.Assinatura;
 import com.edupercurso.entity.GrupoAcesso;
 import com.edupercurso.entity.Trilha;
 import com.edupercurso.entity.TrilhaEtapa;
+import com.edupercurso.repository.AssinaturaRepository;
 import com.edupercurso.repository.PlanoRepository;
 import com.edupercurso.repository.TrilhaRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.text.Normalizer;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -24,13 +26,13 @@ public class TrilhaService {
     private final TrilhaRepository trilhaRepository;
     private final GrupoAcessoService grupoAcessoService;
     private final PlanoRepository planoRepository;
-    private final AssinaturaService assinaturaService;
+    private final AssinaturaRepository assinaturaRepository;
     private final UsuarioLookupService usuarioLookupService;
 
     @Transactional(readOnly = true)
     public List<Trilha> listarAtivasDoAluno(String email) {
         var usuario = usuarioLookupService.buscarPorEmail(email);
-        List<Assinatura> assinaturasAtivas = assinaturaService.listarAtivas(usuario.getId());
+        List<Assinatura> assinaturasAtivas = assinaturaRepository.findAtivasByUsuarioId(usuario.getId(), LocalDateTime.now());
 
         if (assinaturasAtivas.isEmpty()) {
             return List.of();
