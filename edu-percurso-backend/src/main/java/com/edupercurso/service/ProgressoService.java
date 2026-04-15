@@ -42,8 +42,16 @@ public class ProgressoService {
                         .percurso(percurso)
                         .build());
 
-        if (request.getSegundosAssistidos() > progresso.getSegundosAssistidos()) {
-            progresso.setSegundosAssistidos(request.getSegundosAssistidos());
+        int segundosAssistidos = normalizarSegundosAssistidos(
+                request.getSegundosAssistidos(),
+                percurso.getDuracaoSegundos()
+        );
+        int segundosAtuais = progresso.getSegundosAssistidos() == null ? 0 : progresso.getSegundosAssistidos();
+
+        if (segundosAssistidos > segundosAtuais) {
+            progresso.setSegundosAssistidos(segundosAssistidos);
+        } else if (progresso.getSegundosAssistidos() == null) {
+            progresso.setSegundosAssistidos(segundosAtuais);
         }
 
         if (request.isConcluido()) {
@@ -52,5 +60,13 @@ public class ProgressoService {
         progresso.setUltimaVez(LocalDateTime.now());
 
         return ProgressoDTO.Response.from(progressoRepository.save(progresso));
+    }
+
+    private int normalizarSegundosAssistidos(Integer segundosAssistidos, Integer duracaoSegundos) {
+        int segundos = Math.max(0, segundosAssistidos == null ? 0 : segundosAssistidos);
+        if (duracaoSegundos == null || duracaoSegundos <= 0) {
+            return segundos;
+        }
+        return Math.min(segundos, duracaoSegundos);
     }
 }

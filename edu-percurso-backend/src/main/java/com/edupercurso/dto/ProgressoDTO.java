@@ -1,6 +1,7 @@
 package com.edupercurso.dto;
 
 import com.edupercurso.entity.ProgressoAluno;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -12,7 +13,9 @@ public class ProgressoDTO {
     @Data
     public static class Request {
         @NotNull private UUID percursoId;
-        @NotNull private Integer segundosAssistidos;
+        @NotNull
+        @Min(0)
+        private Integer segundosAssistidos;
         private boolean concluido;
     }
 
@@ -29,7 +32,7 @@ public class ProgressoDTO {
             Response r = new Response();
             r.percursoId = p.getPercurso().getId();
             r.percursoTitulo = p.getPercurso().getTitulo();
-            r.segundosAssistidos = p.getSegundosAssistidos();
+            r.segundosAssistidos = p.getSegundosAssistidos() == null ? 0 : p.getSegundosAssistidos();
             r.duracaoTotal = p.getPercurso().getDuracaoSegundos();
             r.concluido = p.isConcluido();
             r.ultimaVez = p.getUltimaVez();
