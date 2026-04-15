@@ -15,6 +15,7 @@ import PoliticaPrivacidade from './pages/PoliticaPrivacidade'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import PainelAluno from './pages/PainelAluno'
+import MinhaTrilha from './pages/MinhaTrilha'
 import PerfilAluno from './pages/PerfilAluno'
 import Biblioteca from './pages/Biblioteca'
 import BibliotecaGuia from './pages/BibliotecaGuia'
@@ -28,7 +29,6 @@ import AdminPedidos from './pages/AdminPedidos'
 import AdminPercursos from './pages/AdminPercursos'
 import AdminPercursoForm from './pages/AdminPercursoForm'
 import AdminModulos from './pages/AdminModulos'
-import AdminGruposAcesso from './pages/AdminGruposAcesso'
 import AdminQuestoes from './pages/AdminQuestoes'
 import AdminQuestaoForm from './pages/AdminQuestaoForm'
 import AdminLocais from './pages/AdminLocais'
@@ -58,6 +58,7 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
 
             <Route path="/painel" element={<PrivateRoute><PainelAluno /></PrivateRoute>} />
+            <Route path="/minha-trilha" element={<PrivateRoute><MinhaTrilha /></PrivateRoute>} />
             <Route path="/biblioteca" element={<PrivateRoute><Biblioteca /></PrivateRoute>} />
             <Route path="/biblioteca/modulos/:moduloId/guia" element={<PrivateRoute><BibliotecaGuia /></PrivateRoute>} />
             <Route path="/simulado" element={<PrivateRoute><SimuladoTeorico /></PrivateRoute>} />
@@ -75,7 +76,6 @@ export default function App() {
             <Route path="/admin/percursos/novo" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
             <Route path="/admin/percursos/:id/editar" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
             <Route path="/admin/modulos" element={<PrivateRoute adminOnly><AdminModulos /></PrivateRoute>} />
-            <Route path="/admin/grupos-acesso" element={<PrivateRoute adminOnly><AdminGruposAcesso /></PrivateRoute>} />
             <Route path="/admin/questoes" element={<PrivateRoute adminOnly><AdminQuestoes /></PrivateRoute>} />
             <Route path="/admin/questoes/nova" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
             <Route path="/admin/questoes/:id/editar" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />

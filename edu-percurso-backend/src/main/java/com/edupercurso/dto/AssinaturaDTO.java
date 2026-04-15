@@ -56,6 +56,9 @@ public class AssinaturaDTO {
         private String usuarioEmail;
         private UUID planoId;
         private String planoNome;
+        private UUID trilhaId;
+        private String trilhaCodigo;
+        private String trilhaNome;
         private Integer duracaoDias;
         private UUID localProvaId;
         private String localProvaNome;
@@ -87,6 +90,9 @@ public class AssinaturaDTO {
             response.usuarioEmail = assinatura.getUsuario().getEmail();
             response.planoId = assinatura.getPlano().getId();
             response.planoNome = assinatura.getPlano().getNome();
+            response.trilhaId = assinatura.getPlano().getTrilhaPrincipal().getId();
+            response.trilhaCodigo = assinatura.getPlano().getTrilhaPrincipal().getCodigo();
+            response.trilhaNome = assinatura.getPlano().getTrilhaPrincipal().getNome();
             response.duracaoDias = assinatura.getPlano().getDuracaoDias();
             response.localProvaId = assinatura.getLocalProva().getId();
             response.localProvaNome = assinatura.getLocalProva().getNome();

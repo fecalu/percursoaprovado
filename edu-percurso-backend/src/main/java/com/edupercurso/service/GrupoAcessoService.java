@@ -3,7 +3,9 @@ package com.edupercurso.service;
 import com.edupercurso.dto.GrupoAcessoDTO;
 import com.edupercurso.entity.GrupoAcesso;
 import com.edupercurso.repository.GrupoAcessoRepository;
+import com.edupercurso.repository.PlanoRepository;
 import com.edupercurso.repository.PercursoRepository;
+import com.edupercurso.repository.TrilhaEtapaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ public class GrupoAcessoService {
 
     private final GrupoAcessoRepository grupoAcessoRepository;
     private final PercursoRepository percursoRepository;
+    private final PlanoRepository planoRepository;
+    private final TrilhaEtapaRepository trilhaEtapaRepository;
 
     @Transactional(readOnly = true)
     public List<GrupoAcesso> listar() {
@@ -67,16 +71,44 @@ public class GrupoAcessoService {
     public void excluir(UUID id) {
         GrupoAcesso grupoAcesso = buscarEntidade(id);
         long totalAulasVinculadas = percursoRepository.countByGruposAcessoId(id);
+        long totalPlanosVinculados = planoRepository.countByGruposAcessoId(id);
+        long totalEtapasVinculadas = trilhaEtapaRepository.countByGrupoAcessoId(id);
 
-        if (totalAulasVinculadas > 0) {
-            String plural = totalAulasVinculadas == 1 ? "" : "s";
+        if (totalAulasVinculadas > 0 || totalPlanosVinculados > 0 || totalEtapasVinculadas > 0) {
+            StringBuilder uso = new StringBuilder();
+
+            if (totalAulasVinculadas > 0) {
+                uso.append(totalAulasVinculadas)
+                        .append(" aula")
+                        .append(totalAulasVinculadas == 1 ? "" : "s");
+            }
+
+            if (totalPlanosVinculados > 0) {
+                if (uso.length() > 0) {
+                    uso.append(" e ");
+                }
+
+                uso.append(totalPlanosVinculados)
+                        .append(" plano")
+                        .append(totalPlanosVinculados == 1 ? "" : "s");
+            }
+
+            if (totalEtapasVinculadas > 0) {
+                if (uso.length() > 0) {
+                    uso.append(" e ");
+                }
+
+                uso.append(totalEtapasVinculadas)
+                        .append(" etapa")
+                        .append(totalEtapasVinculadas == 1 ? "" : "s")
+                        .append(" de trilha");
+            }
+
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
                     "Nao e possivel excluir este grupo de acesso porque ele ainda esta vinculado a "
-                            + totalAulasVinculadas
-                            + " aula"
-                            + plural
-                            + ". Remova esse grupo das aulas antes de excluir."
+                            + uso
+                            + ". Remova esse grupo antes de excluir."
             );
         }
 

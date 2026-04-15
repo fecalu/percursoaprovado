@@ -10,4 +10,6 @@ public interface PlanoRepository extends JpaRepository<Plano, UUID> {
     List<Plano> findByAtivoTrueOrderByDuracaoDiasAsc();
     List<Plano> findByLocalProvaSlugAndAtivoTrueOrderByDuracaoDiasAsc(String localSlug);
     List<Plano> findByLocalProvaIdOrderByDuracaoDiasAsc(UUID localProvaId);
+    long countByGruposAcessoId(UUID grupoAcessoId);
+    long countByTrilhaPrincipalId(UUID trilhaPrincipalId);
 }

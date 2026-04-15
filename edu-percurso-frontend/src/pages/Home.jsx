@@ -7,6 +7,7 @@ import ThemeToggle from '../components/ThemeToggle'
 import { useAuth } from '../context/AuthContext'
 import { HOME_PAGE_DEFAULTS, resolveHomePageConfig } from '../data/sitePageDefaults'
 import { configuracaoSiteService, localProvaService, percursoService, planoService } from '../services/api'
+import { formatTrilhaPlano, getBadgeClassTrilhaPlano, getOrdemTrilhaPlano } from '../utils/formatters'
 import { resolveMediaUrl } from '../utils/media'
 
 function getCardLinha(local) {
@@ -43,6 +44,48 @@ function getLocalStatusPeso(statusComercial) {
   if (statusComercial === 'EM_BREVE') return 1
   if (statusComercial === 'PAUSADO') return 2
   return 3
+}
+
+function getJornadaPublica(codigo) {
+  if (codigo === 'comecando_do_zero') {
+    return {
+      codigo,
+      nome: 'Comecando do zero',
+      titulo: 'Para quem quer um caminho completo',
+      copy: 'Ideal para quem ainda esta organizando os primeiros passos e quer chegar na prova com mais clareza.',
+      pontos: [
+        'Primeiros passos e orientacao da jornada',
+        'Mais contexto para estudar sem se perder',
+        'Preparacao completa ate a revisao final',
+      ],
+    }
+  }
+
+  if (codigo === 'reta_final_prova') {
+    return {
+      codigo,
+      nome: 'Reta final para a prova',
+      titulo: 'Para quem quer revisar com foco',
+      copy: 'Ideal para quem ja passou pelas etapas iniciais e agora quer praticar, rever percursos e ganhar confianca.',
+      pontos: [
+        'Foco em pratica, percurso e revisao',
+        'Menos teoria inicial, mais objetividade',
+        'Preparacao mais direta para o dia da prova',
+      ],
+    }
+  }
+
+  return {
+    codigo,
+    nome: formatTrilhaPlano('', codigo),
+    titulo: 'Para um momento especifico da jornada',
+    copy: 'Esse perfil organiza o plano de acordo com o momento atual do aluno.',
+    pontos: [
+      'Plano organizado por jornada',
+      'Conteudo alinhado ao momento do aluno',
+      'Estudo mais claro antes da prova',
+    ],
+  }
 }
 
 export default function Home() {
@@ -149,6 +192,22 @@ export default function Home() {
   const localMaisProcuradoId = useMemo(() => {
     return locaisOrdenados.find(local => local.statusComercial === 'DISPONIVEL')?.id || locaisOrdenados[0]?.id
   }, [locaisOrdenados])
+  const jornadasPublicas = useMemo(() => {
+    const codigosPlanos = Array.from(new Set(planos.map(plano => plano?.trilhaCodigo).filter(Boolean)))
+    const codigos = codigosPlanos.length ? codigosPlanos : ['comecando_do_zero', 'reta_final_prova']
+
+    return codigos
+      .map(codigo => {
+        const base = getJornadaPublica(codigo)
+        const totalPlanos = planos.filter(plano => plano?.trilhaCodigo === codigo).length
+        return {
+          ...base,
+          badgeClass: getBadgeClassTrilhaPlano(codigo),
+          totalPlanos,
+        }
+      })
+      .sort((a, b) => getOrdemTrilhaPlano(a.codigo) - getOrdemTrilhaPlano(b.codigo))
+  }, [planos])
 
   const homeContent = useMemo(() => resolveHomePageConfig(configHome || HOME_PAGE_DEFAULTS), [configHome])
   const heroBotaoSecundarioProps = homeContent.heroVideoUrl
@@ -218,6 +277,43 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <RevealSection as="section" className="landing-section landing-section--home-journeys" delay={60} eager>
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">Escolha o caminho certo para o seu momento</div>
+            <div className="section-copy">
+              Hoje a plataforma ja organiza os planos para quem quer comecar do zero e para quem ja esta focado na reta final da prova.
+            </div>
+          </div>
+        </div>
+
+        <div className="home-journey-grid">
+          {jornadasPublicas.map(jornada => (
+            <div key={jornada.codigo} className="home-journey-card">
+              <div className="home-journey-card-top">
+                <span className={`badge ${jornada.badgeClass}`}>{jornada.nome}</span>
+                <span className="home-journey-card-count">
+                  {jornada.totalPlanos > 0 ? `${jornada.totalPlanos} ${jornada.totalPlanos === 1 ? 'plano' : 'planos'} hoje` : 'perfil em preparacao'}
+                </span>
+              </div>
+              <div className="home-journey-card-title">{jornada.titulo}</div>
+              <div className="home-journey-card-copy">{jornada.copy}</div>
+              <div className="home-journey-card-points">
+                {jornada.pontos.map(item => (
+                  <div key={item} className="home-journey-card-point">
+                    <span className="home-journey-card-point-dot" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+              <a className="btn btn-ghost" href="#locais-disponiveis">
+                Ver locais e planos
+              </a>
+            </div>
+          ))}
+        </div>
+      </RevealSection>
 
       <RevealSection as="section" className="landing-section home-local-showcase-section" id="locais-disponiveis" delay={80} eager>
         <div className="home-local-showcase-shell">

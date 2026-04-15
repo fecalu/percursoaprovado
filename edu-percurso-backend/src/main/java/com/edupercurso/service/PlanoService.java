@@ -16,6 +16,7 @@ public class PlanoService {
 
     private final PlanoRepository planoRepository;
     private final LocalProvaService localProvaService;
+    private final TrilhaService trilhaService;
 
     private String normalizarTextoLivre(String valor) {
         if (valor == null) {
@@ -51,6 +52,15 @@ public class PlanoService {
         plano.setVitrineRecomendada(request.getVitrineRecomendada());
     }
 
+    private void aplicarTrilhaPrincipal(Plano plano, PlanoDTO.Request request) {
+        if (request.getTrilhaId() == null) {
+            throw new IllegalArgumentException("Selecione o perfil da jornada deste plano.");
+        }
+
+        plano.setTrilhaPrincipal(trilhaService.buscarEntidade(request.getTrilhaId()));
+    }
+
+    @Transactional(readOnly = true)
     public List<PlanoDTO.Response> listar(String localSlug, boolean todos) {
         List<Plano> planos;
         if (localSlug != null && !localSlug.isBlank()) {
@@ -82,6 +92,7 @@ public class PlanoService {
     public PlanoDTO.Response criar(PlanoDTO.Request request) {
         Plano plano = Plano.builder()
                 .localProva(localProvaService.buscarEntidadePorId(request.getLocalProvaId()))
+                .trilhaPrincipal(trilhaService.buscarEntidade(request.getTrilhaId()))
                 .nome(request.getNome().trim())
                 .duracaoDias(request.getDuracaoDias())
                 .precoCentavos(request.getPrecoCentavos())
@@ -98,6 +109,7 @@ public class PlanoService {
     public PlanoDTO.Response atualizar(UUID id, PlanoDTO.Request request) {
         Plano plano = buscarEntidadePorId(id);
         plano.setLocalProva(localProvaService.buscarEntidadePorId(request.getLocalProvaId()));
+        aplicarTrilhaPrincipal(plano, request);
         plano.setNome(request.getNome().trim());
         plano.setDuracaoDias(request.getDuracaoDias());
         plano.setPrecoCentavos(request.getPrecoCentavos());
@@ -116,6 +128,7 @@ public class PlanoService {
         planoRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public Plano buscarEntidadePorId(UUID id) {
         return planoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plano nao encontrado."));

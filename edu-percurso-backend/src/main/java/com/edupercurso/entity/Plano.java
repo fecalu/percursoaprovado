@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,6 +26,19 @@ public class Plano {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "local_prova_id", nullable = false)
     private LocalProva localProva;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trilha_principal_id", nullable = false)
+    private Trilha trilhaPrincipal;
+
+    @Builder.Default
+    @ManyToMany
+    @JoinTable(
+            name = "planos_grupos_acesso",
+            joinColumns = @JoinColumn(name = "plano_id"),
+            inverseJoinColumns = @JoinColumn(name = "grupo_acesso_id")
+    )
+    private List<GrupoAcesso> gruposAcesso = new ArrayList<>();
 
     @Column(nullable = false)
     private String nome;

@@ -26,9 +26,15 @@ export default function AdminPercursos() {
   }
 
   const percursosFiltrados = useMemo(() => {
-    if (!moduloId) return percursos
-    return percursos.filter(item => item.categoriaId === moduloId)
-  }, [percursos, moduloId])
+    return percursos
+      .filter(item => !moduloId || item.categoriaId === moduloId)
+  }, [moduloId, percursos])
+
+  const resumoClassificacao = useMemo(() => {
+    return {
+      total: percursos.length,
+    }
+  }, [percursos])
 
   async function excluir(id, titulo) {
     if (!confirm(`Excluir a aula "${titulo}"?`)) return
@@ -61,6 +67,11 @@ export default function AdminPercursos() {
         </button>
       </div>
       <p className="page-sub">Gerencie aulas gerais e aulas vinculadas a cada local, organizando tudo por modulo.</p>
+
+      <div className="admin-inline-note" style={{ marginBottom: '1rem' }}>
+        <strong>{resumoClassificacao.total}</strong> aula(s) no total.
+        <span> A assinatura ativa libera as aulas gerais e as aulas do local contratado.</span>
+      </div>
 
       {moduloId ? (
         <div className="admin-inline-note" style={{ marginBottom: '1rem' }}>
@@ -96,9 +107,11 @@ export default function AdminPercursos() {
               <div>
                 <div className="table-name">{item.titulo}</div>
                 <div className="mini-copy">{item.ativo ? 'Aula ativa' : 'Aula inativa'}</div>
-                <span className={`badge ${item.ativo ? 'badge-green' : 'badge-gray'}`} style={{ marginTop: 4 }}>
-                  {item.ativo ? 'Ativo' : 'Inativo'}
-                </span>
+                <div className="admin-status-pair">
+                  <span className={`badge ${item.ativo ? 'badge-green' : 'badge-gray'}`} style={{ marginTop: 4 }}>
+                    {item.ativo ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
               </div>
               <span className="table-cat">{item.categoriaNome || 'Sem modulo'}</span>
               <span className="table-cat">{item.localProvaNome || 'Geral'}</span>

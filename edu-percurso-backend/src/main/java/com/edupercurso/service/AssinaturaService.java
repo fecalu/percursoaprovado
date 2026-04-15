@@ -60,8 +60,12 @@ public class AssinaturaService {
         return assinaturaRepository.existsQualquerAssinaturaAtiva(usuarioId, LocalDateTime.now());
     }
 
+    public List<Assinatura> listarAtivas(UUID usuarioId) {
+        return assinaturaRepository.findAtivasByUsuarioId(usuarioId, LocalDateTime.now());
+    }
+
     public Set<UUID> listarLocaisAtivos(UUID usuarioId) {
-        return assinaturaRepository.findAtivasByUsuarioId(usuarioId, LocalDateTime.now())
+        return listarAtivas(usuarioId)
                 .stream()
                 .map(assinatura -> assinatura.getLocalProva().getId())
                 .collect(java.util.stream.Collectors.toSet());

@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class PlanoDTO {
@@ -14,6 +15,8 @@ public class PlanoDTO {
     public static class Request {
         @NotNull
         private UUID localProvaId;
+        @NotNull
+        private UUID trilhaId;
         @NotBlank
         private String nome;
         @NotNull
@@ -40,6 +43,7 @@ public class PlanoDTO {
         private String vitrineTexto;
         private String vitrineMeta;
         private Boolean vitrineRecomendada;
+        private List<UUID> gruposAcessoIds;
     }
 
     @Data
@@ -48,6 +52,9 @@ public class PlanoDTO {
         private UUID localProvaId;
         private String localProvaNome;
         private String localProvaSlug;
+        private UUID trilhaId;
+        private String trilhaCodigo;
+        private String trilhaNome;
         private String nome;
         private Integer duracaoDias;
         private Integer precoCentavos;
@@ -71,14 +78,32 @@ public class PlanoDTO {
         private String vitrineTexto;
         private String vitrineMeta;
         private Boolean vitrineRecomendada;
+        private List<UUID> gruposAcessoIds;
+        private List<String> gruposAcessoNomes;
         private LocalDateTime criadoEm;
 
         public static Response from(Plano plano) {
             Response response = new Response();
+            List<com.edupercurso.entity.GrupoAcesso> gruposOrdenados = plano.getGruposAcesso() == null
+                    ? List.of()
+                    : plano.getGruposAcesso().stream()
+                    .sorted((a, b) -> {
+                        int ordemA = a.getOrdemExibicao() == null ? Integer.MAX_VALUE : a.getOrdemExibicao();
+                        int ordemB = b.getOrdemExibicao() == null ? Integer.MAX_VALUE : b.getOrdemExibicao();
+                        if (ordemA != ordemB) {
+                            return Integer.compare(ordemA, ordemB);
+                        }
+                        return a.getNome().compareToIgnoreCase(b.getNome());
+                    })
+                    .toList();
+
             response.id = plano.getId();
             response.localProvaId = plano.getLocalProva().getId();
             response.localProvaNome = plano.getLocalProva().getNome();
             response.localProvaSlug = plano.getLocalProva().getSlug();
+            response.trilhaId = plano.getTrilhaPrincipal().getId();
+            response.trilhaCodigo = plano.getTrilhaPrincipal().getCodigo();
+            response.trilhaNome = plano.getTrilhaPrincipal().getNome();
             response.nome = plano.getNome();
             response.duracaoDias = plano.getDuracaoDias();
             response.precoCentavos = plano.getPrecoCentavos();
@@ -102,6 +127,8 @@ public class PlanoDTO {
             response.vitrineTexto = plano.getVitrineTexto();
             response.vitrineMeta = plano.getVitrineMeta();
             response.vitrineRecomendada = plano.getVitrineRecomendada();
+            response.gruposAcessoIds = gruposOrdenados.stream().map(com.edupercurso.entity.GrupoAcesso::getId).toList();
+            response.gruposAcessoNomes = gruposOrdenados.stream().map(com.edupercurso.entity.GrupoAcesso::getNome).toList();
             response.criadoEm = plano.getCriadoEm();
             return response;
         }

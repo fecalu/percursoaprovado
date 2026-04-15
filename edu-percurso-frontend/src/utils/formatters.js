@@ -32,6 +32,42 @@ export function formatPlanoDuracao(dias) {
   return `${dias} dias`
 }
 
+export function formatTrilhaPlano(trilhaNome, trilhaCodigo) {
+  if (trilhaNome) return trilhaNome
+
+  const labels = {
+    comecando_do_zero: 'Comecando do zero',
+    reta_final_prova: 'Reta final para a prova',
+  }
+
+  if (!trilhaCodigo) return 'Trilha do plano'
+  return labels[trilhaCodigo] || trilhaCodigo.replaceAll('_', ' ')
+}
+
+export function getResumoTrilhaPlano(trilhaCodigo) {
+  if (trilhaCodigo === 'comecando_do_zero') {
+    return 'Ideal para quem quer seguir a jornada completa desde o inicio ate o dia da prova.'
+  }
+
+  if (trilhaCodigo === 'reta_final_prova') {
+    return 'Ideal para quem ja passou pelas etapas iniciais e quer focar em pratica, percurso e revisao.'
+  }
+
+  return 'Essa trilha organiza a ordem sugerida de estudo dentro do plano.'
+}
+
+export function getBadgeClassTrilhaPlano(trilhaCodigo) {
+  if (trilhaCodigo === 'comecando_do_zero') return 'badge-green'
+  if (trilhaCodigo === 'reta_final_prova') return 'badge-blue'
+  return 'badge-blue'
+}
+
+export function getOrdemTrilhaPlano(trilhaCodigo) {
+  if (trilhaCodigo === 'comecando_do_zero') return 0
+  if (trilhaCodigo === 'reta_final_prova') return 1
+  return 9
+}
+
 export function formatPedidoStatus(status) {
   const labels = {
     PENDENTE: 'Aguardando pagamento',

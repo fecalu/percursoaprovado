@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assinaturaService } from '../services/api'
+import { assinaturaEstaLiberadaAgora, filtrarAssinaturasLiberadasAgora } from '../utils/access'
 import { formatAssinaturaStatus, formatDataCurta, formatPlanoDuracao } from '../utils/formatters'
 import { formatarDiasRestantes } from '../utils/student'
 
@@ -17,12 +18,12 @@ export default function MeusAcessos() {
   }, [])
 
   const ativas = useMemo(
-    () => assinaturas.filter(item => item.status === 'ATIVA' && item.paymentStatus === 'PAGO'),
+    () => filtrarAssinaturasLiberadasAgora(assinaturas),
     [assinaturas]
   )
 
   const historico = useMemo(
-    () => assinaturas.filter(item => !(item.status === 'ATIVA' && item.paymentStatus === 'PAGO')),
+    () => assinaturas.filter(item => !assinaturaEstaLiberadaAgora(item)),
     [assinaturas]
   )
 
@@ -46,7 +47,7 @@ export default function MeusAcessos() {
             </div>
             <div className="student-kpi-pill">
               <span className="student-kpi-pill-value">{historico.length}</span>
-              <span className="student-kpi-pill-label">Acessos encerrados</span>
+              <span className="student-kpi-pill-label">Outros acessos</span>
             </div>
           </div>
         </section>
@@ -120,8 +121,8 @@ export default function MeusAcessos() {
             aria-expanded={historicoAberto}
           >
             <div className="library-section-heading">
-              <div className="section-heading">Acessos encerrados</div>
-              <div className="section-copy">Histórico de acessos que já terminaram ou foram cancelados.</div>
+              <div className="section-heading">Outros acessos</div>
+              <div className="section-copy">Historico de acessos que ja terminaram, foram cancelados ou ainda nao estao liberados agora.</div>
             </div>
 
             <div className="library-section-meta">

@@ -112,6 +112,7 @@ public class PercursoDTO {
         private String categoriaNome;
         private Integer categoriaOrdemExibicao;
         private List<UUID> gruposAcessoIds;
+        private List<String> gruposAcessoCodigos;
         private List<String> gruposAcessoNomes;
         private UUID localProvaId;
         private String localProvaNome;
@@ -156,6 +157,9 @@ public class PercursoDTO {
             }
             response.gruposAcessoIds = percurso.getGruposAcesso().stream()
                     .map(grupoAcesso -> grupoAcesso.getId())
+                    .toList();
+            response.gruposAcessoCodigos = percurso.getGruposAcesso().stream()
+                    .map(grupoAcesso -> grupoAcesso.getCodigo())
                     .toList();
             response.gruposAcessoNomes = percurso.getGruposAcesso().stream()
                     .map(grupoAcesso -> grupoAcesso.getNome())

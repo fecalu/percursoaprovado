@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assinaturaService, pedidoService } from '../services/api'
+import { filtrarAssinaturasLiberadasAgora } from '../utils/access'
 import { formatDataCurta, formatPlanoDuracao, resolveSituacaoPedido } from '../utils/formatters'
 
 function pluralizar(total, singular, plural) {
@@ -32,7 +33,7 @@ export default function PainelAluno() {
   }, [])
 
   const acessosAtivos = useMemo(
-    () => assinaturas.filter(item => item.status === 'ATIVA' && item.paymentStatus === 'PAGO'),
+    () => filtrarAssinaturasLiberadasAgora(assinaturas),
     [assinaturas]
   )
 

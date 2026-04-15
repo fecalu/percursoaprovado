@@ -5,6 +5,7 @@ import com.edupercurso.entity.Categoria;
 import com.edupercurso.entity.LocalProva;
 import com.edupercurso.entity.Percurso;
 import com.edupercurso.entity.PontoAtencaoPercurso;
+import com.edupercurso.entity.Assinatura;
 import com.edupercurso.entity.Usuario;
 import com.edupercurso.repository.CategoriaRepository;
 import com.edupercurso.repository.PercursoRepository;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -29,7 +29,6 @@ public class PercursoService {
     private final AssinaturaService assinaturaService;
     private final AcessoConteudoService acessoConteudoService;
     private final BunnyStreamService bunnyStreamService;
-    private final GrupoAcessoService grupoAcessoService;
 
     @Transactional(readOnly = true)
     public List<PercursoDTO.Response> listar(String email,
@@ -43,13 +42,12 @@ public class PercursoService {
                 : percursoRepository.findByAtivoTrue();
 
         Usuario usuario = admin ? null : usuarioLookupService.buscarPorEmail(email);
-        Set<UUID> locaisAtivos = admin ? Set.of() : assinaturaService.listarLocaisAtivos(usuario.getId());
-        boolean possuiQualquerAssinaturaAtiva = admin || !locaisAtivos.isEmpty();
+        List<Assinatura> assinaturasAtivas = admin ? List.of() : assinaturaService.listarAtivas(usuario.getId());
 
         return percursos.stream()
                 .filter(percurso -> filtrarPorLocal(percurso, localSlug, geral))
                 .filter(percurso -> tipoConteudo == null || percurso.getTipoConteudo() == tipoConteudo)
-                .filter(percurso -> admin || podeAcessarNaListagem(percurso, locaisAtivos, possuiQualquerAssinaturaAtiva))
+                .filter(percurso -> admin || acessoConteudoService.podeAcessarNaListagem(percurso, assinaturasAtivas))
                 .sorted(Comparator
                         .comparing(Percurso::getOrdemExibicao, Comparator.nullsLast(Integer::compareTo))
                         .thenComparing(Percurso::getCriadoEm, Comparator.nullsLast(Comparator.reverseOrder())))
@@ -79,7 +77,6 @@ public class PercursoService {
                 .duracaoSegundos(request.getDuracaoSegundos())
                 .ativo(request.isAtivo())
                 .categoria(resolverCategoria(request.getCategoriaId()))
-                .gruposAcesso(new java.util.LinkedHashSet<>(grupoAcessoService.buscarPorIds(request.getGruposAcessoIds())))
                 .localProva(resolverLocalProva(request.getLocalProvaId()))
                 .tipoConteudo(request.getTipoConteudo() == null ? Percurso.TipoConteudo.PERCURSO_REAL : request.getTipoConteudo())
                 .resumo(request.getResumo())
@@ -108,7 +105,6 @@ public class PercursoService {
         percurso.setDuracaoSegundos(request.getDuracaoSegundos());
         percurso.setAtivo(request.isAtivo());
         percurso.setCategoria(resolverCategoria(request.getCategoriaId()));
-        percurso.substituirGruposAcesso(grupoAcessoService.buscarPorIds(request.getGruposAcessoIds()));
         percurso.setLocalProva(resolverLocalProva(request.getLocalProvaId()));
         percurso.setTipoConteudo(request.getTipoConteudo() == null ? Percurso.TipoConteudo.PERCURSO_REAL : request.getTipoConteudo());
         percurso.setResumo(request.getResumo());
@@ -147,16 +143,6 @@ public class PercursoService {
             return true;
         }
         return percurso.getLocalProva() != null && localSlug.equalsIgnoreCase(percurso.getLocalProva().getSlug());
-    }
-
-    private boolean podeAcessarNaListagem(Percurso percurso, Set<UUID> locaisAtivos, boolean possuiQualquerAssinaturaAtiva) {
-        if (!percurso.isAtivo()) {
-            return false;
-        }
-        if (percurso.getLocalProva() == null) {
-            return possuiQualquerAssinaturaAtiva;
-        }
-        return locaisAtivos.contains(percurso.getLocalProva().getId());
     }
 
     private Categoria resolverCategoria(UUID categoriaId) {

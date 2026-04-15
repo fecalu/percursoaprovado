@@ -9,6 +9,7 @@ const IconLibrary = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentCo
 const IconPass = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="5" width="14" height="10" rx="2" /><path d="M7 8h6M7 11h4" /></svg>
 const IconCart = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 4h2l1.2 6h8.8l1.5-4H7.2" /><circle cx="8" cy="15" r="1.2" /><circle cx="14" cy="15" r="1.2" /></svg>
 const IconChart = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="10" width="3" height="7" rx="1" /><rect x="8.5" y="6" width="3" height="11" rx="1" /><rect x="14" y="3" width="3" height="14" rx="1" /></svg>
+const IconTrail = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 15.5c1.4-4.7 3.3-7 5.8-7 2.2 0 3.2 1.4 4.4 1.4 1 0 1.7-.8 1.8-2.4" /><circle cx="4" cy="15.5" r="1.2" /><circle cx="9.8" cy="8.5" r="1.2" /><circle cx="16" cy="7" r="1.2" /></svg>
 const IconMap = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 4l4 2 4-2v12l-4 2-4-2-4 2V6l4-2z" /><path d="M10 6v12" /></svg>
 const IconPrice = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 6h10l-1 8H6L5 6z" /><path d="M7 6V4h6v2" /></svg>
 const IconList = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 6h12M4 10h12M4 14h8" /></svg>
@@ -51,11 +52,10 @@ export default function Sidebar() {
     {
       key: 'conteudo',
       label: 'Conteudo',
-      match: pathname => pathname.startsWith('/admin/percursos') || pathname.startsWith('/admin/modulos') || pathname.startsWith('/admin/grupos-acesso') || pathname.startsWith('/admin/questoes'),
+      match: pathname => pathname.startsWith('/admin/percursos') || pathname.startsWith('/admin/modulos') || pathname.startsWith('/admin/questoes'),
       items: [
         { to: '/admin/percursos', icon: IconList, label: 'Aulas' },
         { to: '/admin/modulos', icon: IconList, label: 'Modulos' },
-        { to: '/admin/grupos-acesso', icon: IconPass, label: 'Grupos de acesso' },
         { to: '/admin/questoes', icon: IconQuiz, label: 'Banco de questoes' },
       ],
     },
@@ -90,7 +90,6 @@ export default function Sidebar() {
       if (location.pathname.startsWith('/admin/paginas/')) return 'Site'
       if (location.pathname.startsWith('/admin/percursos')) return 'Aulas'
       if (location.pathname.startsWith('/admin/modulos')) return 'Modulos'
-      if (location.pathname.startsWith('/admin/grupos-acesso')) return 'Conteudo'
       if (location.pathname.startsWith('/admin/questoes')) return 'Questoes'
       if (location.pathname.startsWith('/admin/locais')) return 'Comercial'
       if (location.pathname.startsWith('/admin/planos')) return 'Comercial'
@@ -101,6 +100,7 @@ export default function Sidebar() {
     }
 
     if (location.pathname.startsWith('/painel')) return 'Painel'
+    if (location.pathname.startsWith('/minha-trilha')) return 'Minha trilha'
     if (location.pathname.startsWith('/biblioteca')) return 'Biblioteca'
     if (location.pathname.startsWith('/simulado')) return 'Simulado teorico'
     if (location.pathname.startsWith('/meus-acessos')) return 'Meus acessos'
@@ -148,6 +148,9 @@ export default function Sidebar() {
         <div className="nav-label">Aluno</div>
         <NavLink to="/painel" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconHome /> Painel
+        </NavLink>
+        <NavLink to="/minha-trilha" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+          <IconTrail /> Minha trilha
         </NavLink>
         <NavLink to="/biblioteca" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconLibrary /> Biblioteca

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { categoriaService, grupoAcessoService, percursoService, uploadService } from '../services/api'
+import { categoriaService, percursoService, uploadService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import { resolveMediaUrl } from '../utils/media'
 
@@ -61,7 +61,6 @@ function criarFormularioVazio(categorias = []) {
     descricao: '',
     ordemExibicao: String(Math.max(0, proximaOrdem)),
     formatoExperiencia: 'AULAS',
-    gruposAcessoIds: [],
     guiaBlocos: [],
   }
 }
@@ -147,18 +146,6 @@ function moduloTemGuia(formato) {
   return formato === 'GUIA' || formato === 'MISTO'
 }
 
-function extrairGrupoAcessoIds(categoria = {}) {
-  if (Array.isArray(categoria.gruposAcessoIds)) {
-    return categoria.gruposAcessoIds
-  }
-
-  if (Array.isArray(categoria.gruposAcesso)) {
-    return categoria.gruposAcesso.map(grupo => grupo.id).filter(Boolean)
-  }
-
-  return []
-}
-
 function formatarUsoModulo(totalAulas) {
   if (!totalAulas) return 'Módulo vazio'
   return totalAulas === 1 ? '1 aula vinculada' : `${totalAulas} aulas vinculadas`
@@ -167,7 +154,6 @@ function formatarUsoModulo(totalAulas) {
 export default function AdminModulos() {
   const navigate = useNavigate()
   const [categorias, setCategorias] = useState([])
-  const [gruposAcesso, setGruposAcesso] = useState([])
   const [form, setForm] = useState(criarFormularioVazio())
   const [edicaoId, setEdicaoId] = useState(null)
   const [categoriaDestinoId, setCategoriaDestinoId] = useState('')
@@ -213,10 +199,9 @@ export default function AdminModulos() {
 
   async function carregar(preferirId = null) {
     try {
-      const [categoriasResp, percursosResp, gruposResp] = await Promise.all([
+      const [categoriasResp, percursosResp] = await Promise.all([
         categoriaService.listar(),
         percursoService.listar({ todos: true }),
-        grupoAcessoService.listar(),
       ])
 
       const usoPorCategoria = percursosResp.reduce((acc, percurso) => {
@@ -231,7 +216,6 @@ export default function AdminModulos() {
       }))
 
       setCategorias(lista)
-      setGruposAcesso(gruposResp)
 
       const categoriaPreferida = preferirId
         ? lista.find(item => item.id === preferirId)
@@ -269,7 +253,6 @@ export default function AdminModulos() {
       descricao: categoria.descricao || '',
       ordemExibicao: String(categoria.ordemExibicao ?? 0),
       formatoExperiencia: categoria.formatoExperiencia || 'AULAS',
-      gruposAcessoIds: extrairGrupoAcessoIds(categoria),
       guiaBlocos: normalizarGuiaBlocos(categoria.guiaBlocos || []),
     })
   }
@@ -278,20 +261,6 @@ export default function AdminModulos() {
     setEdicaoId(null)
     setCategoriaDestinoId('')
     setForm(criarFormularioVazio(listaAtual))
-  }
-
-  function alternarGrupoAcesso(grupoId) {
-    setForm(current => {
-      const idsAtuais = Array.isArray(current.gruposAcessoIds) ? current.gruposAcessoIds : []
-      const possuiGrupo = idsAtuais.includes(grupoId)
-
-      return {
-        ...current,
-        gruposAcessoIds: possuiGrupo
-          ? idsAtuais.filter(idAtual => idAtual !== grupoId)
-          : [...idsAtuais, grupoId],
-      }
-    })
   }
 
   async function salvar(event) {
@@ -307,11 +276,6 @@ export default function AdminModulos() {
       ? prepararGuiaBlocosPayload(form.guiaBlocos)
       : []
 
-    if (guiaBlocosPayload.length && (!Array.isArray(form.gruposAcessoIds) || form.gruposAcessoIds.length === 0)) {
-      show('Selecione ao menos um grupo de acesso para liberar este guia.', 'error')
-      return
-    }
-
     setSalvando(true)
     try {
       const payload = {
@@ -319,7 +283,6 @@ export default function AdminModulos() {
         descricao: form.descricao.trim() || null,
         ordemExibicao: Number(form.ordemExibicao) || 0,
         formatoExperiencia: form.formatoExperiencia || 'AULAS',
-        gruposAcessoIds: moduloTemGuia(form.formatoExperiencia) ? form.gruposAcessoIds : [],
         guiaBlocos: guiaBlocosPayload,
       }
 
@@ -617,51 +580,6 @@ export default function AdminModulos() {
                 ))}
               </div>
             </div>
-
-            {moduloTemGuia(form.formatoExperiencia) && (
-              <div className="form-group">
-                <label className="form-label">Grupos que liberam o guia</label>
-                <div className="section-copy" style={{ marginBottom: '0.7rem' }}>
-                  O modulo ainda organiza as aulas. Esta selecao define quais planos tambem enxergam o guia pratico quando ele nao tiver aulas vinculadas.
-                </div>
-
-                {gruposAcesso.length ? (
-                  <div className="admin-access-grid">
-                    {gruposAcesso.map(grupo => {
-                      const selecionado = form.gruposAcessoIds.includes(grupo.id)
-
-                      return (
-                        <label key={grupo.id} className={`admin-access-item${selecionado ? ' is-selected' : ''}`}>
-                          <input
-                            type="checkbox"
-                            checked={selecionado}
-                            onChange={() => alternarGrupoAcesso(grupo.id)}
-                          />
-                          <div className="admin-access-item-body">
-                            <div className="admin-access-item-title-row">
-                              <span className="admin-access-item-title">{grupo.nome}</span>
-                              {!grupo.ativo && <span className="card-tag">Inativo</span>}
-                            </div>
-                            <div className="admin-access-item-copy">
-                              {grupo.descricao?.trim() || grupo.codigo}
-                            </div>
-                          </div>
-                        </label>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <div className="admin-inline-note">
-                    <strong>Nenhum grupo de acesso cadastrado.</strong>
-                    <span> Crie primeiro os grupos para poder liberar guias por plano.</span>
-                  </div>
-                )}
-
-                <div className="mini-copy" style={{ marginTop: '0.55rem' }}>
-                  Liberando agora: {gruposAcesso.filter(grupo => form.gruposAcessoIds.includes(grupo.id)).map(grupo => grupo.nome).join(', ') || 'nenhum grupo marcado ainda.'}
-                </div>
-              </div>
-            )}
 
             {moduloTemGuia(form.formatoExperiencia) ? (
               <div className="admin-modulos-guide-editor">

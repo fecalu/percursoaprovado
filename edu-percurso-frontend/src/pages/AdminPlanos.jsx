@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CHECKOUT_PAGE_DEFAULTS, interpolateSiteText, resolveCheckoutPageConfig } from '../data/sitePageDefaults'
-import { configuracaoSiteService, localProvaService, planoService } from '../services/api'
+import { configuracaoSiteService, localProvaService, planoService, trilhaService } from '../services/api'
 import { useToast } from '../hooks/useToast'
-import { formatPlanoDuracao } from '../utils/formatters'
+import { formatPlanoDuracao, formatTrilhaPlano } from '../utils/formatters'
 
 const VAZIO = {
   localProvaId: '',
+  trilhaId: '',
   nome: '',
   duracaoDias: 30,
   precoReais: '99,00',
@@ -84,6 +85,7 @@ function getCheckoutPadrao(checkoutPageDefaults) {
     beneficios: checkoutPageDefaults.beneficiosListaPadrao,
     ajudaTitulo: checkoutPageDefaults.ajudaTituloPadrao,
     ajudaTexto: checkoutPageDefaults.ajudaTextoPadrao,
+    confianca: checkoutPageDefaults.confiancaListaPadrao,
     resumoKicker: checkoutPageDefaults.resumoKickerPadrao,
     resumoTexto: checkoutPageDefaults.resumoTextoPadrao,
     precoLabel: checkoutPageDefaults.precoLabelPadrao,
@@ -92,8 +94,68 @@ function getCheckoutPadrao(checkoutPageDefaults) {
   }
 }
 
-function getCheckoutBlocosPadrao(checkoutPageDefaults) {
-  const defaults = getCheckoutPadrao(checkoutPageDefaults)
+function getCheckoutPadraoPorTrilha(checkoutPageDefaults, trilhaCodigo) {
+  const base = getCheckoutPadrao(checkoutPageDefaults)
+
+  if (trilhaCodigo === 'comecando_do_zero') {
+    return {
+      ...base,
+      kicker: 'Jornada completa para sua aprovacao',
+      titulo: 'Comece do zero com um plano que organiza sua jornada ate a prova',
+      subtitulo: 'Esse plano foi pensado para quem quer entender os primeiros passos, ganhar seguranca e chegar mais preparado no dia da prova.',
+      beneficiosTitulo: 'O que esse plano ajuda voce a construir',
+      beneficios: [
+        'Entender o caminho desde o inicio, sem ficar perdido',
+        'Avancar pela jornada com mais clareza e menos ansiedade',
+        'Revisar os percursos e os pontos que mais geram inseguranca',
+      ],
+      ajudaTitulo: 'Para quem esse plano faz mais sentido',
+      ajudaTexto: 'Ideal para quem esta comecando agora, quer um caminho guiado e prefere estudar com mais contexto antes da prova.',
+      confianca: [
+        'Plano pensado para quem quer mais orientacao desde o inicio',
+        'Acesso para estudar no seu ritmo e voltar quantas vezes precisar',
+        'Jornada organizada para chegar na prova com mais confianca',
+      ],
+      resumoKicker: 'Plano indicado para quem quer comecar do zero',
+      resumoTexto: 'Voce recebe um plano pensado para acompanhar sua jornada desde os primeiros passos ate a reta final da prova.',
+      precoLabel: 'Investimento para a jornada completa',
+      precoTexto: 'Pagamento unico para o periodo escolhido',
+      seguroTexto: 'Compra segura para quem quer estudar com mais direcao desde o inicio.',
+    }
+  }
+
+  if (trilhaCodigo === 'reta_final_prova') {
+    return {
+      ...base,
+      kicker: 'Foco total na reta final da prova',
+      titulo: 'Revise com mais estrategia e chegue mais seguro para a prova pratica',
+      subtitulo: 'Esse plano foi pensado para quem ja passou pelas etapas iniciais e quer concentrar o estudo em pratica, percurso e revisao final.',
+      beneficiosTitulo: 'O que esse plano ajuda voce a afiar agora',
+      beneficios: [
+        'Rever os percursos reais do local de prova',
+        'Treinar os pontos de atencao e as pegadinhas mais importantes',
+        'Chegar no dia da prova com a revisao mais objetiva',
+      ],
+      ajudaTitulo: 'Para quem esse plano faz mais sentido',
+      ajudaTexto: 'Ideal para quem ja esta na pratica ou perto da prova e quer uma revisao mais direta, sem voltar para as etapas iniciais.',
+      confianca: [
+        'Plano focado em revisao pratica e reta final',
+        'Acesso para rever percurso, pegadinhas e pontos de atencao',
+        'Jornada mais objetiva para chegar mais afiado no dia da prova',
+      ],
+      resumoKicker: 'Plano indicado para a reta final',
+      resumoTexto: 'Voce recebe um plano focado no que mais pesa agora: percurso, pegadinhas, revisao e confianca para o dia da prova.',
+      precoLabel: 'Investimento para a reta final',
+      precoTexto: 'Pagamento unico para o periodo escolhido',
+      seguroTexto: 'Compra segura para quem quer revisar com foco na etapa final da prova.',
+    }
+  }
+
+  return base
+}
+
+function getCheckoutBlocosPadrao(checkoutPageDefaults, trilhaCodigo) {
+  const defaults = getCheckoutPadraoPorTrilha(checkoutPageDefaults, trilhaCodigo)
 
   return {
     hero: {
@@ -110,7 +172,7 @@ function getCheckoutBlocosPadrao(checkoutPageDefaults) {
       checkoutAjudaTexto: defaults.ajudaTexto,
     },
     confianca: {
-      checkoutConfiancaTexto: checkoutPageDefaults.confiancaListaPadrao.join('\n'),
+      checkoutConfiancaTexto: defaults.confianca.join('\n'),
     },
     resumo: {
       checkoutResumoKicker: defaults.resumoKicker,
@@ -122,7 +184,7 @@ function getCheckoutBlocosPadrao(checkoutPageDefaults) {
   }
 }
 
-function getVitrinePadrao(duracaoDias) {
+function getVitrinePadraoNeutro(duracaoDias) {
   if (duracaoDias <= 30) {
     return {
       selo: 'Para comecar agora',
@@ -159,6 +221,114 @@ function getVitrinePadrao(duracaoDias) {
     texto: 'Acesso mais longo para uma preparacao estendida.',
     meta: 'Pagamento unico pelo periodo escolhido',
     recomendada: false,
+  }
+}
+
+function getVitrinePadrao(trilhaCodigo, duracaoDias) {
+  const base = getVitrinePadraoNeutro(duracaoDias)
+
+  if (trilhaCodigo === 'comecando_do_zero') {
+    if (duracaoDias <= 30) {
+      return {
+        selo: 'Comeco guiado',
+        resumo: 'Bom para quem quer sair do zero e ja entrar com direcao na jornada ate a prova.',
+        texto: 'Ideal para quem esta comecando agora e quer entender os primeiros passos sem se perder.',
+        meta: 'Jornada guiada desde o inicio pelo periodo escolhido',
+        recomendada: false,
+      }
+    }
+
+    if (duracaoDias <= 90) {
+      return {
+        selo: 'Jornada completa',
+        resumo: 'Tempo equilibrado para comecar do zero, praticar com calma e chegar mais seguro na prova.',
+        texto: 'Otimo para quem quer acompanhar a jornada completa, da preparacao inicial ate a revisao final.',
+        meta: 'Plano pensado para quem quer seguir a trilha completa',
+        recomendada: true,
+      }
+    }
+
+    return {
+      selo: 'Comeco com folga',
+      resumo: 'Mais tempo para organizar cada etapa, repetir aulas e voltar quando precisar.',
+      texto: 'Ideal para quem quer fazer a jornada completa com mais folga e revisar varias vezes.',
+      meta: 'Mais tempo para uma jornada completa sem pressa',
+      recomendada: false,
+    }
+  }
+
+  if (trilhaCodigo === 'reta_final_prova') {
+    if (duracaoDias <= 30) {
+      return {
+        selo: 'Reta final',
+        resumo: 'Bom para quem ja resolveu as etapas iniciais e quer focar agora na prova pratica.',
+        texto: 'Ideal para revisar percurso, pegadinhas e chegar mais afiado para o dia da prova.',
+        meta: 'Foco na reta final pelo periodo escolhido',
+        recomendada: true,
+      }
+    }
+
+    if (duracaoDias <= 90) {
+      return {
+        selo: 'Revisao com calma',
+        resumo: 'Mais tempo para praticar, rever os percursos e repetir os pontos mais criticos.',
+        texto: 'Otimo para quem ja esta na pratica e quer revisar com mais calma antes da prova.',
+        meta: 'Plano de reta final com mais tempo para revisar',
+        recomendada: false,
+      }
+    }
+
+    return {
+      selo: 'Acesso estendido',
+      resumo: 'Tempo extra para quem prefere manter a reta final disponivel e revisar sempre que precisar.',
+      texto: 'Mais tempo para revisar percurso, pegadinhas e pratica sem pressa.',
+      meta: 'Reta final estendida pelo periodo escolhido',
+      recomendada: false,
+    }
+  }
+
+  return base
+}
+
+function getPosicionamentoTrilha(trilhaCodigo, trilhaNome) {
+  if (trilhaCodigo === 'comecando_do_zero') {
+    return {
+      titulo: 'Plano para quem quer comecar do zero',
+      copy: 'Na vitrine, deixe claro que esse plano acompanha desde os primeiros passos ate a prova. Evite uma copy que pareca so revisao final.',
+    }
+  }
+
+  if (trilhaCodigo === 'reta_final_prova') {
+    return {
+      titulo: 'Plano para quem ja esta na reta final',
+      copy: 'Na vitrine, destaque pratica, percurso, pegadinhas e revisao. Evite vender como jornada completa desde o inicio.',
+    }
+  }
+
+  return {
+    titulo: `Plano da trilha ${formatTrilhaPlano(trilhaNome, trilhaCodigo)}`,
+    copy: 'A copy comercial deve refletir o momento do aluno que esse plano atende.',
+  }
+}
+
+function getPosicionamentoCheckoutTrilha(trilhaCodigo, trilhaNome) {
+  if (trilhaCodigo === 'comecando_do_zero') {
+    return {
+      titulo: 'Checkout para quem ainda esta construindo a jornada',
+      copy: 'Na revisao antes de pagar, vale reforcar seguranca, orientacao e a ideia de caminho completo ate a prova.',
+    }
+  }
+
+  if (trilhaCodigo === 'reta_final_prova') {
+    return {
+      titulo: 'Checkout para quem quer acelerar a reta final',
+      copy: 'Na revisao antes de pagar, vale reforcar praticidade, revisao objetiva e foco no que mais pesa perto da prova.',
+    }
+  }
+
+  return {
+    titulo: `Checkout da trilha ${formatTrilhaPlano(trilhaNome, trilhaCodigo)}`,
+    copy: 'A copy do checkout deve conversar com o momento do aluno que esse plano atende.',
   }
 }
 
@@ -205,6 +375,7 @@ function temVitrinePersonalizada(plano) {
 export default function AdminPlanos() {
   const [locais, setLocais] = useState([])
   const [planos, setPlanos] = useState([])
+  const [trilhas, setTrilhas] = useState([])
   const [configCheckout, setConfigCheckout] = useState(null)
   const [form, setForm] = useState(VAZIO)
   const [edicaoId, setEdicaoId] = useState(null)
@@ -218,18 +389,25 @@ export default function AdminPlanos() {
     Promise.allSettled([
       localProvaService.listar({ todos: true }),
       planoService.listar({ todos: true }),
+      trilhaService.listarAdmin(),
       configuracaoSiteService.buscarAdmin(),
     ])
-      .then(([locaisResp, planosResp, configResp]) => {
+      .then(([locaisResp, planosResp, trilhasResp, configResp]) => {
         const locaisLista = locaisResp.status === 'fulfilled' ? locaisResp.value : []
         const planosLista = planosResp.status === 'fulfilled' ? planosResp.value : []
+        const trilhasLista = trilhasResp.status === 'fulfilled' ? trilhasResp.value : []
 
         setLocais(locaisLista)
         setPlanos(planosLista)
+        setTrilhas(trilhasLista)
         setConfigCheckout(configResp.status === 'fulfilled' ? configResp.value?.checkout || null : null)
 
-        if (!form.localProvaId && locaisLista[0]) {
-          setForm(current => ({ ...current, localProvaId: locaisLista[0].id }))
+        if ((!form.localProvaId && locaisLista[0]) || (!form.trilhaId && trilhasLista[0])) {
+          setForm(current => ({
+            ...current,
+            localProvaId: current.localProvaId || locaisLista[0]?.id || '',
+            trilhaId: current.trilhaId || trilhasLista[0]?.id || '',
+          }))
         }
       })
       .finally(() => setLoading(false))
@@ -237,6 +415,7 @@ export default function AdminPlanos() {
 
   const locaisMap = useMemo(() => new Map(locais.map(local => [local.id, local])), [locais])
   const localSelecionado = useMemo(() => locaisMap.get(form.localProvaId) || null, [form.localProvaId, locaisMap])
+  const trilhaSelecionada = useMemo(() => trilhas.find(item => item.id === form.trilhaId) || null, [form.trilhaId, trilhas])
   const planosOrdenados = useMemo(
     () => [...planos].sort((a, b) => {
       const nomeLocalA = (a.localProvaNome || locaisMap.get(a.localProvaId)?.nome || '').toLowerCase()
@@ -246,17 +425,34 @@ export default function AdminPlanos() {
     }),
     [locaisMap, planos]
   )
+  const planosFiltrados = useMemo(
+    () => planosOrdenados,
+    [planosOrdenados]
+  )
+  const resumoClassificacao = useMemo(() => ({ total: planos.length }), [planos])
   const vitrineDefaults = useMemo(
-    () => getVitrinePadrao(Number(form.duracaoDias) || 0),
+    () => getVitrinePadrao(trilhaSelecionada?.codigo, Number(form.duracaoDias) || 0),
+    [form.duracaoDias, trilhaSelecionada?.codigo]
+  )
+  const vitrineDefaultsNeutro = useMemo(
+    () => getVitrinePadraoNeutro(Number(form.duracaoDias) || 0),
     [form.duracaoDias]
+  )
+  const posicionamentoTrilha = useMemo(
+    () => getPosicionamentoTrilha(trilhaSelecionada?.codigo, trilhaSelecionada?.nome),
+    [trilhaSelecionada?.codigo, trilhaSelecionada?.nome]
   )
   const checkoutPageDefaults = useMemo(
     () => resolveCheckoutPageConfig(configCheckout || CHECKOUT_PAGE_DEFAULTS),
     [configCheckout]
   )
   const checkoutDefaults = useMemo(
-    () => getCheckoutPadrao(checkoutPageDefaults),
-    [checkoutPageDefaults]
+    () => getCheckoutPadraoPorTrilha(checkoutPageDefaults, trilhaSelecionada?.codigo),
+    [checkoutPageDefaults, trilhaSelecionada?.codigo]
+  )
+  const posicionamentoCheckout = useMemo(
+    () => getPosicionamentoCheckoutTrilha(trilhaSelecionada?.codigo, trilhaSelecionada?.nome),
+    [trilhaSelecionada?.codigo, trilhaSelecionada?.nome]
   )
   const checkoutPreview = useMemo(() => {
     const precoCentavos = reaisParaCentavos(form.precoReais)
@@ -280,7 +476,7 @@ export default function AdminPlanos() {
       beneficios: parseLinhasCheckout(form.checkoutBeneficiosTexto, checkoutDefaults.beneficios, contexto),
       ajudaTitulo: obterTexto(form.checkoutAjudaTitulo, checkoutDefaults.ajudaTitulo),
       ajudaTexto: obterTexto(form.checkoutAjudaTexto, checkoutDefaults.ajudaTexto),
-      confianca: parseLinhasCheckout(form.checkoutConfiancaTexto, checkoutPageDefaults.confiancaListaPadrao, contexto),
+      confianca: parseLinhasCheckout(form.checkoutConfiancaTexto, checkoutDefaults.confianca, contexto),
       resumoKicker: obterTexto(form.checkoutResumoKicker, checkoutDefaults.resumoKicker),
       resumoTexto: obterTexto(form.checkoutResumoTexto, checkoutDefaults.resumoTexto),
       precoLabel: obterTexto(form.checkoutPrecoLabel, checkoutDefaults.precoLabel),
@@ -299,6 +495,7 @@ export default function AdminPlanos() {
     setEdicaoId(plano.id)
     setForm({
       localProvaId: plano.localProvaId,
+      trilhaId: plano.trilhaId || '',
       nome: plano.nome,
       duracaoDias: plano.duracaoDias,
       precoReais: centavosParaReais(plano.precoCentavos),
@@ -330,13 +527,15 @@ export default function AdminPlanos() {
     setForm({
       ...VAZIO,
       localProvaId: locais[0]?.id || '',
+      trilhaId: trilhas[0]?.id || '',
     })
     setPreviewModo('desktop')
     setPreviewTema('escuro')
   }
 
-  function copiarBlocoPadrao(bloco) {
-    const valores = getCheckoutBlocosPadrao(checkoutPageDefaults)[bloco]
+  function copiarBlocoPadrao(bloco, modo = 'trilha') {
+    const codigoTrilha = modo === 'trilha' ? trilhaSelecionada?.codigo : null
+    const valores = getCheckoutBlocosPadrao(checkoutPageDefaults, codigoTrilha)[bloco]
     if (!valores) return
 
     setForm(current => ({
@@ -345,8 +544,28 @@ export default function AdminPlanos() {
     }))
   }
 
+  function aplicarSugestaoCheckout(modo = 'trilha') {
+    const codigoTrilha = modo === 'trilha' ? trilhaSelecionada?.codigo : null
+    const blocos = getCheckoutBlocosPadrao(checkoutPageDefaults, codigoTrilha)
+
+    setForm(current => ({
+      ...current,
+      ...blocos.hero,
+      ...blocos.beneficios,
+      ...blocos.apoio,
+      ...blocos.confianca,
+      ...blocos.resumo,
+    }))
+  }
+
   async function salvar(event) {
     event.preventDefault()
+
+    if (!form.trilhaId) {
+      show('Selecione o perfil da jornada deste plano.', 'error')
+      return
+    }
+
     setSalvando(true)
 
     try {
@@ -413,6 +632,19 @@ export default function AdminPlanos() {
             </div>
 
             <div className="form-group">
+              <label className="form-label">Perfil da jornada</label>
+              <select className="form-select" value={form.trilhaId} onChange={event => setForm(current => ({ ...current, trilhaId: event.target.value }))}>
+                <option value="">Selecione o perfil</option>
+                {trilhas.map(trilha => (
+                  <option key={trilha.id} value={trilha.id}>{trilha.nome}</option>
+                ))}
+              </select>
+              <div className="mini-copy">
+                Esse perfil ajusta os textos comerciais e ajuda a apresentar a jornada, sem limitar os conteudos do plano.
+              </div>
+            </div>
+
+            <div className="form-group">
               <label className="form-label">Nome</label>
               <input className="form-input" value={form.nome} onChange={event => setForm(current => ({ ...current, nome: event.target.value }))} required />
             </div>
@@ -445,23 +677,52 @@ export default function AdminPlanos() {
                 <div>
                   <div className="section-heading" style={{ fontSize: 18 }}>Vitrine do plano na pagina do local</div>
                   <div className="section-copy">
-                    Esses textos aparecem no card do plano antes do checkout. Se voce deixar vazio, o site usa a sugestao automatica pela duracao.
+                    Esses textos aparecem no card do plano antes do checkout. Se voce deixar vazio, o site usa a sugestao automatica considerando trilha e duracao.
                   </div>
                 </div>
-                <button
-                  className="btn btn-ghost"
-                  type="button"
-                  onClick={() => setForm(current => ({
-                    ...current,
-                    vitrineSelo: vitrineDefaults.selo,
-                    vitrineResumo: vitrineDefaults.resumo,
-                    vitrineTexto: vitrineDefaults.texto,
-                    vitrineMeta: vitrineDefaults.meta,
-                    vitrineRecomendada: boolSelectParaValor(vitrineDefaults.recomendada),
-                  }))}
-                >
-                  Copiar sugestao
-                </button>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setForm(current => ({
+                      ...current,
+                      vitrineSelo: vitrineDefaults.selo,
+                      vitrineResumo: vitrineDefaults.resumo,
+                      vitrineTexto: vitrineDefaults.texto,
+                      vitrineMeta: vitrineDefaults.meta,
+                      vitrineRecomendada: boolSelectParaValor(vitrineDefaults.recomendada),
+                    }))}
+                  >
+                    Aplicar sugestao da trilha
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setForm(current => ({
+                      ...current,
+                      vitrineSelo: vitrineDefaultsNeutro.selo,
+                      vitrineResumo: vitrineDefaultsNeutro.resumo,
+                      vitrineTexto: vitrineDefaultsNeutro.texto,
+                      vitrineMeta: vitrineDefaultsNeutro.meta,
+                      vitrineRecomendada: boolSelectParaValor(vitrineDefaultsNeutro.recomendada),
+                    }))}
+                  >
+                    Usar sugestao neutra
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-inline-check" style={{ marginBottom: '1rem' }}>
+                <strong>{posicionamentoTrilha.titulo}</strong>
+                <span> {posicionamentoTrilha.copy}</span>
+              </div>
+
+              <div className="admin-inline-note" style={{ marginBottom: '1rem' }}>
+                <strong>Sugestao atual:</strong>
+                <span>
+                  {' '}
+                  selo "{vitrineDefaults.selo}", resumo "{vitrineDefaults.resumo}" e texto principal pensado para {trilhaSelecionada?.nome || 'a trilha selecionada'}.
+                </span>
               </div>
 
               <div className="form-group">
@@ -499,9 +760,30 @@ export default function AdminPlanos() {
                 <div>
                   <div className="section-heading" style={{ fontSize: 18 }}>Checkout / Revisao antes de pagar</div>
                   <div className="section-copy">
-                    Personalize a copy dessa etapa por plano. Se deixar vazio, o checkout usa os textos padrao.
+                    Personalize a copy dessa etapa por plano. Se deixar vazio, o checkout usa a sugestao automatica considerando a trilha principal.
                   </div>
                 </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                  <button className="btn btn-ghost" type="button" onClick={() => aplicarSugestaoCheckout('trilha')}>
+                    Aplicar sugestao da trilha
+                  </button>
+                  <button className="btn btn-ghost" type="button" onClick={() => aplicarSugestaoCheckout('neutro')}>
+                    Usar padrao generico
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-inline-check" style={{ marginBottom: '1rem' }}>
+                <strong>{posicionamentoCheckout.titulo}</strong>
+                <span> {posicionamentoCheckout.copy}</span>
+              </div>
+
+              <div className="admin-inline-note" style={{ marginBottom: '1rem' }}>
+                <strong>Sugestao atual:</strong>
+                <span>
+                  {' '}
+                  kicker "{checkoutDefaults.kicker}", titulo "{checkoutDefaults.titulo}" e resumo final pensados para {trilhaSelecionada?.nome || 'a trilha selecionada'}.
+                </span>
               </div>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', marginBottom: '1rem' }}>
@@ -522,7 +804,10 @@ export default function AdminPlanos() {
                 <div className="checkout-admin-block">
                   <div className="checkout-admin-block-head">
                     <div className="section-heading" style={{ fontSize: 16 }}>Hero</div>
-                    <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('hero')}>Copiar padrao</button>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('hero', 'trilha')}>Sugestao da trilha</button>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('hero', 'neutro')}>Padrao generico</button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Kicker</label>
@@ -541,7 +826,10 @@ export default function AdminPlanos() {
                 <div className="checkout-admin-block">
                   <div className="checkout-admin-block-head">
                     <div className="section-heading" style={{ fontSize: 16 }}>Beneficios</div>
-                    <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('beneficios')}>Copiar padrao</button>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('beneficios', 'trilha')}>Sugestao da trilha</button>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('beneficios', 'neutro')}>Padrao generico</button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Titulo dos beneficios</label>
@@ -556,7 +844,10 @@ export default function AdminPlanos() {
                 <div className="checkout-admin-block">
                   <div className="checkout-admin-block-head">
                     <div className="section-heading" style={{ fontSize: 16 }}>Apoio</div>
-                    <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('apoio')}>Copiar padrao</button>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('apoio', 'trilha')}>Sugestao da trilha</button>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('apoio', 'neutro')}>Padrao generico</button>
+                    </div>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Titulo da secao de apoio</label>
@@ -571,18 +862,24 @@ export default function AdminPlanos() {
                 <div className="checkout-admin-block">
                   <div className="checkout-admin-block-head">
                     <div className="section-heading" style={{ fontSize: 16 }}>Confianca</div>
-                    <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('confianca')}>Copiar padrao</button>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('confianca', 'trilha')}>Sugestao da trilha</button>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('confianca', 'neutro')}>Padrao generico</button>
+                    </div>
                   </div>
                   <div className="form-group" style={{ marginBottom: 0 }}>
                     <label className="form-label">Itens de confianca (1 por linha)</label>
-                    <textarea className="form-textarea" value={form.checkoutConfiancaTexto} onChange={event => setForm(current => ({ ...current, checkoutConfiancaTexto: event.target.value }))} placeholder={checkoutPageDefaults.confiancaListaPadrao.join('\n')} />
+                    <textarea className="form-textarea" value={form.checkoutConfiancaTexto} onChange={event => setForm(current => ({ ...current, checkoutConfiancaTexto: event.target.value }))} placeholder={checkoutDefaults.confianca.join('\n')} />
                   </div>
                 </div>
 
                 <div className="checkout-admin-block checkout-admin-block--full">
                   <div className="checkout-admin-block-head">
                     <div className="section-heading" style={{ fontSize: 16 }}>Resumo e preco</div>
-                    <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('resumo')}>Copiar padrao</button>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('resumo', 'trilha')}>Sugestao da trilha</button>
+                      <button className="btn btn-ghost" type="button" onClick={() => copiarBlocoPadrao('resumo', 'neutro')}>Padrao generico</button>
+                    </div>
                   </div>
                   <div className="form-row">
                     <div className="form-group">
@@ -715,20 +1012,30 @@ export default function AdminPlanos() {
 
         <div className="card">
           <div className="section-heading">Planos cadastrados</div>
+          <div className="admin-inline-note" style={{ marginTop: '0.9rem', marginBottom: '0.9rem' }}>
+            <strong>{resumoClassificacao.total}</strong> plano(s) no total.
+            <span> O acesso agora e definido por local, duracao, status ativo e pagamento confirmado.</span>
+          </div>
           {loading ? (
             <div className="spinner" />
-          ) : (
+          ) : planosFiltrados.length ? (
             <div className="stack-list">
-              {planosOrdenados.map(plano => (
+              {planosFiltrados.map(plano => (
                 <div key={plano.id} className="stack-row">
                   <div>
                     <div className="table-name">{plano.nome}</div>
                     <div className="mini-copy">
                       {(locaisMap.get(plano.localProvaId)?.nome || plano.localProvaNome)} - {formatPlanoDuracao(plano.duracaoDias)} - {fmtMoeda(plano.precoCentavos)}
                     </div>
+                    {plano.trilhaNome && (
+                      <div className="mini-copy" style={{ marginTop: 4 }}>
+                        Trilha principal: {plano.trilhaNome}
+                      </div>
+                    )}
                   </div>
                   <div className="table-actions">
                     <span className={`badge ${plano.ativo ? 'badge-green' : 'badge-gray'}`}>{plano.ativo ? 'Ativo' : 'Inativo'}</span>
+                    {plano.trilhaNome && <span className="badge badge-blue">{plano.trilhaNome}</span>}
                     {temVitrinePersonalizada(plano) && <span className="badge badge-blue">Vitrine customizada</span>}
                     {(plano.usarCheckoutPersonalizado || temTextoPersonalizado(plano)) && <span className="badge badge-warn">Checkout customizado</span>}
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 10px' }} onClick={() => editar(plano)}>Editar</button>
@@ -737,6 +1044,8 @@ export default function AdminPlanos() {
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="empty-state">Nenhum plano encontrado nesse filtro.</div>
           )}
         </div>
       </div>

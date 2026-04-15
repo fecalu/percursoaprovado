@@ -14,6 +14,10 @@ import {
   formatPlanoDuracao,
   formatSituacaoPedido,
   formatStatusComercialLocal,
+  formatTrilhaPlano,
+  getBadgeClassTrilhaPlano,
+  getOrdemTrilhaPlano,
+  getResumoTrilhaPlano,
   getSituacaoPedidoBadgeClass,
 } from '../utils/formatters'
 import {
@@ -231,6 +235,7 @@ function getPlanoDestaque(duracaoDias) {
 
 function getPlanoApresentacao(plano) {
   const padrao = getPlanoDestaque(plano?.duracaoDias || 0)
+  const trilhaNome = formatTrilhaPlano(plano?.trilhaNome, plano?.trilhaCodigo)
 
   return {
     selo: plano?.vitrineSelo?.trim() || padrao.selo,
@@ -238,7 +243,14 @@ function getPlanoApresentacao(plano) {
     recomendado: typeof plano?.vitrineRecomendada === 'boolean' ? plano.vitrineRecomendada : padrao.recomendado,
     texto: plano?.vitrineTexto?.trim() || getPlanoIndicacao(plano?.duracaoDias || 0),
     meta: plano?.vitrineMeta?.trim() || 'Pagamento único pelo período escolhido',
+    trilhaNome,
+    trilhaResumo: getResumoTrilhaPlano(plano?.trilhaCodigo),
+    trilhaBadgeClass: getBadgeClassTrilhaPlano(plano?.trilhaCodigo),
   }
+}
+
+function getCodigoTrilhaPlano(plano) {
+  return plano?.trilhaCodigo || plano?.trilhaNome || 'trilha_padrao'
 }
 
 function isCheckoutDoLocal(monitor, slug) {
@@ -295,6 +307,7 @@ export default function LocalDetalhe() {
   const [checkoutMonitor, setCheckoutMonitor] = useState(null)
   const [sincronizandoCheckout, setSincronizandoCheckout] = useState(false)
   const [planoAtivoIndex, setPlanoAtivoIndex] = useState(0)
+  const [jornadaSelecionada, setJornadaSelecionada] = useState('')
   const checkoutMonitorRef = useRef(null)
   const planoSwipeStartRef = useRef(null)
   const planoSwipeLockRef = useRef(false)
@@ -302,6 +315,31 @@ export default function LocalDetalhe() {
     () => [...planos].sort((a, b) => a.duracaoDias - b.duracaoDias || a.precoCentavos - b.precoCentavos),
     [planos]
   )
+  const jornadasDisponiveis = useMemo(() => {
+    const mapa = new Map()
+
+    planosOrdenados.forEach(plano => {
+      const codigo = getCodigoTrilhaPlano(plano)
+      if (mapa.has(codigo)) return
+
+      mapa.set(codigo, {
+        codigo,
+        nome: formatTrilhaPlano(plano?.trilhaNome, plano?.trilhaCodigo),
+        resumo: getResumoTrilhaPlano(plano?.trilhaCodigo),
+        badgeClass: getBadgeClassTrilhaPlano(plano?.trilhaCodigo),
+      })
+    })
+
+    return Array.from(mapa.values()).sort((a, b) => {
+      const ordem = getOrdemTrilhaPlano(a.codigo) - getOrdemTrilhaPlano(b.codigo)
+      if (ordem !== 0) return ordem
+      return a.nome.localeCompare(b.nome, 'pt-BR')
+    })
+  }, [planosOrdenados])
+  const planosExibidos = useMemo(() => {
+    if (!jornadaSelecionada) return planosOrdenados
+    return planosOrdenados.filter(plano => getCodigoTrilhaPlano(plano) === jornadaSelecionada)
+  }, [jornadaSelecionada, planosOrdenados])
 
   useEffect(() => {
     checkoutMonitorRef.current = checkoutMonitor
@@ -350,13 +388,28 @@ export default function LocalDetalhe() {
 
   useEffect(() => {
     if (planosOrdenados.length === 0) {
+      setJornadaSelecionada('')
+      return
+    }
+
+    const recomendado = planosOrdenados.find(plano => plano?.vitrineRecomendada === true)
+    const codigoPreferido = recomendado ? getCodigoTrilhaPlano(recomendado) : jornadasDisponiveis[0]?.codigo || ''
+
+    setJornadaSelecionada(atual => {
+      if (atual && jornadasDisponiveis.some(item => item.codigo === atual)) return atual
+      return codigoPreferido
+    })
+  }, [jornadasDisponiveis, planosOrdenados])
+
+  useEffect(() => {
+    if (planosExibidos.length === 0) {
       setPlanoAtivoIndex(0)
       return
     }
 
-    const recomendadoIndex = planosOrdenados.findIndex(plano => plano?.vitrineRecomendada === true)
+    const recomendadoIndex = planosExibidos.findIndex(plano => plano?.vitrineRecomendada === true)
     setPlanoAtivoIndex(recomendadoIndex >= 0 ? recomendadoIndex : 0)
-  }, [planosOrdenados])
+  }, [planosExibidos])
 
   useEffect(() => {
     const monitorSalvo = loadCheckoutMonitor()
@@ -563,7 +616,11 @@ export default function LocalDetalhe() {
           {destaquePlano.recomendado && <div className="plan-showcase-ribbon">Mais escolhido</div>}
           <div className="plan-showcase-name">{plano.nome}</div>
           <div className="plan-showcase-price">{fmtMoeda(plano.precoCentavos)}</div>
+          <div className="plan-showcase-journey">
+            <span className={`badge ${destaquePlano.trilhaBadgeClass}`}>{destaquePlano.trilhaNome}</span>
+          </div>
           <div className="plan-showcase-copy">{destaquePlano.texto}</div>
+          <div className="plan-showcase-trilha-copy">{destaquePlano.trilhaResumo}</div>
           <div className="plan-showcase-meta">{destaquePlano.meta}</div>
           <div className="plan-showcase-action" onClick={event => event.stopPropagation()}>
             {renderAcaoPlano(plano)}
@@ -599,10 +656,11 @@ export default function LocalDetalhe() {
   const subtituloComercial = getSubtituloComercial(local, compraLiberada, mensagemDisponibilidade, localPageContent)
   const caixaDestaque = getCaixaDestaque(local, localPageContent)
   const imagemPrincipal = resolveMediaUrl(local.imagemPrincipalUrl)
-  const planoAtivo = planosOrdenados[Math.min(planoAtivoIndex, Math.max(planosOrdenados.length - 1, 0))] || null
+  const jornadaAtiva = jornadasDisponiveis.find(item => item.codigo === jornadaSelecionada) || null
+  const planoAtivo = planosExibidos[Math.min(planoAtivoIndex, Math.max(planosExibidos.length - 1, 0))] || null
   const destaquePlanoAtivo = planoAtivo ? getPlanoApresentacao(planoAtivo) : null
-  const planoAnterior = planoAtivoIndex > 0 ? planosOrdenados[planoAtivoIndex - 1] : null
-  const planoSeguinte = planoAtivoIndex < planosOrdenados.length - 1 ? planosOrdenados[planoAtivoIndex + 1] : null
+  const planoAnterior = planoAtivoIndex > 0 ? planosExibidos[planoAtivoIndex - 1] : null
+  const planoSeguinte = planoAtivoIndex < planosExibidos.length - 1 ? planosExibidos[planoAtivoIndex + 1] : null
   const usarIntroPlanosNoHero = compraLiberada && planosOrdenados.length > 0
   const tituloHero = usarIntroPlanosNoHero
     ? interpolateSiteText(localPageContent.secaoPlanosTitulo, localPageContext)
@@ -610,7 +668,7 @@ export default function LocalDetalhe() {
   const subtituloHero = usarIntroPlanosNoHero
     ? interpolateSiteText(localPageContent.secaoPlanosSubtitulo, localPageContext)
     : subtituloComercial
-  const resumoHero = usarIntroPlanosNoHero ? destaquePlanoAtivo?.resumo || '' : ''
+  const resumoHero = usarIntroPlanosNoHero ? jornadaAtiva?.resumo || destaquePlanoAtivo?.resumo || '' : ''
   const checkoutAcompanhamento = checkoutMonitor ? getCheckoutAcompanhamento(checkoutMonitor) : null
   const checkoutSituacao = checkoutMonitor
     ? formatSituacaoPedido(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
@@ -783,6 +841,24 @@ export default function LocalDetalhe() {
           </>
         )}
 
+        {compraLiberada && planosOrdenados.length > 0 && (
+          <>
+            <div className="page-title">Escolha o plano certo para o seu momento</div>
+            <p className="page-sub">
+              {jornadasDisponiveis.length > 1
+                ? 'Neste local, voce encontra planos para quem quer comecar do zero e para quem ja esta focado na reta final da prova.'
+                : `Neste local, os planos seguem a jornada ${jornadasDisponiveis[0]?.nome || 'principal'} para a sua preparacao.`}
+            </p>
+            <div className="local-offer-profiles">
+              {jornadasDisponiveis.map(jornada => (
+                <span key={jornada.codigo} className={`badge ${jornada.badgeClass}`}>
+                  {jornada.nome}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+
         {!compraLiberada ? (
           <div className="card">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
@@ -815,6 +891,41 @@ export default function LocalDetalhe() {
           <div className="local-offer-layout">
             <div className="plan-showcase">
               {resumoHero && <div className="local-plan-intro">{resumoHero}</div>}
+              {jornadasDisponiveis.length > 1 && (
+                <div className="plan-showcase-profile-picker">
+                  <div className="plan-showcase-profile-head">
+                    <div className="plan-showcase-profile-title">Escolha primeiro o seu momento</div>
+                    <div className="plan-showcase-profile-copy">
+                      Separe os planos entre quem quer comecar do zero e quem ja esta focado na reta final.
+                    </div>
+                  </div>
+
+                  <div className="plan-showcase-profile-rail" role="tablist" aria-label="Perfis de jornada">
+                    {jornadasDisponiveis.map(jornada => {
+                      const quantidadePlanos = planosOrdenados.filter(plano => getCodigoTrilhaPlano(plano) === jornada.codigo).length
+                      const estaAtiva = jornada.codigo === jornadaSelecionada
+
+                      return (
+                        <button
+                          key={jornada.codigo}
+                          type="button"
+                          className={`plan-showcase-profile-card ${estaAtiva ? 'is-active' : ''}`}
+                          onClick={() => setJornadaSelecionada(jornada.codigo)}
+                          aria-selected={estaAtiva}
+                        >
+                          <div className="plan-showcase-profile-top">
+                            <span className={`badge ${jornada.badgeClass}`}>{jornada.nome}</span>
+                            <span className="plan-showcase-profile-count">
+                              {quantidadePlanos} {quantidadePlanos === 1 ? 'plano' : 'planos'}
+                            </span>
+                          </div>
+                          <div className="plan-showcase-profile-summary">{jornada.resumo}</div>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
               <div
                 className="plan-showcase-stage"
                 onTouchStart={event => iniciarSwipePlanos(event.touches[0]?.clientX ?? 0)}
@@ -836,7 +947,7 @@ export default function LocalDetalhe() {
                   type="button"
                   className="plan-showcase-arrow plan-showcase-arrow--next"
                   onClick={irParaProximoPlano}
-                  disabled={planoAtivoIndex === planosOrdenados.length - 1}
+                  disabled={planoAtivoIndex === planosExibidos.length - 1}
                   aria-label="Ver próximo plano"
                 >
                   <span aria-hidden="true">→</span>
@@ -844,7 +955,7 @@ export default function LocalDetalhe() {
               </div>
 
               <div className="plan-showcase-dots" role="tablist" aria-label="Seleção de planos">
-                {planosOrdenados.map((plano, index) => (
+                {planosExibidos.map((plano, index) => (
                   <button
                     key={plano.id}
                     type="button"

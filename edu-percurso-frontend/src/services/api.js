@@ -103,6 +103,14 @@ export const grupoAcessoService = {
   excluir: id => api.delete(`/admin/grupos-acesso/${id}`),
 }
 
+export const trilhaService = {
+  listar: () => api.get('/trilhas').then(response => response.data),
+  listarAdmin: () => api.get('/admin/trilhas').then(response => response.data),
+  criar: data => api.post('/admin/trilhas', data).then(response => response.data),
+  atualizar: (id, data) => api.put(`/admin/trilhas/${id}`, data).then(response => response.data),
+  excluir: id => api.delete(`/admin/trilhas/${id}`),
+}
+
 export const progressoService = {
   meu: () => api.get('/progresso/meu').then(response => response.data),
   salvar: data => api.post('/progresso', data).then(response => response.data),
