@@ -4,10 +4,12 @@ import com.edupercurso.dto.PercursoDTO;
 import com.edupercurso.entity.Categoria;
 import com.edupercurso.entity.CategoriaGuiaBloco;
 import com.edupercurso.entity.CategoriaGuiaItem;
+import com.edupercurso.entity.GrupoAcesso;
 import com.edupercurso.entity.Percurso;
 import com.edupercurso.repository.CategoriaRepository;
 import com.edupercurso.repository.PercursoRepository;
 import com.edupercurso.service.AssinaturaService;
+import com.edupercurso.service.GrupoAcessoService;
 import com.edupercurso.service.MediaCleanupService;
 import com.edupercurso.service.PercursoService;
 import com.edupercurso.service.UsuarioLookupService;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +49,7 @@ public class CategoriaController {
     private final PercursoService percursoService;
     private final UsuarioLookupService usuarioLookupService;
     private final AssinaturaService assinaturaService;
+    private final GrupoAcessoService grupoAcessoService;
 
     @GetMapping
     public ResponseEntity<List<Categoria>> listar(
@@ -66,13 +70,18 @@ public class CategoriaController {
             return ResponseEntity.ok(List.of());
         }
 
+        Set<UUID> grupoAcessoIdsLiberados = new LinkedHashSet<>(
+                categoriaRepository.findGrupoAcessoIdsLiberadosPorUsuario(usuario.getId(), LocalDateTime.now())
+        );
+
         Set<UUID> categoriaIdsVisiveis = percursoService.listar(email, false, false, null, null, null).stream()
                 .map(PercursoDTO.Response::getCategoriaId)
                 .filter(java.util.Objects::nonNull)
                 .collect(java.util.stream.Collectors.toSet());
 
         return ResponseEntity.ok(categorias.stream()
-                .filter(categoria -> categoriaIdsVisiveis.contains(categoria.getId()) || possuiGuiaPublicado(categoria))
+                .filter(categoria -> categoriaIdsVisiveis.contains(categoria.getId())
+                        || guiaPublicadoAcessivel(categoria, grupoAcessoIdsLiberados))
                 .toList());
     }
 
@@ -80,13 +89,15 @@ public class CategoriaController {
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Categoria> criar(@Valid @RequestBody CategoriaRequest req) {
+        Categoria.FormatoExperiencia formato = resolverFormatoExperiencia(req.getFormatoExperiencia());
         Categoria categoria = Categoria.builder()
                 .nome(req.getNome())
                 .descricao(req.getDescricao())
                 .ordemExibicao(resolverOrdemExibicao(req.getOrdemExibicao()))
-                .formatoExperiencia(resolverFormatoExperiencia(req.getFormatoExperiencia()))
+                .formatoExperiencia(formato)
                 .build();
         aplicarGuiaBlocos(categoria, req.getGuiaBlocos());
+        categoria.substituirGruposAcesso(resolverGruposAcessoDoGuia(formato, req));
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(categoriaRepository.save(categoria));
     }
@@ -102,8 +113,10 @@ public class CategoriaController {
         categoria.setNome(req.getNome());
         categoria.setDescricao(req.getDescricao());
         categoria.setOrdemExibicao(resolverOrdemExibicao(req.getOrdemExibicao()));
-        categoria.setFormatoExperiencia(resolverFormatoExperiencia(req.getFormatoExperiencia()));
+        Categoria.FormatoExperiencia formato = resolverFormatoExperiencia(req.getFormatoExperiencia());
+        categoria.setFormatoExperiencia(formato);
         aplicarGuiaBlocos(categoria, req.getGuiaBlocos());
+        categoria.substituirGruposAcesso(resolverGruposAcessoDoGuia(formato, req));
 
         Categoria categoriaSalva = categoriaRepository.save(categoria);
         categoriaRepository.flush();
@@ -285,6 +298,47 @@ public class CategoriaController {
         return categoria.getGuiaBlocos() != null && !categoria.getGuiaBlocos().isEmpty();
     }
 
+    private boolean guiaPublicadoAcessivel(Categoria categoria, Set<UUID> grupoAcessoIdsLiberados) {
+        if (!possuiGuiaPublicado(categoria)) {
+            return false;
+        }
+
+        if (categoria.getGruposAcesso() == null || categoria.getGruposAcesso().isEmpty()) {
+            return false;
+        }
+
+        return categoria.getGruposAcesso().stream()
+                .map(GrupoAcesso::getId)
+                .anyMatch(grupoAcessoIdsLiberados::contains);
+    }
+
+    private List<GrupoAcesso> resolverGruposAcessoDoGuia(
+            Categoria.FormatoExperiencia formato,
+            CategoriaRequest req) {
+        if (formato == Categoria.FormatoExperiencia.AULAS) {
+            return List.of();
+        }
+
+        boolean possuiGuia = possuiBlocosGuiaPublicaveis(req.getGuiaBlocos());
+        if (!possuiGuia && (req.getGruposAcessoIds() == null || req.getGruposAcessoIds().isEmpty())) {
+            return List.of();
+        }
+
+        if (possuiGuia && (req.getGruposAcessoIds() == null || req.getGruposAcessoIds().isEmpty())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Selecione ao menos um grupo de acesso para liberar este guia."
+            );
+        }
+
+        return grupoAcessoService.buscarPorIds(req.getGruposAcessoIds());
+    }
+
+    private boolean possuiBlocosGuiaPublicaveis(List<GuiaBlocoRequest> blocos) {
+        return blocos != null && blocos.stream()
+                .anyMatch(bloco -> bloco.getTitulo() != null && !bloco.getTitulo().isBlank());
+    }
+
     private List<CategoriaGuiaItem> prepararItensVisuais(List<GuiaItemVisualRequest> itens) {
         if (itens == null || itens.isEmpty()) {
             return List.of();
@@ -308,6 +362,7 @@ public class CategoriaController {
         private String descricao;
         private Integer ordemExibicao;
         private String formatoExperiencia;
+        private List<UUID> gruposAcessoIds;
         private List<GuiaBlocoRequest> guiaBlocos;
     }
 
