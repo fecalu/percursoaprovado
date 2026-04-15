@@ -16,6 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +37,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/categorias")
 @RequiredArgsConstructor
+@Slf4j
 public class CategoriaController {
 
     private final CategoriaRepository categoriaRepository;
@@ -70,7 +72,7 @@ public class CategoriaController {
                 .collect(java.util.stream.Collectors.toSet());
 
         return ResponseEntity.ok(categorias.stream()
-                .filter(categoria -> categoriaIdsVisiveis.contains(categoria.getId()))
+                .filter(categoria -> categoriaIdsVisiveis.contains(categoria.getId()) || possuiGuiaPublicado(categoria))
                 .toList());
     }
 
@@ -139,6 +141,7 @@ public class CategoriaController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> excluir(@PathVariable UUID id) {
         Categoria categoria = categoriaRepository.findById(id)
@@ -260,7 +263,11 @@ public class CategoriaController {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                mediaCleanupService.excluirArquivosOrfaos(urlsParaLimpeza);
+                try {
+                    mediaCleanupService.excluirArquivosOrfaos(urlsParaLimpeza);
+                } catch (RuntimeException ex) {
+                    log.warn("Nao foi possivel limpar midias orfas do modulo apos commit.", ex);
+                }
             }
         });
     }
@@ -268,6 +275,14 @@ public class CategoriaController {
     private boolean ehAdmin(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+    }
+
+    private boolean possuiGuiaPublicado(Categoria categoria) {
+        if (categoria == null || categoria.getFormatoExperiencia() == Categoria.FormatoExperiencia.AULAS) {
+            return false;
+        }
+
+        return categoria.getGuiaBlocos() != null && !categoria.getGuiaBlocos().isEmpty();
     }
 
     private List<CategoriaGuiaItem> prepararItensVisuais(List<GuiaItemVisualRequest> itens) {
