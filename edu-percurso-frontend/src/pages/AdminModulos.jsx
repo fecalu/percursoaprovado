@@ -1,7 +1,35 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { categoriaService, percursoService } from '../services/api'
+import { categoriaService, percursoService, uploadService } from '../services/api'
 import { useToast } from '../hooks/useToast'
+import { resolveMediaUrl } from '../utils/media'
+
+const FORMATOS_MODULO = [
+  {
+    value: 'AULAS',
+    title: 'Aulas',
+    copy: 'Abre direto na lista de videos, como hoje.',
+  },
+  {
+    value: 'GUIA',
+    title: 'Guia pratico',
+    copy: 'Mostra blocos rapidos de orientacao no lugar das aulas.',
+  },
+  {
+    value: 'MISTO',
+    title: 'Misto',
+    copy: 'Mostra o guia primeiro e as aulas como complemento.',
+  },
+]
+
+const GUIA_ICONE_OPTIONS = [
+  { value: 'check', label: 'Checklist' },
+  { value: 'documento', label: 'Documento' },
+  { value: 'local', label: 'Local' },
+  { value: 'carro', label: 'Carro' },
+  { value: 'alerta', label: 'Atencao' },
+  { value: 'tempo', label: 'Horario' },
+]
 
 function getApiErrorMessage(error, fallback) {
   const data = error?.response?.data
@@ -32,7 +60,90 @@ function criarFormularioVazio(categorias = []) {
     nome: '',
     descricao: '',
     ordemExibicao: String(Math.max(0, proximaOrdem)),
+    formatoExperiencia: 'AULAS',
+    guiaBlocos: [],
   }
+}
+
+function criarBlocoGuiaVazio(total = 0) {
+  return {
+    titulo: '',
+    descricao: '',
+    textoDetalhado: '',
+    imagemUrl: '',
+    imagemLegenda: '',
+    icone: 'check',
+    ordemExibicao: String(total + 1),
+    itensVisuais: [],
+  }
+}
+
+function criarItemVisualGuiaVazio(total = 0) {
+  return {
+    titulo: '',
+    descricao: '',
+    imagemUrl: '',
+    imagemLegenda: '',
+    ordemExibicao: String(total + 1),
+  }
+}
+
+function normalizarItensVisuaisGuia(itens = []) {
+  return [...itens]
+    .sort((a, b) => (Number(a.ordemExibicao) || 0) - (Number(b.ordemExibicao) || 0))
+    .map((item, index) => ({
+      titulo: item.titulo || '',
+      descricao: item.descricao || '',
+      imagemUrl: item.imagemUrl || '',
+      imagemLegenda: item.imagemLegenda || '',
+      ordemExibicao: String(item.ordemExibicao ?? index + 1),
+    }))
+}
+
+function normalizarGuiaBlocos(blocos = []) {
+  return [...blocos]
+    .sort((a, b) => (Number(a.ordemExibicao) || 0) - (Number(b.ordemExibicao) || 0))
+    .map((bloco, index) => ({
+      titulo: bloco.titulo || '',
+      descricao: bloco.descricao || '',
+      textoDetalhado: bloco.textoDetalhado || '',
+      imagemUrl: bloco.imagemUrl || '',
+      imagemLegenda: bloco.imagemLegenda || '',
+      icone: bloco.icone || 'check',
+      ordemExibicao: String(bloco.ordemExibicao ?? index + 1),
+      itensVisuais: normalizarItensVisuaisGuia(bloco.itensVisuais || []),
+    }))
+}
+
+function prepararItensVisuaisGuiaPayload(itens = []) {
+  return itens
+    .map((item, index) => ({
+      titulo: item.titulo.trim(),
+      descricao: item.descricao.trim() || null,
+      imagemUrl: item.imagemUrl.trim() || null,
+      imagemLegenda: item.imagemLegenda.trim() || null,
+      ordemExibicao: Number(item.ordemExibicao) || index + 1,
+    }))
+    .filter(item => item.titulo)
+}
+
+function prepararGuiaBlocosPayload(blocos = []) {
+  return blocos
+    .map((bloco, index) => ({
+      titulo: bloco.titulo.trim(),
+      descricao: bloco.descricao.trim() || null,
+      textoDetalhado: bloco.textoDetalhado.trim() || null,
+      imagemUrl: bloco.imagemUrl.trim() || null,
+      imagemLegenda: bloco.imagemLegenda.trim() || null,
+      icone: bloco.icone || 'check',
+      ordemExibicao: Number(bloco.ordemExibicao) || index + 1,
+      itensVisuais: prepararItensVisuaisGuiaPayload(bloco.itensVisuais),
+    }))
+    .filter(bloco => bloco.titulo)
+}
+
+function moduloTemGuia(formato) {
+  return formato === 'GUIA' || formato === 'MISTO'
 }
 
 function formatarUsoModulo(totalAulas) {
@@ -50,6 +161,7 @@ export default function AdminModulos() {
   const [salvando, setSalvando] = useState(false)
   const [movendo, setMovendo] = useState(false)
   const [excluindo, setExcluindo] = useState(false)
+  const [uploadingGuiaField, setUploadingGuiaField] = useState('')
   const { show, ToastEl } = useToast()
 
   const categoriaEmEdicao = useMemo(
@@ -140,6 +252,8 @@ export default function AdminModulos() {
       nome: categoria.nome || '',
       descricao: categoria.descricao || '',
       ordemExibicao: String(categoria.ordemExibicao ?? 0),
+      formatoExperiencia: categoria.formatoExperiencia || 'AULAS',
+      guiaBlocos: normalizarGuiaBlocos(categoria.guiaBlocos || []),
     })
   }
 
@@ -164,6 +278,8 @@ export default function AdminModulos() {
         nome,
         descricao: form.descricao.trim() || null,
         ordemExibicao: Number(form.ordemExibicao) || 0,
+        formatoExperiencia: form.formatoExperiencia || 'AULAS',
+        guiaBlocos: moduloTemGuia(form.formatoExperiencia) ? prepararGuiaBlocosPayload(form.guiaBlocos) : [],
       }
 
       const resposta = edicaoId
@@ -234,6 +350,110 @@ export default function AdminModulos() {
     })
 
     navigate(`/admin/percursos?${search.toString()}`)
+  }
+
+  function atualizarBlocoGuia(index, campo, valor) {
+    setForm(current => ({
+      ...current,
+      guiaBlocos: current.guiaBlocos.map((bloco, blocoIndex) => (
+        blocoIndex === index ? { ...bloco, [campo]: valor } : bloco
+      )),
+    }))
+  }
+
+  function adicionarBlocoGuia() {
+    setForm(current => ({
+      ...current,
+      guiaBlocos: [...current.guiaBlocos, criarBlocoGuiaVazio(current.guiaBlocos.length)],
+    }))
+  }
+
+  function removerBlocoGuia(index) {
+    setForm(current => ({
+      ...current,
+      guiaBlocos: current.guiaBlocos.filter((_, blocoIndex) => blocoIndex !== index),
+    }))
+  }
+
+  function atualizarItemVisualGuia(blocoIndex, itemIndex, campo, valor) {
+    setForm(current => ({
+      ...current,
+      guiaBlocos: current.guiaBlocos.map((bloco, blocoAtualIndex) => (
+        blocoAtualIndex === blocoIndex
+          ? {
+              ...bloco,
+              itensVisuais: bloco.itensVisuais.map((item, itemAtualIndex) => (
+                itemAtualIndex === itemIndex ? { ...item, [campo]: valor } : item
+              )),
+            }
+          : bloco
+      )),
+    }))
+  }
+
+  function adicionarItemVisualGuia(blocoIndex) {
+    setForm(current => ({
+      ...current,
+      guiaBlocos: current.guiaBlocos.map((bloco, blocoAtualIndex) => (
+        blocoAtualIndex === blocoIndex
+          ? {
+              ...bloco,
+              itensVisuais: [...bloco.itensVisuais, criarItemVisualGuiaVazio(bloco.itensVisuais.length)],
+            }
+          : bloco
+      )),
+    }))
+  }
+
+  function removerItemVisualGuia(blocoIndex, itemIndex) {
+    setForm(current => ({
+      ...current,
+      guiaBlocos: current.guiaBlocos.map((bloco, blocoAtualIndex) => (
+        blocoAtualIndex === blocoIndex
+          ? {
+              ...bloco,
+              itensVisuais: bloco.itensVisuais.filter((_, itemAtualIndex) => itemAtualIndex !== itemIndex),
+            }
+          : bloco
+      )),
+    }))
+  }
+
+  async function handleBlocoGuiaImagemUpload(index, event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setUploadingGuiaField(`guia-imagem-${index}`)
+
+    try {
+      const resposta = await uploadService.enviarImagem(file)
+      atualizarBlocoGuia(index, 'imagemUrl', resposta.url || '')
+      show('Imagem do guia enviada com sucesso.')
+    } catch (error) {
+      show(getApiErrorMessage(error, 'Nao foi possivel enviar a imagem do guia.'), 'error')
+    } finally {
+      setUploadingGuiaField('')
+      event.target.value = ''
+    }
+  }
+
+  async function handleItemVisualGuiaImagemUpload(blocoIndex, itemIndex, event) {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const fieldKey = `guia-item-imagem-${blocoIndex}-${itemIndex}`
+    setUploadingGuiaField(fieldKey)
+
+    try {
+      const resposta = await uploadService.enviarImagem(file)
+      atualizarItemVisualGuia(blocoIndex, itemIndex, 'imagemUrl', resposta.url || '')
+      show('Imagem do item visual enviada com sucesso.')
+    } catch (error) {
+      show(getApiErrorMessage(error, 'Nao foi possivel enviar a imagem do item visual.'), 'error')
+    } finally {
+      setUploadingGuiaField('')
+      event.target.value = ''
+    }
   }
 
   return (
@@ -334,6 +554,293 @@ export default function AdminModulos() {
               <div className="form-group" />
             </div>
 
+            <div className="form-group">
+              <label className="form-label">Formato do modulo</label>
+              <div className="admin-modulos-format-grid">
+                {FORMATOS_MODULO.map(opcao => (
+                  <button
+                    key={opcao.value}
+                    type="button"
+                    className={`admin-modulos-format-option${form.formatoExperiencia === opcao.value ? ' is-active' : ''}`}
+                    onClick={() => setForm(current => ({
+                      ...current,
+                      formatoExperiencia: opcao.value,
+                      guiaBlocos: moduloTemGuia(opcao.value) && current.guiaBlocos.length === 0
+                        ? [criarBlocoGuiaVazio(0)]
+                        : current.guiaBlocos,
+                    }))}
+                  >
+                    <strong>{opcao.title}</strong>
+                    <span>{opcao.copy}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {moduloTemGuia(form.formatoExperiencia) ? (
+              <div className="admin-modulos-guide-editor">
+                <div className="admin-modulos-guide-head">
+                  <div>
+                    <div className="section-heading" style={{ fontSize: 17 }}>Guia pratico</div>
+                    <div className="section-copy">Crie passos curtos para o aluno consultar rapido dentro da Biblioteca.</div>
+                  </div>
+                  <button className="btn btn-ghost" type="button" onClick={adicionarBlocoGuia}>
+                    Adicionar bloco
+                  </button>
+                </div>
+
+                {form.guiaBlocos.length ? (
+                  <div className="admin-modulos-guide-list">
+                    {form.guiaBlocos.map((bloco, index) => (
+                      <div key={index} className="admin-modulos-guide-block">
+                        <div className="admin-modulos-guide-block-head">
+                          <span>Bloco {index + 1}</span>
+                          <button className="btn btn-ghost" type="button" onClick={() => removerBlocoGuia(index)}>
+                            Remover
+                          </button>
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Titulo do bloco</label>
+                          <input
+                            className="form-input"
+                            value={bloco.titulo}
+                            onChange={event => atualizarBlocoGuia(index, 'titulo', event.target.value)}
+                            placeholder="Ex.: Antes de sair de casa"
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Descricao curta</label>
+                          <textarea
+                            className="form-textarea admin-modulos-guide-textarea"
+                            value={bloco.descricao}
+                            onChange={event => atualizarBlocoGuia(index, 'descricao', event.target.value)}
+                            placeholder="Explique de forma objetiva o que o aluno precisa fazer."
+                          />
+                        </div>
+
+                        <div className="form-group">
+                          <label className="form-label">Texto introdutorio do passo</label>
+                          <textarea
+                            className="form-textarea admin-modulos-guide-detail-textarea"
+                            value={bloco.textoDetalhado}
+                            onChange={event => atualizarBlocoGuia(index, 'textoDetalhado', event.target.value)}
+                            placeholder="Opcional. Esse texto aparece no topo do modal antes do checklist visual."
+                          />
+                        </div>
+
+                        <div className="admin-modulos-guide-media-grid">
+                          <div className="form-group">
+                            <label className="form-label">Imagem principal do passo</label>
+                            <div className="question-media-stack admin-modulos-guide-upload-stack">
+                              <input
+                                className="form-input"
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                onChange={event => handleBlocoGuiaImagemUpload(index, event)}
+                                disabled={uploadingGuiaField === `guia-imagem-${index}`}
+                              />
+                              <div className="mini-copy">
+                                {uploadingGuiaField === `guia-imagem-${index}`
+                                  ? 'Enviando imagem...'
+                                  : 'Opcional. Se este passo nao tiver checklist visual, essa imagem vira a ilustracao principal do modal.'}
+                              </div>
+                              {bloco.imagemUrl ? (
+                                <div className="question-media-preview-wrap">
+                                  <img
+                                    src={resolveMediaUrl(bloco.imagemUrl)}
+                                    alt={bloco.imagemLegenda || bloco.titulo || `Preview do bloco ${index + 1}`}
+                                    className="question-media-preview question-media-preview--option admin-modulos-guide-image-preview"
+                                  />
+                                  <button
+                                    className="btn btn-ghost"
+                                    type="button"
+                                    onClick={() => atualizarBlocoGuia(index, 'imagemUrl', '')}
+                                  >
+                                    Remover imagem
+                                  </button>
+                                </div>
+                              ) : null}
+                            </div>
+                          </div>
+
+                          <div className="form-group">
+                            <label className="form-label">Imagem principal (URL)</label>
+                            <input
+                              className="form-input"
+                              value={bloco.imagemUrl}
+                              onChange={event => atualizarBlocoGuia(index, 'imagemUrl', event.target.value)}
+                              placeholder="https://..."
+                            />
+                            <div className="mini-copy">Aceita `/media/...` ou uma URL externa publica.</div>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Legenda da imagem</label>
+                            <input
+                              className="form-input"
+                              value={bloco.imagemLegenda}
+                              onChange={event => atualizarBlocoGuia(index, 'imagemLegenda', event.target.value)}
+                              placeholder="Ex.: Exemplo de documento aceito"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="admin-modulos-guide-items-editor">
+                          <div className="admin-modulos-guide-items-head">
+                            <div>
+                              <div className="section-heading" style={{ fontSize: 15 }}>Checklist visual</div>
+                              <div className="section-copy">Monte varios itens pequenos com imagem e texto, como um passo a passo visual.</div>
+                            </div>
+                            <button className="btn btn-ghost" type="button" onClick={() => adicionarItemVisualGuia(index)}>
+                              Adicionar item visual
+                            </button>
+                          </div>
+
+                          {bloco.itensVisuais.length ? (
+                            <div className="admin-modulos-guide-items-list">
+                              {bloco.itensVisuais.map((item, itemIndex) => (
+                                <div key={`${index}-${itemIndex}`} className="admin-modulos-guide-item-card">
+                                  <div className="admin-modulos-guide-item-head">
+                                    <span>Item visual {itemIndex + 1}</span>
+                                    <button className="btn btn-ghost" type="button" onClick={() => removerItemVisualGuia(index, itemIndex)}>
+                                      Remover item
+                                    </button>
+                                  </div>
+
+                                  <div className="form-row">
+                                    <div className="form-group">
+                                      <label className="form-label">Titulo do item</label>
+                                      <input
+                                        className="form-input"
+                                        value={item.titulo}
+                                        onChange={event => atualizarItemVisualGuia(index, itemIndex, 'titulo', event.target.value)}
+                                        placeholder="Ex.: Identidade original"
+                                      />
+                                    </div>
+                                    <div className="form-group">
+                                      <label className="form-label">Ordem</label>
+                                      <input
+                                        className="form-input"
+                                        type="number"
+                                        min="0"
+                                        value={item.ordemExibicao}
+                                        onChange={event => atualizarItemVisualGuia(index, itemIndex, 'ordemExibicao', event.target.value)}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="form-group">
+                                    <label className="form-label">Texto curto</label>
+                                    <textarea
+                                      className="form-textarea admin-modulos-guide-item-textarea"
+                                      value={item.descricao}
+                                      onChange={event => atualizarItemVisualGuia(index, itemIndex, 'descricao', event.target.value)}
+                                      placeholder="Ex.: RG/CNH original com foto e em bom estado."
+                                    />
+                                  </div>
+
+                                  <div className="admin-modulos-guide-media-grid admin-modulos-guide-media-grid--items">
+                                    <div className="form-group">
+                                      <label className="form-label">Upload da imagem do item</label>
+                                      <div className="question-media-stack admin-modulos-guide-upload-stack">
+                                        <input
+                                          className="form-input"
+                                          type="file"
+                                          accept="image/png,image/jpeg,image/webp"
+                                          onChange={event => handleItemVisualGuiaImagemUpload(index, itemIndex, event)}
+                                          disabled={uploadingGuiaField === `guia-item-imagem-${index}-${itemIndex}`}
+                                        />
+                                        <div className="mini-copy">
+                                          {uploadingGuiaField === `guia-item-imagem-${index}-${itemIndex}`
+                                            ? 'Enviando imagem...'
+                                            : 'O upload preenche a URL automaticamente. Se preferir, cole um link manual.'}
+                                        </div>
+                                        {item.imagemUrl ? (
+                                          <div className="question-media-preview-wrap">
+                                            <img
+                                              src={resolveMediaUrl(item.imagemUrl)}
+                                              alt={item.imagemLegenda || item.titulo || `Preview do item ${itemIndex + 1}`}
+                                              className="question-media-preview question-media-preview--option admin-modulos-guide-image-preview"
+                                            />
+                                            <button
+                                              className="btn btn-ghost"
+                                              type="button"
+                                              onClick={() => atualizarItemVisualGuia(index, itemIndex, 'imagemUrl', '')}
+                                            >
+                                              Remover imagem
+                                            </button>
+                                          </div>
+                                        ) : null}
+                                      </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label className="form-label">Imagem do item (URL)</label>
+                                      <input
+                                        className="form-input"
+                                        value={item.imagemUrl}
+                                        onChange={event => atualizarItemVisualGuia(index, itemIndex, 'imagemUrl', event.target.value)}
+                                        placeholder="https://..."
+                                      />
+                                      <div className="mini-copy">Aceita `/media/...` ou uma URL publica.</div>
+                                    </div>
+
+                                    <div className="form-group">
+                                      <label className="form-label">Legenda da imagem</label>
+                                      <input
+                                        className="form-input"
+                                        value={item.imagemLegenda}
+                                        onChange={event => atualizarItemVisualGuia(index, itemIndex, 'imagemLegenda', event.target.value)}
+                                        placeholder="Ex.: Documento valido e legivel"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="admin-modulos-guide-empty">
+                              Nenhum item visual criado ainda. Use essa area para montar checklists com varias imagens pequenas dentro do modal.
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label className="form-label">Tipo visual</label>
+                            <select
+                              className="form-select"
+                              value={bloco.icone}
+                              onChange={event => atualizarBlocoGuia(index, 'icone', event.target.value)}
+                            >
+                              {GUIA_ICONE_OPTIONS.map(opcao => (
+                                <option key={opcao.value} value={opcao.value}>{opcao.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Ordem</label>
+                            <input
+                              className="form-input"
+                              type="number"
+                              min="0"
+                              value={bloco.ordemExibicao}
+                              onChange={event => atualizarBlocoGuia(index, 'ordemExibicao', event.target.value)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="admin-modulos-guide-empty">
+                    Nenhum bloco criado ainda. Use "Adicionar bloco" para montar o guia deste modulo.
+                  </div>
+                )}
+              </div>
+            ) : null}
+
             <div className="admin-inline-note admin-modulos-preview">
               <strong>Prévia de uso:</strong>
               <span>Biblioteca &gt; Módulos gerais &gt; {form.nome.trim() || 'Nome do módulo'}</span>
@@ -373,7 +880,7 @@ export default function AdminModulos() {
                       className="btn btn-ghost"
                       type="button"
                       onClick={moverAulasDoModulo}
-                      disabled={!categoriaDestinoId || movendo || salvando || excluindo}
+                      disabled={!categoriaDestinoId || movendo || salvando || excluindo || Boolean(uploadingGuiaField)}
                     >
                       {movendo ? 'Movendo...' : `Mover ${categoriaEmEdicao.totalAulas} aula(s)`}
                     </button>
@@ -383,7 +890,7 @@ export default function AdminModulos() {
             ) : null}
 
             <div className="form-actions">
-              <button className="btn btn-primary" type="submit" disabled={salvando || movendo || excluindo}>
+              <button className="btn btn-primary" type="submit" disabled={salvando || movendo || excluindo || Boolean(uploadingGuiaField)}>
                 {salvando ? 'Salvando...' : edicaoId ? 'Salvar alterações' : 'Criar módulo'}
               </button>
               <button className="btn btn-ghost" type="button" onClick={() => resetar()}>
@@ -403,7 +910,7 @@ export default function AdminModulos() {
                   className="btn btn-danger"
                   type="button"
                   onClick={excluirModulo}
-                  disabled={excluindo || salvando || movendo}
+                  disabled={excluindo || salvando || movendo || Boolean(uploadingGuiaField)}
                 >
                   {excluindo ? 'Excluindo...' : 'Excluir módulo'}
                 </button>

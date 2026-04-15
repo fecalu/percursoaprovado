@@ -98,6 +98,24 @@ public class StorageService {
         return mediaRoot.toUri().toString();
     }
 
+    public boolean isManagedMediaUrl(String url) {
+        return StringUtils.hasText(url) && url.trim().startsWith("/media/");
+    }
+
+    public void excluirArquivoPorUrl(String url) {
+        if (!isManagedMediaUrl(url)) {
+            return;
+        }
+
+        Path destino = resolverCaminhoDoArquivo(url.trim());
+
+        try {
+            Files.deleteIfExists(destino);
+        } catch (IOException ex) {
+            throw new IllegalStateException("Nao foi possivel remover o arquivo de midia.", ex);
+        }
+    }
+
     private void validarImagem(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Selecione uma imagem para enviar.");
@@ -174,6 +192,17 @@ public class StorageService {
             return originalFilename.substring(originalFilename.lastIndexOf('.')).toLowerCase(Locale.ROOT);
         }
         return null;
+    }
+
+    private Path resolverCaminhoDoArquivo(String url) {
+        String relativePath = url.substring("/media/".length());
+        Path destino = mediaRoot.resolve(relativePath).normalize();
+
+        if (!destino.startsWith(mediaRoot)) {
+            throw new IllegalArgumentException("URL de midia invalida.");
+        }
+
+        return destino;
     }
 
     public record StoredFile(String fileName, String url, String contentType, long size) {

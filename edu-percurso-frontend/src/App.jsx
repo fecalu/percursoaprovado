@@ -17,6 +17,7 @@ import ResetPassword from './pages/ResetPassword'
 import PainelAluno from './pages/PainelAluno'
 import PerfilAluno from './pages/PerfilAluno'
 import Biblioteca from './pages/Biblioteca'
+import BibliotecaGuia from './pages/BibliotecaGuia'
 import SimuladoTeorico from './pages/SimuladoTeorico'
 import Player from './pages/Player'
 import MeusAcessos from './pages/MeusAcessos'
@@ -58,6 +59,7 @@ export default function App() {
 
             <Route path="/painel" element={<PrivateRoute><PainelAluno /></PrivateRoute>} />
             <Route path="/biblioteca" element={<PrivateRoute><Biblioteca /></PrivateRoute>} />
+            <Route path="/biblioteca/modulos/:moduloId/guia" element={<PrivateRoute><BibliotecaGuia /></PrivateRoute>} />
             <Route path="/simulado" element={<PrivateRoute><SimuladoTeorico /></PrivateRoute>} />
             <Route path="/percursos" element={<Navigate to="/biblioteca" replace />} />
             <Route path="/conteudos/:id" element={<PrivateRoute><Player /></PrivateRoute>} />
