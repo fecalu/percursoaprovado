@@ -1,12 +1,13 @@
 import axios from 'axios'
 import { buildReturnTo } from '../utils/authRedirects'
+import { safeLocalStorageGetItem, safeLocalStorageRemoveItem } from '../utils/browserStorage'
 
 const api = axios.create({ baseURL: '/api' })
 
 api.interceptors.request.use(config => {
   const url = config.url || ''
   const isPublicAuthRoute = url.startsWith('/auth/')
-  const token = localStorage.getItem('token')
+  const token = safeLocalStorageGetItem('token')
   if (token && !isPublicAuthRoute) config.headers.Authorization = `Bearer ${token}`
   return config
 })
@@ -15,8 +16,8 @@ api.interceptors.response.use(
   response => response,
   error => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
+      safeLocalStorageRemoveItem('token')
+      safeLocalStorageRemoveItem('user')
 
       const pathname = window.location.pathname || '/'
       const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].includes(pathname)

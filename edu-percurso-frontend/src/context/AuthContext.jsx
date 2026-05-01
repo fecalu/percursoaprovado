@@ -1,13 +1,22 @@
 import { createContext, useContext, useState, useCallback } from 'react'
 import { authService } from '../services/api'
+import { safeLocalStorageGetItem, safeLocalStorageRemoveItem, safeLocalStorageSetItem } from '../utils/browserStorage'
 
 const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem('user')
+function loadStoredUser() {
+  try {
+    const stored = safeLocalStorageGetItem('user')
     return stored ? JSON.parse(stored) : null
-  })
+  } catch {
+    safeLocalStorageRemoveItem('token')
+    safeLocalStorageRemoveItem('user')
+    return null
+  }
+}
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(loadStoredUser)
 
   const persistAuth = useCallback(data => {
     const userData = {
@@ -15,8 +24,8 @@ export function AuthProvider({ children }) {
       role: data.role,
       provider: data.provider || 'LOCAL',
     }
-    localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(userData))
+    safeLocalStorageSetItem('token', data.token)
+    safeLocalStorageSetItem('user', JSON.stringify(userData))
     setUser(userData)
   }, [])
 
@@ -39,8 +48,8 @@ export function AuthProvider({ children }) {
   }, [persistAuth])
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    safeLocalStorageRemoveItem('token')
+    safeLocalStorageRemoveItem('user')
     setUser(null)
   }, [])
 

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { safeLocalStorageGetItem, safeLocalStorageSetItem } from '../utils/browserStorage'
 
 const STORAGE_KEY = 'edu-percurso-theme'
 
@@ -12,7 +13,7 @@ const ThemeContext = createContext({
 function getPreferredTheme() {
   if (typeof window === 'undefined') return 'dark'
 
-  const storedTheme = window.localStorage.getItem(STORAGE_KEY)
+  const storedTheme = safeLocalStorageGetItem(STORAGE_KEY)
   if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme
 
   return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
@@ -24,7 +25,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     document.documentElement.dataset.theme = theme
     document.documentElement.style.colorScheme = theme
-    window.localStorage.setItem(STORAGE_KEY, theme)
+    safeLocalStorageSetItem(STORAGE_KEY, theme)
   }, [theme])
 
   const value = useMemo(() => ({

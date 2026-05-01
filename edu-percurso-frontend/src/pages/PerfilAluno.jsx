@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { safeLocalStorageGetItem } from '../utils/browserStorage'
 
 const EMAIL_SUPORTE = 'suporte@percursoaprovado.com.br'
 
@@ -24,7 +25,7 @@ export default function PerfilAluno() {
   const { user } = useAuth()
 
   const email = useMemo(() => {
-    const token = localStorage.getItem('token')
+    const token = safeLocalStorageGetItem('token')
     return decodeJwtPayload(token)?.sub || ''
   }, [])
 

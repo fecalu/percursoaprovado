@@ -1,10 +1,17 @@
+import {
+  canUseLocalStorage,
+  safeLocalStorageGetItem,
+  safeLocalStorageRemoveItem,
+  safeLocalStorageSetItem,
+} from './browserStorage'
+
 const CHECKOUT_STORAGE_KEY = 'checkout_em_andamento'
 const CHECKOUT_EVENT_KEY = 'checkout_status_event'
 const CHECKOUT_CHANNEL_NAME = 'checkout-status'
 const CHECKOUT_MAX_AGE_MS = 1000 * 60 * 60 * 12
 
 function canUseBrowserStorage() {
-  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+  return canUseLocalStorage()
 }
 
 function parsePayload(rawValue) {
@@ -75,7 +82,7 @@ export function mergeCheckoutMonitor(currentMonitor, patch = {}) {
 export function loadCheckoutMonitor() {
   if (!canUseBrowserStorage()) return null
 
-  const monitor = parsePayload(window.localStorage.getItem(CHECKOUT_STORAGE_KEY))
+  const monitor = parsePayload(safeLocalStorageGetItem(CHECKOUT_STORAGE_KEY))
   if (!monitor) return null
 
   if (isExpired(monitor)) {
@@ -88,12 +95,12 @@ export function loadCheckoutMonitor() {
 
 export function saveCheckoutMonitor(monitor) {
   if (!canUseBrowserStorage() || !monitor) return
-  window.localStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(monitor))
+  safeLocalStorageSetItem(CHECKOUT_STORAGE_KEY, JSON.stringify(monitor))
 }
 
 export function clearCheckoutMonitor() {
   if (!canUseBrowserStorage()) return
-  window.localStorage.removeItem(CHECKOUT_STORAGE_KEY)
+  safeLocalStorageRemoveItem(CHECKOUT_STORAGE_KEY)
 }
 
 export function notifyCheckoutMonitor(message) {
@@ -110,8 +117,8 @@ export function notifyCheckoutMonitor(message) {
     channel.close()
   }
 
-  window.localStorage.setItem(CHECKOUT_EVENT_KEY, JSON.stringify(payload))
-  window.localStorage.removeItem(CHECKOUT_EVENT_KEY)
+  safeLocalStorageSetItem(CHECKOUT_EVENT_KEY, JSON.stringify(payload))
+  safeLocalStorageRemoveItem(CHECKOUT_EVENT_KEY)
 }
 
 export function subscribeCheckoutMonitor(listener) {
