@@ -14688,6 +14688,20 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
   text-decoration: underline;
 }
 
+.player-duvidas-link-action--toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+}
+
+.player-duvidas-link-chevron {
+  transition: transform 0.18s ease;
+}
+
+.player-duvidas-link-action--toggle.is-open .player-duvidas-link-chevron {
+  transform: rotate(180deg);
+}
+
 .player-duvidas-compose-collapsed,
 .player-duvidas-time-card,
 .player-duvida-resposta {

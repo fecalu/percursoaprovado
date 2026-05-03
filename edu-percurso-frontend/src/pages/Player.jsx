@@ -32,6 +32,12 @@ function parseTimestampInput(valor) {
   return Math.max(0, (minutos * 60) + Math.min(segundos, 59))
 }
 
+function formatarTimestampInputFixo(valor) {
+  const digits = String(valor || '').replace(/\D/g, '').slice(0, 4)
+  const padded = digits.padStart(4, '0')
+  return `${padded.slice(0, 2)}:${padded.slice(2)}`
+}
+
 function clampPercentual(segundos, duracaoSegundos) {
   if (!duracaoSegundos || duracaoSegundos <= 0) return 0
   return Math.max(0, Math.min(100, (Number(segundos || 0) / duracaoSegundos) * 100))
@@ -307,7 +313,7 @@ export default function Player() {
 
   useEffect(() => {
     if (!duvidaTempoEditando) {
-      setDuvidaTempoTexto(formatarTimestamp(duvidaForm.timestampSegundos))
+      setDuvidaTempoTexto(formatarTimestampInputFixo(formatarTimestamp(duvidaForm.timestampSegundos)))
     }
   }, [duvidaForm.timestampSegundos, duvidaTempoEditando])
 
@@ -646,7 +652,7 @@ export default function Player() {
       ...current,
       timestampSegundos,
     }))
-    setDuvidaTempoTexto(formatarTimestamp(timestampSegundos))
+    setDuvidaTempoTexto(formatarTimestampInputFixo(formatarTimestamp(timestampSegundos)))
   }
 
   async function enviarDuvida(event) {
@@ -1697,11 +1703,23 @@ export default function Player() {
                     </button>
                     {item.respostaOficial ? (
                       <button
-                        className="player-duvidas-link-action"
+                        className={`player-duvidas-link-action player-duvidas-link-action--toggle${duvidasRespostaAbertas[item.id] ? ' is-open' : ''}`}
                         type="button"
                         onClick={() => setDuvidasRespostaAbertas(current => ({ ...current, [item.id]: !current[item.id] }))}
                       >
-                        {duvidasRespostaAbertas[item.id] ? 'Ocultar resposta' : 'Ver resposta'}
+                        <span>{duvidasRespostaAbertas[item.id] ? 'Ocultar resposta' : 'Ver resposta'}</span>
+                        <svg
+                          className="player-duvidas-link-chevron"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 20 20"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          aria-hidden="true"
+                        >
+                          <path d="M5 7l5 6 5-6" />
+                        </svg>
                       </button>
                     ) : null}
                     {item.quantidadeApoios > 0 ? (
@@ -1775,21 +1793,24 @@ export default function Player() {
               <input
                 className="player-duvidas-time-input"
                 type="text"
-                inputMode="text"
+                inputMode="numeric"
                 value={duvidaTempoTexto}
-                onFocus={() => setDuvidaTempoEditando(true)}
+                onFocus={event => {
+                  setDuvidaTempoEditando(true)
+                  event.currentTarget.select()
+                }}
                 onChange={event => {
                   const bruto = String(event.target.value || '')
-                  const saneado = bruto.replace(/[^\d:]/g, '').slice(0, 5)
-                  setDuvidaTempoTexto(saneado)
+                  const formatado = formatarTimestampInputFixo(bruto)
+                  setDuvidaTempoTexto(formatado)
                   setDuvidaForm(current => ({
                     ...current,
-                    timestampSegundos: parseTimestampInput(saneado),
+                    timestampSegundos: parseTimestampInput(formatado),
                   }))
                 }}
                 onBlur={() => {
                   setDuvidaTempoEditando(false)
-                  setDuvidaTempoTexto(formatarTimestamp(parseTimestampInput(duvidaTempoTexto)))
+                  setDuvidaTempoTexto(formatarTimestampInputFixo(duvidaTempoTexto))
                 }}
               />
               <div className="mini-copy">Voce pode ajustar o minuto aqui.</div>
