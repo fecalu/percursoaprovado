@@ -14657,6 +14657,11 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 
 .player-duvidas-shell {
   display: grid;
+  gap: 0.9rem;
+}
+
+.player-duvidas-panel {
+  display: grid;
   gap: 1rem;
 }
 

@@ -233,6 +233,7 @@ export default function Player() {
   const [processandoApoioId, setProcessandoApoioId] = useState('')
   const [formDuvidaAberto, setFormDuvidaAberto] = useState(false)
   const [visaoDuvidas, setVisaoDuvidas] = useState('trecho')
+  const [duvidasAbertas, setDuvidasAbertas] = useState(false)
   const [buscaDuvidas, setBuscaDuvidas] = useState('')
   const [limiteDuvidasVisiveis, setLimiteDuvidasVisiveis] = useState(4)
 
@@ -680,6 +681,7 @@ export default function Player() {
   function abrirCriacaoDuvida(segundos = currentTimeRef.current) {
     sincronizarTempoDuvida(segundos)
     pausarVideo()
+    setDuvidasAbertas(true)
     setFormDuvidaAberto(true)
   }
 
@@ -1844,17 +1846,46 @@ export default function Player() {
       : buscaDuvidasNormalizada
         ? 'Experimente buscar pelo trecho, pelo problema ou pela resposta esperada.'
         : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
+    const resumoDuvidas = duvidas.length
+      ? `${totalRelacionadas} neste trecho • ${duvidas.length} publicadas`
+      : 'Abra para consultar respostas ou registrar uma nova duvida'
 
     return (
       <div className="card player-duvidas-shell" style={{ marginTop: '1rem' }}>
-        <div className="player-duvidas-hero">
-          <div className="player-duvidas-hero-copy">
-            <div className="player-duvidas-eyebrow">Ajuda colaborativa do percurso</div>
-            <div className="section-heading">Duvidas por trecho</div>
-            <div className="section-copy">
-              Marque o ponto exato do video em que voce travou. As respostas publicadas ajudam os proximos alunos no mesmo trecho.
+        <button
+          type="button"
+          className={`player-module-toggle player-duvidas-toggle${duvidasAbertas ? ' is-open' : ''}`}
+          onClick={() => setDuvidasAbertas(current => !current)}
+          aria-expanded={duvidasAbertas}
+        >
+          <div className="player-module-toggle-main">
+            <div className="player-module-list-title-row">
+              <div className="player-module-list-title">Duvidas por trecho</div>
+              <span className="player-module-list-count">{duvidas.length}</span>
             </div>
-            <div className="player-duvidas-hero-actions">
+            <div className="player-module-toggle-summary">
+              Trecho atual {formatarTimestamp(trechoSelecionadoDuvida)} • {resumoDuvidas}
+            </div>
+          </div>
+          <div className="player-module-toggle-side">
+            <span className="player-module-toggle-label">{duvidasAbertas ? 'Ocultar' : 'Ver duvidas'}</span>
+            <svg
+              className="player-module-toggle-chevron"
+              width="18"
+              height="18"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M5 7l5 6 5-6" />
+            </svg>
+          </div>
+        </button>
+
+        {duvidasAbertas ? (
+          <div className="player-duvidas-panel">
+            <div className="player-duvidas-toolbar">
               <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
                 Tive uma duvida aqui
               </button>
@@ -1869,105 +1900,67 @@ export default function Player() {
                 Ver trecho atual
               </button>
             </div>
-          </div>
-          <div className="player-duvidas-hero-stats">
-            <div className="player-duvidas-stat">
-              <span className="player-duvidas-stat-label">Trecho atual</span>
-              <strong>{formatarTimestamp(trechoSelecionadoDuvida)}</strong>
-            </div>
-            <div className="player-duvidas-stat">
-              <span className="player-duvidas-stat-label">Relacionadas</span>
-              <strong>{totalRelacionadas}</strong>
-            </div>
-            <div className="player-duvidas-stat">
-              <span className="player-duvidas-stat-label">Respondidas</span>
-              <strong>{totalRespondidas}</strong>
-            </div>
-            <div className="player-duvidas-stat">
-              <span className="player-duvidas-stat-label">Com apoio</span>
-              <strong>{totalComApoio}</strong>
-            </div>
-          </div>
-        </div>
 
-        <div className="player-duvidas-onboarding">
-          <div className="player-duvidas-onboarding-step">
-            <span>1</span>
-            Pare no trecho exato
-          </div>
-          <div className="player-duvidas-onboarding-step">
-            <span>2</span>
-            Veja se ja existe resposta
-          </div>
-          <div className="player-duvidas-onboarding-step">
-            <span>3</span>
-            Registre sua duvida se precisar
-          </div>
-        </div>
+            {renderFormularioDuvida()}
 
-        {renderFormularioDuvida()}
+            {duvidasLoading ? (
+              <div className="spinner" style={{ marginTop: '1rem' }} />
+            ) : (
+              <>
+                <div className="player-duvidas-tabs">
+                  <button
+                    type="button"
+                    className={`player-duvidas-tab${visaoDuvidas === 'trecho' ? ' is-active' : ''}`}
+                    onClick={() => setVisaoDuvidas('trecho')}
+                  >
+                    Neste trecho
+                    <span>{totalRelacionadas}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`player-duvidas-tab${visaoDuvidas === 'todas' ? ' is-active' : ''}`}
+                    onClick={() => setVisaoDuvidas('todas')}
+                  >
+                    Todas do percurso
+                    <span>{duvidas.length}</span>
+                  </button>
+                </div>
 
-        {duvidasLoading ? (
-          <div className="spinner" style={{ marginTop: '1rem' }} />
-        ) : (
-          <>
-            <div className="player-duvidas-tabs">
-              <button
-                type="button"
-                className={`player-duvidas-tab${visaoDuvidas === 'trecho' ? ' is-active' : ''}`}
-                onClick={() => setVisaoDuvidas('trecho')}
-              >
-                Neste trecho
-                <span>{totalRelacionadas}</span>
-              </button>
-              <button
-                type="button"
-                className={`player-duvidas-tab${visaoDuvidas === 'todas' ? ' is-active' : ''}`}
-                onClick={() => setVisaoDuvidas('todas')}
-              >
-                Todas do percurso
-                <span>{duvidas.length}</span>
-              </button>
-            </div>
-
-            <div className="player-duvidas-toolbar">
-              <div className="player-duvidas-search">
-                <input
-                  className="form-input"
-                  type="text"
-                  value={buscaDuvidas}
-                  onChange={event => setBuscaDuvidas(event.target.value)}
-                  placeholder={visaoDuvidas === 'trecho' ? 'Buscar neste trecho' : 'Buscar neste percurso'}
-                />
-              </div>
-              <div className="mini-copy player-duvidas-toolbar-copy">
-                {visaoDuvidas === 'trecho'
-                  ? 'Mostrando o que ja foi publicado perto do ponto em que voce esta assistindo.'
-                  : 'Use a busca para encontrar rapidamente uma explicacao ja respondida.'}
-              </div>
-            </div>
-
-            {isPrimeiraDuvida ? (
-              <div className="player-duvidas-first-run">
-                <div>
-                  <div className="player-duvidas-first-run-title">Seja a primeira pessoa a registrar uma duvida neste percurso</div>
-                  <div className="mini-copy">
-                    Quanto mais contextualizada a pergunta, mais facil fica para o professor responder e para os proximos alunos aproveitarem.
+                <div className="player-duvidas-toolbar">
+                  <div className="player-duvidas-search">
+                    <input
+                      className="form-input"
+                      type="text"
+                      value={buscaDuvidas}
+                      onChange={event => setBuscaDuvidas(event.target.value)}
+                      placeholder={visaoDuvidas === 'trecho' ? 'Buscar neste trecho' : 'Buscar neste percurso'}
+                    />
                   </div>
                 </div>
-                <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
-                  Registrar primeira duvida
-                </button>
-              </div>
-            ) : null}
 
-            {renderDuvidasLista(listaAtiva, {
-              titulo: tituloLista,
-              emptyTitle,
-              emptyCopy,
-            })}
-          </>
-        )}
+                {isPrimeiraDuvida ? (
+                  <div className="player-duvidas-first-run">
+                    <div>
+                      <div className="player-duvidas-first-run-title">Ainda nao ha duvidas publicadas neste percurso</div>
+                      <div className="mini-copy">
+                        Se voce travou nesse ponto, pode registrar a primeira pergunta para a equipe responder depois.
+                      </div>
+                    </div>
+                    <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
+                      Registrar primeira duvida
+                    </button>
+                  </div>
+                ) : null}
+
+                {renderDuvidasLista(listaAtiva, {
+                  titulo: tituloLista,
+                  emptyTitle,
+                  emptyCopy,
+                })}
+              </>
+            )}
+          </div>
+        ) : null}
       </div>
     )
   }
