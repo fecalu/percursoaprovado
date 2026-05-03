@@ -1657,88 +1657,67 @@ export default function Player() {
         ) : (
           <div className="player-duvidas-list" style={{ display: 'grid', gap: '0.6rem' }}>
             {listaVisivel.map(item => (
-              <article key={item.id} className="student-filter-card player-duvida-item" style={{ padding: '0.8rem' }}>
-                <div className="section-title-row player-duvida-item-head" style={{ marginBottom: '0.55rem', gap: 10 }}>
-                  <div>
-                    <div className="player-duvida-item-topline">
-                      <span className="player-duvida-time-chip">{formatarTimestamp(item.timestampSegundos)}</span>
-                      {item.quantidadeApoios > 0 ? (
-                        <span className="player-duvida-inline-chip">
-                          {item.quantidadeApoios} {item.quantidadeApoios === 1 ? 'apoio' : 'apoios'}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="table-name player-duvida-item-title">{item.titulo}</div>
-                    <div className="mini-copy">
-                      {formatarTimestamp(item.timestampSegundos)} • {item.autorNomeAbreviado || item.autorNome} • {formatDataHoraCurta(item.publicadaEm || item.criadaEm)}
-                    </div>
-                  </div>
-                  <div className="player-duvida-item-side">
-                    {item.respostaOficial ? (
-                      <span className="badge badge-green">Resposta oficial</span>
-                    ) : (
-                      <span className="badge badge-warn">Aguardando resposta</span>
-                    )}
-                  </div>
+              <article key={item.id} className="player-duvida-comment">
+                <div className="player-duvida-comment-avatar">
+                  {(item.autorNomeAbreviado || item.autorNome || 'A').trim().charAt(0).toUpperCase()}
                 </div>
-
-                {item.descricao ? (
-                  <div className="player-secondary-copy player-duvida-descricao" style={{ marginBottom: '0.6rem' }}>
-                    {item.descricao}
+                <div className="player-duvida-comment-body">
+                  <div className="player-duvida-comment-meta">
+                    <span className="player-duvida-comment-author">{item.autorNomeAbreviado || item.autorNome}</span>
+                    <span>{formatarTimestamp(item.timestampSegundos)}</span>
+                    <span>{formatDataHoraCurta(item.publicadaEm || item.criadaEm)}</span>
                   </div>
-                ) : null}
-
-                {item.respostaOficial ? (
-                  <>
+                  <div className="player-duvida-comment-title">{item.titulo}</div>
+                  {item.descricao ? (
+                    <div className="player-duvida-comment-copy">{item.descricao}</div>
+                  ) : null}
+                  <div className="player-duvida-comment-actions">
                     <button
                       className="player-duvidas-link-action"
                       type="button"
-                      onClick={() => setDuvidasRespostaAbertas(current => ({ ...current, [item.id]: !current[item.id] }))}
+                      disabled={processandoApoioId === item.id}
+                      onClick={() => alternarApoioDuvida(item)}
                     >
-                      {duvidasRespostaAbertas[item.id] ? 'Ocultar resposta' : 'Ver resposta'}
+                      {processandoApoioId === item.id
+                        ? 'Salvando...'
+                        : item.apoiadaPeloUsuario
+                          ? 'Remover meu apoio'
+                          : 'Tambem tive essa duvida'}
                     </button>
-                    {duvidasRespostaAbertas[item.id] ? (
-                      <div className="player-duvida-resposta" style={{ marginTop: '0.45rem', marginBottom: '0.6rem' }}>
-                        <div className="player-meta-label">Resposta</div>
-                        <div className="player-meta-value player-duvida-resposta-copy" style={{ fontSize: 15, lineHeight: 1.45 }}>
-                          {item.respostaOficial}
-                        </div>
-                        {item.respondidaPorNome ? (
-                          <div className="mini-copy">Respondida por {item.respondidaPorNome}</div>
-                        ) : null}
-                      </div>
+                    <button
+                      className="player-duvidas-link-action"
+                      type="button"
+                      onClick={() => {
+                        sincronizarTempoDuvida(item.timestampSegundos)
+                        irParaSegundo(item.timestampSegundos)
+                        pausarVideo()
+                      }}
+                    >
+                      Ir para esse trecho
+                    </button>
+                    {item.respostaOficial ? (
+                      <button
+                        className="player-duvidas-link-action"
+                        type="button"
+                        onClick={() => setDuvidasRespostaAbertas(current => ({ ...current, [item.id]: !current[item.id] }))}
+                      >
+                        {duvidasRespostaAbertas[item.id] ? 'Ocultar resposta' : 'Ver resposta'}
+                      </button>
                     ) : null}
-                  </>
-                ) : (
-                  <div className="mini-copy player-duvida-sem-resposta" style={{ marginBottom: '0.45rem' }}>
-                    Sem resposta ainda.
+                    {item.quantidadeApoios > 0 ? (
+                      <span className="player-duvida-comment-support">{item.quantidadeApoios} apoios</span>
+                    ) : null}
                   </div>
-                )}
-
-                <div className="form-actions player-duvida-actions">
-                  <button
-                    className={`btn ${item.apoiadaPeloUsuario ? 'btn-primary' : 'btn-ghost'}`}
-                    type="button"
-                    disabled={processandoApoioId === item.id}
-                    onClick={() => alternarApoioDuvida(item)}
-                  >
-                    {processandoApoioId === item.id
-                      ? 'Salvando...'
-                      : item.apoiadaPeloUsuario
-                        ? 'Remover meu apoio'
-                        : 'Tambem tive essa duvida'}
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    type="button"
-                    onClick={() => {
-                      sincronizarTempoDuvida(item.timestampSegundos)
-                      irParaSegundo(item.timestampSegundos)
-                      pausarVideo()
-                    }}
-                  >
-                    Ir para esse trecho
-                  </button>
+                  {item.respostaOficial && duvidasRespostaAbertas[item.id] ? (
+                    <div className="player-duvida-resposta player-duvida-resposta--inline">
+                      <div className="player-meta-value player-duvida-resposta-copy" style={{ fontSize: 15, lineHeight: 1.45 }}>
+                        {item.respostaOficial}
+                      </div>
+                      {item.respondidaPorNome ? (
+                        <div className="mini-copy">Respondida por {item.respondidaPorNome}</div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </article>
             ))}
