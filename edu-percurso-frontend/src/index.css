@@ -14658,11 +14658,29 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 .player-duvidas-shell {
   display: grid;
   gap: 0.45rem;
+  padding: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(18,23,33,0.92);
+}
+
+.player-duvidas-shell .player-duvidas-toggle {
+  padding: 0.7rem 0.75rem;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.player-duvidas-shell .player-duvidas-toggle:hover,
+.player-duvidas-shell .player-duvidas-toggle.is-open {
+  background: rgba(255,255,255,0.03);
 }
 
 .player-duvidas-panel {
   display: grid;
   gap: 0.55rem;
+  padding: 0 0.4rem 0.4rem;
 }
 
 .player-duvidas-toolbar {
@@ -14936,6 +14954,16 @@ html[data-theme='light'] .player-duvidas-time-card,
 html[data-theme='light'] .player-duvida-resposta {
   background: rgba(15,23,42,0.03);
   border-color: rgba(15,23,42,0.08);
+}
+
+html[data-theme='light'] .player-duvidas-shell {
+  background: #ffffff;
+  border-color: rgba(15,23,42,0.08);
+}
+
+html[data-theme='light'] .player-duvidas-shell .player-duvidas-toggle:hover,
+html[data-theme='light'] .player-duvidas-shell .player-duvidas-toggle.is-open {
+  background: rgba(15,23,42,0.03);
 }
 
 @media (max-width: 900px) {

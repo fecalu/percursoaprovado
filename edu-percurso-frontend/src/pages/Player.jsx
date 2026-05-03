@@ -1869,7 +1869,7 @@ export default function Player() {
 
     return (
       <div className="player-module-nav player-duvidas-nav">
-        <div className="player-module-list-shell">
+        <div className="player-module-list-shell player-duvidas-shell">
           <button
             type="button"
             className={`player-module-toggle player-duvidas-toggle${duvidasAbertas ? ' is-open' : ''}`}
