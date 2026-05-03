@@ -231,6 +231,8 @@ export default function Player() {
   const [duvidaForm, setDuvidaForm] = useState(montarDuvidaInicial())
   const [enviandoDuvida, setEnviandoDuvida] = useState(false)
   const [processandoApoioId, setProcessandoApoioId] = useState('')
+  const [formDuvidaAberto, setFormDuvidaAberto] = useState(false)
+  const [visaoDuvidas, setVisaoDuvidas] = useState('trecho')
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -316,6 +318,8 @@ export default function Player() {
     setDuvidaForm(montarDuvidaInicial())
     setEnviandoDuvida(false)
     setProcessandoApoioId('')
+    setFormDuvidaAberto(false)
+    setVisaoDuvidas('trecho')
     disparadosIdsRef.current = new Set()
     secondsRef.current = 0
     reproducaoIniciadaRef.current = false
@@ -606,6 +610,7 @@ export default function Player() {
       })
       show('Duvida enviada para moderacao. Assim que for publicada, ela vai aparecer para os outros alunos.')
       setDuvidaForm(montarDuvidaInicial(currentTimeRef.current))
+      setFormDuvidaAberto(false)
     } catch (error) {
       show(error.response?.data?.erro || 'Nao foi possivel enviar a duvida agora.', 'error')
     } finally {
@@ -646,6 +651,12 @@ export default function Player() {
     } finally {
       setProcessandoApoioId('')
     }
+  }
+
+  function abrirCriacaoDuvida(segundos = currentTimeRef.current) {
+    sincronizarTempoDuvida(segundos)
+    pausarVideo()
+    setFormDuvidaAberto(true)
   }
 
   function alternarPonto(ponto, { rolar = false } = {}) {
@@ -1564,9 +1575,9 @@ export default function Player() {
 
   function renderDuvidasLista(lista, { titulo, emptyTitle, emptyCopy } = {}) {
     return (
-      <div className="card" style={{ marginTop: '1rem' }}>
+      <div className="card player-duvidas-list-card" style={{ marginTop: '1rem' }}>
         {titulo ? (
-          <div className="section-title-row" style={{ marginBottom: '1rem' }}>
+          <div className="section-title-row player-duvidas-list-head" style={{ marginBottom: '1rem' }}>
             <div>
               <div className="section-heading">{titulo}</div>
               <div className="section-copy">Trechos publicados deste percurso para reaproveitar respostas e reduzir duvidas repetidas.</div>
@@ -1575,34 +1586,44 @@ export default function Player() {
         ) : null}
 
         {!lista.length ? (
-          <div className="empty-state" style={{ padding: '1rem 0 0' }}>
+          <div className="empty-state player-duvidas-empty" style={{ padding: '1rem 0 0' }}>
             <div>{emptyTitle}</div>
             {emptyCopy ? <div className="mini-copy" style={{ marginTop: 8 }}>{emptyCopy}</div> : null}
           </div>
         ) : (
-          <div style={{ display: 'grid', gap: '0.9rem' }}>
+          <div className="player-duvidas-list" style={{ display: 'grid', gap: '0.9rem' }}>
             {lista.map(item => (
-              <article key={item.id} className="student-filter-card" style={{ padding: '1rem' }}>
-                <div className="section-title-row" style={{ marginBottom: '0.8rem', gap: 12 }}>
+              <article key={item.id} className="student-filter-card player-duvida-item" style={{ padding: '1rem' }}>
+                <div className="section-title-row player-duvida-item-head" style={{ marginBottom: '0.8rem', gap: 12 }}>
                   <div>
-                    <div className="table-name">{item.titulo}</div>
+                    <div className="player-duvida-item-topline">
+                      <span className="player-duvida-time-chip">{formatarTimestamp(item.timestampSegundos)}</span>
+                    </div>
+                    <div className="table-name player-duvida-item-title">{item.titulo}</div>
                     <div className="mini-copy">
                       {formatarTimestamp(item.timestampSegundos)} • {item.autorNomeAbreviado || item.autorNome} • {formatDataHoraCurta(item.publicadaEm || item.criadaEm)}
                     </div>
                   </div>
-                  <span className="badge badge-blue">{item.quantidadeApoios || 0} apoios</span>
+                  <div className="player-duvida-item-side">
+                    <span className="badge badge-blue">{item.quantidadeApoios || 0} apoios</span>
+                    {item.respostaOficial ? (
+                      <span className="badge badge-green">Resposta oficial</span>
+                    ) : (
+                      <span className="badge badge-warn">Aguardando resposta</span>
+                    )}
+                  </div>
                 </div>
 
                 {item.descricao ? (
-                  <div className="player-secondary-copy" style={{ marginBottom: '0.9rem' }}>
+                  <div className="player-secondary-copy player-duvida-descricao" style={{ marginBottom: '0.9rem' }}>
                     {item.descricao}
                   </div>
                 ) : null}
 
                 {item.respostaOficial ? (
-                  <div className="player-meta-card" style={{ marginBottom: '0.9rem' }}>
+                  <div className="player-duvida-resposta" style={{ marginBottom: '0.9rem' }}>
                     <div className="player-meta-label">Resposta oficial</div>
-                    <div className="player-meta-value" style={{ fontSize: 16, lineHeight: 1.5 }}>
+                    <div className="player-meta-value player-duvida-resposta-copy" style={{ fontSize: 16, lineHeight: 1.5 }}>
                       {item.respostaOficial}
                     </div>
                     {item.respondidaPorNome ? (
@@ -1610,12 +1631,12 @@ export default function Player() {
                     ) : null}
                   </div>
                 ) : (
-                  <div className="mini-copy" style={{ marginBottom: '0.9rem' }}>
+                  <div className="mini-copy player-duvida-sem-resposta" style={{ marginBottom: '0.9rem' }}>
                     Essa duvida ja esta publicada, mas ainda nao recebeu resposta oficial.
                   </div>
                 )}
 
-                <div className="form-actions">
+                <div className="form-actions player-duvida-actions">
                   <button
                     className={`btn ${item.apoiadaPeloUsuario ? 'btn-primary' : 'btn-ghost'}`}
                     type="button"
@@ -1648,87 +1669,171 @@ export default function Player() {
     )
   }
 
-  function renderCardDuvidas() {
+  function renderFormularioDuvida() {
+    if (!formDuvidaAberto) {
+      return (
+        <div className="player-duvidas-compose-collapsed">
+          <div>
+            <div className="player-duvidas-compose-title">Teve uma duvida agora?</div>
+            <div className="mini-copy">
+              Capture o minuto exato e deixe a pergunta registrada para a equipe responder depois.
+            </div>
+          </div>
+          <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
+            Tive uma duvida aqui
+          </button>
+        </div>
+      )
+    }
+
     return (
-      <div className="card" style={{ marginTop: '1rem' }}>
-        <div className="section-title-row">
+      <form onSubmit={enviarDuvida} className="player-duvidas-compose-form">
+        <div className="player-duvidas-compose-grid">
+          <div className="form-group">
+            <label className="form-label">Trecho selecionado</label>
+            <div className="player-duvidas-time-card">
+              <div>
+                <div className="player-duvidas-time-value">{formatarTimestamp(trechoSelecionadoDuvida)}</div>
+                <div className="mini-copy">O video vai ficar pausado nesse ponto para voce registrar a pergunta.</div>
+              </div>
+              <div className="player-duvidas-time-actions">
+                <button className="btn btn-ghost" type="button" onClick={() => sincronizarTempoDuvida()}>
+                  Atualizar com tempo atual
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Tempo em segundos</label>
+            <input
+              className="form-input"
+              type="number"
+              min="0"
+              value={duvidaForm.timestampSegundos}
+              onChange={event => setDuvidaForm(current => ({ ...current, timestampSegundos: event.target.value }))}
+            />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Titulo da duvida</label>
+          <input
+            className="form-input"
+            value={duvidaForm.titulo}
+            onChange={event => setDuvidaForm(current => ({ ...current, titulo: event.target.value }))}
+            placeholder="Ex.: aqui eu reduzo para primeira ou segunda?"
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Contexto da duvida</label>
+          <textarea
+            className="form-textarea"
+            value={duvidaForm.descricao}
+            onChange={event => setDuvidaForm(current => ({ ...current, descricao: event.target.value }))}
+            placeholder="Explique rapidamente o que te confundiu nesse trecho para facilitar a resposta oficial."
+          />
+        </div>
+
+        <div className="form-actions player-duvidas-compose-actions">
+          <button className="btn btn-primary" type="submit" disabled={enviandoDuvida}>
+            {enviandoDuvida ? 'Enviando...' : 'Enviar duvida'}
+          </button>
+          <button className="btn btn-ghost" type="button" onClick={() => setFormDuvidaAberto(false)}>
+            Fechar
+          </button>
+          <div className="mini-copy">
+            Novas duvidas passam por moderacao antes de ficarem visiveis para toda a comunidade.
+          </div>
+        </div>
+      </form>
+    )
+  }
+
+  function renderCardDuvidas() {
+    const totalRelacionadas = duvidasRelacionadasAoTrecho.length
+    const listaAtiva = visaoDuvidas === 'trecho' ? duvidasRelacionadasAoTrecho : duvidas
+    const tituloLista = visaoDuvidas === 'trecho'
+      ? 'Duvidas publicadas neste trecho'
+      : 'Todas as duvidas publicadas deste percurso'
+    const emptyTitle = visaoDuvidas === 'trecho'
+      ? 'Nenhuma duvida publicada perto desse ponto ainda.'
+      : 'Ainda nao ha duvidas publicadas neste percurso.'
+    const emptyCopy = visaoDuvidas === 'trecho'
+      ? 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.'
+      : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
+
+    return (
+      <div className="card player-duvidas-shell" style={{ marginTop: '1rem' }}>
+        <div className="player-duvidas-hero">
           <div>
             <div className="section-heading">Duvidas por trecho</div>
             <div className="section-copy">
               Marque o ponto exato do video em que voce travou. As respostas publicadas ajudam os proximos alunos no mesmo trecho.
             </div>
           </div>
-          <span className="badge badge-blue">{duvidas.length} publicadas</span>
+          <div className="player-duvidas-hero-stats">
+            <div className="player-duvidas-stat">
+              <span className="player-duvidas-stat-label">Trecho atual</span>
+              <strong>{formatarTimestamp(trechoSelecionadoDuvida)}</strong>
+            </div>
+            <div className="player-duvidas-stat">
+              <span className="player-duvidas-stat-label">Relacionadas</span>
+              <strong>{totalRelacionadas}</strong>
+            </div>
+            <div className="player-duvidas-stat">
+              <span className="player-duvidas-stat-label">Publicadas</span>
+              <strong>{duvidas.length}</strong>
+            </div>
+          </div>
         </div>
 
-        <form onSubmit={enviarDuvida} style={{ marginTop: '1rem' }}>
-          <div className="form-row">
-            <div className="form-group">
-              <label className="form-label">Trecho selecionado</label>
-              <div className="form-input" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <strong>{formatarTimestamp(trechoSelecionadoDuvida)}</strong>
-                <button className="btn btn-ghost" type="button" onClick={() => sincronizarTempoDuvida()}>
-                  Usar tempo atual
-                </button>
-              </div>
-            </div>
+        <div className="player-duvidas-toolbar">
+          <button
+            className="btn btn-ghost"
+            type="button"
+            onClick={() => {
+              sincronizarTempoDuvida()
+              setVisaoDuvidas('trecho')
+            }}
+          >
+            Ver trecho atual
+          </button>
+          <button className="btn btn-ghost" type="button" onClick={() => abrirCriacaoDuvida()}>
+            Tive uma duvida aqui
+          </button>
+        </div>
 
-            <div className="form-group">
-              <label className="form-label">Tempo em segundos</label>
-              <input
-                className="form-input"
-                type="number"
-                min="0"
-                value={duvidaForm.timestampSegundos}
-                onChange={event => setDuvidaForm(current => ({ ...current, timestampSegundos: event.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Titulo da duvida</label>
-            <input
-              className="form-input"
-              value={duvidaForm.titulo}
-              onChange={event => setDuvidaForm(current => ({ ...current, titulo: event.target.value }))}
-              placeholder="Ex.: aqui eu reduzo para primeira ou segunda?"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Contexto da duvida</label>
-            <textarea
-              className="form-textarea"
-              value={duvidaForm.descricao}
-              onChange={event => setDuvidaForm(current => ({ ...current, descricao: event.target.value }))}
-              placeholder="Explique rapidamente o que te confundiu nesse trecho para facilitar a resposta oficial."
-            />
-          </div>
-
-          <div className="form-actions">
-            <button className="btn btn-primary" type="submit" disabled={enviandoDuvida}>
-              {enviandoDuvida ? 'Enviando...' : 'Enviar duvida'}
-            </button>
-            <div className="mini-copy">
-              Novas duvidas passam por moderacao antes de ficarem visiveis para toda a comunidade.
-            </div>
-          </div>
-        </form>
+        {renderFormularioDuvida()}
 
         {duvidasLoading ? (
           <div className="spinner" style={{ marginTop: '1rem' }} />
         ) : (
           <>
-            {renderDuvidasLista(duvidasRelacionadasAoTrecho, {
-              titulo: 'Ja existem duvidas neste trecho',
-              emptyTitle: 'Nenhuma duvida publicada perto desse ponto ainda.',
-              emptyCopy: 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.',
-            })}
+            <div className="player-duvidas-tabs">
+              <button
+                type="button"
+                className={`player-duvidas-tab${visaoDuvidas === 'trecho' ? ' is-active' : ''}`}
+                onClick={() => setVisaoDuvidas('trecho')}
+              >
+                Neste trecho
+                <span>{totalRelacionadas}</span>
+              </button>
+              <button
+                type="button"
+                className={`player-duvidas-tab${visaoDuvidas === 'todas' ? ' is-active' : ''}`}
+                onClick={() => setVisaoDuvidas('todas')}
+              >
+                Todas do percurso
+                <span>{duvidas.length}</span>
+              </button>
+            </div>
 
-            {renderDuvidasLista(duvidas, {
-              titulo: 'Todas as duvidas publicadas deste percurso',
-              emptyTitle: 'Ainda nao ha duvidas publicadas neste percurso.',
-              emptyCopy: 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.',
+            {renderDuvidasLista(listaAtiva, {
+              titulo: tituloLista,
+              emptyTitle,
+              emptyCopy,
             })}
           </>
         )}
@@ -2082,6 +2187,13 @@ export default function Player() {
                         : 'Carregando player...'}
                     </div>
                     <div className="attention-timeline-tools">
+                      <button
+                        type="button"
+                        className="btn btn-ghost player-duvidas-quick-trigger"
+                        onClick={() => abrirCriacaoDuvida(currentTime)}
+                      >
+                        Tive uma duvida aqui
+                      </button>
                       {pontosAtencaoAtivos.length > 0 && (
                         <label className="player-attention-toggle player-attention-toggle--inline">
                           <input
