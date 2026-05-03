@@ -1622,10 +1622,10 @@ export default function Player() {
             {emptyCopy ? <div className="mini-copy" style={{ marginTop: 8 }}>{emptyCopy}</div> : null}
           </div>
         ) : (
-          <div className="player-duvidas-list" style={{ display: 'grid', gap: '0.9rem' }}>
+          <div className="player-duvidas-list" style={{ display: 'grid', gap: '0.6rem' }}>
             {listaVisivel.map(item => (
-              <article key={item.id} className="student-filter-card player-duvida-item" style={{ padding: '1rem' }}>
-                <div className="section-title-row player-duvida-item-head" style={{ marginBottom: '0.8rem', gap: 12 }}>
+              <article key={item.id} className="student-filter-card player-duvida-item" style={{ padding: '0.8rem' }}>
+                <div className="section-title-row player-duvida-item-head" style={{ marginBottom: '0.55rem', gap: 10 }}>
                   <div>
                     <div className="player-duvida-item-topline">
                       <span className="player-duvida-time-chip">{formatarTimestamp(item.timestampSegundos)}</span>
@@ -1650,13 +1650,13 @@ export default function Player() {
                 </div>
 
                 {item.descricao ? (
-                  <div className="player-secondary-copy player-duvida-descricao" style={{ marginBottom: '0.9rem' }}>
+                  <div className="player-secondary-copy player-duvida-descricao" style={{ marginBottom: '0.6rem' }}>
                     {item.descricao}
                   </div>
                 ) : null}
 
                 {item.respostaOficial ? (
-                  <div className="player-duvida-resposta" style={{ marginBottom: '0.9rem' }}>
+                  <div className="player-duvida-resposta" style={{ marginBottom: '0.6rem' }}>
                     <div className="player-meta-label">Resposta oficial</div>
                     <div className="player-meta-value player-duvida-resposta-copy" style={{ fontSize: 16, lineHeight: 1.5 }}>
                       {item.respostaOficial}
@@ -1666,7 +1666,7 @@ export default function Player() {
                     ) : null}
                   </div>
                 ) : (
-                  <div className="mini-copy player-duvida-sem-resposta" style={{ marginBottom: '0.9rem' }}>
+                  <div className="mini-copy player-duvida-sem-resposta" style={{ marginBottom: '0.6rem' }}>
                     Essa duvida ja esta publicada, mas ainda nao recebeu resposta oficial.
                   </div>
                 )}
@@ -1745,31 +1745,37 @@ export default function Player() {
 
     return (
       <form onSubmit={enviarDuvida} className="player-duvidas-compose-form">
-        <div className="player-duvidas-compose-grid">
-          <div className="form-group">
-            <label className="form-label">Trecho selecionado</label>
-            <div className="player-duvidas-time-card">
-              <div>
-                <div className="player-duvidas-time-value">{formatarTimestamp(trechoSelecionadoDuvida)}</div>
-                <div className="mini-copy">O video vai ficar pausado nesse ponto para voce registrar a pergunta.</div>
-              </div>
-              <div className="player-duvidas-time-actions">
-                <button className="btn btn-ghost" type="button" onClick={() => sincronizarTempoDuvida()}>
-                  Atualizar com tempo atual
-                </button>
-              </div>
+        <div className="form-group">
+          <label className="form-label">Trecho selecionado</label>
+          <div className="player-duvidas-time-card">
+            <div className="player-duvidas-time-edit">
+              <input
+                className="player-duvidas-time-input"
+                type="text"
+                inputMode="numeric"
+                value={formatarTimestamp(trechoSelecionadoDuvida)}
+                onChange={event => {
+                  const digits = String(event.target.value || '').replace(/\D/g, '').slice(0, 4)
+                  if (!digits) {
+                    setDuvidaForm(current => ({ ...current, timestampSegundos: 0 }))
+                    return
+                  }
+                  const padded = digits.padStart(2, '0')
+                  const secondsPart = Number(padded.slice(-2))
+                  const minutesPart = Number(padded.slice(0, -2) || 0)
+                  setDuvidaForm(current => ({
+                    ...current,
+                    timestampSegundos: (minutesPart * 60) + secondsPart,
+                  }))
+                }}
+              />
+              <div className="mini-copy">Voce pode ajustar o minuto aqui.</div>
             </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Tempo em segundos</label>
-            <input
-              className="form-input"
-              type="number"
-              min="0"
-              value={duvidaForm.timestampSegundos}
-              onChange={event => setDuvidaForm(current => ({ ...current, timestampSegundos: event.target.value }))}
-            />
+            <div className="player-duvidas-time-actions">
+              <button className="btn btn-ghost" type="button" onClick={() => sincronizarTempoDuvida()}>
+                Usar tempo atual
+              </button>
+            </div>
           </div>
         </div>
 

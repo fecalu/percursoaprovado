@@ -14662,7 +14662,7 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 
 .player-duvidas-panel {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.55rem;
 }
 
 .player-duvidas-toolbar {
@@ -14699,9 +14699,9 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 .player-duvidas-compose-collapsed {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
   align-items: center;
-  padding: 1rem 1.1rem;
+  padding: 0.8rem 0.9rem;
 }
 
 .player-duvidas-compose-title {
@@ -14713,26 +14713,41 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 
 .player-duvidas-compose-form {
   display: grid;
-  gap: 1rem;
-}
-
-.player-duvidas-compose-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.6fr);
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .player-duvidas-time-card {
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.1rem;
+  gap: 0.8rem;
+  padding: 0.75rem 0.9rem;
 }
 
 .player-duvidas-time-value {
   font-size: 1.35rem;
   font-weight: 800;
   color: var(--text-1);
+}
+
+.player-duvidas-time-edit {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.player-duvidas-time-input {
+  width: 96px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-1);
+  font: inherit;
+  font-size: 1.2rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.player-duvidas-time-input:focus {
+  outline: none;
 }
 
 .player-duvidas-time-actions {
@@ -14786,7 +14801,7 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 
 .player-duvidas-list {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.55rem;
 }
 
 .player-duvida-item {
@@ -14807,7 +14822,7 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.2rem;
   flex-wrap: wrap;
 }
 
@@ -14842,7 +14857,7 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 .player-duvida-item-side {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.3rem;
   align-items: flex-end;
   flex-shrink: 0;
 }
@@ -14863,7 +14878,7 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 
 .player-duvidas-list-footer {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.55rem;
   flex-wrap: wrap;
 }
 
@@ -14871,8 +14886,8 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.1rem;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
   border-radius: 20px;
   border: 1px dashed rgba(45,224,154,0.28);
   background: rgba(45,224,154,0.07);
@@ -14893,11 +14908,6 @@ html[data-theme='light'] .player-duvida-resposta {
 }
 
 @media (max-width: 900px) {
-  .player-duvidas-compose-grid {
-    grid-template-columns: 1fr;
-    width: 100%;
-  }
-
   .player-duvidas-toolbar,
   .player-duvidas-first-run {
     flex-direction: column;
