@@ -1823,97 +1823,96 @@ export default function Player() {
       ? 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.'
       : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
     const resumoDuvidas = duvidas.length
-      ? `${totalRelacionadas} neste trecho • ${duvidas.length} publicadas`
-      : 'Abra para consultar respostas ou registrar uma nova duvida'
+      ? totalRelacionadas > 0
+        ? `${totalRelacionadas} duvidas perto deste ponto`
+        : 'Consulte respostas ou faca uma pergunta'
+      : 'Consulte respostas ou faca uma pergunta'
 
     return (
-      <div className="card player-duvidas-shell" style={{ marginTop: '1rem' }}>
-        <button
-          type="button"
-          className={`player-module-toggle player-duvidas-toggle${duvidasAbertas ? ' is-open' : ''}`}
-          onClick={() => setDuvidasAbertas(current => !current)}
-          aria-expanded={duvidasAbertas}
-        >
-          <div className="player-module-toggle-main">
-            <div className="player-module-list-title-row">
-              <div className="player-module-list-title">Duvidas por trecho</div>
-              <span className="player-module-list-count">{duvidas.length}</span>
+      <div className="player-module-nav player-duvidas-nav">
+        <div className="player-module-list-shell">
+          <button
+            type="button"
+            className={`player-module-toggle player-duvidas-toggle${duvidasAbertas ? ' is-open' : ''}`}
+            onClick={() => setDuvidasAbertas(current => !current)}
+            aria-expanded={duvidasAbertas}
+          >
+            <div className="player-module-toggle-main">
+              <div className="player-module-list-title-row">
+                <div className="player-module-list-title">Duvidas por trecho</div>
+              </div>
+              <div className="player-module-toggle-summary">
+                {resumoDuvidas}
+              </div>
             </div>
-            <div className="player-module-toggle-summary">
-              Trecho atual {formatarTimestamp(trechoSelecionadoDuvida)} • {resumoDuvidas}
+            <div className="player-module-toggle-side">
+              <span className="player-module-toggle-label">{duvidasAbertas ? 'Ocultar' : 'Ver duvidas'}</span>
+              <svg
+                className="player-module-toggle-chevron"
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M5 7l5 6 5-6" />
+              </svg>
             </div>
-          </div>
-          <div className="player-module-toggle-side">
-            <span className="player-module-toggle-label">{duvidasAbertas ? 'Ocultar' : 'Ver duvidas'}</span>
-            <svg
-              className="player-module-toggle-chevron"
-              width="18"
-              height="18"
-              viewBox="0 0 20 20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M5 7l5 6 5-6" />
-            </svg>
-          </div>
-        </button>
+          </button>
 
-        {duvidasAbertas ? (
-          <div className="player-duvidas-panel">
-            <div className="player-duvidas-toolbar">
-              <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
-                Fazer pergunta
-              </button>
-            </div>
-
-            {formDuvidaAberto ? renderFormularioDuvida() : null}
-
-            {duvidasLoading ? (
-              <div className="spinner" style={{ marginTop: '1rem' }} />
-            ) : (
-              <>
-                <div className="player-duvidas-tabs">
+          {duvidasAbertas ? (
+            <div className="player-duvidas-panel">
+              <div className="player-duvidas-toolbar">
+                <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
+                  Fazer pergunta
+                </button>
+                {!duvidasLoading && duvidas.length > totalRelacionadas ? (
                   <button
+                    className="btn btn-ghost"
                     type="button"
-                    className={`player-duvidas-tab${visaoDuvidas === 'trecho' ? ' is-active' : ''}`}
-                    onClick={() => setVisaoDuvidas('trecho')}
+                    onClick={() => setVisaoDuvidas(current => (current === 'trecho' ? 'todas' : 'trecho'))}
                   >
-                    Neste trecho
-                    <span>{totalRelacionadas}</span>
+                    {visaoDuvidas === 'trecho' ? 'Ver todas do percurso' : 'Voltar para este trecho'}
                   </button>
-                  <button
-                    type="button"
-                    className={`player-duvidas-tab${visaoDuvidas === 'todas' ? ' is-active' : ''}`}
-                    onClick={() => setVisaoDuvidas('todas')}
-                  >
-                    Todas do percurso
-                    <span>{duvidas.length}</span>
-                  </button>
-                </div>
-
-                {isPrimeiraDuvida ? (
-                  <div className="player-duvidas-first-run">
-                    <div>
-                      <div className="player-duvidas-first-run-title">Ainda nao ha duvidas publicadas neste percurso</div>
-                      <div className="mini-copy">
-                        Se voce travou nesse ponto, pode registrar a primeira pergunta para a equipe responder depois.
-                      </div>
-                    </div>
-                    <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
-                      Registrar primeira duvida
-                    </button>
-                  </div>
                 ) : null}
+              </div>
 
-                {renderDuvidasLista(listaAtiva, {
-                  emptyTitle,
-                  emptyCopy,
-                })}
-              </>
-            )}
-          </div>
-        ) : null}
+              {formDuvidaAberto ? renderFormularioDuvida() : null}
+
+              {duvidasLoading ? (
+                <div className="spinner" style={{ marginTop: '1rem' }} />
+              ) : (
+                <>
+                  {visaoDuvidas === 'todas' ? (
+                    <div className="mini-copy">Mostrando todas as duvidas publicadas deste percurso.</div>
+                  ) : (
+                    <div className="mini-copy">Mostrando as duvidas publicadas perto do trecho atual.</div>
+                  )}
+
+                  {isPrimeiraDuvida ? (
+                    <div className="player-duvidas-first-run">
+                      <div>
+                        <div className="player-duvidas-first-run-title">Ainda nao ha duvidas publicadas neste percurso</div>
+                        <div className="mini-copy">
+                          Se voce travou nesse ponto, pode registrar a primeira pergunta para a equipe responder depois.
+                        </div>
+                      </div>
+                      <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
+                        Registrar primeira duvida
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {renderDuvidasLista(listaAtiva, {
+                    emptyTitle,
+                    emptyCopy,
+                  })}
+                </>
+              )}
+            </div>
+          ) : null}
+        </div>
       </div>
     )
   }
