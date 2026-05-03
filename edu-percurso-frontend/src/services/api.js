@@ -78,6 +78,15 @@ export const percursoService = {
   excluir: id => api.delete(`/percursos/${id}`),
 }
 
+export const duvidaPercursoService = {
+  listarPublicas: percursoId => api.get(`/percursos/${percursoId}/duvidas`).then(response => response.data),
+  criar: (percursoId, data) => api.post(`/percursos/${percursoId}/duvidas`, data).then(response => response.data),
+  apoiar: (percursoId, duvidaId) => api.post(`/percursos/${percursoId}/duvidas/${duvidaId}/apoios`),
+  removerApoio: (percursoId, duvidaId) => api.delete(`/percursos/${percursoId}/duvidas/${duvidaId}/apoios`),
+  listarAdmin: params => api.get(`/admin/duvidas-percurso${toSearchParams(params)}`).then(response => response.data),
+  atualizarAdmin: (duvidaId, data) => api.put(`/admin/duvidas-percurso/${duvidaId}`, data).then(response => response.data),
+}
+
 export const questaoService = {
   listarAdmin: params => api.get(`/admin/questoes${toSearchParams(params)}`).then(response => response.data),
   buscarAdmin: id => api.get(`/admin/questoes/${id}`).then(response => response.data),

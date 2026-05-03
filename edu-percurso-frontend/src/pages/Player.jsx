@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { percursoService, progressoService } from '../services/api'
-import { formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
+import { duvidaPercursoService, percursoService, progressoService } from '../services/api'
+import { useToast } from '../hooks/useToast'
+import { formatDataHoraCurta, formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
+
+const JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS = 15
 
 function formatarTimestamp(segundos) {
   const total = Math.max(0, Math.floor(Number(segundos) || 0))
@@ -168,9 +171,18 @@ const PLYR_SETTINGS = ['quality', 'speed']
 const PLYR_SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2]
 const PLYR_QUALITY_OPTIONS = [2160, 1440, 1080, 720, 576, 480, 360, 240]
 
+function montarDuvidaInicial(segundos = 0) {
+  return {
+    timestampSegundos: Math.max(0, Math.floor(Number(segundos) || 0)),
+    titulo: '',
+    descricao: '',
+  }
+}
+
 export default function Player() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { show, ToastEl } = useToast()
   const playerShellRef = useRef(null)
   const playerMountRef = useRef(null)
   const playerRef = useRef(null)
@@ -214,6 +226,11 @@ export default function Player() {
   const [interrupcoesAtivas, setInterrupcoesAtivas] = useState(true)
   const [moduloNavAberta, setModuloNavAberta] = useState(false)
   const [pontosMobileAbertos, setPontosMobileAbertos] = useState(false)
+  const [duvidas, setDuvidas] = useState([])
+  const [duvidasLoading, setDuvidasLoading] = useState(true)
+  const [duvidaForm, setDuvidaForm] = useState(montarDuvidaInicial())
+  const [enviandoDuvida, setEnviandoDuvida] = useState(false)
+  const [processandoApoioId, setProcessandoApoioId] = useState('')
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -294,6 +311,11 @@ export default function Player() {
     setInterrupcoesAtivas(true)
     setModuloNavAberta(false)
     setPontosMobileAbertos(false)
+    setDuvidas([])
+    setDuvidasLoading(true)
+    setDuvidaForm(montarDuvidaInicial())
+    setEnviandoDuvida(false)
+    setProcessandoApoioId('')
     disparadosIdsRef.current = new Set()
     secondsRef.current = 0
     reproducaoIniciadaRef.current = false
@@ -301,24 +323,31 @@ export default function Player() {
     previousTimeRef.current = 0
     autoConclusaoEmAndamentoRef.current = false
 
-    Promise.all([percursoService.buscar(id), progressoService.meu(), percursoService.listar()])
-      .then(([percursoResp, progressoResp, percursosResp]) => {
+    Promise.all([percursoService.buscar(id), progressoService.meu(), percursoService.listar(), duvidaPercursoService.listarPublicas(id)])
+      .then(([percursoResp, progressoResp, percursosResp, duvidasResp]) => {
         setPercurso(percursoResp)
         setProgressoConteudos(progressoResp)
         setPercursosDisponiveis(Array.isArray(percursosResp) ? percursosResp : [])
+        setDuvidas(Array.isArray(duvidasResp) ? duvidasResp : [])
 
         const progressoAtual = progressoResp.find(item => String(item.percursoId) === String(id))
         if (progressoAtual) {
           setConcluido(Boolean(progressoAtual.concluido))
           secondsRef.current = progressoAtual.segundosAssistidos || 0
           autoConclusaoEmAndamentoRef.current = Boolean(progressoAtual.concluido)
+          setDuvidaForm(montarDuvidaInicial(progressoAtual.segundosAssistidos || 0))
+        } else {
+          setDuvidaForm(montarDuvidaInicial())
         }
       })
       .catch(error => {
         setErro(error.response?.data?.erro || 'Nao foi possivel carregar esse conteudo.')
         setPercurso(null)
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        setLoading(false)
+        setDuvidasLoading(false)
+      })
   }, [id])
 
   const configuracaoPontosAtencao = percurso?.configuracaoPontosAtencao || 'AUTOMATICO'
@@ -472,6 +501,10 @@ export default function Player() {
   )
   const exibirRailPontosDesktop = !isMobileViewport && exibirAreaPontos
   const exibirVideoInlineMobile = isMobileViewport && videoExplicativoAberto && Boolean(pontoVideoExplicativoAtual) && Boolean(fonteVideoExplicativo)
+  const trechoSelecionadoDuvida = Math.max(0, Math.floor(Number(duvidaForm.timestampSegundos) || 0))
+  const duvidasRelacionadasAoTrecho = useMemo(() => (
+    duvidas.filter(item => Math.abs((item.timestampSegundos || 0) - trechoSelecionadoDuvida) <= JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS)
+  ), [duvidas, trechoSelecionadoDuvida])
 
   function definirPromptPonto(id) {
     promptPontoIdRef.current = id
@@ -546,6 +579,72 @@ export default function Player() {
       requestAnimationFrame(() => {
         attentionDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       })
+    }
+  }
+
+  function sincronizarTempoDuvida(segundos = currentTimeRef.current) {
+    setDuvidaForm(current => ({
+      ...current,
+      timestampSegundos: Math.max(0, Math.floor(Number(segundos) || 0)),
+    }))
+  }
+
+  async function enviarDuvida(event) {
+    event.preventDefault()
+
+    if (!duvidaForm.titulo.trim()) {
+      show('Informe um titulo curto para a sua duvida.', 'error')
+      return
+    }
+
+    setEnviandoDuvida(true)
+    try {
+      await duvidaPercursoService.criar(id, {
+        timestampSegundos: Math.max(0, Math.floor(Number(duvidaForm.timestampSegundos) || 0)),
+        titulo: duvidaForm.titulo.trim(),
+        descricao: duvidaForm.descricao.trim(),
+      })
+      show('Duvida enviada para moderacao. Assim que for publicada, ela vai aparecer para os outros alunos.')
+      setDuvidaForm(montarDuvidaInicial(currentTimeRef.current))
+    } catch (error) {
+      show(error.response?.data?.erro || 'Nao foi possivel enviar a duvida agora.', 'error')
+    } finally {
+      setEnviandoDuvida(false)
+    }
+  }
+
+  async function alternarApoioDuvida(duvida) {
+    if (!duvida?.id) return
+
+    setProcessandoApoioId(duvida.id)
+    try {
+      if (duvida.apoiadaPeloUsuario) {
+        await duvidaPercursoService.removerApoio(id, duvida.id)
+        setDuvidas(current => current.map(item => (
+          item.id === duvida.id
+            ? {
+                ...item,
+                apoiadaPeloUsuario: false,
+                quantidadeApoios: Math.max(0, Number(item.quantidadeApoios || 0) - 1),
+              }
+            : item
+        )))
+      } else {
+        await duvidaPercursoService.apoiar(id, duvida.id)
+        setDuvidas(current => current.map(item => (
+          item.id === duvida.id
+            ? {
+                ...item,
+                apoiadaPeloUsuario: true,
+                quantidadeApoios: Number(item.quantidadeApoios || 0) + 1,
+              }
+            : item
+        )))
+      }
+    } catch (error) {
+      show(error.response?.data?.erro || 'Nao foi possivel registrar seu apoio agora.', 'error')
+    } finally {
+      setProcessandoApoioId('')
     }
   }
 
@@ -1463,6 +1562,180 @@ export default function Player() {
     )
   }
 
+  function renderDuvidasLista(lista, { titulo, emptyTitle, emptyCopy } = {}) {
+    return (
+      <div className="card" style={{ marginTop: '1rem' }}>
+        {titulo ? (
+          <div className="section-title-row" style={{ marginBottom: '1rem' }}>
+            <div>
+              <div className="section-heading">{titulo}</div>
+              <div className="section-copy">Trechos publicados deste percurso para reaproveitar respostas e reduzir duvidas repetidas.</div>
+            </div>
+          </div>
+        ) : null}
+
+        {!lista.length ? (
+          <div className="empty-state" style={{ padding: '1rem 0 0' }}>
+            <div>{emptyTitle}</div>
+            {emptyCopy ? <div className="mini-copy" style={{ marginTop: 8 }}>{emptyCopy}</div> : null}
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gap: '0.9rem' }}>
+            {lista.map(item => (
+              <article key={item.id} className="student-filter-card" style={{ padding: '1rem' }}>
+                <div className="section-title-row" style={{ marginBottom: '0.8rem', gap: 12 }}>
+                  <div>
+                    <div className="table-name">{item.titulo}</div>
+                    <div className="mini-copy">
+                      {formatarTimestamp(item.timestampSegundos)} • {item.autorNomeAbreviado || item.autorNome} • {formatDataHoraCurta(item.publicadaEm || item.criadaEm)}
+                    </div>
+                  </div>
+                  <span className="badge badge-blue">{item.quantidadeApoios || 0} apoios</span>
+                </div>
+
+                {item.descricao ? (
+                  <div className="player-secondary-copy" style={{ marginBottom: '0.9rem' }}>
+                    {item.descricao}
+                  </div>
+                ) : null}
+
+                {item.respostaOficial ? (
+                  <div className="player-meta-card" style={{ marginBottom: '0.9rem' }}>
+                    <div className="player-meta-label">Resposta oficial</div>
+                    <div className="player-meta-value" style={{ fontSize: 16, lineHeight: 1.5 }}>
+                      {item.respostaOficial}
+                    </div>
+                    {item.respondidaPorNome ? (
+                      <div className="mini-copy">Respondida por {item.respondidaPorNome}</div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="mini-copy" style={{ marginBottom: '0.9rem' }}>
+                    Essa duvida ja esta publicada, mas ainda nao recebeu resposta oficial.
+                  </div>
+                )}
+
+                <div className="form-actions">
+                  <button
+                    className={`btn ${item.apoiadaPeloUsuario ? 'btn-primary' : 'btn-ghost'}`}
+                    type="button"
+                    disabled={processandoApoioId === item.id}
+                    onClick={() => alternarApoioDuvida(item)}
+                  >
+                    {processandoApoioId === item.id
+                      ? 'Salvando...'
+                      : item.apoiadaPeloUsuario
+                        ? 'Remover meu apoio'
+                        : 'Tambem tive essa duvida'}
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => {
+                      sincronizarTempoDuvida(item.timestampSegundos)
+                      irParaSegundo(item.timestampSegundos)
+                      pausarVideo()
+                    }}
+                  >
+                    Ir para esse trecho
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  function renderCardDuvidas() {
+    return (
+      <div className="card" style={{ marginTop: '1rem' }}>
+        <div className="section-title-row">
+          <div>
+            <div className="section-heading">Duvidas por trecho</div>
+            <div className="section-copy">
+              Marque o ponto exato do video em que voce travou. As respostas publicadas ajudam os proximos alunos no mesmo trecho.
+            </div>
+          </div>
+          <span className="badge badge-blue">{duvidas.length} publicadas</span>
+        </div>
+
+        <form onSubmit={enviarDuvida} style={{ marginTop: '1rem' }}>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Trecho selecionado</label>
+              <div className="form-input" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <strong>{formatarTimestamp(trechoSelecionadoDuvida)}</strong>
+                <button className="btn btn-ghost" type="button" onClick={() => sincronizarTempoDuvida()}>
+                  Usar tempo atual
+                </button>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Tempo em segundos</label>
+              <input
+                className="form-input"
+                type="number"
+                min="0"
+                value={duvidaForm.timestampSegundos}
+                onChange={event => setDuvidaForm(current => ({ ...current, timestampSegundos: event.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Titulo da duvida</label>
+            <input
+              className="form-input"
+              value={duvidaForm.titulo}
+              onChange={event => setDuvidaForm(current => ({ ...current, titulo: event.target.value }))}
+              placeholder="Ex.: aqui eu reduzo para primeira ou segunda?"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Contexto da duvida</label>
+            <textarea
+              className="form-textarea"
+              value={duvidaForm.descricao}
+              onChange={event => setDuvidaForm(current => ({ ...current, descricao: event.target.value }))}
+              placeholder="Explique rapidamente o que te confundiu nesse trecho para facilitar a resposta oficial."
+            />
+          </div>
+
+          <div className="form-actions">
+            <button className="btn btn-primary" type="submit" disabled={enviandoDuvida}>
+              {enviandoDuvida ? 'Enviando...' : 'Enviar duvida'}
+            </button>
+            <div className="mini-copy">
+              Novas duvidas passam por moderacao antes de ficarem visiveis para toda a comunidade.
+            </div>
+          </div>
+        </form>
+
+        {duvidasLoading ? (
+          <div className="spinner" style={{ marginTop: '1rem' }} />
+        ) : (
+          <>
+            {renderDuvidasLista(duvidasRelacionadasAoTrecho, {
+              titulo: 'Ja existem duvidas neste trecho',
+              emptyTitle: 'Nenhuma duvida publicada perto desse ponto ainda.',
+              emptyCopy: 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.',
+            })}
+
+            {renderDuvidasLista(duvidas, {
+              titulo: 'Todas as duvidas publicadas deste percurso',
+              emptyTitle: 'Ainda nao ha duvidas publicadas neste percurso.',
+              emptyCopy: 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.',
+            })}
+          </>
+        )}
+      </div>
+    )
+  }
+
   function renderCardPontosAtencao() {
     if (!exibirAreaPontos) return null
 
@@ -1604,19 +1877,22 @@ export default function Player() {
     )
   }
 
-  if (loading) return <div className="spinner" />
+  if (loading) return <>{ToastEl}<div className="spinner" /></>
 
   if (!percurso) {
     return (
-      <div className="empty-state">
-        <div className="empty-state-icon">!</div>
-        {erro || 'Conteudo nao encontrado.'}
-        <div style={{ marginTop: '1rem' }}>
-          <button className="btn btn-primary" onClick={() => navigate('/biblioteca')}>
-            Voltar para a biblioteca
-          </button>
+      <>
+        {ToastEl}
+        <div className="empty-state">
+          <div className="empty-state-icon">!</div>
+          {erro || 'Conteudo nao encontrado.'}
+          <div style={{ marginTop: '1rem' }}>
+            <button className="btn btn-primary" onClick={() => navigate('/biblioteca')}>
+              Voltar para a biblioteca
+            </button>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 
@@ -1625,6 +1901,7 @@ export default function Player() {
 
   return (
     <>
+      {ToastEl}
       <button className="back-link" onClick={voltarParaBiblioteca}>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M13 4L6 10l7 6" />
@@ -1867,6 +2144,8 @@ export default function Player() {
                   {descricaoComplementar}
                 </p>
               )}
+
+              {renderCardDuvidas()}
             </div>
 
             {!isMobileViewport && renderNavegacaoModulo()}

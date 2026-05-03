@@ -292,3 +292,24 @@ export function getStatusQuestaoBadgeClass(status) {
   if (status === 'ARQUIVADA') return 'badge-gray'
   return 'badge-warn'
 }
+
+export function formatStatusDuvidaPercurso(status) {
+  const labels = {
+    PENDENTE_MODERACAO: 'Pendente',
+    PUBLICADA: 'Publicada',
+    RESPONDIDA: 'Respondida',
+    RESOLVIDA: 'Resolvida',
+    OCULTA: 'Oculta',
+    FUNDIDA: 'Fundida',
+  }
+
+  if (!status) return '-'
+  return labels[status] || status
+}
+
+export function getStatusDuvidaPercursoBadgeClass(status) {
+  if (status === 'RESPONDIDA' || status === 'RESOLVIDA') return 'badge-green'
+  if (status === 'PUBLICADA') return 'badge-blue'
+  if (status === 'OCULTA' || status === 'FUNDIDA') return 'badge-gray'
+  return 'badge-warn'
+}

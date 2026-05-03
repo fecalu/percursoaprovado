@@ -14,6 +14,7 @@ const IconMap = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
 const IconPrice = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M5 6h10l-1 8H6L5 6z" /><path d="M7 6V4h6v2" /></svg>
 const IconList = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 6h12M4 10h12M4 14h8" /></svg>
 const IconQuiz = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 4h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2z" /><path d="M8 8a2 2 0 1 1 3.2 1.6c-.7.5-1.2.9-1.2 1.9" /><circle cx="10" cy="13.8" r=".8" fill="currentColor" stroke="none" /></svg>
+const IconComment = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h7A2.5 2.5 0 0 1 16 5.5v5A2.5 2.5 0 0 1 13.5 13H9l-3.5 3V13H6.5A2.5 2.5 0 0 1 4 10.5v-5z" /><path d="M7 6.8h6M7 9.8h4.5" /></svg>
 const IconUser = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="10" cy="6.5" r="3" /><path d="M4 16c1.5-2.6 3.6-4 6-4s4.5 1.4 6 4" /></svg>
 const IconMenu = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M4 6h12M4 10h12M4 14h12" /></svg>
 const IconClose = () => <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M5 5l10 10M15 5L5 15" /></svg>
@@ -52,11 +53,12 @@ export default function Sidebar() {
     {
       key: 'conteudo',
       label: 'Conteudo',
-      match: pathname => pathname.startsWith('/admin/percursos') || pathname.startsWith('/admin/modulos') || pathname.startsWith('/admin/questoes'),
+      match: pathname => pathname.startsWith('/admin/percursos') || pathname.startsWith('/admin/modulos') || pathname.startsWith('/admin/questoes') || pathname.startsWith('/admin/duvidas-percurso'),
       items: [
         { to: '/admin/percursos', icon: IconList, label: 'Aulas' },
         { to: '/admin/modulos', icon: IconList, label: 'Modulos' },
         { to: '/admin/questoes', icon: IconQuiz, label: 'Banco de questoes' },
+        { to: '/admin/duvidas-percurso', icon: IconComment, label: 'Duvidas por trecho' },
       ],
     },
     {
@@ -91,6 +93,7 @@ export default function Sidebar() {
       if (location.pathname.startsWith('/admin/percursos')) return 'Aulas'
       if (location.pathname.startsWith('/admin/modulos')) return 'Modulos'
       if (location.pathname.startsWith('/admin/questoes')) return 'Questoes'
+      if (location.pathname.startsWith('/admin/duvidas-percurso')) return 'Duvidas'
       if (location.pathname.startsWith('/admin/locais')) return 'Comercial'
       if (location.pathname.startsWith('/admin/planos')) return 'Comercial'
       if (location.pathname.startsWith('/admin/usuarios')) return 'Operacao'
