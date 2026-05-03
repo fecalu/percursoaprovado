@@ -24,7 +24,7 @@ function parseTimestampInput(valor) {
     return Math.max(0, (minutos * 60) + Math.min(segundos, 59))
   }
 
-  const digits = texto.replace(/\D/g, '').slice(0, 4)
+  const digits = texto.replace(/\D/g, '').slice(-4)
   if (!digits) return 0
   const padded = digits.padStart(2, '0')
   const segundos = Number(padded.slice(-2))
@@ -33,7 +33,7 @@ function parseTimestampInput(valor) {
 }
 
 function formatarTimestampInputFixo(valor) {
-  const digits = String(valor || '').replace(/\D/g, '').slice(0, 4)
+  const digits = String(valor || '').replace(/\D/g, '').slice(-4)
   const padded = digits.padStart(4, '0')
   return `${padded.slice(0, 2)}:${padded.slice(2)}`
 }
