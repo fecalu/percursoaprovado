@@ -233,6 +233,8 @@ export default function Player() {
   const [processandoApoioId, setProcessandoApoioId] = useState('')
   const [formDuvidaAberto, setFormDuvidaAberto] = useState(false)
   const [visaoDuvidas, setVisaoDuvidas] = useState('trecho')
+  const [buscaDuvidas, setBuscaDuvidas] = useState('')
+  const [limiteDuvidasVisiveis, setLimiteDuvidasVisiveis] = useState(4)
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -276,6 +278,10 @@ export default function Player() {
       document.body.classList.remove('player-page-wide')
     }
   }, [])
+
+  useEffect(() => {
+    setLimiteDuvidasVisiveis(visaoDuvidas === 'trecho' ? 4 : 6)
+  }, [visaoDuvidas])
 
   useEffect(() => {
     if (isMobileViewport) {
@@ -506,9 +512,27 @@ export default function Player() {
   const exibirRailPontosDesktop = !isMobileViewport && exibirAreaPontos
   const exibirVideoInlineMobile = isMobileViewport && videoExplicativoAberto && Boolean(pontoVideoExplicativoAtual) && Boolean(fonteVideoExplicativo)
   const trechoSelecionadoDuvida = Math.max(0, Math.floor(Number(duvidaForm.timestampSegundos) || 0))
+  const duvidasOrdenadas = useMemo(() => (
+    [...duvidas].sort((a, b) => {
+      const aRespondida = Boolean(a?.respostaOficial)
+      const bRespondida = Boolean(b?.respostaOficial)
+      if (aRespondida !== bRespondida) return aRespondida ? -1 : 1
+
+      const apoioA = Number(a?.quantidadeApoios || 0)
+      const apoioB = Number(b?.quantidadeApoios || 0)
+      if (apoioA !== apoioB) return apoioB - apoioA
+
+      const tempoA = Number(a?.timestampSegundos || 0)
+      const tempoB = Number(b?.timestampSegundos || 0)
+      if (tempoA !== tempoB) return tempoA - tempoB
+
+      return new Date(b?.publicadaEm || b?.criadaEm || 0).getTime() - new Date(a?.publicadaEm || a?.criadaEm || 0).getTime()
+    })
+  ), [duvidas])
   const duvidasRelacionadasAoTrecho = useMemo(() => (
-    duvidas.filter(item => Math.abs((item.timestampSegundos || 0) - trechoSelecionadoDuvida) <= JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS)
-  ), [duvidas, trechoSelecionadoDuvida])
+    duvidasOrdenadas.filter(item => Math.abs((item.timestampSegundos || 0) - trechoSelecionadoDuvida) <= JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS)
+  ), [duvidasOrdenadas, trechoSelecionadoDuvida])
+  const buscaDuvidasNormalizada = buscaDuvidas.trim().toLowerCase()
 
   function definirPromptPonto(id) {
     promptPontoIdRef.current = id
@@ -1574,13 +1598,20 @@ export default function Player() {
   }
 
   function renderDuvidasLista(lista, { titulo, emptyTitle, emptyCopy } = {}) {
+    const listaVisivel = lista.slice(0, limiteDuvidasVisiveis)
+    const limiteInicial = visaoDuvidas === 'trecho' ? 4 : 6
+    const temMaisItens = lista.length > listaVisivel.length
+
     return (
       <div className="card player-duvidas-list-card" style={{ marginTop: '1rem' }}>
         {titulo ? (
           <div className="section-title-row player-duvidas-list-head" style={{ marginBottom: '1rem' }}>
             <div>
               <div className="section-heading">{titulo}</div>
-              <div className="section-copy">Trechos publicados deste percurso para reaproveitar respostas e reduzir duvidas repetidas.</div>
+              <div className="section-copy">Respostas reaproveitaveis para esse percurso, organizadas por trecho para voce chegar mais rapido no que precisa.</div>
+            </div>
+            <div className="mini-copy player-duvidas-list-meta">
+              {lista.length} {lista.length === 1 ? 'duvida encontrada' : 'duvidas encontradas'}
             </div>
           </div>
         ) : null}
@@ -1592,12 +1623,17 @@ export default function Player() {
           </div>
         ) : (
           <div className="player-duvidas-list" style={{ display: 'grid', gap: '0.9rem' }}>
-            {lista.map(item => (
+            {listaVisivel.map(item => (
               <article key={item.id} className="student-filter-card player-duvida-item" style={{ padding: '1rem' }}>
                 <div className="section-title-row player-duvida-item-head" style={{ marginBottom: '0.8rem', gap: 12 }}>
                   <div>
                     <div className="player-duvida-item-topline">
                       <span className="player-duvida-time-chip">{formatarTimestamp(item.timestampSegundos)}</span>
+                      {item.quantidadeApoios > 0 ? (
+                        <span className="player-duvida-inline-chip">
+                          {item.quantidadeApoios} {item.quantidadeApoios === 1 ? 'apoio' : 'apoios'}
+                        </span>
+                      ) : null}
                     </div>
                     <div className="table-name player-duvida-item-title">{item.titulo}</div>
                     <div className="mini-copy">
@@ -1605,7 +1641,6 @@ export default function Player() {
                     </div>
                   </div>
                   <div className="player-duvida-item-side">
-                    <span className="badge badge-blue">{item.quantidadeApoios || 0} apoios</span>
                     {item.respostaOficial ? (
                       <span className="badge badge-green">Resposta oficial</span>
                     ) : (
@@ -1663,6 +1698,28 @@ export default function Player() {
                 </div>
               </article>
             ))}
+            {(temMaisItens || limiteDuvidasVisiveis > limiteInicial) ? (
+              <div className="player-duvidas-list-footer">
+                {temMaisItens ? (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setLimiteDuvidasVisiveis(current => current + limiteInicial)}
+                  >
+                    Ver mais duvidas
+                  </button>
+                ) : null}
+                {limiteDuvidasVisiveis > limiteInicial ? (
+                  <button
+                    className="btn btn-ghost"
+                    type="button"
+                    onClick={() => setLimiteDuvidasVisiveis(limiteInicial)}
+                  >
+                    Mostrar menos
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         )}
       </div>
@@ -1676,7 +1733,7 @@ export default function Player() {
           <div>
             <div className="player-duvidas-compose-title">Teve uma duvida agora?</div>
             <div className="mini-copy">
-              Capture o minuto exato e deixe a pergunta registrada para a equipe responder depois.
+              Capture o minuto exato, descreva a trava e deixe a resposta oficial ajudar voce e os proximos alunos.
             </div>
           </div>
           <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
@@ -1753,24 +1810,64 @@ export default function Player() {
 
   function renderCardDuvidas() {
     const totalRelacionadas = duvidasRelacionadasAoTrecho.length
-    const listaAtiva = visaoDuvidas === 'trecho' ? duvidasRelacionadasAoTrecho : duvidas
+    const listaBase = visaoDuvidas === 'trecho' ? duvidasRelacionadasAoTrecho : duvidasOrdenadas
+    const listaAtiva = buscaDuvidasNormalizada
+      ? listaBase.filter(item => {
+        const resumo = [
+          item?.titulo,
+          item?.descricao,
+          item?.respostaOficial,
+          item?.autorNome,
+          item?.autorNomeAbreviado,
+          formatarTimestamp(item?.timestampSegundos),
+        ].join(' ').toLowerCase()
+        return resumo.includes(buscaDuvidasNormalizada)
+      })
+      : listaBase
+    const totalRespondidas = duvidas.filter(item => item?.respostaOficial).length
+    const totalComApoio = duvidas.filter(item => Number(item?.quantidadeApoios || 0) > 0).length
+    const isPrimeiraDuvida = duvidas.length === 0 && !duvidasLoading
     const tituloLista = visaoDuvidas === 'trecho'
       ? 'Duvidas publicadas neste trecho'
       : 'Todas as duvidas publicadas deste percurso'
     const emptyTitle = visaoDuvidas === 'trecho'
-      ? 'Nenhuma duvida publicada perto desse ponto ainda.'
-      : 'Ainda nao ha duvidas publicadas neste percurso.'
+      ? buscaDuvidasNormalizada
+        ? 'Nenhuma duvida desse trecho combina com a sua busca.'
+        : 'Nenhuma duvida publicada perto desse ponto ainda.'
+      : buscaDuvidasNormalizada
+        ? 'Nenhuma duvida deste percurso combina com a sua busca.'
+        : 'Ainda nao ha duvidas publicadas neste percurso.'
     const emptyCopy = visaoDuvidas === 'trecho'
-      ? 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.'
-      : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
+      ? buscaDuvidasNormalizada
+        ? 'Tente buscar por outro termo ou registre uma nova duvida no minuto exato em que voce travou.'
+        : 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.'
+      : buscaDuvidasNormalizada
+        ? 'Experimente buscar pelo trecho, pelo problema ou pela resposta esperada.'
+        : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
 
     return (
       <div className="card player-duvidas-shell" style={{ marginTop: '1rem' }}>
         <div className="player-duvidas-hero">
-          <div>
+          <div className="player-duvidas-hero-copy">
+            <div className="player-duvidas-eyebrow">Ajuda colaborativa do percurso</div>
             <div className="section-heading">Duvidas por trecho</div>
             <div className="section-copy">
               Marque o ponto exato do video em que voce travou. As respostas publicadas ajudam os proximos alunos no mesmo trecho.
+            </div>
+            <div className="player-duvidas-hero-actions">
+              <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
+                Tive uma duvida aqui
+              </button>
+              <button
+                className="btn btn-ghost"
+                type="button"
+                onClick={() => {
+                  sincronizarTempoDuvida()
+                  setVisaoDuvidas('trecho')
+                }}
+              >
+                Ver trecho atual
+              </button>
             </div>
           </div>
           <div className="player-duvidas-hero-stats">
@@ -1783,26 +1880,29 @@ export default function Player() {
               <strong>{totalRelacionadas}</strong>
             </div>
             <div className="player-duvidas-stat">
-              <span className="player-duvidas-stat-label">Publicadas</span>
-              <strong>{duvidas.length}</strong>
+              <span className="player-duvidas-stat-label">Respondidas</span>
+              <strong>{totalRespondidas}</strong>
+            </div>
+            <div className="player-duvidas-stat">
+              <span className="player-duvidas-stat-label">Com apoio</span>
+              <strong>{totalComApoio}</strong>
             </div>
           </div>
         </div>
 
-        <div className="player-duvidas-toolbar">
-          <button
-            className="btn btn-ghost"
-            type="button"
-            onClick={() => {
-              sincronizarTempoDuvida()
-              setVisaoDuvidas('trecho')
-            }}
-          >
-            Ver trecho atual
-          </button>
-          <button className="btn btn-ghost" type="button" onClick={() => abrirCriacaoDuvida()}>
-            Tive uma duvida aqui
-          </button>
+        <div className="player-duvidas-onboarding">
+          <div className="player-duvidas-onboarding-step">
+            <span>1</span>
+            Pare no trecho exato
+          </div>
+          <div className="player-duvidas-onboarding-step">
+            <span>2</span>
+            Veja se ja existe resposta
+          </div>
+          <div className="player-duvidas-onboarding-step">
+            <span>3</span>
+            Registre sua duvida se precisar
+          </div>
         </div>
 
         {renderFormularioDuvida()}
@@ -1829,6 +1929,37 @@ export default function Player() {
                 <span>{duvidas.length}</span>
               </button>
             </div>
+
+            <div className="player-duvidas-toolbar">
+              <div className="player-duvidas-search">
+                <input
+                  className="form-input"
+                  type="text"
+                  value={buscaDuvidas}
+                  onChange={event => setBuscaDuvidas(event.target.value)}
+                  placeholder={visaoDuvidas === 'trecho' ? 'Buscar neste trecho' : 'Buscar neste percurso'}
+                />
+              </div>
+              <div className="mini-copy player-duvidas-toolbar-copy">
+                {visaoDuvidas === 'trecho'
+                  ? 'Mostrando o que ja foi publicado perto do ponto em que voce esta assistindo.'
+                  : 'Use a busca para encontrar rapidamente uma explicacao ja respondida.'}
+              </div>
+            </div>
+
+            {isPrimeiraDuvida ? (
+              <div className="player-duvidas-first-run">
+                <div>
+                  <div className="player-duvidas-first-run-title">Seja a primeira pessoa a registrar uma duvida neste percurso</div>
+                  <div className="mini-copy">
+                    Quanto mais contextualizada a pergunta, mais facil fica para o professor responder e para os proximos alunos aproveitarem.
+                  </div>
+                </div>
+                <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
+                  Registrar primeira duvida
+                </button>
+              </div>
+            ) : null}
 
             {renderDuvidasLista(listaAtiva, {
               titulo: tituloLista,
