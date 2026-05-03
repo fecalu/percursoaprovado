@@ -1617,7 +1617,7 @@ export default function Player() {
         ) : null}
 
         {!lista.length ? (
-          <div className="empty-state player-duvidas-empty" style={{ padding: '1rem 0 0' }}>
+          <div className="empty-state player-duvidas-empty" style={{ padding: '0.4rem 0 0' }}>
             <div>{emptyTitle}</div>
             {emptyCopy ? <div className="mini-copy" style={{ marginTop: 8 }}>{emptyCopy}</div> : null}
           </div>
@@ -1813,15 +1813,12 @@ export default function Player() {
     const listaBase = visaoDuvidas === 'trecho' ? duvidasRelacionadasAoTrecho : duvidasOrdenadas
     const listaAtiva = listaBase
     const isPrimeiraDuvida = duvidas.length === 0 && !duvidasLoading
-    const tituloLista = visaoDuvidas === 'trecho'
-      ? 'Duvidas publicadas neste trecho'
-      : 'Todas as duvidas publicadas deste percurso'
     const emptyTitle = visaoDuvidas === 'trecho'
-      ? 'Nenhuma duvida publicada perto desse ponto ainda.'
-      : 'Ainda nao ha duvidas publicadas neste percurso.'
+      ? 'Nenhuma duvida neste trecho.'
+      : 'Nenhuma duvida neste percurso.'
     const emptyCopy = visaoDuvidas === 'trecho'
-      ? 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.'
-      : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
+      ? 'Se precisar, faca uma pergunta.'
+      : 'As respostas aparecem aqui.'
     const resumoDuvidas = duvidas.length
       ? totalRelacionadas > 0
         ? `${totalRelacionadas} duvidas perto deste ponto`
@@ -1869,7 +1866,7 @@ export default function Player() {
                 </button>
                 {!duvidasLoading && duvidas.length > totalRelacionadas ? (
                   <button
-                    className="btn btn-ghost"
+                    className="player-duvidas-link-action"
                     type="button"
                     onClick={() => setVisaoDuvidas(current => (current === 'trecho' ? 'todas' : 'trecho'))}
                   >
@@ -1885,9 +1882,9 @@ export default function Player() {
               ) : (
                 <>
                   {visaoDuvidas === 'todas' ? (
-                    <div className="mini-copy">Mostrando todas as duvidas publicadas deste percurso.</div>
+                    <div className="mini-copy">Todas do percurso.</div>
                   ) : (
-                    <div className="mini-copy">Mostrando as duvidas publicadas perto do trecho atual.</div>
+                    <div className="mini-copy">Deste trecho.</div>
                   )}
 
                   {isPrimeiraDuvida ? (
