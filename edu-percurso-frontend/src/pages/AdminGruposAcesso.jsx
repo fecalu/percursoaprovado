@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { grupoAcessoService, percursoService } from '../services/api'
+import { grupoAcessoService, percursoService, planoService, trilhaService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 
 function getApiErrorMessage(error, fallback) {
@@ -40,9 +40,26 @@ function criarFormularioVazio(grupos = []) {
   }
 }
 
-function formatarUsoGrupo(totalAulas) {
-  if (!totalAulas) return 'Grupo sem aulas vinculadas'
-  return totalAulas === 1 ? '1 aula vinculada' : `${totalAulas} aulas vinculadas`
+function formatarUsoGrupo(totalAulas, totalPlanos, totalTrilhas) {
+  const partes = []
+
+  if (totalAulas) {
+    partes.push(totalAulas === 1 ? '1 aula vinculada' : `${totalAulas} aulas vinculadas`)
+  }
+
+  if (totalPlanos) {
+    partes.push(totalPlanos === 1 ? '1 plano vinculado' : `${totalPlanos} planos vinculados`)
+  }
+
+  if (totalTrilhas) {
+    partes.push(totalTrilhas === 1 ? '1 trilha vinculada' : `${totalTrilhas} trilhas vinculadas`)
+  }
+
+  if (!partes.length) {
+    return 'Grupo sem aulas, planos ou trilhas vinculadas'
+  }
+
+  return partes.join(' - ')
 }
 
 export default function AdminGruposAcesso() {
@@ -65,9 +82,11 @@ export default function AdminGruposAcesso() {
 
   async function carregar(preferirId = null) {
     try {
-      const [gruposResp, percursosResp] = await Promise.all([
+      const [gruposResp, percursosResp, planosResp, trilhasResp] = await Promise.all([
         grupoAcessoService.listar(),
         percursoService.listar({ todos: true }),
+        planoService.listar({ todos: true }),
+        trilhaService.listarAdmin(),
       ])
 
       const usoPorGrupo = percursosResp.reduce((acc, percurso) => {
@@ -78,9 +97,28 @@ export default function AdminGruposAcesso() {
         return acc
       }, {})
 
+      const usoPorPlano = planosResp.reduce((acc, plano) => {
+        const ids = Array.isArray(plano.gruposAcessoIds) ? plano.gruposAcessoIds : []
+        ids.forEach(id => {
+          acc[id] = (acc[id] || 0) + 1
+        })
+        return acc
+      }, {})
+
+      const usoPorTrilha = trilhasResp.reduce((acc, trilha) => {
+        const etapas = Array.isArray(trilha.etapas) ? trilha.etapas : []
+        etapas.forEach(etapa => {
+          if (!etapa.grupoAcessoId) return
+          acc[etapa.grupoAcessoId] = (acc[etapa.grupoAcessoId] || 0) + 1
+        })
+        return acc
+      }, {})
+
       const lista = gruposResp.map(grupo => ({
         ...grupo,
         totalAulas: usoPorGrupo[grupo.id] || 0,
+        totalPlanos: usoPorPlano[grupo.id] || 0,
+        totalTrilhas: usoPorTrilha[grupo.id] || 0,
       }))
 
       setGrupos(lista)
@@ -232,7 +270,7 @@ export default function AdminGruposAcesso() {
                     {grupo.descricao?.trim() ? ` - ${grupo.descricao}` : ' - Sem descricao definida.'}
                   </div>
                   <div className="mini-copy" style={{ marginTop: '0.4rem' }}>
-                    {formatarUsoGrupo(grupo.totalAulas)} • {grupo.ativo ? 'Ativo' : 'Inativo'}
+                    {formatarUsoGrupo(grupo.totalAulas, grupo.totalPlanos, grupo.totalTrilhas)} - {grupo.ativo ? 'Ativo' : 'Inativo'}
                   </div>
                 </button>
               ))}
@@ -321,9 +359,9 @@ export default function AdminGruposAcesso() {
 
             {edicaoId ? (
               <div className="mini-copy" style={{ marginTop: '0.85rem' }}>
-                {grupoEmEdicao?.totalAulas
-                  ? `Este grupo esta em uso em ${grupoEmEdicao.totalAulas} aula(s). Ele so pode ser excluido depois que sair dessas aulas.`
-                  : 'Este grupo nao esta vinculado a nenhuma aula e pode ser excluido com seguranca.'}
+                {grupoEmEdicao?.totalAulas || grupoEmEdicao?.totalPlanos || grupoEmEdicao?.totalTrilhas
+                  ? `Este grupo esta em uso em ${grupoEmEdicao?.totalAulas || 0} aula(s), ${grupoEmEdicao?.totalPlanos || 0} plano(s) e ${grupoEmEdicao?.totalTrilhas || 0} trilha(s). Ele so pode ser excluido depois que sair desses vinculos.`
+                  : 'Este grupo nao esta vinculado a nenhuma aula, plano ou trilha e pode ser excluido com seguranca.'}
               </div>
             ) : null}
 

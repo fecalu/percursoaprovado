@@ -1,116 +1,155 @@
-# Arquitetura de Produto - Evolucao da Plataforma
+# Arquitetura de Produto - Evolucao Futura da Plataforma
 
 ## Objetivo deste documento
 
-Este documento registra a visao arquitetural e de produto para a evolucao da plataforma Percurso Aprovado.
+Este documento registra, de forma detalhada, a direcao arquitetural e de produto para a evolucao do Percurso Aprovado.
 
-O objetivo e evitar perda de contexto nas proximas conversas, mantendo em um so lugar:
+Ele existe para evitar perda de contexto nas proximas conversas e para alinhar:
+
+- produto
+- UX
+- conteudo
+- comercial
+- administracao
+- implementacao tecnica
+
+Este documento descreve:
 
 - o que a plataforma e hoje
-- quais problemas o modelo atual nao resolve mais
-- qual arquitetura e recomendada para o proximo ciclo
-- como separar experiencia do aluno, regra de acesso e estrutura comercial
+- qual problema o modelo atual nao resolve mais
+- como a plataforma deve evoluir para atender perfis diferentes de aluno
+- como suportar Carro, Moto e Combo Carro + Moto
+- como separar modulo visual, grupo de acesso, trilha, plano e contexto de local
+- como isso deve refletir no aluno e no admin
 - quais fases fazem sentido executar
-- como preparar a base para expansao futura, incluindo Moto
 
-Este documento nao e uma especificacao tecnica fechada. Ele funciona como base de alinhamento entre produto, UX, negocio e implementacao.
+Este documento nao e uma especificacao tecnica fechada. Ele e uma base de arquitetura de produto.
 
 ---
 
 ## Visao geral do produto
 
-A plataforma e um produto de ensino para aprovacao em provas praticas do DETRAN, com foco em:
+O Percurso Aprovado e uma plataforma de ensino voltada para aprovacao em provas do DETRAN, com foco especial em:
 
-- percursos reais de locais de prova
+- preparacao pratica
 - revisao orientada para aprovacao
-- preparacao emocional e pratica do aluno
-- conteudo geral e conteudo especifico por local
+- percursos reais de prova
+- reducao de ansiedade antes da prova
+- conteudo geral e conteudo contextual
 
-Hoje a plataforma ja possui:
+Hoje o produto ja possui:
 
-- autenticacao e area logada do aluno
+- autenticacao e area logada
 - painel do aluno
-- biblioteca de conteudos
+- biblioteca
 - player com pontos de atencao
-- progresso de consumo
 - simulados teoricos
-- planos, pedidos, assinaturas e cancelamentos
-- administracao de aulas, modulos, locais, planos e usuarios
+- progresso
+- planos
+- pedidos
+- assinaturas
+- cancelamentos
+- administracao de aulas, planos, modulos, locais e usuarios
 
-O produto ja e bom como biblioteca organizada de conteudo, mas a proxima evolucao desejada e transforma-lo em uma jornada guiada ate a aprovacao.
+Hoje ele funciona bem como biblioteca de conteudo organizada.
+
+O proximo salto desejado e transformar essa biblioteca em uma plataforma completa de jornada ate a aprovacao.
 
 ---
 
 ## Visao de produto desejada
 
-A plataforma deve atender dois comportamentos diferentes do aluno:
+O produto precisa atender, ao mesmo tempo, dois grandes perfis de uso:
 
-1. O aluno que quer seguir uma ordem clara e nao sabe por onde comecar
-2. O aluno que quer encontrar rapidamente um tema especifico
+### 1. Aluno que quer comecar do zero
 
-Na pratica, a plataforma ideal deve oferecer ao mesmo tempo:
+Esse aluno precisa de orientacao desde o inicio da jornada.
 
-- uma trilha guiada, para quem quer comecar do zero ou seguir um caminho recomendado
+Ele nao quer apenas "ver um percurso". Ele quer entender:
+
+- o que fazer primeiro
+- quais documentos levar
+- onde ir
+- como funcionam as taxas
+- como passar no teorico
+- como se preparar para a pratica
+- como revisar antes da prova
+
+### 2. Aluno que ja iniciou e quer focar na pratica e na prova
+
+Esse aluno quer ser mais objetivo.
+
+Ele normalmente ja passou pelas etapas iniciais e quer:
+
+- entender a pratica
+- dominar o percurso
+- revisar os erros mais comuns
+- saber o que fazer no dia da prova
+
+### Sintese da visao
+
+A plataforma ideal deve oferecer ao mesmo tempo:
+
+- uma jornada guiada, para quem quer seguir um caminho completo
 - uma navegacao visual por modulos, para quem quer achar rapido o que precisa
 
-O produto tambem precisa comecar a suportar dois perfis comerciais diferentes:
+Ela deve deixar de parecer apenas uma biblioteca de videos e passar a parecer:
 
-- aluno que esta comecando do zero
-- aluno que ja passou pelo DETRAN e quer focar na reta final
-
-E, no futuro, uma nova linha de produto:
-
-- Moto
+- uma plataforma de preparacao completa
+- uma orientadora da jornada do aluno
+- uma ferramenta de revisao rapida na reta final
 
 ---
 
 ## Problema principal do modelo atual
 
-Hoje a regra de acesso do produto esta muito amarrada ao local de prova.
+Hoje o modelo de acesso do produto esta muito amarrado ao local de prova.
 
-### Como funciona hoje
+Na pratica, hoje:
 
-- O plano esta vinculado a um local de prova
-- A assinatura libera aquele local
-- Conteudo geral entra para qualquer aluno com alguma assinatura ativa
-- Conteudo especifico entra para quem tem assinatura ativa daquele local
+- o plano fica ligado ao local
+- a assinatura libera aquele local
+- conteudo geral entra para qualquer assinatura ativa
+- conteudo especifico entra por local
 
-Isso e suficiente para:
+Esse modelo resolve bem:
 
-- vender acesso por local
-- liberar conteudo geral
-- liberar conteudo especifico por local
+- venda por local
+- liberacao de percurso por local
+- mistura de conteudo geral com local
 
-Mas isso nao e suficiente para:
+Mas ele nao resolve bem:
 
-- vender jornadas diferentes para tipos diferentes de aluno
-- permitir plano do zero e plano direto para prova
-- organizar o produto por etapas da jornada do aluno
-- separar melhor regra de acesso de organizacao visual
-- escalar para Moto sem remendar a base
+- aluno do zero
+- aluno em reta final
+- linha de produto Moto
+- produto Combo Carro + Moto
+- jornadas diferentes
+- ofertas comerciais diferentes usando a mesma base de conteudo
 
-Em outras palavras:
+O problema central e este:
 
-- hoje o local faz papel demais
-- e o produto precisa de uma camada a mais de inteligencia
+- o local hoje faz papel demais
+- e a plataforma precisa de mais camadas para crescer sem virar remendo
 
 ---
 
 ## Principio central da arquitetura recomendada
 
-O crescimento da plataforma depende de separar claramente estas camadas:
+Para a plataforma crescer bem, e preciso separar claramente cinco camadas:
 
 ### 1. Modulo visual
 
-E a forma como o aluno enxerga e navega pelo conteudo.
+E a forma como o conteudo aparece para o aluno.
 
 Exemplos:
 
 - Primeiros passos
 - Documentos e taxas
 - Curso teorico
-- Aulas praticas
-- Percursos
+- Simulados
+- Pratica base
+- Percursos reais
 - Pegadinhas
 - Revisao final
 - Dia da prova
@@ -121,30 +160,38 @@ Funcao:
 - descoberta de conteudo
 - navegacao rapida
 
+Modulo visual responde a pergunta:
+
+- "Como o aluno encontra isso na plataforma?"
+
 Modulo visual nao deve ser a regra de acesso.
 
 ### 2. Grupo de acesso
 
-E a regra de negocio que define o que um plano libera.
+E a camada de regra de negocio que define o que um plano libera.
 
-Exemplos iniciais recomendados:
+Exemplos:
 
 - `primeiros_passos`
 - `documentos_taxas`
 - `curso_teorico`
-- `pratica_geral`
-- `percursos_local`
-- `pegadinhas_local`
-- `revisao_final`
-- `dia_da_prova`
+- `simulados_teoricos`
+- `carro_pratica_base`
+- `carro_percursos_local`
+- `moto_pista_padrao`
+- `moto_revisao_final`
 
 Funcao:
 
-- controlar acesso por plano
-- permitir produtos diferentes para tipos diferentes de aluno
-- preparar a base para expansao futura
+- controlar o que cada plano libera
+- separar perfis comerciais
+- permitir produtos diferentes sem duplicar toda a base
 
-Grupo de acesso nao deve ser o nome do card visto pelo aluno.
+Grupo de acesso responde a pergunta:
+
+- "Quem pode ver isso?"
+
+Grupo de acesso nao deve ser o nome do card mostrado ao aluno.
 
 ### 3. Trilha
 
@@ -152,11 +199,15 @@ E a ordem recomendada de estudo.
 
 Funcao:
 
-- orientar o aluno
 - transformar conteudo em jornada
-- apoiar o perfil "quero comecar do zero"
+- orientar o aluno
+- reduzir a sensacao de "nao sei por onde comecar"
 
-Trilha nao define sozinha o acesso. Ela organiza o que faz sentido ver primeiro.
+Trilha responde a pergunta:
+
+- "Em que ordem faz sentido estudar?"
+
+Trilha nao define sozinha o acesso. Ela organiza o que ja esta liberado.
 
 ### 4. Plano
 
@@ -164,290 +215,685 @@ E o produto comercial.
 
 Funcao:
 
-- definir preco, duracao e oferta
+- definir preco
+- definir duracao
+- definir oferta
 - liberar grupos de acesso
 - apontar para uma trilha principal
-- opcionalmente amarrar um local
+- definir a modalidade e, quando fizer sentido, o contexto de local
 
-### 5. Local
+Plano responde a pergunta:
+
+- "O que estamos vendendo?"
+
+### 5. Contexto de local
 
 Continua importante, mas com papel mais especifico.
 
 Funcao:
 
-- contexto geografico e operacional do percurso
-- filtro para conteudo especifico do local
-- parte da oferta comercial quando o plano for vinculado a um local
+- representar o local da prova quando ele for relevante
+- filtrar conteudo especifico de percurso
+- participar da regra de acesso quando o conteudo for contextual
 
-O local nao deve continuar sendo a unica camada de liberacao do produto.
+Local responde a pergunta:
 
----
+- "Esse conteudo depende de um local especifico ou nao?"
 
-## Estado atual da plataforma
-
-### O que ja esta bem resolvido
-
-- autenticacao do aluno
-- area administrativa madura
-- conteudos gerais e por local
-- biblioteca com modulos por categoria
-- player com pontos de atencao
-- compras, pedidos e assinaturas
-
-### O que ainda falta para a visao futura
-
-- uma camada propria de grupos de acesso
-- trilhas de aprendizagem
-- planos por perfil de aluno
-- separacao clara entre o que o aluno ve e o que o plano libera
-- preparacao para mais de uma modalidade
+O local nao deve continuar sendo a unica camada de autorizacao do produto.
 
 ---
 
-## Visao alvo da experiencia do aluno
+## Nova dimensao obrigatoria: modalidade
 
-O aluno nao deve sentir que esta apenas entrando em uma biblioteca.
+Para o futuro do produto, e essencial tratar modalidade como uma camada propria.
 
-Ele deve sentir que esta entrando em uma plataforma que:
+Valores iniciais:
 
-- mostra onde ele esta
-- indica o proximo passo
-- deixa facil achar um tema rapido
-- reduz ansiedade antes da prova
+- `CARRO`
+- `MOTO`
 
-### Duas portas de entrada
+No futuro, essa modalidade pode existir em:
 
-A experiencia ideal deve oferecer duas entradas muito claras:
+- plano
+- trilha
+- grupos de acesso
+- modulos
+- conteudos
 
-- "Seguir minha trilha"
-- "Encontrar um modulo"
+Mas o papel dela nao e o mesmo do local.
 
-### Painel do aluno
+### Diferenca entre modalidade e local
 
-O painel deve virar o centro de decisao do aluno.
+- Modalidade define a linha do produto
+- Local define o contexto geografico ou operacional quando existir
 
-Blocos sugeridos:
+Exemplo:
 
-- Continue de onde parou
-- Sua trilha
-- Encontre rapido o que precisa
-- Seu local de prova
-
-### Biblioteca
-
-A biblioteca deve assumir um papel mais pedagogico.
-
-Blocos sugeridos:
-
-- Sua trilha
-- Modulos gerais
-- Modulos do seu local
-- Revisao rapida
-
-### Tela da trilha
-
-Deve existir uma tela propria para a jornada.
-
-Ela mostraria:
-
-- etapas
-- progresso
-- status da etapa atual
-- CTA de continuidade
+- Carro: modalidade com conteudo contextual por local
+- Moto: modalidade com pista padrao fixa, sem local flexivel em Sao Luis
 
 ---
 
-## Dois perfis de aluno inicialmente previstos
+## Diferenca estrutural entre Carro e Moto
 
-### Perfil 1 - Comecando do zero
+Esse ponto e fundamental.
 
-Esse aluno precisa de orientacao desde antes da pratica.
+### Carro
 
-Precisa ver:
+Para Carro, o produto depende de local de prova variavel.
 
-- primeiros passos no DETRAN
+O aluno precisa de:
+
+- pratica base
+- preparacao do veiculo
+- local de prova
+- percursos reais do local
+- pegadinhas do local
+- revisao final carro
+- dia da prova carro
+
+### Moto
+
+Para Moto em Sao Luis, a logica e diferente.
+
+A prova e feita em uma pista padrao do proprio DETRAN.
+
+Isso significa que Moto:
+
+- nao depende de um local flexivel como Carro
+- nao precisa de "percursos por local"
+- precisa de dominio da pista padrao
+- precisa de erros mais comuns da pista
+- precisa de revisao final moto
+- precisa de dia da prova moto
+
+### Consequencia arquitetural
+
+Moto nao deve ser modelada como "Carro com outro nome".
+
+A jornada inicial pode ser compartilhada, mas o ramo pratico precisa ser diferente.
+
+---
+
+## Modelo-alvo da plataforma
+
+O modelo completo recomendado e este:
+
+```text
+PERCURSO APROVADO
+│
+├── JORNADA INICIAL COMPARTILHADA
+│   ├── Primeiros passos
+│   ├── Documentos e taxas
+│   ├── Curso teorico
+│   └── Simulados e preparacao teorica
+│
+├── RAMO CARRO
+│   ├── Pratica base carro
+│   ├── Preparacao do veiculo
+│   ├── Percursos reais do local
+│   ├── Pegadinhas do local
+│   ├── Revisao final carro
+│   └── Dia da prova carro
+│
+├── RAMO MOTO
+│   ├── Pratica base moto
+│   ├── Preparacao da moto
+│   ├── Pista padrao do DETRAN
+│   ├── Erros mais comuns da pista
+│   ├── Revisao final moto
+│   └── Dia da prova moto
+│
+└── MODO REVISAO RAPIDA
+    ├── Revisao geral
+    ├── Vespera da prova
+    ├── Erros que mais reprovam
+    └── Checklist final
+```
+
+---
+
+## Arquitetura comercial futura
+
+Os planos comerciais devem passar a ser pensados por:
+
+- perfil da jornada
+- modalidade
+- profundidade da oferta
+
+### Planos recomendados inicialmente
+
+#### 1. Plano Completo Carro
+
+Libera:
+
+- jornada inicial compartilhada
+- ramo completo de Carro
+
+Contexto:
+
+- exige local de prova do carro
+
+#### 2. Plano Completo Moto
+
+Libera:
+
+- jornada inicial compartilhada
+- ramo completo de Moto
+
+Contexto:
+
+- nao exige local flexivel
+- usa a pista padrao da modalidade
+
+#### 3. Plano Combo Carro + Moto
+
+Libera:
+
+- jornada inicial compartilhada
+- ramo completo de Carro
+- ramo completo de Moto
+
+Contexto:
+
+- para Carro, exige local de prova do carro
+- para Moto, usa pista padrao
+
+#### 4. Plano Reta Final Carro
+
+Libera:
+
+- pratica base carro
+- percursos reais do local
+- pegadinhas do local
+- revisao final carro
+- dia da prova carro
+
+#### 5. Plano Reta Final Moto
+
+Libera:
+
+- pratica base moto
+- pista padrao do DETRAN
+- erros da pista
+- revisao final moto
+- dia da prova moto
+
+---
+
+## Desenho detalhado das jornadas
+
+## Jornada inicial compartilhada
+
+Esse bloco pode servir para:
+
+- Carro
+- Moto
+- Combo Carro + Moto
+
+### Modulo: Primeiros passos
+
+Pode conter:
+
+- o que fazer para comecar
+- onde ir
+- como funciona o processo
+- quais etapas existem
+- o que fazer depois de concluir a etapa atual
+
+### Modulo: Documentos e taxas
+
+Pode conter:
+
+- documentos necessarios
+- taxas principais
+- onde resolver
+- duvidas comuns
+- erros de inicio da jornada
+
+### Modulo: Curso teorico
+
+Pode conter:
+
+- por onde estudar
+- organizacao da etapa teorica
+- preparacao para aulas teoricas
+- marcacao da prova
+- o que fazer ao concluir a teoria
+
+### Modulo: Simulados e preparacao teorica
+
+Pode conter:
+
+- questoes
+- simulados completos
+- topicos que mais caem
+- rotina de revisao para teorica
+
+---
+
+## Jornada detalhada de Carro
+
+### Modulo: Pratica base carro
+
+Pode conter:
+
+- embreagem
+- saida
+- parada
+- observacao
+- baliza
+- vicios comuns
+- erros de postura
+
+### Modulo: Preparacao do veiculo
+
+Pode conter:
+
+- documentos do carro
+- adesivacao
+- ajustes antes da prova
+- checklist do veiculo
+
+### Modulo: Percursos reais do local
+
+Pode conter:
+
+- videos do percurso
+- pontos de atencao
+- trechos criticos
+- onde o examinador observa mais
+
+### Modulo: Pegadinhas do local
+
+Pode conter:
+
+- erros recorrentes
+- vicios comuns do local
+- reprovacoes mais comuns
+
+### Modulo: Revisao final carro
+
+Pode conter:
+
+- compilado dos pontos mais importantes
+- revisao curta
+- erros fatais
+- ultimos ajustes
+
+### Modulo: Dia da prova carro
+
+Pode conter:
+
+- o que levar
+- como ir
+- como se vestir
+- como se comportar
+- o que nao esquecer
+
+---
+
+## Jornada detalhada de Moto
+
+### Modulo: Pratica base moto
+
+Pode conter:
+
+- controle da moto
+- equilibrio
+- postura
+- freio e aceleracao
+- vicios comuns
+
+### Modulo: Preparacao da moto
+
+Pode conter:
+
+- documentos
+- ajustes basicos
+- checklist da moto
+- cuidados pre-prova
+
+### Modulo: Pista padrao do DETRAN
+
+Pode conter:
+
+- estrutura da pista
+- leitura da pista
+- ordem das etapas
+- demonstracao de execucao
+- pontos de atencao
+
+### Modulo: Erros mais comuns da pista
+
+Pode conter:
+
+- erros que mais reprovam
+- erros por etapa
+- o que observar com mais cuidado
+
+### Modulo: Revisao final moto
+
+Pode conter:
+
+- compilado dos pontos mais importantes
+- revisao curta
+- erros fatais
+- ultimos ajustes
+
+### Modulo: Dia da prova moto
+
+Pode conter:
+
+- o que levar
+- como ir
+- como se vestir
+- como se comportar
+- o que nao esquecer
+
+---
+
+## Como o Combo Carro + Moto deve funcionar
+
+O plano Combo Carro + Moto nao deve parecer um amontoado de tudo.
+
+Ele deve ter uma logica clara:
+
+### Parte 1. Nucleo compartilhado
+
+O aluno ve primeiro a jornada inicial compartilhada:
+
+- primeiros passos
 - documentos e taxas
 - curso teorico
-- prova teorica
-- inicio da pratica
-- percurso
-- revisao final
-- dia da prova
+- simulados
 
-### Perfil 2 - Ja passou pelo DETRAN
+### Parte 2. Escolha de estudo por modalidade
 
-Esse aluno nao precisa da jornada completa.
+No painel, o aluno deve conseguir alternar claramente entre:
 
-Precisa focar em:
+- Estudar Carro
+- Estudar Moto
 
-- pratica
-- baliza e controle
-- percurso do local
-- pegadinhas
-- revisao final
-- dia da prova
+### Parte 3. Progresso separado por modalidade
 
-Esses dois perfis justificam uma arquitetura de acesso mais flexivel.
+Mesmo no combo, o progresso deve ser separado entre:
 
----
+- progresso carro
+- progresso moto
 
-## Trilhas iniciais recomendadas
+### Parte 4. Regras diferentes por contexto
 
-### Trilha 1 - Comecando do zero
+- Carro usa local de prova do carro
+- Moto usa pista padrao fixa
 
-Etapas sugeridas:
+### Consequencia de UX
 
-1. Primeiros passos no DETRAN
-2. Documentos e taxas
-3. Curso teorico
-4. Prova teorica
-5. Aulas praticas
-6. Baliza e controle do carro
-7. Percursos do seu local
-8. Pegadinhas do examinador
-9. Revisao final
-10. Dia da prova
+No combo, o aluno nao deve enxergar as duas linhas misturadas.
 
-### Trilha 2 - Ja passou pelo DETRAN
+Ele deve sentir que tem:
 
-Etapas sugeridas:
-
-1. Aulas praticas
-2. Baliza e controle do carro
-3. Percursos do seu local
-4. Pegadinhas do examinador
-5. Revisao final
-6. Dia da prova
-
-As trilhas devem organizar o mesmo ecossistema de conteudo, sem exigir duplicacao de videos.
+- uma jornada compartilhada
+- e dois ramos claros para estudar
 
 ---
 
-## Modulos visuais iniciais recomendados
+## Modelo recomendado de modulos visuais
 
-Para a navegacao rapida, os modulos iniciais podem ser:
+Os modulos visuais devem ser a camada mais facil de entender para o aluno.
+
+Eles podem ser apresentados como cards arredondados e visuais.
+
+### Familias de modulos recomendadas
+
+#### 1. Modulos de inicio de jornada
 
 - Primeiros passos
 - Documentos e taxas
 - Curso teorico
-- Aulas praticas
-- Baliza
-- Controle de embreagem
-- Percursos do seu local
-- Pegadinhas
+- Simulados
+
+#### 2. Modulos de pratica da modalidade
+
+- Pratica base carro
+- Pratica base moto
+- Preparacao do veiculo
+- Preparacao da moto
+
+#### 3. Modulos contextuais
+
+- Percursos reais do local
+- Pegadinhas do local
+- Pista padrao do DETRAN
+- Erros da pista
+
+#### 4. Modulos de fechamento
+
 - Revisao final
 - Dia da prova
+- Revisao rapida
 
-Esses modulos podem aparecer como cards arredondados e visuais, com:
+### Informacao recomendada dentro do card do modulo
 
 - titulo
 - subtitulo curto
 - quantidade de aulas
 - progresso
-- CTA de abertura
+- CTA para abrir
 
 ---
 
-## Grupos de acesso iniciais recomendados
+## Modelo recomendado de grupos de acesso
 
-Os grupos abaixo cobrem bem a primeira versao da arquitetura:
+Os grupos de acesso devem refletir a logica de liberacao e nao a navegacao visual.
+
+### Grupos compartilhados
 
 - `primeiros_passos`
 - `documentos_taxas`
 - `curso_teorico`
-- `pratica_geral`
-- `percursos_local`
-- `pegadinhas_local`
-- `revisao_final`
-- `dia_da_prova`
+- `simulados_teoricos`
 
-Esses grupos nao precisam ser publicos para o aluno. Eles podem funcionar como estrutura interna de acesso.
+### Grupos de Carro
+
+- `carro_pratica_base`
+- `carro_preparacao_veiculo`
+- `carro_percursos_local`
+- `carro_pegadinhas_local`
+- `carro_revisao_final`
+- `carro_dia_prova`
+
+### Grupos de Moto
+
+- `moto_pratica_base`
+- `moto_preparacao_moto`
+- `moto_pista_padrao`
+- `moto_erros_pista`
+- `moto_revisao_final`
+- `moto_dia_prova`
+
+### Grupos de revisao transversal
+
+- `revisao_rapida_geral`
+- `revisao_rapida_carro`
+- `revisao_rapida_moto`
 
 ---
 
-## Regra de acesso recomendada
+## Regras de acesso recomendadas
 
-### Conteudo geral
-
-Quando o conteudo nao pertence a um local especifico:
-
-- o acesso deve ser liberado por grupo de acesso
-
-Exemplo:
-
-- uma aula de documentos e taxas pode ser geral
-- ela fica acessivel para qualquer plano que libere `documentos_taxas`
-
-### Conteudo especifico de local
-
-Quando o conteudo pertence a um local:
-
-- o acesso deve ser liberado por grupo de acesso
-- e validado tambem pelo local correto
-
-Exemplo:
-
-- uma aula do percurso do Cohatrac
-- grupo: `percursos_local`
-- local: Cohatrac
-
-O aluno deve ter:
-
-- grupo `percursos_local`
-- e acesso ao local Cohatrac
-
-### Principio
-
-Conteudo local deve depender de:
-
-- grupo + local
+## Regra geral
 
 Conteudo geral deve depender de:
 
-- grupo
+- grupo de acesso
+
+Conteudo contextual deve depender de:
+
+- grupo de acesso
+- modalidade, quando relevante
+- local, quando relevante
+
+## Conteudo geral compartilhado
+
+Exemplo:
+
+- aula de documentos e taxas
+
+Depende de:
+
+- grupo `documentos_taxas`
+
+Nao depende de local.
+
+## Conteudo de Carro por local
+
+Exemplo:
+
+- aula do percurso do Cohatrac
+
+Depende de:
+
+- grupo `carro_percursos_local`
+- modalidade `CARRO`
+- local `Cohatrac`
+
+## Conteudo de Moto em pista padrao
+
+Exemplo:
+
+- aula sobre a pista padrao do DETRAN
+
+Depende de:
+
+- grupo `moto_pista_padrao`
+- modalidade `MOTO`
+
+Nao depende de local flexivel.
 
 ---
 
-## Exemplo de produtos comerciais futuros
+## Estrutura recomendada de trilhas
 
-### Plano do zero - Cohatrac
+As trilhas devem organizar a ordem recomendada do estudo.
 
-Pode ter:
+### Trilhas minimas recomendadas
 
-- local: Cohatrac
-- trilha principal: Comecando do zero
-- grupos liberados:
-  - primeiros_passos
-  - documentos_taxas
-  - curso_teorico
-  - pratica_geral
-  - percursos_local
-  - pegadinhas_local
-  - revisao_final
-  - dia_da_prova
+- `comecando_do_zero_carro`
+- `comecando_do_zero_moto`
+- `comecando_do_zero_combo`
+- `reta_final_carro`
+- `reta_final_moto`
 
-### Plano direto para prova - Cohatrac
+### Exemplo: trilha comecando do zero - carro
 
-Pode ter:
+1. Primeiros passos
+2. Documentos e taxas
+3. Curso teorico
+4. Simulados
+5. Pratica base carro
+6. Preparacao do veiculo
+7. Percursos reais do local
+8. Pegadinhas do local
+9. Revisao final carro
+10. Dia da prova carro
 
-- local: Cohatrac
-- trilha principal: Ja passou pelo DETRAN
-- grupos liberados:
-  - pratica_geral
-  - percursos_local
-  - pegadinhas_local
-  - revisao_final
-  - dia_da_prova
+### Exemplo: trilha reta final - carro
 
-Esses dois produtos podem reaproveitar bastante conteudo sem duplicar a base inteira.
+1. Pratica base carro
+2. Percursos reais do local
+3. Pegadinhas do local
+4. Revisao final carro
+5. Dia da prova carro
+
+### Exemplo: trilha comecando do zero - moto
+
+1. Primeiros passos
+2. Documentos e taxas
+3. Curso teorico
+4. Simulados
+5. Pratica base moto
+6. Preparacao da moto
+7. Pista padrao do DETRAN
+8. Erros da pista
+9. Revisao final moto
+10. Dia da prova moto
+
+### Exemplo: trilha reta final - moto
+
+1. Pratica base moto
+2. Pista padrao do DETRAN
+3. Erros da pista
+4. Revisao final moto
+5. Dia da prova moto
+
+### Exemplo: trilha comecando do zero - combo
+
+1. Primeiros passos
+2. Documentos e taxas
+3. Curso teorico
+4. Simulados
+5. Escolha de ramificacao
+6. Ramo Carro
+7. Ramo Moto
+
+No produto, isso deve ser apresentado de forma mais amigavel do que a estrutura tecnica acima.
 
 ---
 
-## Impacto no admin
+## Como o aluno deve sentir essa arquitetura
 
-O admin precisa controlar esse novo modelo sem ficar sobrecarregado.
+O aluno nao deve perceber as camadas tecnicas.
 
-A recomendacao e separar a administracao em blocos claros.
+Ele deve sentir apenas que a plataforma:
+
+- entende o momento dele
+- mostra o proximo passo
+- facilita achar rapidamente um modulo
+- orienta a revisao final
+
+### Portas de entrada recomendadas
+
+A experiencia do aluno deve sempre ter duas portas de entrada claras:
+
+- Seguir minha trilha
+- Encontrar um modulo
+
+### Painel do aluno
+
+O painel ideal deve mostrar:
+
+- Continue de onde parou
+- Sua jornada
+- Modulos rapidos
+- Revisao rapida
+- Seu contexto atual
+
+### Biblioteca
+
+A biblioteca ideal deve mostrar:
+
+- Sua trilha
+- Modulos gerais
+- Modulos da modalidade atual
+- Modulos do local, quando houver
+- Revisao rapida
+
+### Combo Carro + Moto
+
+No combo, o painel deve mostrar um seletor claro:
+
+- Estudar Carro
+- Estudar Moto
+
+O aluno nao deve se perder vendo tudo ao mesmo tempo.
+
+---
+
+## Como o admin deve operar isso
+
+Para a plataforma nao virar bagunca, o admin deve continuar separado por responsabilidades.
 
 ### 1. Modulos
 
@@ -466,9 +912,9 @@ Pergunta que responde:
 Responsabilidade:
 
 - regra de liberacao
-- identificador tecnico
+- codigo tecnico
 - descricao interna
-- comportamento geral ou local
+- ordem
 
 Pergunta que responde:
 
@@ -478,38 +924,40 @@ Pergunta que responde:
 
 Responsabilidade:
 
-- ordem recomendada
-- nome da jornada
+- nome da trilha
 - descricao
-- etapas
+- ordem das etapas
+- grupo principal de cada etapa
 
 Pergunta que responde:
 
-- "Em que ordem o aluno deve estudar?"
+- "Qual e a jornada recomendada?"
 
 ### 4. Planos
 
 Responsabilidade:
 
-- oferta comercial
 - preco
 - duracao
-- local
+- modalidade
+- contexto de local, quando existir
 - trilha principal
 - grupos liberados
 
 Pergunta que responde:
 
-- "O que estamos vendendo e liberando?"
+- "Qual produto estamos vendendo?"
 
 ### 5. Aulas
 
 Responsabilidade:
 
-- titulo e resumo
+- titulo
+- resumo
 - modulo visual
-- local
-- grupo(s) de acesso
+- modalidade
+- local, quando fizer sentido
+- grupos de acesso
 - ordem
 
 Pergunta que responde:
@@ -518,272 +966,158 @@ Pergunta que responde:
 
 ---
 
-## O que nao deve acontecer
+## Coisas que nao devem acontecer
 
-Para a arquitetura permanecer limpa, estas confusoes devem ser evitadas:
+Para a arquitetura continuar limpa, estas confusoes devem ser evitadas:
 
-### Nao misturar modulo visual com regra de acesso
+### 1. Nao misturar modulo visual com grupo de acesso
 
 Modulo e UX.
 
-Grupo de acesso e negocio.
+Grupo de acesso e regra de negocio.
 
-Se essas duas camadas forem misturadas, o sistema fica dificil de evoluir.
+### 2. Nao tratar Moto como copia de Carro
 
-### Nao prender tudo ao local
+Moto tem jornada pratica diferente.
 
-O local continua importante, mas nao deve ser a unica base de autorizacao.
+Em Sao Luis, Moto usa pista padrao, nao local flexivel.
 
-### Nao hardcodar perfis no frontend
+### 3. Nao deixar o local mandar em tudo
 
-Os perfis "do zero" e "ja passou pelo DETRAN" devem nascer do plano, da trilha e dos grupos, nao de ifs espalhados na interface.
+Local continua importante para Carro, mas nao pode ser a unica base de autorizacao da plataforma.
 
-### Nao começar por Moto
+### 4. Nao hardcodar tudo no frontend
 
-Moto deve entrar depois que a arquitetura de acesso estiver pronta.
+Perfis de jornada devem nascer da combinacao de:
 
----
-
-## Preparacao para Moto
-
-Moto nao deve ser tratada como excecao.
-
-Ela deve entrar como uma nova linha de produto.
-
-### Camada recomendada
-
-Adicionar no futuro uma nova dimensao:
-
-- `modalidade`
-
-Valores iniciais:
-
-- `CARRO`
-- `MOTO`
-
-Essa modalidade pode passar a existir em:
-
-- modulo
-- grupo de acesso
-- trilha
 - plano
-- conteudo
+- trilha
+- grupos de acesso
+- modalidade
 
-Assim, no futuro, a plataforma podera suportar:
+### 5. Nao deixar o combo virar bagunca
 
-- comecando do zero - carro
-- direto para prova - carro
-- comecando do zero - moto
-- direto para prova - moto
-
-Sem reescrever a base inteira.
+Combo precisa compartilhar o que faz sentido e separar o que precisa ser separado.
 
 ---
 
-## Fases recomendadas
+## Roadmap recomendado
 
-### Fase 1 - Fundacao de acesso
+### Fase 1. Fundacao de acesso
 
 Objetivo:
 
-- criar a camada de grupos de acesso
+- separar acesso de organizacao visual
 
 Entradas:
 
 - grupos de acesso
 - plano libera grupos
-- aula/conteudo pertence a grupos
-- regra final de acesso:
-  - conteudo geral por grupo
-  - conteudo local por grupo + local
+- aula pertence a grupos
+- regra de acesso por grupo
 
-Essa e a fase mais importante tecnicamente.
-
-### Fase 2 - Trilhas
+### Fase 2. Trilhas
 
 Objetivo:
 
-- modelar jornadas diferentes para tipos diferentes de aluno
+- formalizar jornadas diferentes
 
 Entradas:
 
-- trilha Comecando do zero
-- trilha Ja passou pelo DETRAN
+- trilhas de Carro
+- trilhas de Moto
+- trilha do Combo
 
-### Fase 3 - Experiencia do aluno
+### Fase 3. Experiencia do aluno
 
 Objetivo:
 
-- deixar a plataforma mais orientada por jornada
+- fazer a jornada aparecer de forma clara
 
 Entradas:
 
 - novo painel do aluno
 - nova biblioteca
-- tela de trilha
+- tela propria da trilha
 
-### Fase 4 - Adaptacao do admin
-
-Objetivo:
-
-- permitir que o time opere a nova arquitetura com clareza
-
-Entradas:
-
-- planos escolhem grupos e trilha
-- aulas escolhem grupos
-- trilhas ganham gestao propria
-
-### Fase 5 - Expansao
+### Fase 4. Adaptacao do admin
 
 Objetivo:
 
-- abrir caminho para Moto
+- permitir operar a nova arquitetura com clareza
 
 Entradas:
 
-- modalidade
-- novas trilhas
-- novos planos
+- admin de grupos
+- admin de trilhas
+- planos com modalidade e trilha
+- aulas com modalidade e grupos
+
+### Fase 5. Expansao comercial
+
+Objetivo:
+
+- consolidar as novas ofertas
+
+Entradas:
+
+- plano completo carro
+- plano completo moto
+- combo carro + moto
+- reta final carro
+- reta final moto
 
 ---
 
 ## Ordem de prioridade recomendada
 
-### Ordem recomendada real
+1. grupos de acesso
+2. planos liberando grupos
+3. conteudos classificados por grupos
+4. modalidade como camada de produto
+5. trilhas por modalidade
+6. painel do aluno orientado por jornada
+7. biblioteca orientada por jornada
+8. combo carro + moto
+9. refinamentos comerciais
 
-1. Grupos de acesso
-2. Planos liberando grupos
-3. Conteudos vinculados a grupos
-4. Painel do aluno
-5. Biblioteca
-6. Trilhas
-7. Admin de trilhas
-8. Preparacao para modalidade
-9. Moto
-
-### Motivo dessa ordem
+### Motivo da ordem
 
 Primeiro:
 
-- resolver "quem pode ver o que"
+- resolver quem pode ver o que
 
 Depois:
 
-- melhorar "como o aluno entende a jornada"
+- resolver como o aluno entende a jornada
 
 Depois:
 
-- escalar para novas ofertas e modalidades
-
----
-
-## Fase 1 minima viavel
-
-Se for necessario comecar com uma versao enxuta, a recomendacao minima e:
-
-- criar grupos de acesso
-- permitir que planos liberem grupos
-- permitir que aulas pertençam a grupos
-- manter modulo visual como esta
-- manter local como esta
-- ajustar regra de acesso
-
-Com isso, ja fica possivel vender:
-
-- plano do zero
-- plano direto para prova
-
-Sem ainda reescrever toda a experiencia do aluno.
-
----
-
-## Exemplo pratico de combinacao entre as camadas
-
-### Aula 1
-
-- titulo: Como pagar as taxas
-- modulo visual: Documentos e taxas
-- grupo de acesso: documentos_taxas
-- local: nenhum
-
-### Aula 2
-
-- titulo: Percurso Cohatrac 01
-- modulo visual: Percursos
-- grupo de acesso: percursos_local
-- local: Cohatrac
-
-### Aula 3
-
-- titulo: O que vestir no dia da prova
-- modulo visual: Dia da prova
-- grupo de acesso: dia_da_prova
-- local: nenhum
-
-### Plano A - Do zero
-
-- libera:
-  - documentos_taxas
-  - curso_teorico
-  - pratica_geral
-  - percursos_local
-  - pegadinhas_local
-  - revisao_final
-  - dia_da_prova
-
-### Plano B - Direto para prova
-
-- libera:
-  - pratica_geral
-  - percursos_local
-  - pegadinhas_local
-  - revisao_final
-  - dia_da_prova
-
-Assim:
-
-- Aula 1 entra so no Plano A
-- Aula 2 entra nos dois, desde que o local bata
-- Aula 3 entra nos dois
-
----
-
-## Principios de UX para a proxima fase
-
-O aluno deve sentir que:
-
-- sabe por onde comecar
-- sabe o que revisar
-- sabe o que vem depois
-- consegue achar rapido um tema especifico
-
-Os principios de experiencia recomendados sao:
-
-- direcao antes de volume
-- trilha e atalho convivendo juntos
-- menos sensacao de "biblioteca solta"
-- mais sensacao de "jornada para aprovacao"
+- resolver como vender versoes diferentes do produto
 
 ---
 
 ## Conclusao
 
-O produto esta no momento certo para sair de "biblioteca por local" e evoluir para "jornada guiada ate a aprovacao".
+O Percurso Aprovado esta no momento certo para sair de "biblioteca de percursos por local" e evoluir para "plataforma completa de aprovacao".
 
-A recomendacao central deste documento e:
+Essa evolucao deve partir destes principios:
 
-- criar grupos de acesso
-- manter modulo como camada visual
-- usar trilhas como organizacao da jornada
-- usar planos como composicao comercial de grupos + trilha
-- preservar o local como contexto, nao como unica regra
+- jornada inicial compartilhada
+- ramificacao clara entre Carro e Moto
+- Moto tratada como modalidade com pista padrao
+- Carro tratado como modalidade com local flexivel
+- Combo Carro + Moto tratado como produto proprio
+- modulo visual separado de grupo de acesso
+- trilha separada de plano
+- plano separado de contexto local
 
 Se essa arquitetura for seguida, a plataforma ganha:
 
 - clareza para o aluno
+- clareza para o admin
 - flexibilidade comercial
 - menos duplicacao de conteudo
-- base preparada para modalidades futuras
+- base pronta para crescimento futuro
 
-Esse documento deve servir como memoria principal dessa direcao de produto.
+Este documento deve servir como memoria principal dessa visao de produto.

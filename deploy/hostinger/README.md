@@ -29,6 +29,57 @@ docker compose --env-file .env.hostinger -f docker-compose.hostinger.yml up -d -
 docker compose --env-file .env.hostinger -f docker-compose.hostinger.yml ps
 ```
 
+Ou use o script de deploy com politica de backup:
+```bash
+./deploy/hostinger/deploy.sh
+```
+
+Politica de backup do script:
+- `BACKUP_MODE=quick` por padrao: salva so arquivos criticos de deploy
+- `BACKUP_MODE=full`: gera um backup completo do projeto antes do deploy
+- `BACKUP_MODE=none`: nao gera backup
+
+Exemplos:
+```bash
+./deploy/hostinger/deploy.sh
+BACKUP_MODE=full ./deploy/hostinger/deploy.sh
+BACKUP_MODE=none ./deploy/hostinger/deploy.sh
+```
+
+Variaveis opcionais:
+- `BACKUP_DIR` para mudar o destino dos arquivos
+- `ENV_FILE` para escolher outro arquivo de ambiente
+- `COMPOSE_FILE_PATH` para trocar o compose alvo
+
+Deploy padronizado de producao:
+```bash
+./deploy/hostinger/deploy-prod.sh
+```
+
+Esse comando:
+- usa `.env.hostinger`
+- usa `docker-compose.hostinger.yml`
+- faz `BACKUP_MODE=quick` por padrao
+- grava log em `/var/log/percursoaprovado-deploy.log`
+- executa limpeza leve do Docker ao final
+- valida o health da aplicacao
+
+Variaveis uteis do `deploy-prod.sh`:
+- `BACKUP_MODE=full` para um backup completo antes do deploy
+- `BACKUP_MODE=none` para pular backup
+- `RUN_DOCKER_PRUNE=0` para nao rodar a limpeza leve apos o deploy
+- `LOG_FILE=/caminho/arquivo.log` para trocar o destino do log
+
+Rotacao dos logs operacionais:
+- use `deploy/hostinger/percursoaprovado.logrotate.conf` em `/etc/logrotate.d/percursoaprovado`
+- cobre:
+  - `/var/log/percursoaprovado-deploy.log`
+  - `/var/log/percursoaprovado-backup-retention.log`
+  - `/var/log/percursoaprovado-docker-prune.log`
+
+Operacao diaria da VPS:
+- veja `deploy/hostinger/OPERACAO_VPS.md`
+
 5. Instale o site no Nginx do host
 ```bash
 cp deploy/hostinger/percursoaprovado.nginx.conf /etc/nginx/sites-available/percursoaprovado
