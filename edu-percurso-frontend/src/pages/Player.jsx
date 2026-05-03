@@ -234,7 +234,6 @@ export default function Player() {
   const [formDuvidaAberto, setFormDuvidaAberto] = useState(false)
   const [visaoDuvidas, setVisaoDuvidas] = useState('trecho')
   const [duvidasAbertas, setDuvidasAbertas] = useState(false)
-  const [buscaDuvidas, setBuscaDuvidas] = useState('')
   const [limiteDuvidasVisiveis, setLimiteDuvidasVisiveis] = useState(4)
 
   useEffect(() => {
@@ -533,7 +532,6 @@ export default function Player() {
   const duvidasRelacionadasAoTrecho = useMemo(() => (
     duvidasOrdenadas.filter(item => Math.abs((item.timestampSegundos || 0) - trechoSelecionadoDuvida) <= JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS)
   ), [duvidasOrdenadas, trechoSelecionadoDuvida])
-  const buscaDuvidasNormalizada = buscaDuvidas.trim().toLowerCase()
 
   function definirPromptPonto(id) {
     promptPontoIdRef.current = id
@@ -1813,39 +1811,17 @@ export default function Player() {
   function renderCardDuvidas() {
     const totalRelacionadas = duvidasRelacionadasAoTrecho.length
     const listaBase = visaoDuvidas === 'trecho' ? duvidasRelacionadasAoTrecho : duvidasOrdenadas
-    const listaAtiva = buscaDuvidasNormalizada
-      ? listaBase.filter(item => {
-        const resumo = [
-          item?.titulo,
-          item?.descricao,
-          item?.respostaOficial,
-          item?.autorNome,
-          item?.autorNomeAbreviado,
-          formatarTimestamp(item?.timestampSegundos),
-        ].join(' ').toLowerCase()
-        return resumo.includes(buscaDuvidasNormalizada)
-      })
-      : listaBase
-    const totalRespondidas = duvidas.filter(item => item?.respostaOficial).length
-    const totalComApoio = duvidas.filter(item => Number(item?.quantidadeApoios || 0) > 0).length
+    const listaAtiva = listaBase
     const isPrimeiraDuvida = duvidas.length === 0 && !duvidasLoading
     const tituloLista = visaoDuvidas === 'trecho'
       ? 'Duvidas publicadas neste trecho'
       : 'Todas as duvidas publicadas deste percurso'
     const emptyTitle = visaoDuvidas === 'trecho'
-      ? buscaDuvidasNormalizada
-        ? 'Nenhuma duvida desse trecho combina com a sua busca.'
-        : 'Nenhuma duvida publicada perto desse ponto ainda.'
-      : buscaDuvidasNormalizada
-        ? 'Nenhuma duvida deste percurso combina com a sua busca.'
-        : 'Ainda nao ha duvidas publicadas neste percurso.'
+      ? 'Nenhuma duvida publicada perto desse ponto ainda.'
+      : 'Ainda nao ha duvidas publicadas neste percurso.'
     const emptyCopy = visaoDuvidas === 'trecho'
-      ? buscaDuvidasNormalizada
-        ? 'Tente buscar por outro termo ou registre uma nova duvida no minuto exato em que voce travou.'
-        : 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.'
-      : buscaDuvidasNormalizada
-        ? 'Experimente buscar pelo trecho, pelo problema ou pela resposta esperada.'
-        : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
+      ? 'Se esse trecho te confundiu agora, vale a pena registrar a duvida para o professor responder depois.'
+      : 'As primeiras perguntas aprovadas vao virar uma base de ajuda reaproveitavel para os proximos alunos.'
     const resumoDuvidas = duvidas.length
       ? `${totalRelacionadas} neste trecho • ${duvidas.length} publicadas`
       : 'Abra para consultar respostas ou registrar uma nova duvida'
@@ -1887,21 +1863,11 @@ export default function Player() {
           <div className="player-duvidas-panel">
             <div className="player-duvidas-toolbar">
               <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
-                Tive uma duvida aqui
-              </button>
-              <button
-                className="btn btn-ghost"
-                type="button"
-                onClick={() => {
-                  sincronizarTempoDuvida()
-                  setVisaoDuvidas('trecho')
-                }}
-              >
-                Ver trecho atual
+                Fazer pergunta
               </button>
             </div>
 
-            {renderFormularioDuvida()}
+            {formDuvidaAberto ? renderFormularioDuvida() : null}
 
             {duvidasLoading ? (
               <div className="spinner" style={{ marginTop: '1rem' }} />
@@ -1926,18 +1892,6 @@ export default function Player() {
                   </button>
                 </div>
 
-                <div className="player-duvidas-toolbar">
-                  <div className="player-duvidas-search">
-                    <input
-                      className="form-input"
-                      type="text"
-                      value={buscaDuvidas}
-                      onChange={event => setBuscaDuvidas(event.target.value)}
-                      placeholder={visaoDuvidas === 'trecho' ? 'Buscar neste trecho' : 'Buscar neste percurso'}
-                    />
-                  </div>
-                </div>
-
                 {isPrimeiraDuvida ? (
                   <div className="player-duvidas-first-run">
                     <div>
@@ -1953,7 +1907,6 @@ export default function Player() {
                 ) : null}
 
                 {renderDuvidasLista(listaAtiva, {
-                  titulo: tituloLista,
                   emptyTitle,
                   emptyCopy,
                 })}
@@ -2311,13 +2264,6 @@ export default function Player() {
                         : 'Carregando player...'}
                     </div>
                     <div className="attention-timeline-tools">
-                      <button
-                        type="button"
-                        className="btn btn-ghost player-duvidas-quick-trigger"
-                        onClick={() => abrirCriacaoDuvida(currentTime)}
-                      >
-                        Tive uma duvida aqui
-                      </button>
                       {pontosAtencaoAtivos.length > 0 && (
                         <label className="player-attention-toggle player-attention-toggle--inline">
                           <input
@@ -2367,6 +2313,8 @@ export default function Player() {
 
               {isMobileViewport && renderNavegacaoModulo()}
 
+              {isMobileViewport && renderCardDuvidas()}
+
               {resumoPrincipal && (
                 <div className="player-stage-summary">
                   <p className="player-copy player-copy--stage">
@@ -2381,10 +2329,11 @@ export default function Player() {
                 </p>
               )}
 
-              {renderCardDuvidas()}
             </div>
 
             {!isMobileViewport && renderNavegacaoModulo()}
+
+            {!isMobileViewport && renderCardDuvidas()}
           </div>
 
           {exibirRailPontosDesktop && renderCardPontosAtencao()}
