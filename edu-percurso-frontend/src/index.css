@@ -14727,14 +14727,22 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 
 .player-duvidas-compose-form {
   display: grid;
-  gap: 0.75rem;
+  gap: 0.45rem;
+}
+
+.player-duvidas-form-group {
+  margin-bottom: 0 !important;
+}
+
+.player-duvidas-form-group .form-label {
+  margin-bottom: 0.2rem;
 }
 
 .player-duvidas-time-card {
   display: flex;
   justify-content: space-between;
   gap: 0.8rem;
-  padding: 0.75rem 0.9rem;
+  padding: 0.6rem 0.75rem;
 }
 
 .player-duvidas-time-value {
@@ -14772,6 +14780,14 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 .player-duvidas-compose-actions {
   align-items: center;
   flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.1rem;
+}
+
+.player-duvidas-compose-form .form-textarea {
+  min-height: 74px;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
 }
 
 .player-duvidas-tabs {

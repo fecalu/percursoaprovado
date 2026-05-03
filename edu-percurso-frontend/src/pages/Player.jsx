@@ -658,17 +658,19 @@ export default function Player() {
   async function enviarDuvida(event) {
     event.preventDefault()
 
-    if (!duvidaForm.titulo.trim()) {
-      show('Informe um titulo curto para a sua duvida.', 'error')
+    if (!duvidaForm.descricao.trim()) {
+      show('Escreva sua duvida para continuar.', 'error')
       return
     }
+
+    const pergunta = duvidaForm.descricao.trim()
 
     setEnviandoDuvida(true)
     try {
       await duvidaPercursoService.criar(id, {
         timestampSegundos: Math.max(0, Math.floor(Number(duvidaForm.timestampSegundos) || 0)),
-        titulo: duvidaForm.titulo.trim(),
-        descricao: duvidaForm.descricao.trim(),
+        titulo: pergunta,
+        descricao: null,
       })
       show('Duvida enviada para moderacao. Assim que for publicada, ela vai aparecer para os outros alunos.')
       setDuvidaForm(montarDuvidaInicial(currentTimeRef.current))
@@ -1786,7 +1788,7 @@ export default function Player() {
 
     return (
       <form onSubmit={enviarDuvida} className="player-duvidas-compose-form">
-        <div className="form-group">
+        <div className="form-group player-duvidas-form-group">
           <label className="form-label">Trecho selecionado</label>
           <div className="player-duvidas-time-card">
             <div className="player-duvidas-time-edit">
@@ -1823,23 +1825,13 @@ export default function Player() {
           </div>
         </div>
 
-        <div className="form-group">
-          <label className="form-label">Titulo da duvida</label>
-          <input
-            className="form-input"
-            value={duvidaForm.titulo}
-            onChange={event => setDuvidaForm(current => ({ ...current, titulo: event.target.value }))}
-            placeholder="Ex.: aqui eu reduzo para primeira ou segunda?"
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Contexto da duvida</label>
+        <div className="form-group player-duvidas-form-group">
+          <label className="form-label">Sua duvida</label>
           <textarea
             className="form-textarea"
             value={duvidaForm.descricao}
             onChange={event => setDuvidaForm(current => ({ ...current, descricao: event.target.value }))}
-            placeholder="Explique rapidamente o que te confundiu nesse trecho para facilitar a resposta oficial."
+            placeholder="Escreva rapidamente o que te confundiu nesse trecho."
           />
         </div>
 
