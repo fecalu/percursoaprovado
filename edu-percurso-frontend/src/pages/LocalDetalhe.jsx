@@ -671,10 +671,10 @@ export default function LocalDetalhe() {
   const resumoHero = usarIntroPlanosNoHero ? jornadaAtiva?.resumo || destaquePlanoAtivo?.resumo || '' : ''
   const checkoutAcompanhamento = checkoutMonitor ? getCheckoutAcompanhamento(checkoutMonitor) : null
   const checkoutSituacao = checkoutMonitor
-    ? formatSituacaoPedido(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
+    ? formatSituacaoPedido(checkoutMonitor.status, null, checkoutMonitor.paymentStatus, checkoutMonitor.assinaturaInicioEm)
     : ''
   const checkoutBadgeClass = checkoutMonitor
-    ? getSituacaoPedidoBadgeClass(checkoutMonitor.status, null, checkoutMonitor.paymentStatus)
+    ? getSituacaoPedidoBadgeClass(checkoutMonitor.status, null, checkoutMonitor.paymentStatus, checkoutMonitor.assinaturaInicioEm)
     : 'badge-gray'
   const checkoutEtapa = checkoutMonitor ? getCheckoutMonitorStage(checkoutMonitor) : 'IDLE'
   const saibaMaisLocal = localPageContent.saibaMaisItens

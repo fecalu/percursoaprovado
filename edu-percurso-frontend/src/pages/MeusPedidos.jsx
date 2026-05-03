@@ -36,7 +36,12 @@ function getSolicitacaoBadgeClass(status) {
 }
 
 function formatResumoAluno(item) {
-  const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+  const situacao = resolveSituacaoPedido(
+    item.status,
+    item.solicitacaoCancelamentoStatus,
+    item.paymentStatus,
+    item.assinaturaInicioEm
+  )
 
   if (situacao === 'SOLICITACAO_EM_ANALISE') {
     return 'Sua solicitação foi enviada e está em análise.'
@@ -125,7 +130,12 @@ export default function MeusPedidos() {
 
   const resumoOperacional = useMemo(() => {
     return pedidos.reduce((acc, item) => {
-      const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+      const situacao = resolveSituacaoPedido(
+        item.status,
+        item.solicitacaoCancelamentoStatus,
+        item.paymentStatus,
+        item.assinaturaInicioEm
+      )
 
       if (situacao === 'AGUARDANDO_PAGAMENTO') acc.aguardandoPagamento += 1
       if (situacao === 'ACESSO_LIBERADO' || situacao === 'PAGAMENTO_MANTIDO') acc.acessoAtivo += 1
@@ -210,8 +220,8 @@ export default function MeusPedidos() {
             <div key={item.id} className="student-order-card">
               <div className="student-order-main">
                 <div className="student-card-top">
-                  <span className={`badge ${getSituacaoPedidoBadgeClass(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}`}>
-                    {formatSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}
+                  <span className={`badge ${getSituacaoPedidoBadgeClass(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus, item.assinaturaInicioEm)}`}>
+                    {formatSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus, item.assinaturaInicioEm)}
                   </span>
                   <span className="student-card-copy">{fmtMoeda(item.valorCentavos)}</span>
                 </div>

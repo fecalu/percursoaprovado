@@ -35,6 +35,8 @@ public class PedidoDTO {
         private String localProvaNome;
         private String localProvaSlug;
         private UUID assinaturaId;
+        private LocalDateTime assinaturaInicioEm;
+        private LocalDateTime assinaturaFimEm;
         private Integer valorCentavos;
         private String referencia;
         private String metodoPagamento;
@@ -72,6 +74,8 @@ public class PedidoDTO {
             response.localProvaNome = pedido.getLocalProva().getNome();
             response.localProvaSlug = pedido.getLocalProva().getSlug();
             response.assinaturaId = pedido.getAssinatura() == null ? null : pedido.getAssinatura().getId();
+            response.assinaturaInicioEm = pedido.getAssinatura() == null ? null : pedido.getAssinatura().getInicioEm();
+            response.assinaturaFimEm = pedido.getAssinatura() == null ? null : pedido.getAssinatura().getFimEm();
             response.valorCentavos = pedido.getValorCentavos();
             response.referencia = pedido.getReferencia();
             response.metodoPagamento = pedido.getMetodoPagamento().name();

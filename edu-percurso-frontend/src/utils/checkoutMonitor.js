@@ -43,6 +43,8 @@ export function createCheckoutMonitor(pedido, localSlug) {
     paymentStatus: pedido?.paymentStatus || '',
     paymentStatusDetail: pedido?.paymentStatusDetail || '',
     pagoEm: pedido?.pagoEm || '',
+    assinaturaInicioEm: pedido?.assinaturaInicioEm || '',
+    assinaturaFimEm: pedido?.assinaturaFimEm || '',
     startedAt: pedido?.criadoEm || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     completedAt: '',

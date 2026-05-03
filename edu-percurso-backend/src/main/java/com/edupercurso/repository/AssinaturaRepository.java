@@ -41,6 +41,19 @@ public interface AssinaturaRepository extends JpaRepository<Assinatura, UUID> {
     boolean existsAssinaturaAtiva(UUID usuarioId, UUID localProvaId, LocalDateTime agora);
 
     @Query("""
+            select a
+            from Assinatura a
+            where a.usuario.id = :usuarioId
+              and a.localProva.id = :localProvaId
+              and a.status = com.edupercurso.entity.Assinatura.Status.ATIVA
+              and a.paymentStatus = com.edupercurso.entity.Assinatura.PaymentStatus.PAGO
+              and a.inicioEm <= :agora
+              and a.fimEm >= :agora
+            order by a.fimEm desc
+            """)
+    List<Assinatura> findAtivasByUsuarioIdAndLocalProvaId(UUID usuarioId, UUID localProvaId, LocalDateTime agora);
+
+    @Query("""
             select case when count(a) > 0 then true else false end
             from Assinatura a
             where a.usuario.id = :usuarioId
@@ -50,6 +63,19 @@ public interface AssinaturaRepository extends JpaRepository<Assinatura, UUID> {
               and a.fimEm >= :agora
             """)
     boolean existsQualquerAssinaturaAtiva(UUID usuarioId, LocalDateTime agora);
+
+    boolean existsByUsuarioIdAndLocalProvaIdAndStatusNotAndPaymentStatusAndInicioEmAfter(
+            UUID usuarioId,
+            UUID localProvaId,
+            Assinatura.Status status,
+            Assinatura.PaymentStatus paymentStatus,
+            LocalDateTime agora);
+
+    java.util.Optional<Assinatura> findFirstByUsuarioIdAndLocalProvaIdAndPaymentStatusAndStatusNotOrderByFimEmDesc(
+            UUID usuarioId,
+            UUID localProvaId,
+            Assinatura.PaymentStatus paymentStatus,
+            Assinatura.Status status);
 
     @Query("""
             select distinct a.usuario.id

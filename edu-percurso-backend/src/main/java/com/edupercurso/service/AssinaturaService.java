@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.Map;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AssinaturaService {
+
+    public static final int JANELA_RENOVACAO_DIAS = 15;
 
     private final AssinaturaRepository assinaturaRepository;
     private final PedidoRepository pedidoRepository;
@@ -56,6 +59,31 @@ public class AssinaturaService {
         return assinaturaRepository.existsAssinaturaAtiva(usuarioId, localProvaId, LocalDateTime.now());
     }
 
+    public Optional<Assinatura> buscarAssinaturaAtivaAtual(UUID usuarioId, UUID localProvaId, LocalDateTime agora) {
+        return assinaturaRepository.findAtivasByUsuarioIdAndLocalProvaId(usuarioId, localProvaId, agora)
+                .stream()
+                .findFirst();
+    }
+
+    public boolean possuiRenovacaoFutura(UUID usuarioId, UUID localProvaId, LocalDateTime agora) {
+        return assinaturaRepository.existsByUsuarioIdAndLocalProvaIdAndStatusNotAndPaymentStatusAndInicioEmAfter(
+                usuarioId,
+                localProvaId,
+                Assinatura.Status.CANCELADA,
+                Assinatura.PaymentStatus.PAGO,
+                agora
+        );
+    }
+
+    public boolean estaNaJanelaDeRenovacao(Assinatura assinatura, LocalDateTime agora) {
+        if (assinatura == null || assinatura.getFimEm() == null) {
+            return false;
+        }
+
+        long diasAteFim = ChronoUnit.DAYS.between(agora.toLocalDate(), assinatura.getFimEm().toLocalDate());
+        return diasAteFim >= 0 && diasAteFim <= JANELA_RENOVACAO_DIAS;
+    }
+
     public boolean possuiQualquerAssinaturaAtiva(UUID usuarioId) {
         return assinaturaRepository.existsQualquerAssinaturaAtiva(usuarioId, LocalDateTime.now());
     }
@@ -69,6 +97,22 @@ public class AssinaturaService {
                 .stream()
                 .map(assinatura -> assinatura.getLocalProva().getId())
                 .collect(java.util.stream.Collectors.toSet());
+    }
+
+    public LocalDateTime calcularInicioParaNovoCheckout(
+            UUID usuarioId,
+            UUID localProvaId,
+            LocalDateTime pedidoCriadoEm,
+            LocalDateTime aprovadoEm) {
+        return assinaturaRepository.findFirstByUsuarioIdAndLocalProvaIdAndPaymentStatusAndStatusNotOrderByFimEmDesc(
+                        usuarioId,
+                        localProvaId,
+                        Assinatura.PaymentStatus.PAGO,
+                        Assinatura.Status.CANCELADA
+                )
+                .filter(assinatura -> !assinatura.getFimEm().isBefore(pedidoCriadoEm))
+                .map(assinatura -> assinatura.getFimEm().isAfter(aprovadoEm) ? assinatura.getFimEm() : aprovadoEm)
+                .orElse(aprovadoEm);
     }
 
     @Transactional
@@ -92,7 +136,18 @@ public class AssinaturaService {
             LocalDateTime inicio,
             Assinatura.Origem origem,
             String observacaoInterna) {
-        if (possuiAssinaturaAtiva(usuario.getId(), plano.getLocalProva().getId())) {
+        LocalDateTime agora = LocalDateTime.now();
+        var ultimaAssinatura = assinaturaRepository.findFirstByUsuarioIdAndLocalProvaIdAndPaymentStatusAndStatusNotOrderByFimEmDesc(
+                usuario.getId(),
+                plano.getLocalProva().getId(),
+                Assinatura.PaymentStatus.PAGO,
+                Assinatura.Status.CANCELADA
+        );
+
+        if (ultimaAssinatura.isPresent() && inicio.isBefore(ultimaAssinatura.get().getFimEm())) {
+            if (ultimaAssinatura.get().getInicioEm().isAfter(agora)) {
+                throw new IllegalArgumentException("O aluno ja possui uma renovacao agendada para esse local de prova.");
+            }
             throw new IllegalArgumentException("O aluno ja possui uma assinatura ativa para esse local de prova.");
         }
 
@@ -248,6 +303,9 @@ public class AssinaturaService {
 
     private int calcularDiasRestantes(Assinatura assinatura, LocalDateTime agora) {
         if (assinatura.getStatus() != Assinatura.Status.ATIVA) {
+            return 0;
+        }
+        if (assinatura.getInicioEm() != null && assinatura.getInicioEm().isAfter(agora)) {
             return 0;
         }
         long dias = ChronoUnit.DAYS.between(agora.toLocalDate(), assinatura.getFimEm().toLocalDate());

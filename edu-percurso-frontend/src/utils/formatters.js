@@ -79,7 +79,15 @@ export function formatPedidoStatus(status) {
   return labels[status] || status
 }
 
-export function resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus) {
+function assinaturaComecaNoFuturo(assinaturaInicioEm) {
+  if (!assinaturaInicioEm) return false
+
+  const inicio = new Date(assinaturaInicioEm)
+  if (Number.isNaN(inicio.getTime())) return false
+  return inicio.getTime() > Date.now()
+}
+
+export function resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus, assinaturaInicioEm) {
   if (paymentStatus === 'refunded') return 'REEMBOLSADO'
   if (paymentStatus === 'charged_back') return 'ESTORNADO'
   if (status === 'CANCELADO') return 'PEDIDO_CANCELADO'
@@ -87,15 +95,17 @@ export function resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus) 
   if (solicitacaoStatus === 'ABERTA') return 'SOLICITACAO_EM_ANALISE'
   if (solicitacaoStatus === 'APROVADA') return 'REEMBOLSO_PENDENTE'
   if (solicitacaoStatus === 'NEGADA') return 'PAGAMENTO_MANTIDO'
+  if (status === 'PAGO' && assinaturaComecaNoFuturo(assinaturaInicioEm)) return 'RENOVACAO_AGENDADA'
   if (status === 'PAGO') return 'ACESSO_LIBERADO'
   return status || '-'
 }
 
-export function formatSituacaoPedido(status, solicitacaoStatus, paymentStatus) {
-  const situacao = resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus)
+export function formatSituacaoPedido(status, solicitacaoStatus, paymentStatus, assinaturaInicioEm) {
+  const situacao = resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus, assinaturaInicioEm)
   const labels = {
     AGUARDANDO_PAGAMENTO: 'Aguardando pagamento',
     ACESSO_LIBERADO: 'Acesso liberado',
+    RENOVACAO_AGENDADA: 'Renovação agendada',
     SOLICITACAO_EM_ANALISE: 'Solicitação em análise',
     REEMBOLSO_PENDENTE: 'Reembolso pendente',
     PAGAMENTO_MANTIDO: 'Pagamento mantido',
@@ -107,9 +117,10 @@ export function formatSituacaoPedido(status, solicitacaoStatus, paymentStatus) {
   return labels[situacao] || situacao
 }
 
-export function getSituacaoPedidoBadgeClass(status, solicitacaoStatus, paymentStatus) {
-  const situacao = resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus)
+export function getSituacaoPedidoBadgeClass(status, solicitacaoStatus, paymentStatus, assinaturaInicioEm) {
+  const situacao = resolveSituacaoPedido(status, solicitacaoStatus, paymentStatus, assinaturaInicioEm)
   if (situacao === 'ACESSO_LIBERADO' || situacao === 'PAGAMENTO_MANTIDO') return 'badge-green'
+  if (situacao === 'RENOVACAO_AGENDADA') return 'badge-blue'
   if (situacao === 'SOLICITACAO_EM_ANALISE') return 'badge-warn'
   if (situacao === 'REEMBOLSO_PENDENTE' || situacao === 'REEMBOLSADO' || situacao === 'ESTORNADO') return 'badge-blue'
   if (situacao === 'PEDIDO_CANCELADO') return 'badge-red'

@@ -47,7 +47,7 @@ public class PedidoService {
         Plano plano = planoService.buscarEntidadePorId(request.getPlanoId());
 
         validarPlanoDisponivel(plano);
-        validarSemAcessoAtivo(usuario, plano);
+        validarDisponibilidadeParaCompra(usuario, plano);
         validarSemPedidoPendente(usuario, plano);
 
         Pedido pedido = Pedido.builder()
@@ -128,10 +128,20 @@ public class PedidoService {
         atualizarDadosPagamento(pedido, payment);
 
         if ("approved".equalsIgnoreCase(payment.status()) && pedido.getStatus() != Pedido.Status.PAGO) {
-            LocalDateTime inicio = payment.approvedAt() == null ? LocalDateTime.now() : payment.approvedAt();
-            Assinatura assinatura = assinaturaService.criarAssinaturaPaga(pedido.getUsuario(), pedido.getPlano(), inicio);
+            LocalDateTime inicioPagamento = payment.approvedAt() == null ? LocalDateTime.now() : payment.approvedAt();
+            LocalDateTime inicioAssinatura = assinaturaService.calcularInicioParaNovoCheckout(
+                    pedido.getUsuario().getId(),
+                    pedido.getLocalProva().getId(),
+                    pedido.getCriadoEm(),
+                    inicioPagamento
+            );
+            Assinatura assinatura = assinaturaService.criarAssinaturaPaga(
+                    pedido.getUsuario(),
+                    pedido.getPlano(),
+                    inicioAssinatura
+            );
             pedido.setAssinatura(assinatura);
-            pedido.setPagoEm(inicio);
+            pedido.setPagoEm(inicioPagamento);
             pedido.setStatus(Pedido.Status.PAGO);
         }
     }
@@ -209,10 +219,30 @@ public class PedidoService {
         throw new IllegalArgumentException("Esse local de prova nao esta disponivel para compra.");
     }
 
-    private void validarSemAcessoAtivo(Usuario usuario, Plano plano) {
-        if (assinaturaService.possuiAssinaturaAtiva(usuario.getId(), plano.getLocalProva().getId())) {
-            throw new IllegalArgumentException("Voce ja possui acesso ativo para esse local de prova.");
+    private void validarDisponibilidadeParaCompra(Usuario usuario, Plano plano) {
+        UUID usuarioId = usuario.getId();
+        UUID localProvaId = plano.getLocalProva().getId();
+        LocalDateTime agora = LocalDateTime.now();
+
+        if (assinaturaService.possuiRenovacaoFutura(usuarioId, localProvaId, agora)) {
+            throw new IllegalArgumentException("Voce ja possui uma renovacao agendada para esse local de prova.");
         }
+
+        var assinaturaAtiva = assinaturaService.buscarAssinaturaAtivaAtual(usuarioId, localProvaId, agora);
+        if (assinaturaAtiva.isEmpty()) {
+            return;
+        }
+
+        if (assinaturaService.estaNaJanelaDeRenovacao(assinaturaAtiva.get(), agora)) {
+            return;
+        }
+
+        throw new IllegalArgumentException(
+                "Voce ja possui acesso ativo para esse local de prova. "
+                        + "A renovacao fica disponivel nos ultimos "
+                        + AssinaturaService.JANELA_RENOVACAO_DIAS
+                        + " dias de validade."
+        );
     }
 
     private void validarSemPedidoPendente(Usuario usuario, Plano plano) {

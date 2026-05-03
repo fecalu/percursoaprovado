@@ -58,9 +58,15 @@ function getResultadoSolicitacaoBadgeClass(item) {
 }
 
 function formatResumoAdminPedido(item) {
-  const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+  const situacao = resolveSituacaoPedido(
+    item.status,
+    item.solicitacaoCancelamentoStatus,
+    item.paymentStatus,
+    item.assinaturaInicioEm
+  )
 
   if (situacao === 'AGUARDANDO_PAGAMENTO') return 'Pedido ainda aguardando pagamento.'
+  if (situacao === 'RENOVACAO_AGENDADA') return `Renovacao agendada para ${formatDataCurta(item.assinaturaInicioEm)}.`
   if (situacao === 'ACESSO_LIBERADO') return `Acesso liberado em ${formatDataCurta(item.pagoEm)}.`
   if (situacao === 'SOLICITACAO_EM_ANALISE') return 'Aguardando decisao do atendimento.'
   if (situacao === 'REEMBOLSO_PENDENTE') return 'Proximo passo: fazer o reembolso manual no Mercado Pago.'
@@ -182,7 +188,12 @@ export default function AdminPedidos() {
   )
   const resumoOperacional = useMemo(() => {
     return pedidos.reduce((acc, item) => {
-      const situacao = resolveSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)
+      const situacao = resolveSituacaoPedido(
+        item.status,
+        item.solicitacaoCancelamentoStatus,
+        item.paymentStatus,
+        item.assinaturaInicioEm
+      )
 
       if (situacao === 'AGUARDANDO_PAGAMENTO') acc.aguardandoPagamento += 1
       if (situacao === 'ACESSO_LIBERADO' || situacao === 'PAGAMENTO_MANTIDO') acc.acessoAtivo += 1
@@ -432,8 +443,8 @@ export default function AdminPedidos() {
                   <span className="table-cat">{item.referencia}</span>
                   <span className="table-dur">{fmtMoeda(item.valorCentavos)}</span>
                   <span>
-                    <span className={`badge ${getSituacaoPedidoBadgeClass(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}`}>
-                      {formatSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus)}
+                    <span className={`badge ${getSituacaoPedidoBadgeClass(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus, item.assinaturaInicioEm)}`}>
+                      {formatSituacaoPedido(item.status, item.solicitacaoCancelamentoStatus, item.paymentStatus, item.assinaturaInicioEm)}
                     </span>
                   </span>
                   <div className="table-actions">

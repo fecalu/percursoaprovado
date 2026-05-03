@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { assinaturaService } from '../services/api'
-import { assinaturaEstaLiberadaAgora, filtrarAssinaturasLiberadasAgora } from '../utils/access'
+import {
+  assinaturaEstaAgendada,
+  assinaturaEstaLiberadaAgora,
+  assinaturaPodeSerRenovada,
+  filtrarAssinaturasAgendadas,
+  filtrarAssinaturasLiberadasAgora,
+  getRenovacaoAgendadaPorLocal,
+} from '../utils/access'
 import { formatAssinaturaStatus, formatDataCurta, formatPlanoDuracao } from '../utils/formatters'
 import { formatarDiasRestantes } from '../utils/student'
+
+const JANELA_RENOVACAO_DIAS = 15
 
 export default function MeusAcessos() {
   const navigate = useNavigate()
@@ -22,8 +31,13 @@ export default function MeusAcessos() {
     [assinaturas]
   )
 
+  const agendadas = useMemo(
+    () => filtrarAssinaturasAgendadas(assinaturas),
+    [assinaturas]
+  )
+
   const historico = useMemo(
-    () => assinaturas.filter(item => !assinaturaEstaLiberadaAgora(item)),
+    () => assinaturas.filter(item => !assinaturaEstaLiberadaAgora(item) && !assinaturaEstaAgendada(item)),
     [assinaturas]
   )
 
@@ -44,6 +58,10 @@ export default function MeusAcessos() {
             <div className="student-kpi-pill">
               <span className="student-kpi-pill-value">{ativas.length}</span>
               <span className="student-kpi-pill-label">Acessos ativos</span>
+            </div>
+            <div className="student-kpi-pill">
+              <span className="student-kpi-pill-value">{agendadas.length}</span>
+              <span className="student-kpi-pill-label">Renovações agendadas</span>
             </div>
             <div className="student-kpi-pill">
               <span className="student-kpi-pill-value">{historico.length}</span>
@@ -76,38 +94,100 @@ export default function MeusAcessos() {
           </div>
 
           <div className="student-access-grid">
-          {ativas.map(item => (
-            <div key={item.id} className="student-card student-access-card active-plan">
-              <div className="student-card-top">
-                <span className="badge badge-green">Ativo</span>
-                <span className="student-card-copy">{formatarDiasRestantes(item.fimEm)}</span>
-              </div>
-              <div className="student-card-title">{item.localProvaNome}</div>
-              <div className="student-card-copy">Acesso liberado no plano {item.planoNome}.</div>
-              <div className="student-detail-list">
-                <div className="student-detail-item">
-                  <span className="student-detail-label">Período</span>
-                  <span className="student-detail-value">{formatPlanoDuracao(item.duracaoDias)}</span>
+            {ativas.map(item => {
+              const renovacaoAgendada = getRenovacaoAgendadaPorLocal(assinaturas, item.localProvaId)
+              const podeRenovar = assinaturaPodeSerRenovada(item, assinaturas, JANELA_RENOVACAO_DIAS)
+
+              return (
+                <div key={item.id} className="student-card student-access-card active-plan">
+                  <div className="student-card-top">
+                    <span className="badge badge-green">Ativo</span>
+                    <span className="student-card-copy">{formatarDiasRestantes(item.fimEm)}</span>
+                  </div>
+                  <div className="student-card-title">{item.localProvaNome}</div>
+                  <div className="student-card-copy">Acesso liberado no plano {item.planoNome}.</div>
+                  <div className="student-detail-list">
+                    <div className="student-detail-item">
+                      <span className="student-detail-label">Período</span>
+                      <span className="student-detail-value">{formatPlanoDuracao(item.duracaoDias)}</span>
+                    </div>
+                    <div className="student-detail-item">
+                      <span className="student-detail-label">Início</span>
+                      <span className="student-detail-value">{formatDataCurta(item.inicioEm)}</span>
+                    </div>
+                    <div className="student-detail-item">
+                      <span className="student-detail-label">Fim</span>
+                      <span className="student-detail-value">{formatDataCurta(item.fimEm)}</span>
+                    </div>
+                    {renovacaoAgendada && (
+                      <div className="student-detail-item">
+                        <span className="student-detail-label">Próxima renovação</span>
+                        <span className="student-detail-value">Começa em {formatDataCurta(renovacaoAgendada.inicioEm)}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {renovacaoAgendada && (
+                    <div className="student-inline-note" style={{ marginTop: '0.9rem' }}>
+                      Sua renovação já está agendada. Quando este acesso terminar, o próximo ciclo entra automaticamente.
+                    </div>
+                  )}
+
+                  {!renovacaoAgendada && podeRenovar && (
+                    <div className="student-inline-note" style={{ marginTop: '0.9rem' }}>
+                      Faltam poucos dias para o vencimento. Você já pode renovar sem perder o período atual.
+                    </div>
+                  )}
+
+                  <div className="student-card-actions">
+                    <button className="btn btn-primary" onClick={() => navigate('/biblioteca')}>
+                      Abrir biblioteca
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => navigate('/meu-progresso')}>
+                      Ver progresso
+                    </button>
+                    {!renovacaoAgendada && podeRenovar && (
+                      <button className="btn btn-ghost" onClick={() => navigate(`/locais/${item.localProvaSlug}`)}>
+                        Renovar acesso
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
+      {agendadas.length > 0 && (
+        <section className="content-section" style={{ marginBottom: '2rem' }}>
+          <div className="section-title-row">
+            <div>
+              <div className="section-heading">Renovações agendadas</div>
+              <div className="section-copy">Pagamentos já confirmados que entram automaticamente quando o acesso atual terminar.</div>
+            </div>
+          </div>
+
+          <div className="student-stack">
+            {agendadas.map(item => (
+              <div key={item.id} className="student-stack-card">
+                <div>
+                  <div className="table-name">{item.localProvaNome}</div>
+                  <div className="mini-copy">{item.planoNome}</div>
                 </div>
                 <div className="student-detail-item">
-                  <span className="student-detail-label">Início</span>
+                  <span className="student-detail-label">Começa em</span>
                   <span className="student-detail-value">{formatDataCurta(item.inicioEm)}</span>
                 </div>
                 <div className="student-detail-item">
-                  <span className="student-detail-label">Fim</span>
+                  <span className="student-detail-label">Vai até</span>
                   <span className="student-detail-value">{formatDataCurta(item.fimEm)}</span>
                 </div>
+                <div>
+                  <span className="badge badge-blue">Agendada</span>
+                </div>
               </div>
-              <div className="student-card-actions">
-                <button className="btn btn-primary" onClick={() => navigate('/biblioteca')}>
-                  Abrir biblioteca
-                </button>
-                <button className="btn btn-ghost" onClick={() => navigate('/meu-progresso')}>
-                  Ver progresso
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
           </div>
         </section>
       )}
@@ -122,7 +202,7 @@ export default function MeusAcessos() {
           >
             <div className="library-section-heading">
               <div className="section-heading">Outros acessos</div>
-              <div className="section-copy">Historico de acessos que ja terminaram, foram cancelados ou ainda nao estao liberados agora.</div>
+              <div className="section-copy">Histórico de acessos que já terminaram ou foram cancelados.</div>
             </div>
 
             <div className="library-section-meta">
