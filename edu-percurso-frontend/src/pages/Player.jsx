@@ -13,6 +13,25 @@ function formatarTimestamp(segundos) {
   return `${String(minutos).padStart(2, '0')}:${String(resto).padStart(2, '0')}`
 }
 
+function parseTimestampInput(valor) {
+  const texto = String(valor || '').trim()
+  if (!texto) return 0
+
+  if (texto.includes(':')) {
+    const [minutosRaw = '0', segundosRaw = '0'] = texto.split(':', 2)
+    const minutos = Number(minutosRaw.replace(/\D/g, '') || 0)
+    const segundos = Number(segundosRaw.replace(/\D/g, '') || 0)
+    return Math.max(0, (minutos * 60) + Math.min(segundos, 59))
+  }
+
+  const digits = texto.replace(/\D/g, '').slice(0, 4)
+  if (!digits) return 0
+  const padded = digits.padStart(2, '0')
+  const segundos = Number(padded.slice(-2))
+  const minutos = Number(padded.slice(0, -2) || 0)
+  return Math.max(0, (minutos * 60) + Math.min(segundos, 59))
+}
+
 function clampPercentual(segundos, duracaoSegundos) {
   if (!duracaoSegundos || duracaoSegundos <= 0) return 0
   return Math.max(0, Math.min(100, (Number(segundos || 0) / duracaoSegundos) * 100))
@@ -235,6 +254,8 @@ export default function Player() {
   const [visaoDuvidas, setVisaoDuvidas] = useState('trecho')
   const [duvidasAbertas, setDuvidasAbertas] = useState(false)
   const [limiteDuvidasVisiveis, setLimiteDuvidasVisiveis] = useState(4)
+  const [duvidaTempoTexto, setDuvidaTempoTexto] = useState('00:00')
+  const [duvidaTempoEditando, setDuvidaTempoEditando] = useState(false)
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -282,6 +303,12 @@ export default function Player() {
   useEffect(() => {
     setLimiteDuvidasVisiveis(visaoDuvidas === 'trecho' ? 4 : 6)
   }, [visaoDuvidas])
+
+  useEffect(() => {
+    if (!duvidaTempoEditando) {
+      setDuvidaTempoTexto(formatarTimestamp(duvidaForm.timestampSegundos))
+    }
+  }, [duvidaForm.timestampSegundos, duvidaTempoEditando])
 
   useEffect(() => {
     if (isMobileViewport) {
@@ -610,10 +637,12 @@ export default function Player() {
   }
 
   function sincronizarTempoDuvida(segundos = currentTimeRef.current) {
+    const timestampSegundos = Math.max(0, Math.floor(Number(segundos) || 0))
     setDuvidaForm(current => ({
       ...current,
-      timestampSegundos: Math.max(0, Math.floor(Number(segundos) || 0)),
+      timestampSegundos,
     }))
+    setDuvidaTempoTexto(formatarTimestamp(timestampSegundos))
   }
 
   async function enviarDuvida(event) {
@@ -1752,21 +1781,21 @@ export default function Player() {
               <input
                 className="player-duvidas-time-input"
                 type="text"
-                inputMode="numeric"
-                value={formatarTimestamp(trechoSelecionadoDuvida)}
+                inputMode="text"
+                value={duvidaTempoTexto}
+                onFocus={() => setDuvidaTempoEditando(true)}
                 onChange={event => {
-                  const digits = String(event.target.value || '').replace(/\D/g, '').slice(0, 4)
-                  if (!digits) {
-                    setDuvidaForm(current => ({ ...current, timestampSegundos: 0 }))
-                    return
-                  }
-                  const padded = digits.padStart(2, '0')
-                  const secondsPart = Number(padded.slice(-2))
-                  const minutesPart = Number(padded.slice(0, -2) || 0)
+                  const bruto = String(event.target.value || '')
+                  const saneado = bruto.replace(/[^\d:]/g, '').slice(0, 5)
+                  setDuvidaTempoTexto(saneado)
                   setDuvidaForm(current => ({
                     ...current,
-                    timestampSegundos: (minutesPart * 60) + secondsPart,
+                    timestampSegundos: parseTimestampInput(saneado),
                   }))
+                }}
+                onBlur={() => {
+                  setDuvidaTempoEditando(false)
+                  setDuvidaTempoTexto(formatarTimestamp(parseTimestampInput(duvidaTempoTexto)))
                 }}
               />
               <div className="mini-copy">Voce pode ajustar o minuto aqui.</div>
