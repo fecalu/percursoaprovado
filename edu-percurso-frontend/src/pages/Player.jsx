@@ -646,6 +646,15 @@ export default function Player() {
     }
   }
 
+  function alternarPlayPauseVideo() {
+    if (playerEstaReproduzindoRef.current) {
+      pausarVideo()
+      return
+    }
+
+    iniciarVideo()
+  }
+
   function sincronizarTempoDuvida(segundos = currentTimeRef.current) {
     const timestampSegundos = Math.max(0, Math.floor(Number(segundos) || 0))
     setDuvidaForm(current => ({
@@ -2149,6 +2158,14 @@ export default function Player() {
                 )}
                 {playerPodeReproduzir ? (
                   <>
+                    {isMobileViewport && (
+                      <button
+                        type="button"
+                        className="player-mobile-tap-toggle"
+                        onClick={alternarPlayPauseVideo}
+                        aria-label={playerEstaReproduzindoRef.current ? 'Pausar video' : 'Reproduzir video'}
+                      />
+                    )}
                     {fontePlayer?.provider === 'bunny' ? (
                       <iframe
                         ref={playerMountRef}
