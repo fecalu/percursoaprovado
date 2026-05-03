@@ -4227,20 +4227,6 @@ html[data-theme='light'] .landing-page--home .home-local-showcase-sub {
   color: #516175;
 }
 
-html[data-theme='light'] .landing-page--home .home-journey-card {
-  background:
-    radial-gradient(circle at top left, rgba(21,159,112,0.1), transparent 38%),
-    linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,248,251,0.96));
-  border-color: rgba(15,23,42,0.1);
-  box-shadow:
-    0 0 0 1px rgba(15,23,42,0.04),
-    0 18px 32px rgba(15,23,42,0.06);
-}
-
-html[data-theme='light'] .landing-page--home .home-journey-card-count {
-  color: #64748b;
-}
-
 html[data-theme='light'] .landing-page--home .home-local-card {
   background: #ffffff;
   border-color: rgba(15,23,42,0.12);
@@ -4282,9 +4268,6 @@ html[data-theme='dark'] .landing-page--home .home-local-showcase-title {
 }
 
 html[data-theme='dark'] .landing-page--home .home-local-showcase-sub,
-html[data-theme='dark'] .landing-page--home .home-journey-card-copy,
-html[data-theme='dark'] .landing-page--home .home-journey-card-point,
-html[data-theme='dark'] .landing-page--home .home-journey-card-count,
 html[data-theme='dark'] .landing-page--home .home-local-card-copy,
 html[data-theme='dark'] .landing-page--home .home-local-card-meta,
 html[data-theme='dark'] .landing-page--home .home-local-card-city {
@@ -4309,14 +4292,6 @@ html[data-theme='dark'] .landing-page--home .home-local-card {
   box-shadow:
     0 0 0 1px rgba(148,163,184,0.05),
     0 20px 34px rgba(2, 6, 23, 0.28);
-}
-
-html[data-theme='dark'] .landing-page--home .home-journey-card {
-  background:
-    radial-gradient(circle at top left, rgba(45,224,154,0.12), transparent 40%),
-    linear-gradient(180deg, rgba(15,23,42,0.94), rgba(15,23,42,0.9));
-  border-color: rgba(148,163,184,0.16);
-  box-shadow: 0 20px 36px rgba(2, 6, 23, 0.28);
 }
 
 html[data-theme='dark'] .landing-page--home .home-local-card:hover {
@@ -4939,83 +4914,6 @@ html[data-theme='light'] .landing-topbar-link:hover {
 .home-local-showcase-section {
   background: #f8fafc;
   padding-block: 6rem;
-}
-
-.landing-section--home-journeys {
-  padding-top: 4.4rem;
-  padding-bottom: 0;
-}
-
-.home-journey-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.25rem;
-}
-
-.home-journey-card {
-  display: grid;
-  gap: 0.9rem;
-  padding: 1.3rem;
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at top left, rgba(45,224,154,0.12), transparent 38%),
-    linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  box-shadow: 0 18px 38px rgba(2, 6, 23, 0.16);
-}
-
-.home-journey-card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-}
-
-.home-journey-card-count {
-  color: var(--text-3);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.home-journey-card-title {
-  font-family: var(--font-head);
-  color: var(--text);
-  font-size: 1.35rem;
-  font-weight: 600;
-  line-height: 1.15;
-}
-
-.home-journey-card-copy {
-  color: var(--text-2);
-  font-size: 14px;
-  line-height: 1.65;
-}
-
-.home-journey-card-points {
-  display: grid;
-  gap: 0.55rem;
-}
-
-.home-journey-card-point {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  color: var(--text-2);
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.home-journey-card-point-dot {
-  width: 7px;
-  height: 7px;
-  margin-top: 0.45rem;
-  border-radius: 999px;
-  flex-shrink: 0;
-  background: rgba(45,224,154,0.82);
-  box-shadow: 0 0 0 4px rgba(45,224,154,0.1);
 }
 
 .home-local-showcase-shell {
@@ -13006,24 +12904,6 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
 
   .home-local-showcase-section {
     padding-block: 4.1rem;
-  }
-
-  .landing-section--home-journeys {
-    padding-top: 3.8rem;
-  }
-
-  .home-journey-grid {
-    grid-template-columns: 1fr;
-    gap: 0.95rem;
-  }
-
-  .home-journey-card {
-    padding: 1.05rem;
-    border-radius: 20px;
-  }
-
-  .home-journey-card-title {
-    font-size: 1.2rem;
   }
 
   .home-local-showcase-head {

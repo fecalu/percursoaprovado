@@ -5,6 +5,7 @@ import GoogleAuthButton from '../components/GoogleAuthButton'
 import { useAuth } from '../context/AuthContext'
 import { extractAuthError } from '../utils/authErrors'
 import { resolveAuthDestination } from '../utils/authRedirects'
+import { consumeSessionExpiredNotice } from '../utils/authSession'
 
 export default function Login() {
   const { login, loginWithGoogle } = useAuth()
@@ -12,6 +13,9 @@ export default function Login() {
   const location = useLocation()
   const [form, setForm] = useState({ email: '', senha: '' })
   const [erro, setErro] = useState('')
+  const [sessionNotice] = useState(() => (
+    consumeSessionExpiredNotice() ? 'Sua sessao expirou. Entre novamente para continuar.' : ''
+  ))
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
@@ -81,6 +85,7 @@ export default function Login() {
             </Link>
           </div>
 
+          {sessionNotice && <div className="form-error" style={{ marginBottom: '1rem' }}>{sessionNotice}</div>}
           {erro && <div className="form-error" style={{ marginBottom: '1rem' }}>{erro}</div>}
 
           <button

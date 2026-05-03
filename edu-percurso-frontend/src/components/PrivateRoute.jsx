@@ -2,12 +2,13 @@ import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import Sidebar from './Sidebar'
 import { buildReturnTo } from '../utils/authRedirects'
+import { hasValidStoredSession } from '../utils/authSession'
 
 export default function PrivateRoute({ children, adminOnly = false }) {
   const { user, isAdmin } = useAuth()
   const location = useLocation()
 
-  if (!user) {
+  if (!user || !hasValidStoredSession()) {
     return (
       <Navigate
         to="/login"

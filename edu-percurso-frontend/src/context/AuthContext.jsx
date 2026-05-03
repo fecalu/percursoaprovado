@@ -1,18 +1,23 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { authService } from '../services/api'
-import { safeLocalStorageGetItem, safeLocalStorageRemoveItem, safeLocalStorageSetItem } from '../utils/browserStorage'
+import { safeLocalStorageSetItem } from '../utils/browserStorage'
+import { clearStoredSession, getJwtExpirationMs, getStoredToken, isJwtExpired, markSessionExpiredNotice, readStoredSessionUser } from '../utils/authSession'
 
 const AuthContext = createContext(null)
 
 function loadStoredUser() {
-  try {
-    const stored = safeLocalStorageGetItem('user')
-    return stored ? JSON.parse(stored) : null
-  } catch {
-    safeLocalStorageRemoveItem('token')
-    safeLocalStorageRemoveItem('user')
-    return null
+  const token = getStoredToken()
+  if (token && isJwtExpired(token)) {
+    markSessionExpiredNotice()
   }
+
+  return readStoredSessionUser()
+}
+
+function sameUser(current, next) {
+  return current?.nome === next?.nome
+    && current?.role === next?.role
+    && current?.provider === next?.provider
 }
 
 export function AuthProvider({ children }) {
@@ -48,10 +53,67 @@ export function AuthProvider({ children }) {
   }, [persistAuth])
 
   const logout = useCallback(() => {
-    safeLocalStorageRemoveItem('token')
-    safeLocalStorageRemoveItem('user')
+    clearStoredSession()
     setUser(null)
   }, [])
+
+  const syncStoredSession = useCallback(() => {
+    const token = getStoredToken()
+    const sessionExpired = Boolean(token) && isJwtExpired(token)
+    const nextUser = readStoredSessionUser()
+
+    setUser(current => {
+      if (current && !nextUser && sessionExpired) {
+        markSessionExpiredNotice()
+      }
+
+      return sameUser(current, nextUser) ? current : nextUser
+    })
+  }, [])
+
+  useEffect(() => {
+    function handleFocus() {
+      syncStoredSession()
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        syncStoredSession()
+      }
+    }
+
+    function handleStorage(event) {
+      if (!event.key || event.key === 'token' || event.key === 'user') {
+        syncStoredSession()
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('storage', handleStorage)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('storage', handleStorage)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [syncStoredSession])
+
+  useEffect(() => {
+    if (!user || typeof window === 'undefined') return undefined
+
+    const expirationMs = getJwtExpirationMs(getStoredToken())
+    if (!expirationMs) return undefined
+
+    const timeoutMs = Math.max(expirationMs - Date.now(), 0)
+    const timeoutId = window.setTimeout(() => {
+      markSessionExpiredNotice()
+      clearStoredSession()
+      setUser(null)
+    }, timeoutMs)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [user])
 
   return (
     <AuthContext.Provider value={{ user, login, loginWithGoogle, register, logout, isAdmin: user?.role === 'ADMIN' }}>

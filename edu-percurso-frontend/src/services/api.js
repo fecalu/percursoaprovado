@@ -1,36 +1,41 @@
 import axios from 'axios'
-import { buildReturnTo } from '../utils/authRedirects'
-import { safeLocalStorageGetItem, safeLocalStorageRemoveItem } from '../utils/browserStorage'
+import { clearStoredSession, getStoredToken, isJwtExpired, markSessionExpiredNotice, buildLoginRedirectHref } from '../utils/authSession'
 
 const api = axios.create({ baseURL: '/api' })
 
 api.interceptors.request.use(config => {
   const url = config.url || ''
   const isPublicAuthRoute = url.startsWith('/auth/')
-  const token = safeLocalStorageGetItem('token')
-  if (token && !isPublicAuthRoute) config.headers.Authorization = `Bearer ${token}`
+  const token = getStoredToken()
+
+  if (!token || isPublicAuthRoute) {
+    return config
+  }
+
+  if (isJwtExpired(token)) {
+    clearStoredSession()
+    return config
+  }
+
+  config.headers.Authorization = `Bearer ${token}`
   return config
 })
 
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response?.status === 401) {
-      safeLocalStorageRemoveItem('token')
-      safeLocalStorageRemoveItem('user')
+    const requestUrl = error.config?.url || ''
+    const isPublicAuthRoute = requestUrl.startsWith('/auth/')
+
+    if (error.response?.status === 401 && !isPublicAuthRoute) {
+      clearStoredSession()
+      markSessionExpiredNotice()
 
       const pathname = window.location.pathname || '/'
       const isAuthPage = ['/login', '/register', '/forgot-password', '/reset-password'].includes(pathname)
-      const isAdminPage = pathname.startsWith('/admin')
 
       if (!isAuthPage) {
-        const search = new URLSearchParams()
-        if (!isAdminPage) {
-          const returnTo = buildReturnTo(window.location.pathname, window.location.search, window.location.hash)
-          search.set('returnTo', returnTo)
-        }
-
-        const href = search.toString() ? `/login?${search.toString()}` : '/login'
+        const href = buildLoginRedirectHref(window.location.pathname, window.location.search, window.location.hash)
         window.location.assign(href)
       }
     }

@@ -1,31 +1,16 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { safeLocalStorageGetItem } from '../utils/browserStorage'
+import { getStoredToken, decodeJwtPayload } from '../utils/authSession'
 
 const EMAIL_SUPORTE = 'suporte@percursoaprovado.com.br'
-
-function decodeJwtPayload(token) {
-  if (!token) return null
-
-  try {
-    const [, payload] = token.split('.')
-    if (!payload) return null
-
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
-    const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), '=')
-    return JSON.parse(atob(padded))
-  } catch {
-    return null
-  }
-}
 
 export default function PerfilAluno() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
   const email = useMemo(() => {
-    const token = safeLocalStorageGetItem('token')
+    const token = getStoredToken()
     return decodeJwtPayload(token)?.sub || ''
   }, [])
 
