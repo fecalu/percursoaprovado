@@ -36,7 +36,7 @@ function montarFormulario(detalhe) {
     descricao: detalhe?.descricao || '',
     status: detalhe?.status || 'PENDENTE_MODERACAO',
     respostaOficial: detalhe?.respostaOficial || '',
-    janelaRelacionadaSegundos: detalhe?.janelaRelacionadaSegundos ?? 15,
+    janelaRelacionadaSegundos: detalhe?.janelaRelacionadaSegundos ?? 5,
   }
 }
 
@@ -354,6 +354,18 @@ export default function AdminDuvidasPercurso() {
                         <option key={status} value={status}>{formatStatusDuvidaPercurso(status)}</option>
                       ))}
                     </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Janela do trecho</label>
+                    <input
+                      className="form-input"
+                      type="number"
+                      min="0"
+                      max="30"
+                      value={form.janelaRelacionadaSegundos}
+                      onChange={event => setForm(current => ({ ...current, janelaRelacionadaSegundos: event.target.value }))}
+                    />
+                    <div className="mini-copy">Segundos para cada lado do trecho. Ex.: `5` mostra de `00:05` a `00:15` quando a duvida estiver em `00:10`.</div>
                   </div>
                 </div>
 

@@ -68,6 +68,7 @@ class DuvidaPercursoServiceTest {
         ArgumentCaptor<DuvidaPercurso> captor = ArgumentCaptor.forClass(DuvidaPercurso.class);
         verify(duvidaPercursoRepository).save(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo(DuvidaPercurso.Status.PENDENTE_MODERACAO);
+        assertThat(captor.getValue().getJanelaRelacionadaSegundos()).isEqualTo(5);
         assertThat(captor.getValue().getTitulo()).isEqualTo("Posso virar o volante aqui?");
         assertThat(captor.getValue().getDescricao()).isEqualTo("Fiquei em duvida nesse retorno.");
         assertThat(response.getStatus()).isEqualTo("PENDENTE_MODERACAO");
@@ -101,7 +102,7 @@ class DuvidaPercursoServiceTest {
         request.setDescricao("O carro precisa parar totalmente?");
         request.setStatus(DuvidaPercurso.Status.PUBLICADA);
         request.setRespostaOficial("Sim. Nesse ponto o carro precisa imobilizar antes de retomar.");
-        request.setJanelaRelacionadaSegundos(15);
+        request.setJanelaRelacionadaSegundos(5);
 
         when(usuarioLookupService.buscarPorEmail(admin.getEmail())).thenReturn(admin);
         when(duvidaPercursoRepository.findById(duvida.getId())).thenReturn(Optional.of(duvida));
@@ -113,6 +114,7 @@ class DuvidaPercursoServiceTest {
 
         assertThat(response.getStatus()).isEqualTo("RESPONDIDA");
         assertThat(response.getRespostaOficial()).contains("imobilizar");
+        assertThat(response.getJanelaRelacionadaSegundos()).isEqualTo(5);
         assertThat(duvida.getRespondidaPor()).isEqualTo(admin);
         assertThat(duvida.getPublicadaEm()).isNotNull();
         assertThat(duvida.getRespostaCriadaEm()).isNotNull();

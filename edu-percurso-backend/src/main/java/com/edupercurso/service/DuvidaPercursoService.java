@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class DuvidaPercursoService {
 
-    private static final int JANELA_RELACIONADA_SEGUNDOS_PADRAO = 15;
+    private static final int JANELA_RELACIONADA_SEGUNDOS_PADRAO = 5;
     private static final Set<DuvidaPercurso.Status> STATUS_PUBLICOS = EnumSet.of(
             DuvidaPercurso.Status.PUBLICADA,
             DuvidaPercurso.Status.RESPONDIDA,
@@ -53,12 +53,13 @@ public class DuvidaPercursoService {
                 .percurso(percurso)
                 .usuario(usuario)
                 .timestampSegundos(request.getTimestampSegundos())
+                .janelaRelacionadaSegundos(JANELA_RELACIONADA_SEGUNDOS_PADRAO)
                 .titulo(normalizarTitulo(request.getTitulo()))
                 .descricao(normalizarTexto(request.getDescricao()))
                 .status(DuvidaPercurso.Status.PENDENTE_MODERACAO)
                 .build();
 
-        return DuvidaPercursoDTO.Response.from(duvidaPercursoRepository.save(duvida), 0, false, JANELA_RELACIONADA_SEGUNDOS_PADRAO);
+        return DuvidaPercursoDTO.Response.from(duvidaPercursoRepository.save(duvida), 0, false, duvida.getJanelaRelacionadaSegundos());
     }
 
     @Transactional
@@ -136,6 +137,7 @@ public class DuvidaPercursoService {
         }
 
         duvida.setTimestampSegundos(request.getTimestampSegundos());
+        duvida.setJanelaRelacionadaSegundos(normalizarJanelaRelacionada(request.getJanelaRelacionadaSegundos()));
         duvida.setTitulo(titulo);
         duvida.setDescricao(descricao);
         duvida.setStatus(status);
@@ -165,7 +167,7 @@ public class DuvidaPercursoService {
                 salva,
                 quantidadeApoios,
                 false,
-                normalizarJanelaRelacionada(request.getJanelaRelacionadaSegundos())
+                salva.getJanelaRelacionadaSegundos()
         );
     }
 
@@ -193,7 +195,7 @@ public class DuvidaPercursoService {
                         duvida,
                         apoiosPorDuvida.getOrDefault(duvida.getId(), 0L),
                         duvidasApoiadas.contains(duvida.getId()),
-                        JANELA_RELACIONADA_SEGUNDOS_PADRAO
+                        duvida.getJanelaRelacionadaSegundos()
                 ))
                 .toList();
     }
@@ -241,7 +243,7 @@ public class DuvidaPercursoService {
         if (valor == null) {
             return JANELA_RELACIONADA_SEGUNDOS_PADRAO;
         }
-        return Math.max(0, Math.min(20, valor));
+        return Math.max(0, Math.min(30, valor));
     }
 
     private String normalizarTitulo(String valor) {

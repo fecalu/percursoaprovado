@@ -36,6 +36,9 @@ public class DuvidaPercurso {
     @Column(name = "timestamp_segundos", nullable = false)
     private Integer timestampSegundos;
 
+    @Column(name = "janela_relacionada_segundos", nullable = false)
+    private Integer janelaRelacionadaSegundos;
+
     @Column(nullable = false, length = 180)
     private String titulo;
 

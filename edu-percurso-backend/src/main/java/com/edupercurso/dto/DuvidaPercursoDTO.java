@@ -40,7 +40,7 @@ public class DuvidaPercursoDTO {
 
         private String respostaOficial;
 
-        @Max(20)
+        @Max(30)
         @Min(0)
         private Integer janelaRelacionadaSegundos;
     }
@@ -96,7 +96,9 @@ public class DuvidaPercursoDTO {
             response.respostaCriadaEm = duvida.getRespostaCriadaEm();
             response.criadaEm = duvida.getCriadaEm();
             response.atualizadaEm = duvida.getAtualizadaEm();
-            response.janelaRelacionadaSegundos = janelaRelacionadaSegundos;
+            response.janelaRelacionadaSegundos = janelaRelacionadaSegundos != null
+                    ? janelaRelacionadaSegundos
+                    : duvida.getJanelaRelacionadaSegundos();
             return response;
         }
 

@@ -4,7 +4,7 @@ import { duvidaPercursoService, percursoService, progressoService } from '../ser
 import { useToast } from '../hooks/useToast'
 import { formatDataHoraCurta, formatDuracaoMinutos, formatTipoConteudo } from '../utils/formatters'
 
-const JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS = 15
+const JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS = 5
 
 function formatarTimestamp(segundos) {
   const total = Math.max(0, Math.floor(Number(segundos) || 0))
@@ -256,6 +256,7 @@ export default function Player() {
   const [limiteDuvidasVisiveis, setLimiteDuvidasVisiveis] = useState(4)
   const [duvidaTempoTexto, setDuvidaTempoTexto] = useState('00:00')
   const [duvidaTempoEditando, setDuvidaTempoEditando] = useState(false)
+  const [duvidasRespostaAbertas, setDuvidasRespostaAbertas] = useState({})
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -538,7 +539,7 @@ export default function Player() {
   )
   const exibirRailPontosDesktop = !isMobileViewport && exibirAreaPontos
   const exibirVideoInlineMobile = isMobileViewport && videoExplicativoAberto && Boolean(pontoVideoExplicativoAtual) && Boolean(fonteVideoExplicativo)
-  const trechoSelecionadoDuvida = Math.max(0, Math.floor(Number(duvidaForm.timestampSegundos) || 0))
+  const trechoSelecionadoDuvida = Math.max(0, Math.floor(Number(formDuvidaAberto ? duvidaForm.timestampSegundos : currentTime) || 0))
   const duvidasOrdenadas = useMemo(() => (
     [...duvidas].sort((a, b) => {
       const aRespondida = Boolean(a?.respostaOficial)
@@ -557,7 +558,10 @@ export default function Player() {
     })
   ), [duvidas])
   const duvidasRelacionadasAoTrecho = useMemo(() => (
-    duvidasOrdenadas.filter(item => Math.abs((item.timestampSegundos || 0) - trechoSelecionadoDuvida) <= JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS)
+    duvidasOrdenadas.filter(item => {
+      const janela = Number(item?.janelaRelacionadaSegundos || JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS)
+      return Math.abs((item.timestampSegundos || 0) - trechoSelecionadoDuvida) <= janela
+    })
   ), [duvidasOrdenadas, trechoSelecionadoDuvida])
 
   function definirPromptPonto(id) {
@@ -1685,18 +1689,29 @@ export default function Player() {
                 ) : null}
 
                 {item.respostaOficial ? (
-                  <div className="player-duvida-resposta" style={{ marginBottom: '0.6rem' }}>
-                    <div className="player-meta-label">Resposta oficial</div>
-                    <div className="player-meta-value player-duvida-resposta-copy" style={{ fontSize: 16, lineHeight: 1.5 }}>
-                      {item.respostaOficial}
-                    </div>
-                    {item.respondidaPorNome ? (
-                      <div className="mini-copy">Respondida por {item.respondidaPorNome}</div>
+                  <>
+                    <button
+                      className="player-duvidas-link-action"
+                      type="button"
+                      onClick={() => setDuvidasRespostaAbertas(current => ({ ...current, [item.id]: !current[item.id] }))}
+                    >
+                      {duvidasRespostaAbertas[item.id] ? 'Ocultar resposta' : 'Ver resposta'}
+                    </button>
+                    {duvidasRespostaAbertas[item.id] ? (
+                      <div className="player-duvida-resposta" style={{ marginTop: '0.45rem', marginBottom: '0.6rem' }}>
+                        <div className="player-meta-label">Resposta</div>
+                        <div className="player-meta-value player-duvida-resposta-copy" style={{ fontSize: 15, lineHeight: 1.45 }}>
+                          {item.respostaOficial}
+                        </div>
+                        {item.respondidaPorNome ? (
+                          <div className="mini-copy">Respondida por {item.respondidaPorNome}</div>
+                        ) : null}
+                      </div>
                     ) : null}
-                  </div>
+                  </>
                 ) : (
-                  <div className="mini-copy player-duvida-sem-resposta" style={{ marginBottom: '0.6rem' }}>
-                    Essa duvida ja esta publicada, mas ainda nao recebeu resposta oficial.
+                  <div className="mini-copy player-duvida-sem-resposta" style={{ marginBottom: '0.45rem' }}>
+                    Sem resposta ainda.
                   </div>
                 )}
 
