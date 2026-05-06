@@ -24,8 +24,8 @@ export default function Login() {
     setErro('')
     setGoogleLoading(true)
     try {
-      const role = await loginWithGoogle(code, window.location.origin)
-      navigate(resolveAuthDestination(role, location.state, location.search), { replace: true })
+      const data = await loginWithGoogle(code, window.location.origin)
+      navigate(resolveAuthDestination(data.role, location.state, location.search), { replace: true })
     } catch (error) {
       setErro(extractAuthError(error, 'Não foi possível entrar com Google.'))
     } finally {

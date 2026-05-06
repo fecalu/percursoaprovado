@@ -4,6 +4,7 @@ import com.edupercurso.dto.AuthDTO;
 import com.edupercurso.entity.Usuario;
 import com.edupercurso.repository.UsuarioRepository;
 import com.edupercurso.security.JwtUtil;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -90,6 +91,17 @@ public class AuthService {
         );
     }
 
+    public AuthDTO.LoginResponse concluirCadastroGoogle(AuthDTO.CompleteGoogleSignupRequest req) {
+        JwtUtil.GoogleSignupPending signupPending;
+        try {
+            signupPending = jwtUtil.extrairTokenCadastroGooglePendente(req.getSignupToken());
+        } catch (JwtException | IllegalArgumentException error) {
+            throw new IllegalArgumentException("Nao foi possivel continuar o cadastro com Google. Tente novamente.");
+        }
+
+        return criarOuEntrarContaGooglePendente(signupPending);
+    }
+
     private AuthDTO.LoginResponse loginOuRegistrarContaGoogle(
             GoogleAuthService.GoogleAccount googleAccount,
             boolean aceitouTermos,
@@ -144,26 +156,27 @@ public class AuthService {
             throw new IllegalArgumentException("Não encontramos uma conta vinculada a este Google. Toque em Criar conta para continuar.");
         }
         if (!aceitouTermos) {
-            throw new IllegalArgumentException("Para criar sua conta com Google, aceite os Termos de Uso e a Política de Privacidade.");
+            String pendingSignupToken = jwtUtil.gerarTokenCadastroGooglePendente(
+                    googleAccount.getGoogleSub(),
+                    googleAccount.getEmail(),
+                    googleAccount.getNome(),
+                    googleAccount.getAvatarUrl(),
+                    googleAccount.isEmailVerificado()
+            );
+            return AuthDTO.LoginResponse.pendingGoogleSignup(
+                    googleAccount.getNome(),
+                    googleAccount.getEmail(),
+                    pendingSignupToken
+            );
         }
 
-        LocalDateTime aceiteEm = LocalDateTime.now();
-
-        Usuario novoUsuario = Usuario.builder()
-                .nome(googleAccount.getNome())
-                .email(googleAccount.getEmail())
-                .senhaHash(null)
-                .authProvider(Usuario.AuthProvider.GOOGLE)
-                .googleSub(googleAccount.getGoogleSub())
-                .avatarUrl(googleAccount.getAvatarUrl())
-                .emailVerificado(googleAccount.isEmailVerificado())
-                .termosAceitosEm(aceiteEm)
-                .politicaPrivacidadeAceitaEm(aceiteEm)
-                .role(Usuario.Role.ALUNO)
-                .build();
-
-        usuarioRepository.save(novoUsuario);
-        return criarRespostaLogin(novoUsuario);
+        return criarOuEntrarContaGooglePendente(new JwtUtil.GoogleSignupPending(
+                googleAccount.getGoogleSub(),
+                googleAccount.getEmail(),
+                googleAccount.getNome(),
+                googleAccount.getAvatarUrl(),
+                googleAccount.isEmailVerificado()
+        ));
     }
 
     public void solicitarRedefinicao(AuthDTO.ForgotPasswordRequest req) {
@@ -177,6 +190,78 @@ public class AuthService {
     private AuthDTO.LoginResponse criarRespostaLogin(Usuario usuario) {
         String token = jwtUtil.gerar(usuario.getEmail(), usuario.getRole().name());
         return new AuthDTO.LoginResponse(token, usuario.getNome(), usuario.getRole(), usuario.getAuthProvider());
+    }
+
+    private AuthDTO.LoginResponse criarOuEntrarContaGooglePendente(JwtUtil.GoogleSignupPending signupPending) {
+        Usuario usuarioVinculado = usuarioRepository.findByGoogleSub(signupPending.googleSub()).orElse(null);
+        if (usuarioVinculado != null) {
+            if (usuarioVinculado.getRole() != Usuario.Role.ALUNO) {
+                throw new IllegalArgumentException("Login com Google nao disponivel para essa conta.");
+            }
+
+            sincronizarContaGoogle(usuarioVinculado, signupPending);
+            return criarRespostaLogin(usuarioVinculado);
+        }
+
+        Usuario usuarioComMesmoEmail = usuarioRepository.findByEmailIgnoreCase(signupPending.email()).orElse(null);
+        if (usuarioComMesmoEmail != null) {
+            if (usuarioComMesmoEmail.getAuthProvider() == Usuario.AuthProvider.GOOGLE) {
+                throw new IllegalArgumentException("Essa conta Google ja foi criada. Toque em Continuar com Google para entrar.");
+            }
+            throw new IllegalArgumentException("Ja existe uma conta com esse e-mail. Entre com sua senha para acessar.");
+        }
+
+        LocalDateTime aceiteEm = LocalDateTime.now();
+        Usuario novoUsuario = Usuario.builder()
+                .nome(signupPending.nome())
+                .email(signupPending.email())
+                .senhaHash(null)
+                .authProvider(Usuario.AuthProvider.GOOGLE)
+                .googleSub(signupPending.googleSub())
+                .avatarUrl(signupPending.avatarUrl())
+                .emailVerificado(signupPending.emailVerificado())
+                .termosAceitosEm(aceiteEm)
+                .politicaPrivacidadeAceitaEm(aceiteEm)
+                .role(Usuario.Role.ALUNO)
+                .build();
+
+        usuarioRepository.save(novoUsuario);
+        return criarRespostaLogin(novoUsuario);
+    }
+
+    private void sincronizarContaGoogle(Usuario usuario, JwtUtil.GoogleSignupPending signupPending) {
+        boolean precisaAtualizar = false;
+
+        if (!signupPending.nome().equals(usuario.getNome())) {
+            usuario.setNome(signupPending.nome());
+            precisaAtualizar = true;
+        }
+        if (!signupPending.email().equalsIgnoreCase(usuario.getEmail())
+                && usuarioRepository.findByEmailIgnoreCase(signupPending.email())
+                .filter(outro -> !outro.getId().equals(usuario.getId()))
+                .isPresent()) {
+            throw new IllegalArgumentException("Ja existe outra conta vinculada a esse e-mail.");
+        }
+        if (!signupPending.email().equalsIgnoreCase(usuario.getEmail())) {
+            usuario.setEmail(signupPending.email());
+            precisaAtualizar = true;
+        }
+        if (signupPending.avatarUrl() != null && !signupPending.avatarUrl().equals(usuario.getAvatarUrl())) {
+            usuario.setAvatarUrl(signupPending.avatarUrl());
+            precisaAtualizar = true;
+        }
+        if (usuario.isEmailVerificado() != signupPending.emailVerificado()) {
+            usuario.setEmailVerificado(signupPending.emailVerificado());
+            precisaAtualizar = true;
+        }
+        if (usuario.getAuthProvider() != Usuario.AuthProvider.GOOGLE) {
+            usuario.setAuthProvider(Usuario.AuthProvider.GOOGLE);
+            precisaAtualizar = true;
+        }
+
+        if (precisaAtualizar) {
+            usuarioRepository.save(usuario);
+        }
     }
 
     private String normalizarEmail(String email) {

@@ -1635,6 +1635,36 @@ html:not([data-theme='light']) .attention-timeline-progress {
   gap: 0.65rem;
   margin-bottom: 1.4rem;
 }
+.auth-google-pending-card {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.03);
+}
+.auth-google-pending-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+.auth-google-pending-copy {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-2);
+}
+.auth-google-pending-meta {
+  display: grid;
+  gap: 0.1rem;
+}
+.auth-google-pending-meta strong {
+  font-size: 14px;
+  color: var(--text);
+}
+.auth-google-pending-meta span {
+  font-size: 12px;
+  color: var(--text-2);
+}
 .auth-google-button {
   width: 100%;
   min-height: 46px;
@@ -1727,6 +1757,7 @@ html:not([data-theme='light']) .attention-timeline-progress {
   font-weight: 600;
 }
 .auth-consent-check a:hover { text-decoration: underline; }
+.auth-consent-check--compact { margin: 0; }
 
 @keyframes auth-consent-flash {
   0% {

@@ -42,8 +42,18 @@ export function AuthProvider({ children }) {
 
   const loginWithGoogle = useCallback(async (code, redirectUri, aceitouTermos = false, modoCadastro = false) => {
     const data = await authService.googleLogin({ code, redirectUri, aceitouTermos, modoCadastro })
-    persistAuth(data)
-    return data.role
+    if (data?.token) {
+      persistAuth(data)
+    }
+    return data
+  }, [persistAuth])
+
+  const completeGoogleSignup = useCallback(async (signupToken, aceitouTermos) => {
+    const data = await authService.completeGoogleSignup({ signupToken, aceitouTermos })
+    if (data?.token) {
+      persistAuth(data)
+    }
+    return data
   }, [persistAuth])
 
   const register = useCallback(async (nome, email, senha, aceitouTermos) => {
@@ -116,7 +126,7 @@ export function AuthProvider({ children }) {
   }, [user])
 
   return (
-    <AuthContext.Provider value={{ user, login, loginWithGoogle, register, logout, isAdmin: user?.role === 'ADMIN' }}>
+    <AuthContext.Provider value={{ user, login, loginWithGoogle, completeGoogleSignup, register, logout, isAdmin: user?.role === 'ADMIN' }}>
       {children}
     </AuthContext.Provider>
   )

@@ -65,6 +65,7 @@ export const authService = {
       'X-Requested-With': 'XMLHttpRequest',
     },
   }).then(response => response.data),
+  completeGoogleSignup: data => api.post('/auth/google/complete-signup', data).then(response => response.data),
   register: data => api.post('/auth/register', data).then(response => response.data),
   forgotPassword: data => api.post('/auth/forgot-password', data).then(response => response.data),
   resetPassword: data => api.post('/auth/reset-password', data).then(response => response.data),

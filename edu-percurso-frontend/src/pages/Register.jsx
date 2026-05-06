@@ -7,10 +7,12 @@ import { extractAuthError } from '../utils/authErrors'
 import { resolveAuthDestination } from '../utils/authRedirects'
 
 export default function Register() {
-  const { register, loginWithGoogle } = useAuth()
+  const { register, loginWithGoogle, completeGoogleSignup } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [form, setForm] = useState({ nome: '', email: '', senha: '', aceitouTermos: false })
+  const [googleSignupPending, setGoogleSignupPending] = useState(null)
+  const [googleAceitouTermos, setGoogleAceitouTermos] = useState(false)
   const [erro, setErro] = useState('')
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -19,6 +21,8 @@ export default function Register() {
   const privacidadeHref = '/politica-de-privacidade'
   const consentRef = useRef(null)
   const consentInputRef = useRef(null)
+  const googleConsentRef = useRef(null)
+  const googleConsentInputRef = useRef(null)
   const consentHighlightTimerRef = useRef(null)
 
   useEffect(() => {
@@ -29,10 +33,10 @@ export default function Register() {
     }
   }, [])
 
-  function chamarAtencaoParaTermos() {
-    setErro('Para criar sua conta, aceite os Termos de Uso e a Política de Privacidade.')
+  function chamarAtencaoParaTermos(consentElementRef, consentFieldRef, message) {
+    setErro(message)
 
-    const consentElement = consentRef.current
+    const consentElement = consentElementRef.current
     if (consentElement) {
       consentElement.classList.remove('is-required-attention')
       void consentElement.offsetWidth
@@ -40,39 +44,55 @@ export default function Register() {
       consentElement.scrollIntoView({ behavior: 'auto', block: 'nearest' })
     }
 
-    consentInputRef.current?.focus()
+    consentFieldRef.current?.focus()
 
     if (consentHighlightTimerRef.current) {
       window.clearTimeout(consentHighlightTimerRef.current)
     }
 
     consentHighlightTimerRef.current = window.setTimeout(() => {
-      consentRef.current?.classList.remove('is-required-attention')
+      consentElementRef.current?.classList.remove('is-required-attention')
     }, 520)
   }
 
-  function validarAceiteAntesDoGoogle() {
-    if (form.aceitouTermos) {
-      return true
-    }
+  async function handleGoogleCode(code) {
+    setErro('')
+    setGoogleLoading(true)
+    try {
+      const data = await loginWithGoogle(code, window.location.origin, false, true)
+      if (data.status === 'PENDING_CONSENT') {
+        setGoogleSignupPending(data)
+        setGoogleAceitouTermos(false)
+        return
+      }
 
-    chamarAtencaoParaTermos()
-    return false
+      navigate(resolveAuthDestination(data.role, location.state, location.search), { replace: true })
+    } catch (error) {
+      setErro(extractAuthError(error, 'Nao foi possivel criar sua conta com Google.'))
+    } finally {
+      setGoogleLoading(false)
+    }
   }
 
-  async function handleGoogleCode(code) {
-    if (!form.aceitouTermos) {
-      chamarAtencaoParaTermos()
+  async function handleGoogleSignupConfirm(event) {
+    event.preventDefault()
+
+    if (!googleAceitouTermos) {
+      chamarAtencaoParaTermos(
+        googleConsentRef,
+        googleConsentInputRef,
+        'Para concluir sua conta com Google, aceite os Termos de Uso e a Politica de Privacidade.'
+      )
       return
     }
 
     setErro('')
     setGoogleLoading(true)
     try {
-      const role = await loginWithGoogle(code, window.location.origin, true, true)
-      navigate(resolveAuthDestination(role, location.state, location.search), { replace: true })
+      const data = await completeGoogleSignup(googleSignupPending.pendingSignupToken, true)
+      navigate(resolveAuthDestination(data.role, location.state, location.search), { replace: true })
     } catch (error) {
-      setErro(extractAuthError(error, 'Não foi possível criar sua conta com Google.'))
+      setErro(extractAuthError(error, 'Nao foi possivel concluir sua conta com Google.'))
     } finally {
       setGoogleLoading(false)
     }
@@ -87,7 +107,11 @@ export default function Register() {
     }
 
     if (!form.aceitouTermos) {
-      chamarAtencaoParaTermos()
+      chamarAtencaoParaTermos(
+        consentRef,
+        consentInputRef,
+        'Para criar sua conta, aceite os Termos de Uso e a Politica de Privacidade.'
+      )
       return
     }
 
@@ -140,7 +164,7 @@ export default function Register() {
             <input
               className="form-input"
               type="password"
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Minimo 6 caracteres"
               value={form.senha}
               onChange={event => setForm(current => ({ ...current, senha: event.target.value }))}
               required
@@ -162,7 +186,7 @@ export default function Register() {
               </a>{' '}
               e a{' '}
               <a href={privacidadeHref} target="_blank" rel="noreferrer">
-                Política de Privacidade
+                Politica de Privacidade
               </a>
               .
             </span>
@@ -185,20 +209,62 @@ export default function Register() {
               <span>ou continue com Google</span>
             </div>
             <div className="auth-social-stack">
-              <GoogleAuthButton
-                clientId={googleClientId}
-                onCode={handleGoogleCode}
-                disabled={loading || googleLoading}
-                onError={message => setErro(message)}
-                onBeforeStart={validarAceiteAntesDoGoogle}
-              />
-              {googleLoading && <div className="auth-google-status">Conectando com Google...</div>}
+              {googleSignupPending ? (
+                <form className="auth-google-pending-card" onSubmit={handleGoogleSignupConfirm}>
+                  <div className="auth-google-pending-title">Quase la</div>
+                  <div className="auth-google-pending-copy">
+                    Confirme o aceite para concluir sua conta com Google.
+                  </div>
+                  <div className="auth-google-pending-meta">
+                    <strong>{googleSignupPending.nome}</strong>
+                    <span>{googleSignupPending.email}</span>
+                  </div>
+                  <label className="auth-consent-check auth-consent-check--compact" ref={googleConsentRef}>
+                    <input
+                      ref={googleConsentInputRef}
+                      type="checkbox"
+                      checked={googleAceitouTermos}
+                      onChange={event => setGoogleAceitouTermos(event.target.checked)}
+                      disabled={googleLoading}
+                    />
+                    <span>
+                      Li e aceito os{' '}
+                      <a href={termosHref} target="_blank" rel="noreferrer">
+                        Termos de Uso
+                      </a>{' '}
+                      e a{' '}
+                      <a href={privacidadeHref} target="_blank" rel="noreferrer">
+                        Politica de Privacidade
+                      </a>
+                      .
+                    </span>
+                  </label>
+                  <button
+                    className="btn btn-primary"
+                    style={{ width: '100%', justifyContent: 'center' }}
+                    type="submit"
+                    disabled={googleLoading}
+                  >
+                    {googleLoading ? 'Concluindo...' : 'Concluir com Google'}
+                  </button>
+                </form>
+              ) : (
+                <>
+                  <GoogleAuthButton
+                    clientId={googleClientId}
+                    onCode={handleGoogleCode}
+                    disabled={loading || googleLoading}
+                    onError={message => setErro(message)}
+                  />
+                  {googleLoading && <div className="auth-google-status">Conectando com Google...</div>}
+                </>
+              )}
             </div>
           </>
         )}
 
         <div className="auth-footer">
-          Já tem conta? <Link to={`/login${location.search}`} state={location.state}>Entrar</Link>
+          Ja tem conta? <Link to={`/login${location.search}`} state={location.state}>Entrar</Link>
         </div>
       </div>
     </div>

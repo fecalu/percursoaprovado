@@ -42,6 +42,13 @@ public class AuthController {
         ));
     }
 
+    @PostMapping("/google/complete-signup")
+    public ResponseEntity<AuthDTO.LoginResponse> concluirCadastroGoogle(
+            @Valid @RequestBody AuthDTO.CompleteGoogleSignupRequest req
+    ) {
+        return ResponseEntity.ok(authService.concluirCadastroGoogle(req));
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<AuthDTO.MessageResponse> forgotPassword(@Valid @RequestBody AuthDTO.ForgotPasswordRequest req) {
         authService.solicitarRedefinicao(req);
