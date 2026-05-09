@@ -14880,6 +14880,27 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
   text-decoration: underline;
 }
 
+.player-duvidas-link-action--support {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.32rem;
+  color: var(--text-3);
+}
+
+.player-duvidas-link-action--support:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.player-duvidas-link-action--support.is-active {
+  color: var(--accent);
+}
+
+.player-duvidas-link-action--support span {
+  min-width: 0.9rem;
+  text-align: left;
+}
+
 .player-duvidas-link-action--toggle {
   display: inline-flex;
   align-items: center;
@@ -15227,11 +15248,6 @@ html[data-theme='light'] .player-duvidas-shell .player-duvidas-toggle.is-open {
 
   .player-duvida-comment-actions {
     gap: 0.55rem 0.8rem;
-  }
-
-  .player-duvida-comment-support {
-    width: 100%;
-    font-size: 0.78rem;
   }
 
   .player-mobile-tap-toggle {

@@ -1746,16 +1746,28 @@ export default function Player() {
                   <div className="player-duvida-comment-title">{perguntaPrincipal}</div>
                   <div className="player-duvida-comment-actions">
                     <button
-                      className="player-duvidas-link-action"
+                      className={`player-duvidas-link-action player-duvidas-link-action--support${item.apoiadaPeloUsuario ? ' is-active' : ''}`}
                       type="button"
                       disabled={processandoApoioId === item.id}
                       onClick={() => alternarApoioDuvida(item)}
+                      aria-label={item.apoiadaPeloUsuario ? 'Remover apoio desta duvida' : 'Apoiar esta duvida'}
+                      title={item.apoiadaPeloUsuario ? 'Remover apoio' : 'Apoiar'}
                     >
-                      {processandoApoioId === item.id
-                        ? 'Salvando...'
-                        : item.apoiadaPeloUsuario
-                          ? 'Remover meu apoio'
-                          : 'Tambem tive essa duvida'}
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill={item.apoiadaPeloUsuario ? 'currentColor' : 'none'}
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M7 10v10" />
+                        <path d="M12 21h5.2a2 2 0 0 0 2-1.6l1.3-6A2 2 0 0 0 18.5 11H14V6.8A1.8 1.8 0 0 0 12.2 5L7 10v11h5z" />
+                      </svg>
+                      <span>{processandoApoioId === item.id ? '...' : item.quantidadeApoios || 0}</span>
                     </button>
                     <button
                       className="player-duvidas-link-action"
@@ -1766,7 +1778,7 @@ export default function Player() {
                         pausarVideo()
                       }}
                     >
-                      Ir para esse trecho
+                      Ir para trecho
                     </button>
                     {item.respostaOficial ? (
                       <button
@@ -1788,9 +1800,6 @@ export default function Player() {
                           <path d="M5 7l5 6 5-6" />
                         </svg>
                       </button>
-                    ) : null}
-                    {item.quantidadeApoios > 0 ? (
-                      <span className="player-duvida-comment-support">{item.quantidadeApoios} apoios</span>
                     ) : null}
                   </div>
                   {item.respostaOficial && duvidasRespostaAbertas[item.id] ? (
