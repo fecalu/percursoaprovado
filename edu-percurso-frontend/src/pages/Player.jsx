@@ -2370,16 +2370,6 @@ export default function Player() {
                   <div className="attention-timeline-header">
                     <div className="attention-timeline-meta">
                       <div className="attention-timeline-kicker">Pontos de atencao</div>
-                      <div className="attention-timeline-status">
-                        <span className="attention-timeline-chip">
-                          {playerReady
-                            ? `Agora ${formatarTimestamp(currentTime)}`
-                            : 'Carregando player...'}
-                        </span>
-                        <span className="attention-timeline-chip is-muted">
-                          Total {formatarTimestamp(duracaoBase)}
-                        </span>
-                      </div>
                     </div>
                     <div className="attention-timeline-tools">
                       {pontosAtencaoAtivos.length > 0 && (

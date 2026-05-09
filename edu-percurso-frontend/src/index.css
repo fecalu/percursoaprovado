@@ -1534,7 +1534,7 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
 
 .attention-timeline-meta {
   display: grid;
-  gap: 0.38rem;
+  gap: 0;
   min-width: 0;
 }
 
@@ -1544,31 +1544,6 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-3);
-}
-
-.attention-timeline-status {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-  align-items: center;
-}
-
-.attention-timeline-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 30px;
-  padding: 0.35rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.045);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.attention-timeline-chip.is-muted {
-  color: var(--text-2);
-  background: rgba(255,255,255,0.03);
 }
 
 .attention-timeline-tools {
@@ -12600,16 +12575,6 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
 
   .player-mobile-focus .attention-timeline-kicker {
     font-size: 10px;
-  }
-
-  .player-mobile-focus .attention-timeline-status {
-    gap: 0.35rem;
-  }
-
-  .player-mobile-focus .attention-timeline-chip {
-    min-height: 28px;
-    padding: 0.32rem 0.58rem;
-    font-size: 11px;
   }
 
   .form-row,
