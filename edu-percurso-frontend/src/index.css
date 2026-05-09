@@ -15066,25 +15066,6 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
   font-weight: 700;
 }
 
-.player-duvida-comment-date {
-  color: var(--text-3);
-}
-
-.player-duvida-comment-time {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  min-height: 24px;
-  margin-top: 0.08rem;
-  padding: 0.18rem 0.5rem;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.06);
-  color: var(--text-2);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-}
-
 .player-duvida-comment-title {
   color: var(--text-1);
   font-size: 0.97rem;
