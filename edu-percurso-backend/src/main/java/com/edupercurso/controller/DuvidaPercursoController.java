@@ -16,7 +16,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/percursos/{percursoId}/duvidas")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ALUNO')")
 public class DuvidaPercursoController {
 
     private final DuvidaPercursoService duvidaPercursoService;
@@ -30,6 +29,7 @@ public class DuvidaPercursoController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ALUNO')")
     public ResponseEntity<DuvidaPercursoDTO.Response> criar(
             @AuthenticationPrincipal String email,
             @PathVariable UUID percursoId,
@@ -39,6 +39,7 @@ public class DuvidaPercursoController {
     }
 
     @PostMapping("/{duvidaId}/apoios")
+    @PreAuthorize("hasRole('ALUNO')")
     public ResponseEntity<Void> adicionarApoio(
             @AuthenticationPrincipal String email,
             @PathVariable UUID percursoId,
@@ -49,6 +50,7 @@ public class DuvidaPercursoController {
     }
 
     @DeleteMapping("/{duvidaId}/apoios")
+    @PreAuthorize("hasRole('ALUNO')")
     public ResponseEntity<Void> removerApoio(
             @AuthenticationPrincipal String email,
             @PathVariable UUID percursoId,

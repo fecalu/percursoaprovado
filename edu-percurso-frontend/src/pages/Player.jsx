@@ -366,12 +366,34 @@ export default function Player() {
     previousTimeRef.current = 0
     autoConclusaoEmAndamentoRef.current = false
 
-    Promise.all([percursoService.buscar(id), progressoService.meu(), percursoService.listar(), duvidaPercursoService.listarPublicas(id)])
-      .then(([percursoResp, progressoResp, percursosResp, duvidasResp]) => {
+    Promise.allSettled([
+      percursoService.buscar(id),
+      progressoService.meu(),
+      percursoService.listar(),
+      duvidaPercursoService.listarPublicas(id),
+    ])
+      .then(resultados => {
+        const [percursoResult, progressoResult, percursosResult, duvidasResult] = resultados
+
+        if (percursoResult.status !== 'fulfilled') {
+          throw percursoResult.reason
+        }
+
+        const percursoResp = percursoResult.value
+        const progressoResp = progressoResult.status === 'fulfilled' && Array.isArray(progressoResult.value)
+          ? progressoResult.value
+          : []
+        const percursosResp = percursosResult.status === 'fulfilled' && Array.isArray(percursosResult.value)
+          ? percursosResult.value
+          : []
+        const duvidasResp = duvidasResult.status === 'fulfilled' && Array.isArray(duvidasResult.value)
+          ? duvidasResult.value
+          : []
+
         setPercurso(percursoResp)
         setProgressoConteudos(progressoResp)
-        setPercursosDisponiveis(Array.isArray(percursosResp) ? percursosResp : [])
-        setDuvidas(Array.isArray(duvidasResp) ? duvidasResp : [])
+        setPercursosDisponiveis(percursosResp)
+        setDuvidas(duvidasResp)
 
         const progressoAtual = progressoResp.find(item => String(item.percursoId) === String(id))
         if (progressoAtual) {

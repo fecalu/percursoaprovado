@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/percursos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/progresso/meu").authenticated()
                         .requestMatchers("/progresso/**").hasRole("ALUNO")
                         .anyRequest().authenticated()
                 )
