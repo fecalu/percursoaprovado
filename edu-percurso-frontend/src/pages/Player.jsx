@@ -318,14 +318,6 @@ export default function Player() {
   }, [duvidaForm.timestampSegundos, duvidaTempoEditando])
 
   useEffect(() => {
-    if (!isMobileViewport) return
-    if (conteudosDoModulo.length > 1) return
-    if (mobilePainelAtivo !== 'duvidas') {
-      setMobilePainelAtivo('duvidas')
-    }
-  }, [conteudosDoModulo.length, isMobileViewport, mobilePainelAtivo])
-
-  useEffect(() => {
     if (isMobileViewport) {
       document.body.classList.add('player-mobile-focus')
     } else {
@@ -546,7 +538,6 @@ export default function Player() {
   const indiceConteudoAtual = useMemo(() => (
     conteudosDoModulo.findIndex(item => String(item.id) === String(percurso?.id))
   ), [conteudosDoModulo, percurso?.id])
-  const mobilePodeMostrarConteudo = conteudosDoModulo.length > 1
   const exibirAreaPontos = !pontosAtencaoOcultos && (
     pontosAtencaoSempreVisiveis ||
     pontosAtencaoAtivos.length > 0 ||
@@ -2141,17 +2132,15 @@ export default function Player() {
 
     return (
       <div className="player-mobile-tabs" role="tablist" aria-label="Navegacao do player">
-        {mobilePodeMostrarConteudo ? (
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mobilePainelAtivo === 'conteudo'}
-            className={`player-mobile-tab${mobilePainelAtivo === 'conteudo' ? ' is-active' : ''}`}
-            onClick={() => setMobilePainelAtivo('conteudo')}
-          >
-            Conteudo do curso
-          </button>
-        ) : null}
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobilePainelAtivo === 'conteudo'}
+          className={`player-mobile-tab${mobilePainelAtivo === 'conteudo' ? ' is-active' : ''}`}
+          onClick={() => setMobilePainelAtivo('conteudo')}
+        >
+          Conteudo do curso
+        </button>
         <button
           type="button"
           role="tab"
@@ -2422,7 +2411,7 @@ export default function Player() {
 
               {isMobileViewport && renderTabsMobile()}
 
-              {isMobileViewport && mobilePodeMostrarConteudo && mobilePainelAtivo === 'conteudo' && renderNavegacaoModulo()}
+              {isMobileViewport && mobilePainelAtivo === 'conteudo' && renderNavegacaoModulo()}
 
               {isMobileViewport && mobilePainelAtivo === 'duvidas' && renderCardDuvidas()}
 
