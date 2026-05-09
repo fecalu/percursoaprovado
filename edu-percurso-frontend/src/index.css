@@ -12410,7 +12410,7 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
   .player-mobile-focus .main-content {
     max-width: none;
     width: 100%;
-    padding: 1rem 1rem 2rem;
+    padding: 1rem 0 2rem;
     overflow-x: clip;
   }
 
@@ -12429,6 +12429,7 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
   }
 
   .player-mobile-focus .back-link {
+    margin-inline: 1rem;
     margin-bottom: 0.7rem;
   }
 
@@ -12446,15 +12447,18 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
   }
 
   .player-mobile-focus .player-module-nav {
+    margin-inline: 1rem;
     gap: 0.6rem;
     margin-top: 0;
   }
 
   .player-mobile-focus .player-stage-summary {
+    margin-inline: 1rem;
     margin-top: 0.15rem;
   }
 
   .player-mobile-focus .player-secondary-copy {
+    margin-inline: 1rem;
     margin-top: 0.1rem;
   }
 
@@ -12482,12 +12486,13 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
   }
 
   .player-mobile-focus .player-stage-head {
+    margin-inline: 1rem;
     gap: 0.1rem;
   }
 
   .player-mobile-focus .player-wrap {
-    width: calc(100% + 2rem);
-    margin: 0 -1rem 0.55rem;
+    width: 100%;
+    margin: 0 0 0.55rem;
     border-radius: 0;
   }
 
@@ -12496,6 +12501,7 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
   .player-mobile-focus .player-attention-rail {
     width: 100%;
     box-sizing: border-box;
+    margin-inline: 1rem;
   }
 
   .player-mobile-focus .player-fullscreen-toggle {
