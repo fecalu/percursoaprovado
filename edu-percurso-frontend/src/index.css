@@ -1522,12 +1522,7 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
   display: grid;
   gap: 0.6rem;
   margin-bottom: 1.35rem;
-  padding: 0.9rem 1rem 0.95rem;
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  background:
-    radial-gradient(circle at top left, rgba(45,224,154,0.08), transparent 38%),
-    rgba(18,23,33,0.92);
+  padding: 0.15rem 0 0;
 }
 
 .attention-timeline-header {
@@ -1564,7 +1559,7 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
   min-height: 30px;
   padding: 0.35rem 0.65rem;
   border-radius: 999px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.045);
   color: var(--text);
   font-size: 12px;
   font-weight: 600;
@@ -1573,7 +1568,7 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
 
 .attention-timeline-chip.is-muted {
   color: var(--text-2);
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.03);
 }
 
 .attention-timeline-tools {
@@ -12600,8 +12595,7 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
 
   .player-mobile-focus .attention-timeline-shell {
     margin: 0 var(--player-mobile-gutter) 0.7rem;
-    padding: 0.8rem 0.85rem 0.9rem;
-    border-radius: 18px;
+    padding: 0;
   }
 
   .player-mobile-focus .attention-timeline-kicker {
