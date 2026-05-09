@@ -12510,6 +12510,65 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
     flex: 0 0 auto;
   }
 
+  .player-mobile-focus .player-mobile-tab.is-active {
+    color: #0f172a;
+  }
+
+  .player-mobile-focus .player-module-toggle,
+  .player-mobile-focus .player-module-item,
+  .player-mobile-focus .player-duvidas-shell,
+  .player-mobile-focus .player-duvidas-shell .player-duvidas-toggle,
+  .player-mobile-focus .player-duvida-resposta,
+  .player-mobile-focus .player-duvidas-compose-collapsed,
+  .player-mobile-focus .player-duvidas-time-card {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.98), rgba(247,249,252,0.96));
+    border-color: rgba(15,23,42,0.12);
+    box-shadow:
+      0 0 0 1px rgba(15,23,42,0.04),
+      0 10px 22px rgba(15,23,42,0.04);
+  }
+
+  .player-mobile-focus .player-module-toggle.is-open,
+  .player-mobile-focus .player-module-item.is-current {
+    background:
+      radial-gradient(circle at top left, rgba(21,159,112,0.1), transparent 42%),
+      linear-gradient(180deg, rgba(255,255,255,0.99), rgba(245,248,251,0.97));
+    border-color: rgba(21,159,112,0.22);
+  }
+
+  .player-mobile-focus .player-module-list-title,
+  .player-mobile-focus .player-module-toggle-summary,
+  .player-mobile-focus .player-module-item-title,
+  .player-mobile-focus .player-duvida-comment-author,
+  .player-mobile-focus .player-duvida-comment-title,
+  .player-mobile-focus .player-duvidas-compose-title,
+  .player-mobile-focus .player-duvidas-link-action,
+  .player-mobile-focus .player-duvidas-link-action--toggle,
+  .player-mobile-focus .player-duvidas-time-value,
+  .player-mobile-focus .player-duvidas-time-input {
+    color: #0f172a;
+  }
+
+  .player-mobile-focus .player-module-item-meta,
+  .player-mobile-focus .player-module-item-duration,
+  .player-mobile-focus .player-module-toggle-side,
+  .player-mobile-focus .player-duvida-comment-meta,
+  .player-mobile-focus .player-duvida-comment-copy,
+  .player-mobile-focus .player-duvida-comment-date,
+  .player-mobile-focus .player-duvida-comment-support,
+  .player-mobile-focus .player-duvidas-panel .mini-copy,
+  .player-mobile-focus .player-duvidas-compose-form .mini-copy {
+    color: rgba(71,85,105,0.88);
+  }
+
+  .player-mobile-focus .player-module-item-index,
+  .player-mobile-focus .player-duvida-comment-time {
+    background: rgba(15,23,42,0.05);
+    border-color: rgba(15,23,42,0.08);
+    color: #334155;
+  }
+
   .player-mobile-focus .player-stage-summary {
     margin-inline: var(--player-mobile-gutter);
     margin-top: 0.15rem;
