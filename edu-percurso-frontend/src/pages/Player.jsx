@@ -263,6 +263,7 @@ export default function Player() {
   const [duvidaTempoTexto, setDuvidaTempoTexto] = useState('00:00')
   const [duvidaTempoEditando, setDuvidaTempoEditando] = useState(false)
   const [duvidasRespostaAbertas, setDuvidasRespostaAbertas] = useState({})
+  const [mobilePainelAtivo, setMobilePainelAtivo] = useState('conteudo')
 
   useEffect(() => {
     const atualizarViewport = () => setIsMobileViewport(detectarMobile())
@@ -2163,6 +2164,33 @@ export default function Player() {
     )
   }
 
+  function renderTabsMobile() {
+    if (!isMobileViewport) return null
+
+    return (
+      <div className="player-mobile-tabs" role="tablist" aria-label="Navegacao do player">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobilePainelAtivo === 'conteudo'}
+          className={`player-mobile-tab${mobilePainelAtivo === 'conteudo' ? ' is-active' : ''}`}
+          onClick={() => setMobilePainelAtivo('conteudo')}
+        >
+          Conteudo do curso
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobilePainelAtivo === 'duvidas'}
+          className={`player-mobile-tab${mobilePainelAtivo === 'duvidas' ? ' is-active' : ''}`}
+          onClick={() => setMobilePainelAtivo('duvidas')}
+        >
+          Duvidas
+        </button>
+      </div>
+    )
+  }
+
   const resumoPrincipal = percurso.resumo || percurso.descricao || ''
   const descricaoComplementar = percurso.descricao && percurso.resumo ? percurso.descricao : ''
 
@@ -2418,9 +2446,11 @@ export default function Player() {
 
               {isMobileViewport && renderCardPontosAtencao()}
 
-              {isMobileViewport && renderNavegacaoModulo()}
+              {isMobileViewport && renderTabsMobile()}
 
-              {isMobileViewport && renderCardDuvidas()}
+              {isMobileViewport && mobilePainelAtivo === 'conteudo' && renderNavegacaoModulo()}
+
+              {isMobileViewport && mobilePainelAtivo === 'duvidas' && renderCardDuvidas()}
 
               {resumoPrincipal && (
                 <div className="player-stage-summary">
