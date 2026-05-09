@@ -2368,10 +2368,18 @@ export default function Player() {
               {playerPodeReproduzir && (
                 <div className="attention-timeline-shell">
                   <div className="attention-timeline-header">
-                    <div className="mini-copy">
-                      {playerReady
-                        ? `Tempo atual: ${formatarTimestamp(currentTime)}`
-                        : 'Carregando player...'}
+                    <div className="attention-timeline-meta">
+                      <div className="attention-timeline-kicker">Pontos de atencao</div>
+                      <div className="attention-timeline-status">
+                        <span className="attention-timeline-chip">
+                          {playerReady
+                            ? `Agora ${formatarTimestamp(currentTime)}`
+                            : 'Carregando player...'}
+                        </span>
+                        <span className="attention-timeline-chip is-muted">
+                          Total {formatarTimestamp(duracaoBase)}
+                        </span>
+                      </div>
                     </div>
                     <div className="attention-timeline-tools">
                       {pontosAtencaoAtivos.length > 0 && (
@@ -2384,7 +2392,6 @@ export default function Player() {
                           <span>Exibir pontos automaticamente</span>
                         </label>
                       )}
-                      <div className="mini-copy">{formatarTimestamp(duracaoBase)}</div>
                     </div>
                   </div>
                   <div className="attention-timeline-bar">

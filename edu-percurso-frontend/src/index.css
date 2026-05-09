@@ -1522,6 +1522,12 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
   display: grid;
   gap: 0.6rem;
   margin-bottom: 1.35rem;
+  padding: 0.9rem 1rem 0.95rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at top left, rgba(45,224,154,0.08), transparent 38%),
+    rgba(18,23,33,0.92);
 }
 
 .attention-timeline-header {
@@ -1529,6 +1535,45 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+}
+
+.attention-timeline-meta {
+  display: grid;
+  gap: 0.38rem;
+  min-width: 0;
+}
+
+.attention-timeline-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.attention-timeline-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.attention-timeline-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.attention-timeline-chip.is-muted {
+  color: var(--text-2);
+  background: rgba(255,255,255,0.04);
 }
 
 .attention-timeline-tools {
@@ -1541,7 +1586,7 @@ html[data-theme='light'] .main-content-admin .question-audio-preview::-webkit-me
 
 .attention-timeline-bar {
   position: relative;
-  height: 10px;
+  height: 12px;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.08);
   overflow: visible;
@@ -12553,6 +12598,26 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
     height: 38px;
   }
 
+  .player-mobile-focus .attention-timeline-shell {
+    margin: 0 var(--player-mobile-gutter) 0.7rem;
+    padding: 0.8rem 0.85rem 0.9rem;
+    border-radius: 18px;
+  }
+
+  .player-mobile-focus .attention-timeline-kicker {
+    font-size: 10px;
+  }
+
+  .player-mobile-focus .attention-timeline-status {
+    gap: 0.35rem;
+  }
+
+  .player-mobile-focus .attention-timeline-chip {
+    min-height: 28px;
+    padding: 0.32rem 0.58rem;
+    font-size: 11px;
+  }
+
   .form-row,
   .stats-grid,
   .plan-grid,
@@ -12717,12 +12782,12 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
 
   .attention-timeline-tools {
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
 
   .attention-timeline-bar {
     height: 12px;
-    margin-inline: 0.4rem;
+    margin-inline: 0;
   }
 
   .attention-marker {
