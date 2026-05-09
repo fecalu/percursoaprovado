@@ -15050,7 +15050,7 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 .player-duvida-comment-body {
   min-width: 0;
   display: grid;
-  gap: 0.24rem;
+  gap: 0.2rem;
 }
 
 .player-duvida-comment-meta {
@@ -15067,29 +15067,32 @@ html[data-theme='light'] .library-guide-screen-step-pill-index {
 }
 
 .player-duvida-comment-context {
-  display: grid;
-  gap: 0.14rem;
-  justify-items: start;
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .player-duvida-comment-timestamp-chip {
   display: inline-flex;
   align-items: center;
-  min-height: 1.7rem;
-  padding: 0.15rem 0.6rem;
+  min-height: 1.52rem;
+  padding: 0.08rem 0.52rem;
   border-radius: 999px;
   background: rgba(45,224,154,0.12);
   border: 1px solid rgba(45,224,154,0.2);
   color: var(--text-1);
-  font-size: 0.79rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.01em;
+  white-space: nowrap;
 }
 
 .player-duvida-comment-date {
   color: var(--text-3);
-  font-size: 0.8rem;
-  line-height: 1.25;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .player-duvida-comment-title {
@@ -15203,13 +15206,13 @@ html[data-theme='light'] .player-duvidas-shell .player-duvidas-toggle.is-open {
   }
 
   .player-duvida-comment-timestamp-chip {
-    min-height: 1.55rem;
-    padding: 0.12rem 0.52rem;
-    font-size: 0.76rem;
+    min-height: 1.46rem;
+    padding: 0.06rem 0.46rem;
+    font-size: 0.74rem;
   }
 
   .player-duvida-comment-date {
-    font-size: 0.77rem;
+    font-size: 0.74rem;
   }
 
   .player-duvida-comment-title {

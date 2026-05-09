@@ -1739,7 +1739,7 @@ export default function Player() {
                       Trecho {formatarTimestamp(item.timestampSegundos)}
                     </span>
                     <span className="player-duvida-comment-date">
-                      Pergunta feita em {formatDataHoraCurta(item.publicadaEm || item.criadaEm)}
+                      Publicado em {formatDataHoraCurta(item.publicadaEm || item.criadaEm)}
                     </span>
                   </div>
                   <div className="player-duvida-comment-title">{item.titulo}</div>
