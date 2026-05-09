@@ -728,8 +728,7 @@ export default function Player() {
     try {
       await duvidaPercursoService.criar(id, {
         timestampSegundos: Math.max(0, Math.floor(Number(duvidaForm.timestampSegundos) || 0)),
-        titulo: pergunta,
-        descricao: null,
+        descricao: pergunta,
       })
       show('Duvida enviada para moderacao. Assim que for publicada, ela vai aparecer para os outros alunos.')
       setDuvidaForm(montarDuvidaInicial(currentTimeRef.current))
@@ -1725,7 +1724,9 @@ export default function Player() {
           </div>
         ) : (
           <div className="player-duvidas-list" style={{ display: 'grid', gap: '0.6rem' }}>
-            {listaVisivel.map(item => (
+            {listaVisivel.map(item => {
+              const perguntaPrincipal = item.descricao || item.titulo
+              return (
               <article key={item.id} className="player-duvida-comment">
                 <div className="player-duvida-comment-avatar">
                   {(item.autorNomeAbreviado || item.autorNome || 'A').trim().charAt(0).toUpperCase()}
@@ -1742,10 +1743,7 @@ export default function Player() {
                       Publicado em {formatDataHoraCurta(item.publicadaEm || item.criadaEm)}
                     </span>
                   </div>
-                  <div className="player-duvida-comment-title">{item.titulo}</div>
-                  {item.descricao ? (
-                    <div className="player-duvida-comment-copy">{item.descricao}</div>
-                  ) : null}
+                  <div className="player-duvida-comment-title">{perguntaPrincipal}</div>
                   <div className="player-duvida-comment-actions">
                     <button
                       className="player-duvidas-link-action"
@@ -1807,7 +1805,7 @@ export default function Player() {
                   ) : null}
                 </div>
               </article>
-            ))}
+            )})}
             {(temMaisItens || limiteDuvidasVisiveis > limiteInicial) ? (
               <div className="player-duvidas-list-footer">
                 {temMaisItens ? (

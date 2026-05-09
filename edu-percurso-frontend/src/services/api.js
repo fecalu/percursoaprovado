@@ -86,6 +86,7 @@ export const duvidaPercursoService = {
   removerApoio: (percursoId, duvidaId) => api.delete(`/percursos/${percursoId}/duvidas/${duvidaId}/apoios`),
   listarAdmin: params => api.get(`/admin/duvidas-percurso${toSearchParams(params)}`).then(response => response.data),
   atualizarAdmin: (duvidaId, data) => api.put(`/admin/duvidas-percurso/${duvidaId}`, data).then(response => response.data),
+  excluirAdmin: duvidaId => api.delete(`/admin/duvidas-percurso/${duvidaId}`),
 }
 
 export const questaoService = {

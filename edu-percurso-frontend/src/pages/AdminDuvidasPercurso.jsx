@@ -32,8 +32,7 @@ function formatarTimestamp(segundos) {
 function montarFormulario(detalhe) {
   return {
     timestampSegundos: detalhe?.timestampSegundos ?? 0,
-    titulo: detalhe?.titulo || '',
-    descricao: detalhe?.descricao || '',
+    descricao: detalhe?.descricao || detalhe?.titulo || '',
     status: detalhe?.status || 'PENDENTE_MODERACAO',
     respostaOficial: detalhe?.respostaOficial || '',
     janelaRelacionadaSegundos: detalhe?.janelaRelacionadaSegundos ?? 5,
@@ -50,6 +49,7 @@ export default function AdminDuvidasPercurso() {
   const [form, setForm] = useState(montarFormulario())
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
+  const [excluindo, setExcluindo] = useState(false)
 
   useEffect(() => {
     carregarTudo()
@@ -104,6 +104,24 @@ export default function AdminDuvidasPercurso() {
       show(error.response?.data?.erro || 'Erro ao salvar a duvida.', 'error')
     } finally {
       setSalvando(false)
+    }
+  }
+
+  async function excluirSelecionada() {
+    if (!detalheSelecionado?.id) return
+
+    const confirmou = window.confirm('Deseja excluir este comentario de forma permanente?')
+    if (!confirmou) return
+
+    setExcluindo(true)
+    try {
+      await duvidaPercursoService.excluirAdmin(detalheSelecionado.id)
+      show('Comentario excluido com sucesso.')
+      await carregarTudo(null)
+    } catch (error) {
+      show(error.response?.data?.erro || 'Erro ao excluir o comentario.', 'error')
+    } finally {
+      setExcluindo(false)
     }
   }
 
@@ -186,7 +204,7 @@ export default function AdminDuvidasPercurso() {
               <input
                 className="form-input"
                 value={filtros.busca}
-                placeholder="Autor, titulo, percurso ou resposta"
+                placeholder="Autor, comentario, percurso ou resposta"
                 onChange={event => setFiltros(current => ({ ...current, busca: event.target.value }))}
               />
             </div>
@@ -257,7 +275,7 @@ export default function AdminDuvidasPercurso() {
                 >
                   <div>
                     <div className="table-name">{formatarTimestamp(item.timestampSegundos)}</div>
-                    <div className="mini-copy">{item.titulo}</div>
+                    <div className="mini-copy">{item.descricao || item.titulo}</div>
                   </div>
 
                   <div>
@@ -370,21 +388,12 @@ export default function AdminDuvidasPercurso() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Titulo da duvida</label>
-                  <input
-                    className="form-input"
-                    value={form.titulo}
-                    onChange={event => setForm(current => ({ ...current, titulo: event.target.value }))}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label className="form-label">Descricao do aluno</label>
+                  <label className="form-label">Comentario do aluno</label>
                   <textarea
                     className="form-textarea"
                     value={form.descricao}
                     onChange={event => setForm(current => ({ ...current, descricao: event.target.value }))}
-                    placeholder="Ajuste o texto para manter a duvida clara antes de publicar."
+                    placeholder="Ajuste o comentario para manter a pergunta clara antes de publicar."
                   />
                 </div>
 
@@ -408,6 +417,14 @@ export default function AdminDuvidasPercurso() {
                     onClick={() => setForm(montarFormulario(detalheSelecionado))}
                   >
                     Desfazer alteracoes
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    type="button"
+                    onClick={excluirSelecionada}
+                    disabled={excluindo}
+                  >
+                    {excluindo ? 'Excluindo...' : 'Excluir comentario'}
                   </button>
                 </div>
               </form>

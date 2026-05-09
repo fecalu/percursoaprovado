@@ -48,14 +48,15 @@ public class DuvidaPercursoService {
         Percurso percurso = percursoService.buscarEntidadePorId(percursoId);
         acessoConteudoService.validarAcesso(usuario, percurso);
         validarTimestamp(request.getTimestampSegundos(), percurso);
+        String descricao = normalizarDescricaoObrigatoria(request.getDescricao());
 
         DuvidaPercurso duvida = DuvidaPercurso.builder()
                 .percurso(percurso)
                 .usuario(usuario)
                 .timestampSegundos(request.getTimestampSegundos())
                 .janelaRelacionadaSegundos(JANELA_RELACIONADA_SEGUNDOS_PADRAO)
-                .titulo(normalizarTitulo(request.getTitulo()))
-                .descricao(normalizarTexto(request.getDescricao()))
+                .titulo(gerarResumoDaDuvida(descricao))
+                .descricao(descricao)
                 .status(DuvidaPercurso.Status.PENDENTE_MODERACAO)
                 .build();
 
@@ -123,8 +124,7 @@ public class DuvidaPercursoService {
         DuvidaPercurso duvida = buscarEntidade(duvidaId);
         validarTimestamp(request.getTimestampSegundos(), duvida.getPercurso());
 
-        String titulo = normalizarTitulo(request.getTitulo());
-        String descricao = normalizarTexto(request.getDescricao());
+        String descricao = normalizarDescricaoObrigatoria(request.getDescricao());
         String respostaOficial = normalizarTexto(request.getRespostaOficial());
         DuvidaPercurso.Status status = request.getStatus();
 
@@ -138,7 +138,7 @@ public class DuvidaPercursoService {
 
         duvida.setTimestampSegundos(request.getTimestampSegundos());
         duvida.setJanelaRelacionadaSegundos(normalizarJanelaRelacionada(request.getJanelaRelacionadaSegundos()));
-        duvida.setTitulo(titulo);
+        duvida.setTitulo(gerarResumoDaDuvida(descricao));
         duvida.setDescricao(descricao);
         duvida.setStatus(status);
         duvida.setRespostaOficial(respostaOficial);
@@ -169,6 +169,12 @@ public class DuvidaPercursoService {
                 false,
                 salva.getJanelaRelacionadaSegundos()
         );
+    }
+
+    @Transactional
+    public void excluirAdmin(UUID duvidaId) {
+        DuvidaPercurso duvida = buscarEntidade(duvidaId);
+        duvidaPercursoRepository.delete(duvida);
     }
 
     private List<DuvidaPercursoDTO.Response> montarResponses(List<DuvidaPercurso> duvidas, UUID usuarioId, boolean ordenarPorRelevancia) {
@@ -246,15 +252,20 @@ public class DuvidaPercursoService {
         return Math.max(0, Math.min(30, valor));
     }
 
-    private String normalizarTitulo(String valor) {
-        if (valor == null) {
-            throw new IllegalArgumentException("Informe o titulo da duvida.");
+    private String normalizarDescricaoObrigatoria(String valor) {
+        String descricao = normalizarTexto(valor);
+        if (descricao == null) {
+            throw new IllegalArgumentException("Informe a pergunta do aluno.");
         }
-        String titulo = valor.trim();
-        if (titulo.isBlank()) {
-            throw new IllegalArgumentException("Informe o titulo da duvida.");
+        return descricao;
+    }
+
+    private String gerarResumoDaDuvida(String descricao) {
+        String texto = descricao.trim().replaceAll("\\s+", " ");
+        if (texto.length() <= 180) {
+            return texto;
         }
-        return titulo;
+        return texto.substring(0, 177).trim() + "...";
     }
 
     private String normalizarTexto(String valor) {

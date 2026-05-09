@@ -39,4 +39,10 @@ public class AdminDuvidaPercursoController {
     ) {
         return ResponseEntity.ok(duvidaPercursoService.atualizarAdmin(email, duvidaId, request));
     }
+
+    @DeleteMapping("/{duvidaId}")
+    public ResponseEntity<Void> excluir(@PathVariable UUID duvidaId) {
+        duvidaPercursoService.excluirAdmin(duvidaId);
+        return ResponseEntity.noContent().build();
+    }
 }

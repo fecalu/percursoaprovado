@@ -19,8 +19,6 @@ public class DuvidaPercursoDTO {
         private Integer timestampSegundos;
 
         @NotBlank
-        private String titulo;
-
         private String descricao;
     }
 
@@ -31,8 +29,6 @@ public class DuvidaPercursoDTO {
         private Integer timestampSegundos;
 
         @NotBlank
-        private String titulo;
-
         private String descricao;
 
         @NotNull

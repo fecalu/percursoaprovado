@@ -50,8 +50,7 @@ class DuvidaPercursoServiceTest {
         Percurso percurso = criarPercurso();
         DuvidaPercursoDTO.CreateRequest request = new DuvidaPercursoDTO.CreateRequest();
         request.setTimestampSegundos(94);
-        request.setTitulo("  Posso virar o volante aqui? ");
-        request.setDescricao("  Fiquei em duvida nesse retorno. ");
+        request.setDescricao("  Posso virar o volante aqui? Fiquei em duvida nesse retorno. ");
 
         when(usuarioLookupService.buscarPorEmail(aluno.getEmail())).thenReturn(aluno);
         when(percursoService.buscarEntidadePorId(percurso.getId())).thenReturn(percurso);
@@ -69,8 +68,8 @@ class DuvidaPercursoServiceTest {
         verify(duvidaPercursoRepository).save(captor.capture());
         assertThat(captor.getValue().getStatus()).isEqualTo(DuvidaPercurso.Status.PENDENTE_MODERACAO);
         assertThat(captor.getValue().getJanelaRelacionadaSegundos()).isEqualTo(5);
-        assertThat(captor.getValue().getTitulo()).isEqualTo("Posso virar o volante aqui?");
-        assertThat(captor.getValue().getDescricao()).isEqualTo("Fiquei em duvida nesse retorno.");
+        assertThat(captor.getValue().getTitulo()).isEqualTo("Posso virar o volante aqui? Fiquei em duvida nesse retorno.");
+        assertThat(captor.getValue().getDescricao()).isEqualTo("Posso virar o volante aqui? Fiquei em duvida nesse retorno.");
         assertThat(response.getStatus()).isEqualTo("PENDENTE_MODERACAO");
     }
 
@@ -98,7 +97,6 @@ class DuvidaPercursoServiceTest {
                 .build();
         DuvidaPercursoDTO.AdminUpdateRequest request = new DuvidaPercursoDTO.AdminUpdateRequest();
         request.setTimestampSegundos(70);
-        request.setTitulo("Tenho duvida nesse trecho");
         request.setDescricao("O carro precisa parar totalmente?");
         request.setStatus(DuvidaPercurso.Status.PUBLICADA);
         request.setRespostaOficial("Sim. Nesse ponto o carro precisa imobilizar antes de retomar.");
