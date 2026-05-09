@@ -646,7 +646,43 @@ export default function Player() {
     }
   }
 
+  function controlesPlayerEstaoOcultos() {
+    const player = playerRef.current
+    const container = player?.elements?.container
+    const hiddenClass = player?.config?.classNames?.hideControls || 'plyr--hide-controls'
+
+    return Boolean(container?.classList?.contains(hiddenClass))
+  }
+
+  function mostrarControlesPlayer() {
+    const player = playerRef.current
+
+    try {
+      if (typeof player?.toggleControls === 'function') {
+        player.toggleControls(true)
+      }
+    } catch (_) {
+      // segue com fallback de eventos para providers que ignoram toggle direto
+    }
+
+    const container = player?.elements?.container
+    if (!container || typeof window === 'undefined') return
+
+    try {
+      container.dispatchEvent(new window.MouseEvent('mousemove', { bubbles: true }))
+      container.dispatchEvent(new window.Event('touchstart', { bubbles: true }))
+      container.dispatchEvent(new window.Event('touchmove', { bubbles: true }))
+    } catch (_) {
+      // ignora falha silenciosamente em embeds mais restritos
+    }
+  }
+
   function alternarPlayPauseVideo() {
+    if (controlesPlayerEstaoOcultos()) {
+      mostrarControlesPlayer()
+      return
+    }
+
     if (playerEstaReproduzindoRef.current) {
       pausarVideo()
       return
