@@ -1733,8 +1733,14 @@ export default function Player() {
                 <div className="player-duvida-comment-body">
                   <div className="player-duvida-comment-meta">
                     <span className="player-duvida-comment-author">{item.autorNomeAbreviado || item.autorNome}</span>
-                    <span>{formatarTimestamp(item.timestampSegundos)}</span>
-                    <span>{formatDataHoraCurta(item.publicadaEm || item.criadaEm)}</span>
+                  </div>
+                  <div className="player-duvida-comment-context">
+                    <span className="player-duvida-comment-timestamp-chip">
+                      Trecho {formatarTimestamp(item.timestampSegundos)}
+                    </span>
+                    <span className="player-duvida-comment-date">
+                      Pergunta feita em {formatDataHoraCurta(item.publicadaEm || item.criadaEm)}
+                    </span>
                   </div>
                   <div className="player-duvida-comment-title">{item.titulo}</div>
                   {item.descricao ? (
