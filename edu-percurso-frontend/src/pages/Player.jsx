@@ -677,7 +677,7 @@ export default function Player() {
     }
   }
 
-  function alternarPlayPauseVideo() {
+  function alternarPlayPauseVideoMobile() {
     if (controlesPlayerEstaoOcultos()) {
       mostrarControlesPlayer()
       return
@@ -1246,6 +1246,8 @@ export default function Player() {
         player = new Plyr(playerMountRef.current, {
           controls: PLYR_CONTROLS,
           settings: PLYR_SETTINGS,
+          clickToPlay: true,
+          autopause: true,
           speed: {
             selected: 1,
             options: PLYR_SPEED_OPTIONS,
@@ -2188,17 +2190,34 @@ export default function Player() {
                     type="button"
                     className="player-fullscreen-toggle"
                     onClick={togglePlayerFullscreen}
+                    aria-label={isPlayerFullscreen ? 'Sair da tela cheia' : 'Abrir tela cheia'}
                   >
-                    {isPlayerFullscreen ? 'Sair da tela cheia' : 'Tela cheia'}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                      {isPlayerFullscreen ? (
+                        <>
+                          <path d="M9 15H5v4" />
+                          <path d="M15 9h4V5" />
+                          <path d="M5 19l5-5" />
+                          <path d="M19 5l-5 5" />
+                        </>
+                      ) : (
+                        <>
+                          <path d="M9 5H5v4" />
+                          <path d="M15 19h4v-4" />
+                          <path d="M5 5l5 5" />
+                          <path d="M19 19l-5-5" />
+                        </>
+                      )}
+                    </svg>
                   </button>
                 )}
                 {playerPodeReproduzir ? (
                   <>
-                    {isMobileViewport && (
+                    {isMobileViewport && fontePlayer?.provider === 'bunny' && (
                       <button
                         type="button"
                         className="player-mobile-tap-toggle"
-                        onClick={alternarPlayPauseVideo}
+                        onClick={alternarPlayPauseVideoMobile}
                         aria-label={playerEstaReproduzindoRef.current ? 'Pausar video' : 'Reproduzir video'}
                       />
                     )}
