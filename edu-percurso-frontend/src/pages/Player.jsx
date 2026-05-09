@@ -257,7 +257,6 @@ export default function Player() {
   const [enviandoDuvida, setEnviandoDuvida] = useState(false)
   const [processandoApoioId, setProcessandoApoioId] = useState('')
   const [formDuvidaAberto, setFormDuvidaAberto] = useState(false)
-  const [visaoDuvidas, setVisaoDuvidas] = useState('trecho')
   const [duvidasAbertas, setDuvidasAbertas] = useState(false)
   const [limiteDuvidasVisiveis, setLimiteDuvidasVisiveis] = useState(4)
   const [duvidaTempoTexto, setDuvidaTempoTexto] = useState('00:00')
@@ -309,8 +308,8 @@ export default function Player() {
   }, [])
 
   useEffect(() => {
-    setLimiteDuvidasVisiveis(visaoDuvidas === 'trecho' ? 4 : 6)
-  }, [visaoDuvidas])
+    setLimiteDuvidasVisiveis(6)
+  }, [])
 
   useEffect(() => {
     if (!duvidaTempoEditando) {
@@ -546,7 +545,6 @@ export default function Player() {
   )
   const exibirRailPontosDesktop = !isMobileViewport && exibirAreaPontos
   const exibirVideoInlineMobile = isMobileViewport && videoExplicativoAberto && Boolean(pontoVideoExplicativoAtual) && Boolean(fonteVideoExplicativo)
-  const trechoSelecionadoDuvida = Math.max(0, Math.floor(Number(formDuvidaAberto ? duvidaForm.timestampSegundos : currentTime) || 0))
   const duvidasOrdenadas = useMemo(() => (
     [...duvidas].sort((a, b) => {
       const aRespondida = Boolean(a?.respostaOficial)
@@ -564,12 +562,6 @@ export default function Player() {
       return new Date(b?.publicadaEm || b?.criadaEm || 0).getTime() - new Date(a?.publicadaEm || a?.criadaEm || 0).getTime()
     })
   ), [duvidas])
-  const duvidasRelacionadasAoTrecho = useMemo(() => (
-    duvidasOrdenadas.filter(item => {
-      const janela = Number(item?.janelaRelacionadaSegundos || JANELA_DUVIDAS_RELACIONADAS_SEGUNDOS)
-      return Math.abs((item.timestampSegundos || 0) - trechoSelecionadoDuvida) <= janela
-    })
-  ), [duvidasOrdenadas, trechoSelecionadoDuvida])
 
   function definirPromptPonto(id) {
     promptPontoIdRef.current = id
@@ -1688,7 +1680,7 @@ export default function Player() {
 
   function renderDuvidasLista(lista, { titulo, emptyTitle, emptyCopy } = {}) {
     const listaVisivel = lista.slice(0, limiteDuvidasVisiveis)
-    const limiteInicial = visaoDuvidas === 'trecho' ? 4 : 6
+    const limiteInicial = 6
     const temMaisItens = lista.length > listaVisivel.length
 
     return (
@@ -1899,20 +1891,12 @@ export default function Player() {
   }
 
   function renderCardDuvidas() {
-    const totalRelacionadas = duvidasRelacionadasAoTrecho.length
-    const listaBase = visaoDuvidas === 'trecho' ? duvidasRelacionadasAoTrecho : duvidasOrdenadas
-    const listaAtiva = listaBase
+    const listaAtiva = duvidasOrdenadas
     const isPrimeiraDuvida = duvidas.length === 0 && !duvidasLoading
-    const emptyTitle = visaoDuvidas === 'trecho'
-      ? 'Nenhuma duvida neste trecho.'
-      : 'Nenhuma duvida neste percurso.'
-    const emptyCopy = visaoDuvidas === 'trecho'
-      ? 'Se precisar, faca uma pergunta.'
-      : 'As respostas aparecem aqui.'
+    const emptyTitle = 'Nenhuma duvida neste percurso.'
+    const emptyCopy = 'As respostas aparecem aqui.'
     const resumoDuvidas = duvidas.length
-      ? totalRelacionadas > 0
-        ? `${totalRelacionadas} duvidas perto deste ponto`
-        : 'Consulte respostas ou faca uma pergunta'
+      ? 'Todas as duvidas e respostas deste video'
       : 'Consulte respostas ou faca uma pergunta'
 
     return (
@@ -1954,15 +1938,6 @@ export default function Player() {
                 <button className="btn btn-primary" type="button" onClick={() => abrirCriacaoDuvida()}>
                   Fazer pergunta
                 </button>
-                {!duvidasLoading && duvidas.length > totalRelacionadas ? (
-                  <button
-                    className="player-duvidas-link-action"
-                    type="button"
-                    onClick={() => setVisaoDuvidas(current => (current === 'trecho' ? 'todas' : 'trecho'))}
-                  >
-                    {visaoDuvidas === 'trecho' ? 'Ver todas do percurso' : 'Voltar para este trecho'}
-                  </button>
-                ) : null}
               </div>
 
               {formDuvidaAberto ? renderFormularioDuvida() : null}
@@ -1971,11 +1946,7 @@ export default function Player() {
                 <div className="spinner" style={{ marginTop: '1rem' }} />
               ) : (
                 <>
-                  {visaoDuvidas === 'todas' ? (
-                    <div className="mini-copy">Todas do percurso.</div>
-                  ) : (
-                    <div className="mini-copy">Deste trecho.</div>
-                  )}
+                  <div className="mini-copy">Todas do percurso.</div>
 
                   {isPrimeiraDuvida ? (
                     <div className="player-duvidas-first-run">
