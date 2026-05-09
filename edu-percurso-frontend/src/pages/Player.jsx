@@ -359,7 +359,6 @@ export default function Player() {
     setEnviandoDuvida(false)
     setProcessandoApoioId('')
     setFormDuvidaAberto(false)
-    setVisaoDuvidas('trecho')
     disparadosIdsRef.current = new Set()
     secondsRef.current = 0
     reproducaoIniciadaRef.current = false
