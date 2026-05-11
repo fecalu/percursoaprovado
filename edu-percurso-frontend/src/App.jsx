@@ -19,7 +19,9 @@ import MinhaTrilha from './pages/MinhaTrilha'
 import PerfilAluno from './pages/PerfilAluno'
 import Biblioteca from './pages/Biblioteca'
 import BibliotecaGuia from './pages/BibliotecaGuia'
+import Simulados from './pages/Simulados'
 import SimuladoTeorico from './pages/SimuladoTeorico'
+import SimuladoPratico from './pages/SimuladoPratico'
 import Player from './pages/Player'
 import MeusAcessos from './pages/MeusAcessos'
 import MeusPedidos from './pages/MeusPedidos'
@@ -62,7 +64,9 @@ export default function App() {
             <Route path="/minha-trilha" element={<PrivateRoute><MinhaTrilha /></PrivateRoute>} />
             <Route path="/biblioteca" element={<PrivateRoute><Biblioteca /></PrivateRoute>} />
             <Route path="/biblioteca/modulos/:moduloId/guia" element={<PrivateRoute><BibliotecaGuia /></PrivateRoute>} />
-            <Route path="/simulado" element={<PrivateRoute><SimuladoTeorico /></PrivateRoute>} />
+            <Route path="/simulado" element={<PrivateRoute><Simulados /></PrivateRoute>} />
+            <Route path="/simulado/teorico" element={<PrivateRoute><SimuladoTeorico /></PrivateRoute>} />
+            <Route path="/simulado/pratico" element={<PrivateRoute><SimuladoPratico /></PrivateRoute>} />
             <Route path="/percursos" element={<Navigate to="/biblioteca" replace />} />
             <Route path="/conteudos/:id" element={<PrivateRoute><Player /></PrivateRoute>} />
             <Route path="/percursos/:id" element={<PrivateRoute><Player /></PrivateRoute>} />
@@ -77,9 +81,10 @@ export default function App() {
             <Route path="/admin/percursos/novo" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
             <Route path="/admin/percursos/:id/editar" element={<PrivateRoute adminOnly><AdminPercursoForm /></PrivateRoute>} />
             <Route path="/admin/modulos" element={<PrivateRoute adminOnly><AdminModulos /></PrivateRoute>} />
-            <Route path="/admin/questoes" element={<PrivateRoute adminOnly><AdminQuestoes /></PrivateRoute>} />
-            <Route path="/admin/questoes/nova" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
-            <Route path="/admin/questoes/:id/editar" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
+            <Route path="/admin/questoes" element={<Navigate to="/admin/questoes/teoricas" replace />} />
+            <Route path="/admin/questoes/:modalidadeSlug" element={<PrivateRoute adminOnly><AdminQuestoes /></PrivateRoute>} />
+            <Route path="/admin/questoes/:modalidadeSlug/nova" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
+            <Route path="/admin/questoes/:modalidadeSlug/:id/editar" element={<PrivateRoute adminOnly><AdminQuestaoForm /></PrivateRoute>} />
             <Route path="/admin/locais" element={<PrivateRoute adminOnly><AdminLocais /></PrivateRoute>} />
             <Route path="/admin/planos" element={<PrivateRoute adminOnly><AdminPlanos /></PrivateRoute>} />
             <Route path="/admin/assinaturas" element={<PrivateRoute adminOnly><AdminAssinaturas /></PrivateRoute>} />

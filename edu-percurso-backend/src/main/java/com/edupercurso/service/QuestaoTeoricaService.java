@@ -23,25 +23,29 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class QuestaoTeoricaService {
 
-    private static final int TOTAL_QUESTOES_SIMULADO_COMPLETO = 30;
+    private static final int TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO = 30;
+    private static final int TOTAL_QUESTOES_SIMULADO_COMPLETO_PRATICO = 20;
 
     private final QuestaoTeoricaRepository questaoTeoricaRepository;
     private final RespostaQuestaoAlunoRepository respostaQuestaoAlunoRepository;
     private final UsuarioLookupService usuarioLookupService;
 
     public List<QuestaoDTO.Response> listarAdmin(String busca,
+                                                 QuestaoTeorica.Modalidade modalidade,
                                                  QuestaoTeorica.Tema tema,
                                                  QuestaoTeorica.Status status) {
         String termo = busca == null ? "" : busca.trim().toLowerCase();
 
         return questaoTeoricaRepository.findAll().stream()
                 .filter(questao -> termo.isBlank() || correspondeBusca(questao, termo))
+                .filter(questao -> modalidade == null || questao.getModalidade() == modalidade)
                 .filter(questao -> tema == null || questao.getTema() == tema)
                 .filter(questao -> status == null || questao.getStatus() == status)
                 .sorted(Comparator
@@ -51,8 +55,9 @@ public class QuestaoTeoricaService {
                 .toList();
     }
 
-    public List<QuestaoAlunoDTO.TemaResumoResponse> listarTemasDisponiveis() {
-        Map<QuestaoTeorica.Tema, Long> totais = questaoTeoricaRepository.findByStatus(QuestaoTeorica.Status.PUBLICADA).stream()
+    public List<QuestaoAlunoDTO.TemaResumoResponse> listarTemasDisponiveis(QuestaoTeorica.Modalidade modalidade) {
+        Map<QuestaoTeorica.Tema, Long> totais = questaoTeoricaRepository
+                .findByStatusAndModalidade(QuestaoTeorica.Status.PUBLICADA, normalizarModalidade(modalidade)).stream()
                 .collect(Collectors.groupingBy(QuestaoTeorica::getTema, Collectors.counting()));
 
         return totais.entrySet().stream()
@@ -61,10 +66,12 @@ public class QuestaoTeoricaService {
                 .toList();
     }
 
-    public List<QuestaoAlunoDTO.QuestaoTreinoResponse> listarTreino(QuestaoTeorica.Tema tema) {
+    public List<QuestaoAlunoDTO.QuestaoTreinoResponse> listarTreino(QuestaoTeorica.Modalidade modalidade,
+                                                                    QuestaoTeorica.Tema tema) {
+        QuestaoTeorica.Modalidade modalidadeNormalizada = normalizarModalidade(modalidade);
         List<QuestaoTeorica> questoes = tema == null
-                ? questaoTeoricaRepository.findByStatus(QuestaoTeorica.Status.PUBLICADA)
-                : questaoTeoricaRepository.findByStatusAndTema(QuestaoTeorica.Status.PUBLICADA, tema);
+                ? questaoTeoricaRepository.findByStatusAndModalidade(QuestaoTeorica.Status.PUBLICADA, modalidadeNormalizada)
+                : questaoTeoricaRepository.findByStatusAndModalidadeAndTema(QuestaoTeorica.Status.PUBLICADA, modalidadeNormalizada, tema);
 
         return questoes.stream()
                 .sorted(Comparator
@@ -74,10 +81,22 @@ public class QuestaoTeoricaService {
                 .toList();
     }
 
-    public List<QuestaoAlunoDTO.QuestaoTreinoResponse> listarSimuladoCompleto(List<UUID> excluirIds) {
-        List<QuestaoTeorica> publicadas = questaoTeoricaRepository.findByStatus(QuestaoTeorica.Status.PUBLICADA);
-        if (publicadas.isEmpty()) {
+    public List<QuestaoAlunoDTO.QuestaoTreinoResponse> listarSimuladoCompleto(QuestaoTeorica.Modalidade modalidade,
+                                                                               List<UUID> excluirIds) {
+        QuestaoTeorica.Modalidade modalidadeNormalizada = normalizarModalidade(modalidade);
+        int totalQuestoes = modalidadeNormalizada == QuestaoTeorica.Modalidade.PRATICO
+                ? TOTAL_QUESTOES_SIMULADO_COMPLETO_PRATICO
+                : TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO;
+        List<QuestaoTeorica> publicadas = questaoTeoricaRepository.findByStatusAndModalidade(
+                QuestaoTeorica.Status.PUBLICADA,
+                modalidadeNormalizada
+        );
+        if (publicadas.size() < totalQuestoes) {
             return List.of();
+        }
+
+        if (modalidadeNormalizada == QuestaoTeorica.Modalidade.PRATICO) {
+            return montarSimuladoPratico(publicadas, excluirIds);
         }
 
         Set<UUID> idsExcluidos = excluirIds == null ? Set.of() : new HashSet<>(excluirIds);
@@ -85,7 +104,7 @@ public class QuestaoTeoricaService {
                 .filter(questao -> !idsExcluidos.contains(questao.getId()))
                 .toList();
 
-        List<QuestaoTeorica> candidatas = poolBase.size() >= TOTAL_QUESTOES_SIMULADO_COMPLETO ? poolBase : publicadas;
+        List<QuestaoTeorica> candidatas = poolBase.size() >= TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO ? poolBase : publicadas;
 
         Map<QuestaoTeorica.Tema, List<QuestaoTeorica>> questoesPorTema = candidatas.stream()
                 .collect(Collectors.groupingBy(QuestaoTeorica::getTema, () -> new EnumMap<>(QuestaoTeorica.Tema.class), Collectors.toList()));
@@ -103,13 +122,13 @@ public class QuestaoTeoricaService {
         adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.MEIO_AMBIENTE_CIDADANIA, List.of()), 3);
         adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.MECANICA_BASICA, List.of()), 2);
 
-        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO) {
+        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO) {
             List<QuestaoTeorica> restantes = new ArrayList<>(candidatas.stream()
                     .filter(questao -> !idsSelecionados.contains(questao.getId()))
                     .toList());
             Collections.shuffle(restantes);
             restantes.stream()
-                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO - selecionadas.size())
+                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO - selecionadas.size())
                     .forEach(questao -> {
                         if (idsSelecionados.add(questao.getId())) {
                             selecionadas.add(questao);
@@ -117,13 +136,13 @@ public class QuestaoTeoricaService {
                     });
         }
 
-        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO && candidatas != publicadas) {
+        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO && candidatas != publicadas) {
             List<QuestaoTeorica> restantesExcluidas = new ArrayList<>(publicadas.stream()
                     .filter(questao -> !idsSelecionados.contains(questao.getId()))
                     .toList());
             Collections.shuffle(restantesExcluidas);
             restantesExcluidas.stream()
-                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO - selecionadas.size())
+                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO - selecionadas.size())
                     .forEach(questao -> {
                         if (idsSelecionados.add(questao.getId())) {
                             selecionadas.add(questao);
@@ -134,7 +153,70 @@ public class QuestaoTeoricaService {
         Collections.shuffle(selecionadas);
 
         return selecionadas.stream()
-                .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO)
+                .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO_TEORICO)
+                .map(QuestaoAlunoDTO.QuestaoTreinoResponse::from)
+                .toList();
+    }
+
+    private List<QuestaoAlunoDTO.QuestaoTreinoResponse> montarSimuladoPratico(List<QuestaoTeorica> publicadas,
+                                                                              List<UUID> excluirIds) {
+        Set<UUID> idsExcluidos = excluirIds == null ? Set.of() : new HashSet<>(excluirIds);
+        List<QuestaoTeorica> poolBase = publicadas.stream()
+                .filter(questao -> !idsExcluidos.contains(questao.getId()))
+                .toList();
+
+        List<QuestaoTeorica> candidatas = poolBase.size() >= TOTAL_QUESTOES_SIMULADO_COMPLETO_PRATICO
+                ? poolBase
+                : publicadas;
+
+        Map<QuestaoTeorica.Tema, List<QuestaoTeorica>> questoesPorTema = candidatas.stream()
+                .collect(Collectors.groupingBy(QuestaoTeorica::getTema, () -> new EnumMap<>(QuestaoTeorica.Tema.class), Collectors.toList()));
+
+        questoesPorTema.values().forEach(Collections::shuffle);
+
+        List<QuestaoTeorica> selecionadas = new ArrayList<>();
+        Set<UUID> idsSelecionados = new HashSet<>();
+
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.BALIZA, List.of()), 4);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.CONTROLE_DO_VEICULO, List.of()), 4);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.PREFERENCIA, List.of()), 3);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.LADEIRA, List.of()), 2);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.CONVERSOES, List.of()), 2);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.ESTACIONAMENTO, List.of()), 2);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.FALTAS_ELIMINATORIAS, List.of()), 2);
+        adicionarQuestoes(selecionadas, idsSelecionados, questoesPorTema.getOrDefault(QuestaoTeorica.Tema.CONDUTA_NA_PROVA, List.of()), 1);
+
+        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO_PRATICO) {
+            List<QuestaoTeorica> restantes = new ArrayList<>(candidatas.stream()
+                    .filter(questao -> !idsSelecionados.contains(questao.getId()))
+                    .toList());
+            Collections.shuffle(restantes);
+            restantes.stream()
+                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO_PRATICO - selecionadas.size())
+                    .forEach(questao -> {
+                        if (idsSelecionados.add(questao.getId())) {
+                            selecionadas.add(questao);
+                        }
+                    });
+        }
+
+        if (selecionadas.size() < TOTAL_QUESTOES_SIMULADO_COMPLETO_PRATICO && candidatas != publicadas) {
+            List<QuestaoTeorica> restantesExcluidas = new ArrayList<>(publicadas.stream()
+                    .filter(questao -> !idsSelecionados.contains(questao.getId()))
+                    .toList());
+            Collections.shuffle(restantesExcluidas);
+            restantesExcluidas.stream()
+                    .limit(TOTAL_QUESTOES_SIMULADO_COMPLETO_PRATICO - selecionadas.size())
+                    .forEach(questao -> {
+                        if (idsSelecionados.add(questao.getId())) {
+                            selecionadas.add(questao);
+                        }
+                    });
+        }
+
+        Collections.shuffle(selecionadas);
+
+        return selecionadas.stream()
                 .map(QuestaoAlunoDTO.QuestaoTreinoResponse::from)
                 .toList();
     }
@@ -309,9 +391,12 @@ public class QuestaoTeoricaService {
 
     private void aplicarRequest(QuestaoTeorica questao, QuestaoDTO.Request request) {
         validarAlternativas(request.getAlternativas());
+        QuestaoTeorica.Modalidade modalidade = normalizarModalidade(request.getModalidade());
+        validarTemaDaModalidade(modalidade, request.getTema());
 
         questao.setEnunciado(request.getEnunciado().trim());
         questao.setImagemUrl(normalizarTexto(request.getImagemUrl()));
+        questao.setModalidade(modalidade);
         questao.setTema(request.getTema());
         questao.setDificuldade(request.getDificuldade() == null ? QuestaoTeorica.Dificuldade.MEDIA : request.getDificuldade());
         questao.setStatus(request.getStatus() == null ? QuestaoTeorica.Status.RASCUNHO : request.getStatus());
@@ -323,8 +408,12 @@ public class QuestaoTeoricaService {
     }
 
     private void aplicarImportacao(QuestaoTeorica questao, QuestaoImportDTO.QuestaoRequest request) {
+        QuestaoTeorica.Modalidade modalidade = normalizarModalidade(request.getModalidade());
+        validarTemaDaModalidade(modalidade, request.getTema());
+
         questao.setEnunciado(request.getEnunciado().trim());
         questao.setImagemUrl(normalizarTexto(request.getImagemUrl()));
+        questao.setModalidade(modalidade);
         questao.setTema(request.getTema());
         questao.setDificuldade(request.getDificuldade() == null ? QuestaoTeorica.Dificuldade.MEDIA : request.getDificuldade());
         questao.setStatus(request.getStatus() == null ? QuestaoTeorica.Status.RASCUNHO : request.getStatus());
@@ -427,6 +516,29 @@ public class QuestaoTeoricaService {
     private String formatAlternativaLabel(Integer ordem) {
         int indice = ordem == null ? 0 : ordem;
         return String.valueOf((char) ('A' + indice));
+    }
+
+    private QuestaoTeorica.Modalidade normalizarModalidade(QuestaoTeorica.Modalidade modalidade) {
+        return modalidade == null ? QuestaoTeorica.Modalidade.TEORICO : modalidade;
+    }
+
+    private void validarTemaDaModalidade(QuestaoTeorica.Modalidade modalidade, QuestaoTeorica.Tema tema) {
+        boolean temaTeorico = Stream.of(
+                QuestaoTeorica.Tema.PLACAS,
+                QuestaoTeorica.Tema.LEGISLACAO,
+                QuestaoTeorica.Tema.DIRECAO_DEFENSIVA,
+                QuestaoTeorica.Tema.PRIMEIROS_SOCORROS,
+                QuestaoTeorica.Tema.MECANICA_BASICA,
+                QuestaoTeorica.Tema.MEIO_AMBIENTE_CIDADANIA
+        ).anyMatch(item -> item == tema);
+
+        if (modalidade == QuestaoTeorica.Modalidade.TEORICO && !temaTeorico) {
+            throw new IllegalArgumentException("Tema invalido para questao teorica.");
+        }
+
+        if (modalidade == QuestaoTeorica.Modalidade.PRATICO && temaTeorico) {
+            throw new IllegalArgumentException("Tema invalido para questao pratica.");
+        }
     }
 
     private QuestaoTeorica buscarQuestaoPublicada(UUID id) {

@@ -34,6 +34,9 @@ public class QuestaoDTO {
         private QuestaoTeorica.Tema tema;
 
         @NotNull
+        private QuestaoTeorica.Modalidade modalidade = QuestaoTeorica.Modalidade.TEORICO;
+
+        @NotNull
         private QuestaoTeorica.Dificuldade dificuldade = QuestaoTeorica.Dificuldade.MEDIA;
 
         @NotNull
@@ -77,6 +80,7 @@ public class QuestaoDTO {
         private String enunciado;
         private String imagemUrl;
         private String tema;
+        private String modalidade;
         private String dificuldade;
         private String status;
         private String explicacaoCurta;
@@ -92,6 +96,9 @@ public class QuestaoDTO {
             response.enunciado = questao.getEnunciado();
             response.imagemUrl = questao.getImagemUrl();
             response.tema = questao.getTema().name();
+            response.modalidade = (questao.getModalidade() == null
+                    ? QuestaoTeorica.Modalidade.TEORICO
+                    : questao.getModalidade()).name();
             response.dificuldade = questao.getDificuldade().name();
             response.status = questao.getStatus().name();
             response.explicacaoCurta = questao.getExplicacaoCurta();

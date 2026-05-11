@@ -25,6 +25,14 @@ public interface QuestaoTeoricaRepository extends JpaRepository<QuestaoTeorica, 
     List<QuestaoTeorica> findByStatusAndTema(QuestaoTeorica.Status status, QuestaoTeorica.Tema tema);
 
     @EntityGraph(attributePaths = "alternativas")
+    List<QuestaoTeorica> findByStatusAndModalidade(QuestaoTeorica.Status status, QuestaoTeorica.Modalidade modalidade);
+
+    @EntityGraph(attributePaths = "alternativas")
+    List<QuestaoTeorica> findByStatusAndModalidadeAndTema(QuestaoTeorica.Status status,
+                                                          QuestaoTeorica.Modalidade modalidade,
+                                                          QuestaoTeorica.Tema tema);
+
+    @EntityGraph(attributePaths = "alternativas")
     Optional<QuestaoTeorica> findByOrigemAndOrigemQuestaoId(String origem, String origemQuestaoId);
 
     @EntityGraph(attributePaths = "alternativas")

@@ -57,7 +57,8 @@ export default function Sidebar() {
       items: [
         { to: '/admin/percursos', icon: IconList, label: 'Aulas' },
         { to: '/admin/modulos', icon: IconList, label: 'Modulos' },
-        { to: '/admin/questoes', icon: IconQuiz, label: 'Banco de questoes' },
+        { to: '/admin/questoes/teoricas', icon: IconQuiz, label: 'Questoes teoricas' },
+        { to: '/admin/questoes/praticas', icon: IconQuiz, label: 'Questoes praticas' },
         { to: '/admin/duvidas-percurso', icon: IconComment, label: 'Duvidas por trecho' },
       ],
     },
@@ -92,6 +93,8 @@ export default function Sidebar() {
       if (location.pathname.startsWith('/admin/paginas/')) return 'Site'
       if (location.pathname.startsWith('/admin/percursos')) return 'Aulas'
       if (location.pathname.startsWith('/admin/modulos')) return 'Modulos'
+      if (location.pathname.startsWith('/admin/questoes/teoricas')) return 'Questoes teoricas'
+      if (location.pathname.startsWith('/admin/questoes/praticas')) return 'Questoes praticas'
       if (location.pathname.startsWith('/admin/questoes')) return 'Questoes'
       if (location.pathname.startsWith('/admin/duvidas-percurso')) return 'Duvidas'
       if (location.pathname.startsWith('/admin/locais')) return 'Comercial'
@@ -105,7 +108,7 @@ export default function Sidebar() {
     if (location.pathname.startsWith('/painel')) return 'Painel'
     if (location.pathname.startsWith('/minha-trilha')) return 'Minha trilha'
     if (location.pathname.startsWith('/biblioteca')) return 'Biblioteca'
-    if (location.pathname.startsWith('/simulado')) return 'Simulado teorico'
+    if (location.pathname.startsWith('/simulado')) return 'Simulados'
     if (location.pathname.startsWith('/meus-acessos')) return 'Meus acessos'
     if (location.pathname.startsWith('/meus-pedidos')) return 'Pagamentos'
     if (location.pathname.startsWith('/meu-progresso')) return 'Meu progresso'
@@ -159,7 +162,7 @@ export default function Sidebar() {
           <IconLibrary /> Biblioteca
         </NavLink>
         <NavLink to="/simulado" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-          <IconQuiz /> Simulado teorico
+          <IconQuiz /> Simulados
         </NavLink>
         <NavLink to="/meus-acessos" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
           <IconPass /> Meus acessos

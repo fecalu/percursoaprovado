@@ -49,6 +49,11 @@ public class QuestaoTeorica {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
+    private Modalidade modalidade = Modalidade.TEORICO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
     private Dificuldade dificuldade = Dificuldade.MEDIA;
 
     @Enumerated(EnumType.STRING)
@@ -105,7 +110,20 @@ public class QuestaoTeorica {
         DIRECAO_DEFENSIVA,
         PRIMEIROS_SOCORROS,
         MECANICA_BASICA,
-        MEIO_AMBIENTE_CIDADANIA
+        MEIO_AMBIENTE_CIDADANIA,
+        BALIZA,
+        CONTROLE_DO_VEICULO,
+        LADEIRA,
+        PREFERENCIA,
+        CONVERSOES,
+        ESTACIONAMENTO,
+        FALTAS_ELIMINATORIAS,
+        CONDUTA_NA_PROVA
+    }
+
+    public enum Modalidade {
+        TEORICO,
+        PRATICO
     }
 
     public enum Dificuldade {

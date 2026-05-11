@@ -26,20 +26,23 @@ public class QuestaoController {
     private final QuestaoTeoricaService questaoTeoricaService;
 
     @GetMapping("/temas")
-    public ResponseEntity<List<QuestaoAlunoDTO.TemaResumoResponse>> listarTemas() {
-        return ResponseEntity.ok(questaoTeoricaService.listarTemasDisponiveis());
+    public ResponseEntity<List<QuestaoAlunoDTO.TemaResumoResponse>> listarTemas(
+            @RequestParam(required = false) QuestaoTeorica.Modalidade modalidade) {
+        return ResponseEntity.ok(questaoTeoricaService.listarTemasDisponiveis(modalidade));
     }
 
     @GetMapping("/treino")
     public ResponseEntity<List<QuestaoAlunoDTO.QuestaoTreinoResponse>> listarTreino(
+            @RequestParam(required = false) QuestaoTeorica.Modalidade modalidade,
             @RequestParam(required = false) QuestaoTeorica.Tema tema) {
-        return ResponseEntity.ok(questaoTeoricaService.listarTreino(tema));
+        return ResponseEntity.ok(questaoTeoricaService.listarTreino(modalidade, tema));
     }
 
     @GetMapping("/simulado-completo")
     public ResponseEntity<List<QuestaoAlunoDTO.QuestaoTreinoResponse>> listarSimuladoCompleto(
+            @RequestParam(required = false) QuestaoTeorica.Modalidade modalidade,
             @RequestParam(required = false) List<UUID> excluirIds) {
-        return ResponseEntity.ok(questaoTeoricaService.listarSimuladoCompleto(excluirIds));
+        return ResponseEntity.ok(questaoTeoricaService.listarSimuladoCompleto(modalidade, excluirIds));
     }
 
     @PostMapping("/{id}/responder")

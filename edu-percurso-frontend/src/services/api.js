@@ -97,9 +97,10 @@ export const questaoService = {
   publicarAdmin: id => api.post(`/admin/questoes/${id}/publicar`).then(response => response.data),
   arquivarAdmin: id => api.post(`/admin/questoes/${id}/arquivar`).then(response => response.data),
   excluirAdmin: id => api.delete(`/admin/questoes/${id}`),
-  listarTemasAluno: () => api.get('/questoes/temas').then(response => response.data),
+  listarTemasAluno: modalidade => api.get(`/questoes/temas${toSearchParams({ modalidade })}`).then(response => response.data),
   listarTreinoAluno: params => api.get(`/questoes/treino${toSearchParams(params)}`).then(response => response.data),
-  listarSimuladoCompletoAluno: excluirIds => api.get(`/questoes/simulado-completo${toSearchParams({
+  listarSimuladoCompletoAluno: (modalidade, excluirIds) => api.get(`/questoes/simulado-completo${toSearchParams({
+    modalidade,
     excluirIds: Array.isArray(excluirIds) && excluirIds.length ? excluirIds.join(',') : '',
   })}`).then(response => response.data),
   responderAluno: (id, data) => api.post(`/questoes/${id}/responder`, data).then(response => response.data),

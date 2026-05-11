@@ -10088,6 +10088,17 @@ html[data-theme='light'] .library-module-tile.is-open .library-lesson-row:hover 
   font-weight: 700;
 }
 
+.simulados-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.simulados-hub-card,
+.simulados-placeholder-card {
+  min-height: 100%;
+}
+
 .simulado-mode-pill,
 .simulado-theme-pill {
   display: inline-flex;

@@ -104,6 +104,14 @@ public class QuestaoAlunoDTO {
             case PRIMEIROS_SOCORROS -> "Primeiros socorros";
             case MECANICA_BASICA -> "Mecanica basica";
             case MEIO_AMBIENTE_CIDADANIA -> "Meio ambiente e cidadania";
+            case BALIZA -> "Baliza";
+            case CONTROLE_DO_VEICULO -> "Controle do veiculo";
+            case LADEIRA -> "Ladeira";
+            case PREFERENCIA -> "Preferencia";
+            case CONVERSOES -> "Conversoes";
+            case ESTACIONAMENTO -> "Estacionamento";
+            case FALTAS_ELIMINATORIAS -> "Faltas eliminatorias";
+            case CONDUTA_NA_PROVA -> "Conduta na prova";
         };
     }
 

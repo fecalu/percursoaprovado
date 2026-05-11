@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { questaoService } from '../services/api'
 
-const DURACAO_SIMULADO_SEGUNDOS = 40 * 60
-const ACERTOS_MINIMOS = 21
+const DURACAO_SIMULADO_SEGUNDOS = 25 * 60
+const ACERTOS_MINIMOS = 14
 
 function getAlternativaLabel(ordem, fallbackIndex) {
   const indice = Number.isInteger(ordem) ? ordem : fallbackIndex
@@ -16,7 +16,7 @@ function formatarTempoRestante(totalSegundos) {
   return `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`
 }
 
-export default function SimuladoTeorico() {
+export default function SimuladoPratico() {
   const navigate = useNavigate()
   const [questoes, setQuestoes] = useState([])
   const [indiceAtual, setIndiceAtual] = useState(0)
@@ -47,14 +47,14 @@ export default function SimuladoTeorico() {
     setSimuladoFinalizado(false)
     setMotivoEncerramento('')
 
-    questaoService.listarSimuladoCompletoAluno('TEORICO', simuladoIdsParaEvitar)
+    questaoService.listarSimuladoCompletoAluno('PRATICO', simuladoIdsParaEvitar)
       .then(response => {
         if (!ativo) return
         setQuestoes(response)
       })
       .catch(error => {
         if (!ativo) return
-        setErro(error.response?.data?.erro || 'Nao foi possivel carregar o simulado teorico.')
+        setErro(error.response?.data?.erro || 'Nao foi possivel carregar o simulado pratico.')
         setQuestoes([])
       })
       .finally(() => {
@@ -183,7 +183,7 @@ export default function SimuladoTeorico() {
       <section className="simulado-mode-card">
         <div className="simulado-mode-summary">
           <span className="student-inline-note">Modo ativo</span>
-          <strong>Simulado teorico completo com 30 questoes publicadas</strong>
+          <strong>Simulado pratico completo com 20 questoes publicadas</strong>
         </div>
       </section>
 
@@ -192,7 +192,7 @@ export default function SimuladoTeorico() {
       {questoes.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">?</div>
-          Ainda nao existem questoes suficientes para montar o simulado teorico.
+          Ainda nao existem questoes suficientes para montar o simulado pratico.
           <div style={{ marginTop: '1rem' }}>
             <button className="btn btn-primary" onClick={() => navigate('/simulado')}>
               Voltar para simulados
@@ -216,7 +216,7 @@ export default function SimuladoTeorico() {
                 </p>
 
                 <div className={`simulado-result-card ${aprovado ? 'is-pass' : 'is-fail'}`}>
-                  <div className="simulado-result-seal">{aprovado ? 'Trofeu da aprovacao' : 'Hora de revisar'}</div>
+                  <div className="simulado-result-seal">{aprovado ? 'Treino de aprovacao' : 'Hora de revisar'}</div>
                   <div className="simulado-result-copy">
                     {aprovado
                       ? `Voce fez ${corretasSessao} acertos e ultrapassou a meta minima de ${ACERTOS_MINIMOS}.`
@@ -238,7 +238,7 @@ export default function SimuladoTeorico() {
                   </div>
                   <div className="player-meta-card">
                     <div className="player-meta-label">Modo</div>
-                    <div className="player-meta-value">Simulado teorico</div>
+                    <div className="player-meta-value">Simulado pratico</div>
                   </div>
                   <div className="player-meta-card">
                     <div className="player-meta-label">Minimo para passar</div>
@@ -252,7 +252,7 @@ export default function SimuladoTeorico() {
 
                 {!aprovado && (
                   <div className="simulado-review-list">
-                    <div className="player-side-title">Questoes para revisar</div>
+                    <div className="player-side-title">Situacoes para revisar</div>
                     {questoesNaoRespondidas > 0 && (
                       <div className="simulado-review-note">
                         {questoesNaoRespondidas} questoes ficaram sem resposta e contam contra a nota final.
@@ -301,29 +301,29 @@ export default function SimuladoTeorico() {
             ) : !simuladoIniciado ? (
               <div className="simulado-intro-card">
                 <span className="badge badge-blue">Modo prova</span>
-                <h2 className="student-card-title">Simulado teorico</h2>
+                <h2 className="student-card-title">Simulado pratico</h2>
                 <p className="student-card-copy">
-                  Esta rodada segue o formato de prova: 30 questoes, 40 minutos e minimo de 21 acertos para passar.
-                  O tempo comeca a contar quando voce confirmar o inicio.
+                  Esta rodada reune cenarios de baliza, controle do veiculo, faltas eliminatorias e conduta de prova.
+                  Sao 20 questoes, 25 minutos e minimo de 14 acertos para passar.
                 </p>
                 <div className="simulado-intro-grid">
                   <div className="simulado-intro-rule">
                     <span className="simulado-intro-label">Tempo</span>
-                    <strong>40 minutos</strong>
+                    <strong>25 minutos</strong>
                   </div>
                   <div className="simulado-intro-rule">
                     <span className="simulado-intro-label">Meta</span>
-                    <strong>21 acertos</strong>
+                    <strong>14 acertos</strong>
                   </div>
                   <div className="simulado-intro-rule">
                     <span className="simulado-intro-label">Formato</span>
-                    <strong>30 questoes</strong>
+                    <strong>20 questoes</strong>
                   </div>
                 </div>
                 <div className="student-help-steps">
-                  <div className="student-help-step">1. Legislacao e placas entram como o bloco mais pesado da rodada.</div>
-                  <div className="student-help-step">2. Direcao defensiva tem peso alto e costuma decidir a nota final.</div>
-                  <div className="student-help-step">3. Primeiros socorros, cidadania e mecanica completam a prova.</div>
+                  <div className="student-help-step">1. Baliza e controle do veiculo entram com mais peso nesta rodada.</div>
+                  <div className="student-help-step">2. Falta eliminatoria e conduta de prova ajudam a revisar o que reprova mais rapido.</div>
+                  <div className="student-help-step">3. Use o resultado para mapear onde sua leitura pratica ainda falha.</div>
                 </div>
                 <div className="student-card-actions">
                   <button type="button" className="btn btn-primary" onClick={() => setSimuladoIniciado(true)}>
@@ -338,7 +338,7 @@ export default function SimuladoTeorico() {
               <>
                 <div className="student-card-top">
                   <div>
-                    <span className="badge badge-blue">Simulado teorico</span>
+                    <span className="badge badge-blue">Simulado pratico</span>
                     <h2 className="student-card-title simulado-question-title">
                       Questao {indiceAtual + 1} de {totalQuestoes}
                     </h2>
@@ -359,7 +359,7 @@ export default function SimuladoTeorico() {
                     </div>
                     <div className="simulado-exam-pill">
                       <span className="simulado-exam-pill-label">Prova</span>
-                      <strong>40 minutos</strong>
+                      <strong>25 minutos</strong>
                     </div>
                   </div>
 

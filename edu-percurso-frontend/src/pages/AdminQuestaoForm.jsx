@@ -4,18 +4,46 @@ import { questaoService, uploadService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import {
   formatDificuldadeQuestao,
+  formatModalidadeQuestao,
   formatStatusQuestao,
   formatTemaQuestao,
 } from '../utils/formatters'
 
-const TEMAS = [
-  'PLACAS',
-  'LEGISLACAO',
-  'DIRECAO_DEFENSIVA',
-  'PRIMEIROS_SOCORROS',
-  'MECANICA_BASICA',
-  'MEIO_AMBIENTE_CIDADANIA',
-]
+const TEMAS_POR_MODALIDADE = {
+  TEORICO: [
+    'PLACAS',
+    'LEGISLACAO',
+    'DIRECAO_DEFENSIVA',
+    'PRIMEIROS_SOCORROS',
+    'MECANICA_BASICA',
+    'MEIO_AMBIENTE_CIDADANIA',
+  ],
+  PRATICO: [
+    'BALIZA',
+    'CONTROLE_DO_VEICULO',
+    'LADEIRA',
+    'PREFERENCIA',
+    'CONVERSOES',
+    'ESTACIONAMENTO',
+    'FALTAS_ELIMINATORIAS',
+    'CONDUTA_NA_PROVA',
+  ],
+}
+
+const MODALIDADES = {
+  teoricas: {
+    codigo: 'TEORICO',
+    tituloCriacao: 'Nova questao teorica',
+    tituloEdicao: 'Editar questao teorica',
+    subtitulo: 'Cadastre a pergunta, o gabarito e a explicacao que vai apoiar o aluno no simulado teorico.',
+  },
+  praticas: {
+    codigo: 'PRATICO',
+    tituloCriacao: 'Nova questao pratica',
+    tituloEdicao: 'Editar questao pratica',
+    subtitulo: 'Cadastre a pergunta, o gabarito e a explicacao que vai apoiar o aluno no simulado pratico.',
+  },
+}
 
 const DIFICULDADES = ['FACIL', 'MEDIA', 'DIFICIL']
 const STATUS = ['RASCUNHO', 'PUBLICADA', 'ARQUIVADA']
@@ -30,30 +58,45 @@ function criarAlternativasVazias() {
   }))
 }
 
-const VAZIO = {
-  enunciado: '',
-  imagemUrl: '',
-  tema: 'LEGISLACAO',
-  dificuldade: 'MEDIA',
-  status: 'RASCUNHO',
-  explicacaoCurta: '',
-  explicacaoDetalhada: '',
-  videoUrl: '',
-  ordemExibicao: '0',
-  alternativas: criarAlternativasVazias(),
+function getModalidadeSlug(modalidade) {
+  return modalidade === 'PRATICO' ? 'praticas' : 'teoricas'
+}
+
+function criarFormularioVazio(modalidade) {
+  const temas = TEMAS_POR_MODALIDADE[modalidade] || TEMAS_POR_MODALIDADE.TEORICO
+  return {
+    modalidade,
+    enunciado: '',
+    imagemUrl: '',
+    tema: temas[0],
+    dificuldade: 'MEDIA',
+    status: 'RASCUNHO',
+    explicacaoCurta: '',
+    explicacaoDetalhada: '',
+    videoUrl: '',
+    ordemExibicao: '0',
+    alternativas: criarAlternativasVazias(),
+  }
 }
 
 export default function AdminQuestaoForm() {
-  const { id } = useParams()
+  const { modalidadeSlug = 'teoricas', id } = useParams()
   const isEdicao = Boolean(id)
   const navigate = useNavigate()
   const { show, ToastEl } = useToast()
+  const modalidadeAtual = MODALIDADES[modalidadeSlug] || MODALIDADES.teoricas
 
-  const [form, setForm] = useState(VAZIO)
+  const [form, setForm] = useState(criarFormularioVazio(modalidadeAtual.codigo))
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const [erros, setErros] = useState({})
   const [uploadingField, setUploadingField] = useState('')
+
+  useEffect(() => {
+    if (!isEdicao) {
+      setForm(criarFormularioVazio(modalidadeAtual.codigo))
+    }
+  }, [isEdicao, modalidadeAtual.codigo])
 
   useEffect(() => {
     if (!isEdicao) {
@@ -73,9 +116,10 @@ export default function AdminQuestaoForm() {
           }))
 
         setForm({
+          modalidade: response.modalidade || 'TEORICO',
           enunciado: response.enunciado || '',
           imagemUrl: response.imagemUrl || '',
-          tema: response.tema || 'LEGISLACAO',
+          tema: response.tema || (TEMAS_POR_MODALIDADE[response.modalidade || 'TEORICO']?.[0] || 'LEGISLACAO'),
           dificuldade: response.dificuldade || 'MEDIA',
           status: response.status || 'RASCUNHO',
           explicacaoCurta: response.explicacaoCurta || '',
@@ -92,6 +136,8 @@ export default function AdminQuestaoForm() {
     () => form.alternativas.findIndex(item => item.correta),
     [form.alternativas]
   )
+  const temasDisponiveis = TEMAS_POR_MODALIDADE[form.modalidade] || TEMAS_POR_MODALIDADE.TEORICO
+  const modalidadeFormSlug = getModalidadeSlug(form.modalidade)
 
   function set(field, value) {
     setForm(current => ({ ...current, [field]: value }))
@@ -178,6 +224,7 @@ export default function AdminQuestaoForm() {
     setSalvando(true)
 
     const payload = {
+      modalidade: form.modalidade,
       enunciado: form.enunciado.trim(),
       imagemUrl: form.imagemUrl.trim() || null,
       tema: form.tema,
@@ -204,7 +251,7 @@ export default function AdminQuestaoForm() {
         show('Questao criada com sucesso.')
       }
 
-      setTimeout(() => navigate('/admin/questoes'), 700)
+      setTimeout(() => navigate(`/admin/questoes/${modalidadeFormSlug}`), 700)
     } catch (error) {
       show(error.response?.data?.erro || 'Erro ao salvar questao.', 'error')
     } finally {
@@ -218,18 +265,23 @@ export default function AdminQuestaoForm() {
     <>
       {ToastEl}
 
-      <button className="back-link" onClick={() => navigate('/admin/questoes')}>
+      <button className="back-link" onClick={() => navigate(`/admin/questoes/${modalidadeFormSlug}`)}>
         <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M13 4L6 10l7 6" />
         </svg>
         Voltar
       </button>
 
-      <div className="page-title">{isEdicao ? 'Editar questao' : 'Nova questao'}</div>
-      <p className="page-sub">Cadastre a pergunta, o gabarito e a explicacao que vai apoiar o aluno no simulado teorico.</p>
+      <div className="page-title">{isEdicao ? modalidadeAtual.tituloEdicao : modalidadeAtual.tituloCriacao}</div>
+      <p className="page-sub">{modalidadeAtual.subtitulo}</p>
 
       <div className="card" style={{ maxWidth: 900 }}>
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">Modalidade</label>
+            <input className="form-input" value={formatModalidadeQuestao(form.modalidade)} disabled />
+          </div>
+
           <div className="form-group">
             <label className="form-label">Enunciado *</label>
             <textarea
@@ -281,7 +333,7 @@ export default function AdminQuestaoForm() {
             <div className="form-group">
               <label className="form-label">Tema</label>
               <select className="form-select" value={form.tema} onChange={event => set('tema', event.target.value)}>
-                {TEMAS.map(tema => (
+                {temasDisponiveis.map(tema => (
                   <option key={tema} value={tema}>{formatTemaQuestao(tema)}</option>
                 ))}
               </select>
@@ -427,7 +479,7 @@ export default function AdminQuestaoForm() {
             <button className="btn btn-primary" type="submit" disabled={salvando}>
               {salvando ? 'Salvando...' : isEdicao ? 'Salvar alteracoes' : 'Criar questao'}
             </button>
-            <button className="btn btn-ghost" type="button" onClick={() => navigate('/admin/questoes')}>
+            <button className="btn btn-ghost" type="button" onClick={() => navigate(`/admin/questoes/${modalidadeFormSlug}`)}>
               Cancelar
             </button>
           </div>

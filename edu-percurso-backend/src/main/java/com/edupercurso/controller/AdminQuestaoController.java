@@ -33,9 +33,10 @@ public class AdminQuestaoController {
     @GetMapping
     public ResponseEntity<List<QuestaoDTO.Response>> listar(
             @RequestParam(required = false) String busca,
+            @RequestParam(required = false) QuestaoTeorica.Modalidade modalidade,
             @RequestParam(required = false) QuestaoTeorica.Tema tema,
             @RequestParam(required = false) QuestaoTeorica.Status status) {
-        return ResponseEntity.ok(questaoTeoricaService.listarAdmin(busca, tema, status));
+        return ResponseEntity.ok(questaoTeoricaService.listarAdmin(busca, modalidade, tema, status));
     }
 
     @GetMapping("/{id}")

@@ -259,10 +259,28 @@ export function formatTemaQuestao(tema) {
     PRIMEIROS_SOCORROS: 'Primeiros socorros',
     MECANICA_BASICA: 'Mecânica básica',
     MEIO_AMBIENTE_CIDADANIA: 'Meio ambiente e cidadania',
+    BALIZA: 'Baliza',
+    CONTROLE_DO_VEICULO: 'Controle do veiculo',
+    LADEIRA: 'Ladeira',
+    PREFERENCIA: 'Preferencia',
+    CONVERSOES: 'Conversoes',
+    ESTACIONAMENTO: 'Estacionamento',
+    FALTAS_ELIMINATORIAS: 'Faltas eliminatorias',
+    CONDUTA_NA_PROVA: 'Conduta na prova',
   }
 
   if (!tema) return '-'
   return labels[tema] || tema
+}
+
+export function formatModalidadeQuestao(modalidade) {
+  const labels = {
+    TEORICO: 'Teorica',
+    PRATICO: 'Pratica',
+  }
+
+  if (!modalidade) return '-'
+  return labels[modalidade] || modalidade
 }
 
 export function formatDificuldadeQuestao(dificuldade) {

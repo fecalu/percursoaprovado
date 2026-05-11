@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { questaoService } from '../services/api'
 import { useToast } from '../hooks/useToast'
 import {
@@ -15,14 +15,39 @@ const FILTROS_INICIAIS = {
   status: '',
 }
 
-const TEMAS = [
-  'PLACAS',
-  'LEGISLACAO',
-  'DIRECAO_DEFENSIVA',
-  'PRIMEIROS_SOCORROS',
-  'MECANICA_BASICA',
-  'MEIO_AMBIENTE_CIDADANIA',
-]
+const TEMAS_POR_MODALIDADE = {
+  TEORICO: [
+    'PLACAS',
+    'LEGISLACAO',
+    'DIRECAO_DEFENSIVA',
+    'PRIMEIROS_SOCORROS',
+    'MECANICA_BASICA',
+    'MEIO_AMBIENTE_CIDADANIA',
+  ],
+  PRATICO: [
+    'BALIZA',
+    'CONTROLE_DO_VEICULO',
+    'LADEIRA',
+    'PREFERENCIA',
+    'CONVERSOES',
+    'ESTACIONAMENTO',
+    'FALTAS_ELIMINATORIAS',
+    'CONDUTA_NA_PROVA',
+  ],
+}
+
+const MODALIDADES = {
+  teoricas: {
+    codigo: 'TEORICO',
+    titulo: 'Questoes teoricas',
+    subtitulo: 'Cadastre as questoes do simulado teorico, defina o gabarito e inclua a explicacao em texto ou video.',
+  },
+  praticas: {
+    codigo: 'PRATICO',
+    titulo: 'Questoes praticas',
+    subtitulo: 'Cadastre as questoes do simulado pratico, com foco em leitura de situacao, criterio de avaliacao e conduta de prova.',
+  },
+}
 
 const STATUS = ['RASCUNHO', 'PUBLICADA', 'ARQUIVADA']
 const ITENS_POR_PAGINA = 50
@@ -34,12 +59,15 @@ function resumirEnunciado(texto) {
 }
 
 export default function AdminQuestoes() {
+  const { modalidadeSlug = 'teoricas' } = useParams()
   const navigate = useNavigate()
   const { show, ToastEl } = useToast()
   const [questoes, setQuestoes] = useState([])
   const [filtros, setFiltros] = useState(FILTROS_INICIAIS)
   const [loading, setLoading] = useState(true)
   const [paginaAtual, setPaginaAtual] = useState(1)
+  const modalidadeAtual = MODALIDADES[modalidadeSlug] || MODALIDADES.teoricas
+  const temasDisponiveis = TEMAS_POR_MODALIDADE[modalidadeAtual.codigo] || []
 
   const totalPaginas = Math.max(1, Math.ceil(questoes.length / ITENS_POR_PAGINA))
   const inicioPaginacao = (paginaAtual - 1) * ITENS_POR_PAGINA
@@ -63,8 +91,9 @@ export default function AdminQuestoes() {
   }, [paginaAtual, totalPaginas])
 
   useEffect(() => {
+    setFiltros(FILTROS_INICIAIS)
     carregar(FILTROS_INICIAIS)
-  }, [])
+  }, [modalidadeAtual.codigo])
 
   useEffect(() => {
     setPaginaAtual(current => Math.min(current, totalPaginas))
@@ -73,7 +102,10 @@ export default function AdminQuestoes() {
   async function carregar(params = filtros) {
     try {
       setLoading(true)
-      setQuestoes(await questaoService.listarAdmin(params))
+      setQuestoes(await questaoService.listarAdmin({
+        ...params,
+        modalidade: modalidadeAtual.codigo,
+      }))
       setPaginaAtual(1)
     } finally {
       setLoading(false)
@@ -133,12 +165,12 @@ export default function AdminQuestoes() {
       {ToastEl}
 
       <div className="admin-page-head">
-        <div className="page-title">Banco de questoes</div>
-        <button className="btn btn-primary" onClick={() => navigate('/admin/questoes/nova')}>
+        <div className="page-title">{modalidadeAtual.titulo}</div>
+        <button className="btn btn-primary" onClick={() => navigate(`/admin/questoes/${modalidadeSlug}/nova`)}>
           + Nova questao
         </button>
       </div>
-      <p className="page-sub">Cadastre as questoes do simulado teorico, defina o gabarito e inclua a explicacao em texto ou video.</p>
+      <p className="page-sub">{modalidadeAtual.subtitulo}</p>
 
       <form className="card question-filters" onSubmit={handleFiltrar} style={{ marginBottom: '1.5rem' }}>
         <input
@@ -150,7 +182,7 @@ export default function AdminQuestoes() {
 
         <select className="form-select" value={filtros.tema} onChange={event => setFiltro('tema', event.target.value)}>
           <option value="">Todos os temas</option>
-          {TEMAS.map(tema => (
+          {temasDisponiveis.map(tema => (
             <option key={tema} value={tema}>{formatTemaQuestao(tema)}</option>
           ))}
         </select>
@@ -226,7 +258,7 @@ export default function AdminQuestoes() {
                 <button
                   className="btn btn-ghost"
                   type="button"
-                  onClick={() => navigate(`/admin/questoes/${item.id}/editar`)}
+                  onClick={() => navigate(`/admin/questoes/${modalidadeSlug}/${item.id}/editar`)}
                 >
                   Editar
                 </button>

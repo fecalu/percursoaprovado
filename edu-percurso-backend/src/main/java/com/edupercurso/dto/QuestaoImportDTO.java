@@ -32,6 +32,8 @@ public class QuestaoImportDTO {
         @NotNull
         private QuestaoTeorica.Tema tema;
 
+        private QuestaoTeorica.Modalidade modalidade = QuestaoTeorica.Modalidade.TEORICO;
+
         @NotNull
         private QuestaoTeorica.Dificuldade dificuldade = QuestaoTeorica.Dificuldade.MEDIA;
 
