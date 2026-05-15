@@ -165,6 +165,7 @@ function PublicPage() {
   const [quote, setQuote] = useState(null)
   const [quoteBusy, setQuoteBusy] = useState(false)
   const [orderFormOpen, setOrderFormOpen] = useState(false)
+  const [previewPage, setPreviewPage] = useState(0)
   const [orderSubmitting, setOrderSubmitting] = useState(false)
   const [orderResult, setOrderResult] = useState(null)
   const [orderForm, setOrderForm] = useState({
@@ -301,6 +302,12 @@ function PublicPage() {
     return () => window.removeEventListener('keydown', handleEscape)
   }, [orderFormOpen])
 
+  useEffect(() => {
+    if (!orderFormOpen) {
+      setPreviewPage(0)
+    }
+  }, [orderFormOpen])
+
   const selectedCollection = useMemo(
     () => collections.find(collection => collection.slug === selectedCollectionSlug) || null,
     [collections, selectedCollectionSlug]
@@ -316,6 +323,13 @@ function PublicPage() {
     }
     return sheets
   }, [selectedStickerItems])
+  const previewPageCount = Math.max(1, Math.ceil(previewSheets.length / 2))
+  const clampedPreviewPage = Math.min(previewPage, previewPageCount - 1)
+  const visiblePreviewSheets = previewSheets.slice(clampedPreviewPage * 2, clampedPreviewPage * 2 + 2)
+
+  useEffect(() => {
+    setPreviewPage(current => Math.min(current, previewPageCount - 1))
+  }, [previewPageCount])
 
   function toggleSelection(stickerId) {
     setSelectedIds(current =>
@@ -586,28 +600,58 @@ function PublicPage() {
                   <span>{previewSheets.length} folha(s) gerada(s)</span>
                 </div>
                 <div className="fig-sheet-preview-strip">
-                  {previewSheets.map((sheet, sheetIndex) => (
-                    <div key={`sheet-${sheetIndex + 1}`} className="fig-sheet-preview-card">
-                      <div className="fig-sheet-preview-meta">
-                        <strong>Folha {sheetIndex + 1}</strong>
-                        <span>{sheet.length}/{STICKERS_PER_SHEET}</span>
+                  {visiblePreviewSheets.map((sheet, visibleIndex) => {
+                    const sheetIndex = clampedPreviewPage * 2 + visibleIndex
+                    return (
+                      <div key={`sheet-${sheetIndex + 1}`} className="fig-sheet-preview-card">
+                        <div className="fig-sheet-preview-meta">
+                          <strong>Folha {sheetIndex + 1}</strong>
+                          <span>{sheet.length}/{STICKERS_PER_SHEET}</span>
+                        </div>
+                        <div className="fig-sheet-preview-grid">
+                          {Array.from({ length: STICKERS_PER_SHEET }).map((_, slotIndex) => {
+                            const sticker = sheet[slotIndex]
+                            return (
+                              <div
+                                key={`sheet-${sheetIndex + 1}-slot-${slotIndex + 1}`}
+                                className={`fig-sheet-preview-slot${sticker ? ' is-filled' : ''}`}
+                              >
+                                {sticker ? <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} /> : null}
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
-                      <div className="fig-sheet-preview-grid">
-                        {Array.from({ length: STICKERS_PER_SHEET }).map((_, slotIndex) => {
-                          const sticker = sheet[slotIndex]
-                          return (
-                            <div
-                              key={`sheet-${sheetIndex + 1}-slot-${slotIndex + 1}`}
-                              className={`fig-sheet-preview-slot${sticker ? ' is-filled' : ''}`}
-                            >
-                              {sticker ? <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} /> : null}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
+                {previewSheets.length > 2 ? (
+                  <div className="fig-sheet-preview-pagination">
+                    <button
+                      type="button"
+                      className="fig-sheet-preview-arrow"
+                      onClick={() => setPreviewPage(current => Math.max(current - 1, 0))}
+                      disabled={clampedPreviewPage === 0}
+                      aria-label="Ver folhas anteriores"
+                    >
+                      &#9664;
+                    </button>
+                    <span className="fig-sheet-preview-page-indicator">
+                      Folhas {clampedPreviewPage * 2 + 1}-
+                      {Math.min(clampedPreviewPage * 2 + visiblePreviewSheets.length, previewSheets.length)} de{' '}
+                      {previewSheets.length}
+                    </span>
+                    <button
+                      type="button"
+                      className="fig-sheet-preview-arrow"
+                      onClick={() => setPreviewPage(current => Math.min(current + 1, previewPageCount - 1))}
+                      disabled={clampedPreviewPage >= previewPageCount - 1}
+                      aria-label="Ver proximas folhas"
+                    >
+                      &#9654;
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </section>
 

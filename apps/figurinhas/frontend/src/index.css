@@ -298,17 +298,18 @@ a {
 
 .fig-sticker-card {
   border: 1px solid rgba(17, 34, 53, 0.1);
-  background: #fff;
+  background: linear-gradient(180deg, rgba(247, 249, 252, 0.98), rgba(239, 244, 248, 0.98));
   border-radius: 22px;
   overflow: hidden;
   padding: 0;
   cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .fig-sticker-card.is-selected {
   border-color: rgba(31, 122, 77, 0.54);
   box-shadow: 0 18px 28px rgba(31, 122, 77, 0.18);
+  background: #fff;
 }
 
 .fig-sticker-card img {
@@ -316,6 +317,31 @@ a {
   aspect-ratio: 0.73;
   object-fit: cover;
   background: #f2f5f8;
+  filter: grayscale(1) saturate(0.22) brightness(1.03);
+  opacity: 0.86;
+  transition: filter 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.fig-sticker-card.is-selected img {
+  filter: none;
+  opacity: 1;
+}
+
+.fig-sticker-card strong,
+.fig-sticker-card span {
+  transition: color 0.18s ease;
+}
+
+.fig-sticker-card strong {
+  color: #43556b;
+}
+
+.fig-sticker-card.is-selected strong {
+  color: #112235;
+}
+
+.fig-sticker-card.is-selected span {
+  color: #5a6c82;
 }
 
 .fig-sticker-card-body {
@@ -515,7 +541,7 @@ a {
 }
 
 .fig-modal-shell {
-  width: min(900px, 100%);
+  width: min(1060px, 100%);
   max-height: calc(100vh - 3rem);
   overflow: auto;
   padding: 0.9rem;
@@ -682,16 +708,15 @@ a {
 }
 
 .fig-sheet-preview-strip {
-  display: flex;
-  gap: 0.7rem;
-  overflow-x: auto;
-  padding-bottom: 0.2rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
 }
 
 .fig-sheet-preview-card {
-  min-width: 210px;
-  padding: 0.7rem;
-  border-radius: 18px;
+  min-width: 0;
+  padding: 0.56rem;
+  border-radius: 16px;
   border: 1px solid rgba(17, 34, 53, 0.08);
   background: rgba(17, 34, 53, 0.03);
 }
@@ -705,18 +730,18 @@ a {
 }
 
 .fig-sheet-preview-meta strong {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
 }
 
 .fig-sheet-preview-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.22rem;
+  gap: 0.16rem;
 }
 
 .fig-sheet-preview-slot {
   aspect-ratio: 0.73;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px dashed rgba(17, 34, 53, 0.14);
   background: rgba(255, 255, 255, 0.8);
   overflow: hidden;
@@ -732,6 +757,37 @@ a {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.fig-sheet-preview-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+
+.fig-sheet-preview-arrow {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(17, 34, 53, 0.12);
+  background: #fff;
+  color: #112235;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.fig-sheet-preview-arrow:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.fig-sheet-preview-page-indicator {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4d6075;
 }
 
 .fig-admin-summary-grid {
@@ -831,6 +887,10 @@ a {
     max-height: calc(100vh - 2rem);
     padding: 0.85rem;
     border-radius: 22px;
+  }
+
+  .fig-sheet-preview-strip {
+    grid-template-columns: 1fr;
   }
 
   .fig-topbar,
