@@ -175,6 +175,35 @@ function PublicPage() {
     customer_whatsapp: '',
     notes: ''
   })
+  const selectedAlbum = useMemo(
+    () => albums.find(album => album.slug === selectedAlbumSlug) || null,
+    [albums, selectedAlbumSlug]
+  )
+  const availableCollections = selectedAlbum?.collections || []
+  const selectedCollection = useMemo(
+    () => availableCollections.find(collection => collection.slug === selectedCollectionSlug) || null,
+    [availableCollections, selectedCollectionSlug]
+  )
+  const selectedIds = useMemo(() => selectedStickers.map(sticker => sticker.id), [selectedStickers])
+  const selectedCountByCollection = useMemo(
+    () =>
+      selectedStickers.reduce((accumulator, sticker) => {
+        accumulator[sticker.collection_slug] = (accumulator[sticker.collection_slug] || 0) + 1
+        return accumulator
+      }, {}),
+    [selectedStickers]
+  )
+  const selectedStickerItems = selectedStickers
+  const previewSheets = useMemo(() => {
+    const sheets = []
+    for (let index = 0; index < selectedStickerItems.length; index += STICKERS_PER_SHEET) {
+      sheets.push(selectedStickerItems.slice(index, index + STICKERS_PER_SHEET))
+    }
+    return sheets
+  }, [selectedStickerItems])
+  const previewPageCount = Math.max(1, Math.ceil(previewSheets.length / 2))
+  const clampedPreviewPage = Math.min(previewPage, previewPageCount - 1)
+  const visiblePreviewSheets = previewSheets.slice(clampedPreviewPage * 2, clampedPreviewPage * 2 + 2)
 
   useEffect(() => {
     let ignore = false
@@ -309,36 +338,6 @@ function PublicPage() {
       setPreviewPage(0)
     }
   }, [orderFormOpen])
-
-  const selectedAlbum = useMemo(
-    () => albums.find(album => album.slug === selectedAlbumSlug) || null,
-    [albums, selectedAlbumSlug]
-  )
-  const availableCollections = selectedAlbum?.collections || []
-  const selectedCollection = useMemo(
-    () => availableCollections.find(collection => collection.slug === selectedCollectionSlug) || null,
-    [availableCollections, selectedCollectionSlug]
-  )
-  const selectedIds = useMemo(() => selectedStickers.map(sticker => sticker.id), [selectedStickers])
-  const selectedCountByCollection = useMemo(
-    () =>
-      selectedStickers.reduce((accumulator, sticker) => {
-        accumulator[sticker.collection_slug] = (accumulator[sticker.collection_slug] || 0) + 1
-        return accumulator
-      }, {}),
-    [selectedStickers]
-  )
-  const selectedStickerItems = selectedStickers
-  const previewSheets = useMemo(() => {
-    const sheets = []
-    for (let index = 0; index < selectedStickerItems.length; index += STICKERS_PER_SHEET) {
-      sheets.push(selectedStickerItems.slice(index, index + STICKERS_PER_SHEET))
-    }
-    return sheets
-  }, [selectedStickerItems])
-  const previewPageCount = Math.max(1, Math.ceil(previewSheets.length / 2))
-  const clampedPreviewPage = Math.min(previewPage, previewPageCount - 1)
-  const visiblePreviewSheets = previewSheets.slice(clampedPreviewPage * 2, clampedPreviewPage * 2 + 2)
 
   useEffect(() => {
     setPreviewPage(current => Math.min(current, previewPageCount - 1))
