@@ -156,7 +156,7 @@ def refresh_sticker_ocr(sticker: Sticker, update_name: bool = False) -> None:
     sticker.ocr_confidence = result.confidence
     sticker.ocr_processed_at = datetime.utcnow()
 
-    if update_name and result.suggested_name:
+    if update_name and result.suggested_name and (result.confidence is None or result.confidence >= 75):
         sticker.name = result.suggested_name
 
 

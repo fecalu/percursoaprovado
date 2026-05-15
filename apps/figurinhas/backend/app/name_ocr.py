@@ -15,8 +15,9 @@ except ImportError:  # pragma: no cover - dependency is expected in container/ru
 
 
 LOWERCASE_CONNECTORS = {"da", "de", "do", "das", "dos", "e"}
+INVALID_NAME_TOKENS = {"PANINI", "FIFA", "BRA", "BRAS", "BRASIL", "FC", "ENG"}
 OCR_LANGS = "por+eng"
-OCR_CONFIG = "--oem 3 --psm 7"
+OCR_CONFIG = "--oem 3"
 
 
 @dataclass(slots=True)
@@ -37,29 +38,57 @@ def detect_sticker_name(image_path: Path) -> OCRNameResult:
         return OCRNameResult(raw_text=None, suggested_name=None, confidence=None)
 
     band = _extract_name_band(crop)
+    best_valid_result: tuple[str, str, float | None, float] | None = None
     best_raw = None
     best_confidence = None
 
     for variant in _build_ocr_variants(band):
-        raw_text, confidence = _run_ocr(variant)
-        if not raw_text:
-            continue
-        if best_raw is None or (confidence or 0.0) > (best_confidence or 0.0):
-            best_raw = raw_text
-            best_confidence = confidence
+        for psm in (6, 7, 11):
+            raw_text, confidence = _run_ocr(variant, psm=psm)
+            if not raw_text:
+                continue
+
+            if best_raw is None or (confidence or 0.0) > (best_confidence or 0.0):
+                best_raw = raw_text
+                best_confidence = confidence
+
+            suggested = _normalize_player_name(raw_text)
+            if not suggested:
+                continue
+
+            score = _candidate_score(suggested, confidence)
+            if best_valid_result is None or score > best_valid_result[3]:
+                best_valid_result = (raw_text, suggested, confidence, score)
+
+    if best_valid_result is not None:
+        raw_text, suggested, confidence, _ = best_valid_result
+        return OCRNameResult(raw_text=raw_text, suggested_name=suggested, confidence=confidence)
 
     if not best_raw:
         return OCRNameResult(raw_text=None, suggested_name=None, confidence=None)
 
-    suggested = _normalize_player_name(best_raw)
-    return OCRNameResult(raw_text=best_raw, suggested_name=suggested, confidence=best_confidence)
+    return OCRNameResult(raw_text=best_raw, suggested_name=None, confidence=best_confidence)
+
+
+def _candidate_score(suggested_name: str, confidence: float | None) -> float:
+    alpha_length = len(re.sub(r"[^A-Za-zÀ-ÿ]", "", suggested_name))
+    words = len([word for word in suggested_name.split(" ") if word])
+    score = float(confidence or 0.0)
+    score += min(alpha_length, 18)
+    if words >= 2:
+        score += 8
+    if words > 4:
+        score -= 12
+    return score
 
 
 def _extract_name_band(image: Image.Image) -> Image.Image:
     width, height = image.size
-    top = max(0, int(round(height * 0.68)))
-    bottom = min(height, int(round(height * 0.95)))
-    return image.crop((0, top, width, bottom))
+    left = max(0, int(round(width * 0.04)))
+    right = min(width, int(round(width * 0.76)))
+    top = max(0, int(round(height * 0.78)))
+    bottom = min(height, int(round(height * 0.87)))
+    return image.crop((left, top, right, bottom))
 
 
 def _build_ocr_variants(image: Image.Image) -> list[Image.Image]:
@@ -79,9 +108,14 @@ def _build_ocr_variants(image: Image.Image) -> list[Image.Image]:
     ]
 
 
-def _run_ocr(image: Image.Image) -> tuple[str | None, float | None]:
+def _run_ocr(image: Image.Image, psm: int) -> tuple[str | None, float | None]:
     try:
-        data = pytesseract.image_to_data(image, lang=OCR_LANGS, config=OCR_CONFIG, output_type=Output.DICT)
+        data = pytesseract.image_to_data(
+            image,
+            lang=OCR_LANGS,
+            config=f"{OCR_CONFIG} --psm {psm}",
+            output_type=Output.DICT,
+        )
     except (pytesseract.TesseractNotFoundError, RuntimeError):
         return None, None
 
@@ -127,8 +161,28 @@ def _normalize_player_name(value: str) -> str | None:
     if not cleaned:
         return None
 
+    raw_words = [word for word in cleaned.split(" ") if word]
+    while len(raw_words) > 1 and len(re.sub(r"[^A-Za-zÀ-ÿ]", "", raw_words[-1])) <= 1:
+        raw_words.pop()
+
+    if not raw_words:
+        return None
+
+    cleaned = " ".join(raw_words)
+    uppercase_tokens = {token.upper() for token in cleaned.replace("-", " ").split(" ") if token}
+    letters_only = re.sub(r"[^A-Za-zÀ-ÿ]", "", cleaned)
+    if len(letters_only) < 4:
+        return None
+    if any(token in INVALID_NAME_TOKENS for token in uppercase_tokens):
+        return None
+    if len(re.sub(r"[^A-Za-zÀ-ÿ]", "", raw_words[0])) <= 1:
+        return None
+    short_token_count = sum(1 for word in raw_words if len(re.sub(r"[^A-Za-zÀ-ÿ]", "", word)) <= 2)
+    if len(raw_words) >= 3 and short_token_count >= 2:
+        return None
+
     words: list[str] = []
-    for index, word in enumerate(cleaned.split(" ")):
+    for index, word in enumerate(raw_words):
         lower = word.lower()
         if index > 0 and lower in LOWERCASE_CONNECTORS:
             words.append(lower)
