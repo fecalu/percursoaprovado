@@ -494,6 +494,55 @@ a {
   background: rgba(255, 255, 255, 0.92);
 }
 
+.fig-service-card--modal,
+.fig-order-form--modal {
+  margin-bottom: 0;
+}
+
+.fig-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  padding: 1.5rem;
+  background: rgba(17, 34, 53, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fig-modal-shell {
+  width: min(960px, 100%);
+  max-height: calc(100vh - 3rem);
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 28px;
+  background: #f8fbff;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: 0 30px 80px rgba(17, 34, 53, 0.28);
+}
+
+.fig-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.fig-modal-header h3 {
+  margin: 0;
+}
+
+.fig-modal-close {
+  border: 0;
+  background: rgba(17, 34, 53, 0.08);
+  color: #112235;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .fig-service-card-header {
   display: flex;
   align-items: flex-start;
@@ -687,6 +736,16 @@ a {
   .fig-quote-grid,
   .fig-order-options {
     grid-template-columns: 1fr;
+  }
+
+  .fig-modal-backdrop {
+    padding: 1rem;
+  }
+
+  .fig-modal-shell {
+    max-height: calc(100vh - 2rem);
+    padding: 0.85rem;
+    border-radius: 22px;
   }
 
   .fig-topbar,

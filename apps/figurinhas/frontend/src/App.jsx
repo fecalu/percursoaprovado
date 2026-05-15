@@ -286,6 +286,19 @@ function PublicPage() {
     }
   }, [quote, orderForm.service_type])
 
+  useEffect(() => {
+    if (!orderFormOpen) return undefined
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setOrderFormOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [orderFormOpen])
+
   const selectedCollection = useMemo(
     () => collections.find(collection => collection.slug === selectedCollectionSlug) || null,
     [collections, selectedCollectionSlug]
@@ -390,7 +403,7 @@ function PublicPage() {
               type="button"
               className="fig-secondary-button"
               disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
-              onClick={() => setOrderFormOpen(current => !current)}
+              onClick={() => setOrderFormOpen(true)}
             >
               Quero que voce prepare para mim
             </button>
@@ -423,165 +436,8 @@ function PublicPage() {
           </label>
         </div>
 
-        {quote ? (
-          <section className="fig-service-card">
-            <div className="fig-service-card-header">
-              <div>
-                <p className="fig-kicker">Servico opcional</p>
-                <h3>Quer que eu prepare tudo para voce?</h3>
-              </div>
-              <span className={`fig-service-badge${quote.service_enabled ? ' is-ready' : ''}`}>
-                {quote.service_enabled ? 'Disponivel' : 'Em configuracao'}
-              </span>
-            </div>
-
-            <div className="fig-quote-grid">
-              <div className="fig-quote-item">
-                <strong>{quote.item_count}</strong>
-                <span>figurinhas selecionadas</span>
-              </div>
-              <div className="fig-quote-item">
-                <strong>{quote.sheet_count}</strong>
-                <span>folhas para imprimir</span>
-              </div>
-              <div className="fig-quote-item">
-                <strong>{formatCurrency(quote.print_total_cents)}</strong>
-                <span>so impressao das folhas</span>
-              </div>
-              <div className="fig-quote-item">
-                <strong>{quote.pack_eligible ? formatCurrency(quote.pack_total_cents || 0) : '--'}</strong>
-                <span>
-                  {quote.pack_eligible
-                    ? `${quote.pack_count} pacotinho(s) montado(s)`
-                    : `pacotinhos de ${quote.pack_size}`}
-                </span>
-              </div>
-            </div>
-
-            <div className="fig-service-notes">
-              <p>
-                <strong>Servico 1:</strong> impressao por folha: <strong>{formatCurrency(quote.print_price_cents)}</strong>
-              </p>
-              <p>
-                <strong>Servico 2:</strong> montagem de cada pacotinho com corte e separacao de{' '}
-                {quote.pack_size} figurinhas: <strong>{formatCurrency(quote.pack_price_cents)}</strong>
-              </p>
-              {!quote.pack_eligible ? (
-                <p className="fig-warning-text">
-                  Para eu montar os pacotinhos, a quantidade precisa fechar em grupos de {quote.pack_size}.
-                  Sua selecao atual precisa de mais {quote.pack_size - quote.pack_remainder} figurinha(s).
-                </p>
-              ) : null}
-              {quote.pickup_note ? <p>{quote.pickup_note}</p> : null}
-            </div>
-          </section>
-        ) : null}
-
         {!quote && serviceConfig && !serviceConfig.service_enabled ? (
           <p className="fig-empty-note">O servico de impressao ainda nao foi ativado no momento.</p>
-        ) : null}
-
-        {orderFormOpen && quote ? (
-          <form className="fig-form-card fig-order-form" onSubmit={handleCreateOrder}>
-            <div className="fig-panel-header">
-              <p className="fig-kicker">Pedido local</p>
-              <h3>Escolha como voce quer receber</h3>
-            </div>
-
-            <div className="fig-order-options">
-              <label className={`fig-order-option${orderForm.service_type === 'IMPRESSAO' ? ' is-active' : ''}`}>
-                <input
-                  type="radio"
-                  name="service_type"
-                  value="IMPRESSAO"
-                  checked={orderForm.service_type === 'IMPRESSAO'}
-                  onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
-                />
-                <div>
-                  <strong>So imprimir para mim</strong>
-                  <span>{quote.sheet_count} folha(s) impressa(s) · {formatCurrency(quote.print_total_cents)}</span>
-                </div>
-              </label>
-
-              <label
-                className={`fig-order-option${
-                  orderForm.service_type === 'IMPRESSAO_PACOTINHOS' ? ' is-active' : ''
-                }${!quote.pack_eligible ? ' is-disabled' : ''}`}
-              >
-                <input
-                  type="radio"
-                  name="service_type"
-                  value="IMPRESSAO_PACOTINHOS"
-                  checked={orderForm.service_type === 'IMPRESSAO_PACOTINHOS'}
-                  disabled={!quote.pack_eligible}
-                  onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
-                />
-                <div>
-                  <strong>Completo: imprimir, cortar e montar</strong>
-                  <span>
-                    {quote.pack_eligible
-                      ? `${quote.pack_count} pacotinho(s) · ${formatCurrency(quote.pack_total_cents || 0)}`
-                      : `Disponivel so quando fechar grupos de ${quote.pack_size}`}
-                  </span>
-                </div>
-              </label>
-            </div>
-
-            <div className="fig-form-grid">
-              <label className="fig-field">
-                <span>Nome</span>
-                <input
-                  value={orderForm.customer_name}
-                  onChange={event => setOrderForm(current => ({ ...current, customer_name: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="fig-field">
-                <span>WhatsApp</span>
-                <input
-                  value={orderForm.customer_whatsapp}
-                  onChange={event => setOrderForm(current => ({ ...current, customer_whatsapp: event.target.value }))}
-                  required
-                />
-              </label>
-              <label className="fig-field">
-                <span>Apelido (opcional)</span>
-                <input
-                  value={orderForm.customer_nickname}
-                  onChange={event => setOrderForm(current => ({ ...current, customer_nickname: event.target.value }))}
-                />
-              </label>
-              <label className="fig-field">
-                <span>Observacao (opcional)</span>
-                <input
-                  value={orderForm.notes}
-                  onChange={event => setOrderForm(current => ({ ...current, notes: event.target.value }))}
-                  placeholder="Ex.: separar por primo, sobrinho..."
-                />
-              </label>
-            </div>
-
-            <div className="fig-helper-strip">
-              <strong>Pagamento via Pix.</strong>{' '}
-              <span>
-                Chave: {quote.pix_key || 'a configurar'}
-                {quote.pix_holder ? ` · ${quote.pix_holder}` : ''}
-              </span>
-            </div>
-
-            <div className="fig-hero-actions">
-              <button type="button" className="fig-secondary-button" onClick={() => setOrderFormOpen(false)}>
-                Fechar
-              </button>
-              <button
-                type="submit"
-                className="fig-primary-button"
-                disabled={orderSubmitting || !quote.service_enabled}
-              >
-                {orderSubmitting ? 'Criando pedido...' : 'Confirmar pedido'}
-              </button>
-            </div>
-          </form>
         ) : null}
 
         {orderResult ? (
@@ -611,7 +467,7 @@ function PublicPage() {
             </p>
             <p>
               Chave Pix: <strong>{orderResult.pix_key || 'a configurar'}</strong>
-              {orderResult.pix_holder ? ` · ${orderResult.pix_holder}` : ''}
+              {orderResult.pix_holder ? ` ? ${orderResult.pix_holder}` : ''}
             </p>
             {orderResult.pickup_note ? <p>{orderResult.pickup_note}</p> : null}
           </section>
@@ -639,9 +495,179 @@ function PublicPage() {
         </div>
         {!busy && stickers.length === 0 ? <p className="fig-empty-note">Nenhuma figurinha encontrada para esse filtro.</p> : null}
       </div>
+
+      {orderFormOpen && quote ? (
+        <div className="fig-modal-backdrop" onClick={() => setOrderFormOpen(false)}>
+          <div className="fig-modal-shell" onClick={event => event.stopPropagation()}>
+            <div className="fig-modal-header">
+              <div>
+                <p className="fig-kicker">Servico opcional</p>
+                <h3>Quer que eu prepare tudo para voce?</h3>
+              </div>
+              <button type="button" className="fig-modal-close" onClick={() => setOrderFormOpen(false)}>
+                Fechar
+              </button>
+            </div>
+
+            <section className="fig-service-card fig-service-card--modal">
+              <div className="fig-service-card-header">
+                <div>
+                  <p className="fig-kicker">Resumo rapido</p>
+                  <h3>Seu pedido de impressao</h3>
+                </div>
+                <span className={`fig-service-badge${quote.service_enabled ? ' is-ready' : ''}`}>
+                  {quote.service_enabled ? 'Disponivel' : 'Em configuracao'}
+                </span>
+              </div>
+
+              <div className="fig-quote-grid">
+                <div className="fig-quote-item">
+                  <strong>{quote.item_count}</strong>
+                  <span>figurinhas selecionadas</span>
+                </div>
+                <div className="fig-quote-item">
+                  <strong>{quote.sheet_count}</strong>
+                  <span>folhas para imprimir</span>
+                </div>
+                <div className="fig-quote-item">
+                  <strong>{formatCurrency(quote.print_total_cents)}</strong>
+                  <span>so impressao das folhas</span>
+                </div>
+                <div className="fig-quote-item">
+                  <strong>{quote.pack_eligible ? formatCurrency(quote.pack_total_cents || 0) : '--'}</strong>
+                  <span>
+                    {quote.pack_eligible
+                      ? `${quote.pack_count} pacotinho(s) montado(s)`
+                      : `pacotinhos de ${quote.pack_size}`}
+                  </span>
+                </div>
+              </div>
+
+              <div className="fig-service-notes">
+                <p>
+                  <strong>Servico 1:</strong> impressao por folha: <strong>{formatCurrency(quote.print_price_cents)}</strong>
+                </p>
+                <p>
+                  <strong>Servico 2:</strong> montagem de cada pacotinho com corte e separacao de {quote.pack_size} figurinhas:{' '}
+                  <strong>{formatCurrency(quote.pack_price_cents)}</strong>
+                </p>
+                {!quote.pack_eligible ? (
+                  <p className="fig-warning-text">
+                    Para eu montar os pacotinhos, a quantidade precisa fechar em grupos de {quote.pack_size}.
+                    Sua selecao atual precisa de mais {quote.pack_size - quote.pack_remainder} figurinha(s).
+                  </p>
+                ) : null}
+                {quote.pickup_note ? <p>{quote.pickup_note}</p> : null}
+              </div>
+            </section>
+
+            <form className="fig-form-card fig-order-form fig-order-form--modal" onSubmit={handleCreateOrder}>
+              <div className="fig-panel-header">
+                <p className="fig-kicker">Pedido local</p>
+                <h3>Escolha como voce quer receber</h3>
+              </div>
+
+              <div className="fig-order-options">
+                <label className={`fig-order-option${orderForm.service_type === 'IMPRESSAO' ? ' is-active' : ''}`}>
+                  <input
+                    type="radio"
+                    name="service_type"
+                    value="IMPRESSAO"
+                    checked={orderForm.service_type === 'IMPRESSAO'}
+                    onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
+                  />
+                  <div>
+                    <strong>So imprimir para mim</strong>
+                    <span>{quote.sheet_count} folha(s) impressa(s) - {formatCurrency(quote.print_total_cents)}</span>
+                  </div>
+                </label>
+
+                <label
+                  className={`fig-order-option${
+                    orderForm.service_type === 'IMPRESSAO_PACOTINHOS' ? ' is-active' : ''
+                  }${!quote.pack_eligible ? ' is-disabled' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="service_type"
+                    value="IMPRESSAO_PACOTINHOS"
+                    checked={orderForm.service_type === 'IMPRESSAO_PACOTINHOS'}
+                    disabled={!quote.pack_eligible}
+                    onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
+                  />
+                  <div>
+                    <strong>Completo: imprimir, cortar e montar</strong>
+                    <span>
+                      {quote.pack_eligible
+                        ? `${quote.pack_count} pacotinho(s) - ${formatCurrency(quote.pack_total_cents || 0)}`
+                        : `Disponivel so quando fechar grupos de ${quote.pack_size}`}
+                    </span>
+                  </div>
+                </label>
+              </div>
+
+              <div className="fig-form-grid">
+                <label className="fig-field">
+                  <span>Nome</span>
+                  <input
+                    value={orderForm.customer_name}
+                    onChange={event => setOrderForm(current => ({ ...current, customer_name: event.target.value }))}
+                    required
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>WhatsApp</span>
+                  <input
+                    value={orderForm.customer_whatsapp}
+                    onChange={event => setOrderForm(current => ({ ...current, customer_whatsapp: event.target.value }))}
+                    required
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Apelido (opcional)</span>
+                  <input
+                    value={orderForm.customer_nickname}
+                    onChange={event => setOrderForm(current => ({ ...current, customer_nickname: event.target.value }))}
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Observacao (opcional)</span>
+                  <input
+                    value={orderForm.notes}
+                    onChange={event => setOrderForm(current => ({ ...current, notes: event.target.value }))}
+                    placeholder="Ex.: separar por primo, sobrinho..."
+                  />
+                </label>
+              </div>
+
+              <div className="fig-helper-strip">
+                <strong>Pagamento via Pix.</strong>{' '}
+                <span>
+                  Chave: {quote.pix_key || 'a configurar'}
+                  {quote.pix_holder ? ` ? ${quote.pix_holder}` : ''}
+                </span>
+              </div>
+
+              <div className="fig-hero-actions">
+                <button type="button" className="fig-secondary-button" onClick={() => setOrderFormOpen(false)}>
+                  Fechar
+                </button>
+                <button
+                  type="submit"
+                  className="fig-primary-button"
+                  disabled={orderSubmitting || !quote.service_enabled}
+                >
+                  {orderSubmitting ? 'Criando pedido...' : 'Confirmar pedido'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
+
 
 function AdminPage() {
   const [token, setToken] = useAdminToken()
