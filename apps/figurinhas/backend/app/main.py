@@ -126,6 +126,22 @@ def ensure_runtime_schema() -> None:
             if "album_id" not in collection_columns:
                 connection.exec_driver_sql("ALTER TABLE figurinhas_collections ADD COLUMN album_id INTEGER")
 
+        service_settings_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_service_settings'"
+        ).fetchone()
+        if service_settings_table_exists:
+            service_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_service_settings)").fetchall()
+            }
+            if "donation_enabled" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN donation_enabled BOOLEAN NOT NULL DEFAULT 0"
+                )
+            if "donation_message" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN donation_message TEXT"
+                )
+
         print_orders_table_exists = connection.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_print_orders'"
         ).fetchone()
@@ -365,11 +381,13 @@ def get_admin_service_config(db: Session = Depends(get_db)) -> dict:
 def update_admin_service_config(payload: ServiceConfigUpdate, db: Session = Depends(get_db)) -> dict:
     service_settings = get_or_create_service_settings(db)
     service_settings.service_enabled = payload.service_enabled
+    service_settings.donation_enabled = payload.donation_enabled
     service_settings.pack_size = payload.pack_size
     service_settings.print_price_cents = payload.print_price_cents
     service_settings.pack_price_cents = payload.pack_price_cents
     service_settings.pix_key = (payload.pix_key or "").strip() or None
     service_settings.pix_holder = (payload.pix_holder or "").strip() or None
+    service_settings.donation_message = (payload.donation_message or "").strip() or None
     service_settings.pickup_note = (payload.pickup_note or "").strip() or None
     db.commit()
     db.refresh(service_settings)

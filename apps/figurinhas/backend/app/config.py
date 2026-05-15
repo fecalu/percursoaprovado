@@ -22,6 +22,11 @@ class Settings:
     default_pack_price_cents = int(os.getenv("FIGURINHAS_PACK_PRICE_CENTS", "0"))
     default_pix_key = os.getenv("FIGURINHAS_PIX_KEY", "")
     default_pix_holder = os.getenv("FIGURINHAS_PIX_HOLDER", "")
+    default_donation_enabled = os.getenv("FIGURINHAS_DONATION_ENABLED", "false").lower() == "true"
+    default_donation_message = os.getenv(
+        "FIGURINHAS_DONATION_MESSAGE",
+        "Se este material te ajudou, voce pode apoiar o projeto com uma doacao via Pix. O download continua gratuito.",
+    )
     default_pickup_note = os.getenv(
         "FIGURINHAS_PICKUP_NOTE",
         "Pagamento via Pix e retirada combinada diretamente comigo.",

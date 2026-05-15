@@ -153,11 +153,13 @@ class ServiceSettings(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
     service_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    donation_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     pack_size: Mapped[int] = mapped_column(Integer, default=7, nullable=False)
     print_price_cents: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     pack_price_cents: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     pix_key: Mapped[str | None] = mapped_column(String(255), nullable=True)
     pix_holder: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    donation_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     pickup_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(

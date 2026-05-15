@@ -163,21 +163,25 @@ class ExportResponse(BaseModel):
 
 class ServiceConfigResponse(BaseModel):
     service_enabled: bool
+    donation_enabled: bool
     pack_size: int
     print_price_cents: int
     pack_price_cents: int
     pix_key: str | None
     pix_holder: str | None
+    donation_message: str | None
     pickup_note: str | None
 
 
 class ServiceConfigUpdate(BaseModel):
     service_enabled: bool = False
+    donation_enabled: bool = False
     pack_size: int = Field(default=7, ge=1, le=100)
     print_price_cents: int = Field(default=0, ge=0, le=100000)
     pack_price_cents: int = Field(default=0, ge=0, le=100000)
     pix_key: str | None = Field(default=None, max_length=255)
     pix_holder: str | None = Field(default=None, max_length=150)
+    donation_message: str | None = Field(default=None, max_length=500)
     pickup_note: str | None = Field(default=None, max_length=500)
 
 

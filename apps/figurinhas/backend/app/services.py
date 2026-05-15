@@ -246,11 +246,13 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
     settings_record = ServiceSettings(
         id=1,
         service_enabled=settings.default_service_enabled,
+        donation_enabled=settings.default_donation_enabled,
         pack_size=settings.default_pack_size,
         print_price_cents=settings.default_print_price_cents,
         pack_price_cents=settings.default_pack_price_cents,
         pix_key=settings.default_pix_key or None,
         pix_holder=settings.default_pix_holder or None,
+        donation_message=settings.default_donation_message or None,
         pickup_note=settings.default_pickup_note or None,
     )
     db.add(settings_record)
@@ -833,11 +835,13 @@ def sticker_to_response(sticker: Sticker) -> dict:
 def service_settings_to_response(service_settings: ServiceSettings) -> dict:
     return {
         "service_enabled": service_settings.service_enabled,
+        "donation_enabled": service_settings.donation_enabled,
         "pack_size": service_settings.pack_size,
         "print_price_cents": service_settings.print_price_cents,
         "pack_price_cents": service_settings.pack_price_cents,
         "pix_key": service_settings.pix_key,
         "pix_holder": service_settings.pix_holder,
+        "donation_message": service_settings.donation_message,
         "pickup_note": service_settings.pickup_note,
     }
 

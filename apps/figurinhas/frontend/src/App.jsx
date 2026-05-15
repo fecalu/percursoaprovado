@@ -129,6 +129,11 @@ function downloadBlob(blob, fileName) {
   window.URL.revokeObjectURL(objectUrl)
 }
 
+function triggerFileDownload(downloadPath) {
+  if (!downloadPath) return
+  window.location.href = `${apiBase}${downloadPath}`
+}
+
 function Layout({ children }) {
   return (
     <div className="fig-app-shell">
@@ -166,9 +171,13 @@ function PublicPage() {
   const [quote, setQuote] = useState(null)
   const [quoteBusy, setQuoteBusy] = useState(false)
   const [orderFormOpen, setOrderFormOpen] = useState(false)
+  const [donationModalOpen, setDonationModalOpen] = useState(false)
   const [previewPage, setPreviewPage] = useState(0)
   const [orderSubmitting, setOrderSubmitting] = useState(false)
   const [orderResult, setOrderResult] = useState(null)
+  const [pendingDownloadPath, setPendingDownloadPath] = useState('')
+  const [pendingDownloadFileName, setPendingDownloadFileName] = useState('')
+  const [pixCopied, setPixCopied] = useState(false)
   const [orderForm, setOrderForm] = useState({
     service_type: 'IMPRESSAO',
     customer_name: '',
@@ -284,7 +293,7 @@ function PublicPage() {
   }, [selectedCollectionSlug, search, category])
 
   useEffect(() => {
-    if (!selectedAlbumSlug || selectedIds.length === 0) {
+    if (!selectedAlbumSlug || selectedIds.length === 0 || !serviceConfig?.service_enabled) {
       setQuote(null)
       setOrderFormOpen(false)
       return
@@ -319,7 +328,7 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedAlbumSlug, selectedIds])
+  }, [selectedAlbumSlug, selectedIds, serviceConfig?.service_enabled])
 
   useEffect(() => {
     setOrderResult(null)
@@ -345,10 +354,29 @@ function PublicPage() {
   }, [orderFormOpen])
 
   useEffect(() => {
+    if (!donationModalOpen) return undefined
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setDonationModalOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [donationModalOpen])
+
+  useEffect(() => {
     if (!orderFormOpen) {
       setPreviewPage(0)
     }
   }, [orderFormOpen])
+
+  useEffect(() => {
+    if (!donationModalOpen) {
+      setPixCopied(false)
+    }
+  }, [donationModalOpen])
 
   useEffect(() => {
     setPreviewPage(current => Math.min(current, previewPageCount - 1))
@@ -395,12 +423,36 @@ function PublicPage() {
           sticker_ids: selectedIds
         })
       })
-      window.location.href = `${apiBase}${data.download_path}`
+      if (serviceConfig?.donation_enabled && serviceConfig?.pix_key) {
+        setPendingDownloadPath(data.download_path)
+        setPendingDownloadFileName(data.file_name)
+        setDonationModalOpen(true)
+      } else {
+        triggerFileDownload(data.download_path)
+      }
     } catch (err) {
       setError(err.message)
     } finally {
       setExporting(false)
     }
+  }
+
+  async function handleCopyPixKey() {
+    if (!serviceConfig?.pix_key) return
+    try {
+      await navigator.clipboard.writeText(serviceConfig.pix_key)
+      setPixCopied(true)
+    } catch {
+      setError('Nao foi possivel copiar a chave Pix automaticamente.')
+    }
+  }
+
+  function handleDonationDownload() {
+    const downloadPath = pendingDownloadPath
+    setDonationModalOpen(false)
+    setPendingDownloadPath('')
+    setPendingDownloadFileName('')
+    triggerFileDownload(downloadPath)
   }
 
   async function handleCreateOrder(event) {
@@ -542,14 +594,16 @@ function PublicPage() {
             <button type="button" className="fig-secondary-button" onClick={() => setSelectedStickers([])}>
               Limpar selecao
             </button>
-            <button
-              type="button"
-              className="fig-secondary-button"
-              disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
-              onClick={() => setOrderFormOpen(true)}
-            >
-              Quero que voce prepare para mim
-            </button>
+            {serviceConfig?.service_enabled ? (
+              <button
+                type="button"
+                className="fig-secondary-button"
+                disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
+                onClick={() => setOrderFormOpen(true)}
+              >
+                Quero que voce prepare para mim
+              </button>
+            ) : null}
             <button
               type="button"
               className="fig-primary-button"
@@ -578,10 +632,6 @@ function PublicPage() {
             </select>
           </label>
         </div>
-
-        {!quote && serviceConfig && !serviceConfig.service_enabled ? (
-          <p className="fig-empty-note">O servico de impressao ainda nao foi ativado no momento.</p>
-        ) : null}
 
         {orderResult ? (
           <section className="fig-success-panel">
@@ -618,7 +668,9 @@ function PublicPage() {
 
         {error ? <p className="fig-error-banner">{error}</p> : null}
         {busy ? <p className="fig-empty-note">Carregando figurinhas...</p> : null}
-        {quoteBusy && selectedIds.length > 0 ? <p className="fig-empty-note">Calculando folhas e servicos...</p> : null}
+        {serviceConfig?.service_enabled && quoteBusy && selectedIds.length > 0 ? (
+          <p className="fig-empty-note">Calculando folhas e servicos...</p>
+        ) : null}
 
         <div className="fig-sticker-grid">
           {stickers.map(sticker => (
@@ -870,6 +922,62 @@ function PublicPage() {
           </div>
         </div>
       ) : null}
+
+      {donationModalOpen && serviceConfig ? (
+        <div className="fig-modal-backdrop" onClick={() => setDonationModalOpen(false)}>
+          <div className="fig-modal-shell fig-modal-shell--donation" onClick={event => event.stopPropagation()}>
+            <div className="fig-modal-header">
+              <div>
+                <p className="fig-kicker">Apoio opcional</p>
+                <h3>Se quiser, voce pode apoiar o projeto via Pix</h3>
+              </div>
+              <button type="button" className="fig-modal-close" onClick={() => setDonationModalOpen(false)}>
+                Fechar
+              </button>
+            </div>
+
+            <section className="fig-form-card fig-donation-modal-card">
+              <div className="fig-service-notes">
+                <p>{serviceConfig.donation_message || 'O download continua gratuito mesmo sem doacao.'}</p>
+              </div>
+
+              <div className="fig-quote-grid fig-quote-grid--donation">
+                <div className="fig-quote-item">
+                  <strong>{selectedIds.length}</strong>
+                  <span>figurinhas no arquivo</span>
+                </div>
+                <div className="fig-quote-item">
+                  <strong>{quote?.sheet_count || previewSheets.length || 1}</strong>
+                  <span>folha(s) gerada(s)</span>
+                </div>
+                <div className="fig-quote-item">
+                  <strong>Pix</strong>
+                  <span>apoio opcional</span>
+                </div>
+              </div>
+
+              <div className="fig-helper-strip fig-helper-strip--donation">
+                <div>
+                  <strong>Chave Pix</strong>
+                  <span>{serviceConfig.pix_key || 'a configurar'}{serviceConfig.pix_holder ? ` · ${serviceConfig.pix_holder}` : ''}</span>
+                </div>
+                <button type="button" className="fig-secondary-button" onClick={handleCopyPixKey}>
+                  {pixCopied ? 'Chave copiada' : 'Copiar chave Pix'}
+                </button>
+              </div>
+
+              <div className="fig-hero-actions">
+                <button type="button" className="fig-secondary-button" onClick={() => setDonationModalOpen(false)}>
+                  Agora nao
+                </button>
+                <button type="button" className="fig-primary-button" onClick={handleDonationDownload}>
+                  {pendingDownloadFileName ? `Baixar ${pendingDownloadFileName}` : 'Baixar PDF agora'}
+                </button>
+              </div>
+            </section>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -913,11 +1021,13 @@ function AdminPage() {
   const [dragState, setDragState] = useState(null)
   const [serviceForm, setServiceForm] = useState({
     service_enabled: false,
+    donation_enabled: false,
     pack_size: '7',
     print_price: '0.00',
     pack_price: '0.00',
     pix_key: '',
     pix_holder: '',
+    donation_message: '',
     pickup_note: ''
   })
   const [savingService, setSavingService] = useState(false)
@@ -967,11 +1077,13 @@ function AdminPage() {
     })
     setServiceForm({
       service_enabled: data.service_enabled,
+      donation_enabled: data.donation_enabled,
       pack_size: String(data.pack_size),
       print_price: moneyInputFromCents(data.print_price_cents),
       pack_price: moneyInputFromCents(data.pack_price_cents),
       pix_key: data.pix_key || '',
       pix_holder: data.pix_holder || '',
+      donation_message: data.donation_message || '',
       pickup_note: data.pickup_note || ''
     })
   }
@@ -1198,11 +1310,13 @@ function AdminPage() {
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           service_enabled: serviceForm.service_enabled,
+          donation_enabled: serviceForm.donation_enabled,
           pack_size: Number(serviceForm.pack_size || 7),
           print_price_cents: centsFromInput(serviceForm.print_price),
           pack_price_cents: centsFromInput(serviceForm.pack_price),
           pix_key: serviceForm.pix_key,
           pix_holder: serviceForm.pix_holder,
+          donation_message: serviceForm.donation_message,
           pickup_note: serviceForm.pickup_note
         })
       })
@@ -1672,25 +1786,43 @@ function AdminPage() {
 
         {adminView === 'atendimento' ? (
         <section className="fig-admin-summary-grid">
-          <form className="fig-form-card" onSubmit={handleSaveServiceConfig}>
-            <div className="fig-panel-header">
-              <p className="fig-kicker">Servico pago</p>
-              <h3>Impressao e montagem</h3>
-            </div>
+            <form className="fig-form-card" onSubmit={handleSaveServiceConfig}>
+              <div className="fig-panel-header">
+                <p className="fig-kicker">Configuracao publica</p>
+                <h3>Doacao e servico manual</h3>
+              </div>
 
-            <label className="fig-checkbox">
-              <input
-                type="checkbox"
-                checked={serviceForm.service_enabled}
-                onChange={event => setServiceForm(current => ({ ...current, service_enabled: event.target.checked }))}
-              />
-              <span>Ativar pedidos de impressao e montagem</span>
-            </label>
-
-            <div className="fig-form-grid">
-              <label className="fig-field">
-                <span>Figurinhas em cada pacotinho</span>
+              <label className="fig-checkbox">
                 <input
+                  type="checkbox"
+                  checked={serviceForm.donation_enabled}
+                  onChange={event => setServiceForm(current => ({ ...current, donation_enabled: event.target.checked }))}
+                />
+                <span>Mostrar apoio opcional via Pix apos gerar o PDF gratis</span>
+              </label>
+
+              <label className="fig-checkbox">
+                <input
+                  type="checkbox"
+                  checked={serviceForm.service_enabled}
+                  onChange={event => setServiceForm(current => ({ ...current, service_enabled: event.target.checked }))}
+                />
+                <span>Ativar pedidos manuais de impressao e montagem</span>
+              </label>
+
+              <div className="fig-form-grid">
+                <label className="fig-field fig-field--full">
+                  <span>Mensagem do modal de apoio</span>
+                  <textarea
+                    value={serviceForm.donation_message}
+                    onChange={event => setServiceForm(current => ({ ...current, donation_message: event.target.value }))}
+                    rows="3"
+                    placeholder="Se este material te ajudou, voce pode apoiar o projeto com uma doacao via Pix. O download continua gratuito."
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Figurinhas em cada pacotinho</span>
+                  <input
                   type="number"
                   min="1"
                   value={serviceForm.pack_size}
@@ -1731,12 +1863,12 @@ function AdminPage() {
                   onChange={event => setServiceForm(current => ({ ...current, pix_holder: event.target.value }))}
                 />
               </label>
-              <label className="fig-field">
-                <span>Observacao de retirada</span>
-                <input
-                  value={serviceForm.pickup_note}
-                  onChange={event => setServiceForm(current => ({ ...current, pickup_note: event.target.value }))}
-                />
+                <label className="fig-field">
+                  <span>Observacao do servico manual</span>
+                  <input
+                    value={serviceForm.pickup_note}
+                    onChange={event => setServiceForm(current => ({ ...current, pickup_note: event.target.value }))}
+                  />
               </label>
             </div>
 
