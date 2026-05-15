@@ -9,7 +9,6 @@ from pathlib import Path
 
 import fitz
 from PIL import Image
-from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from sqlalchemy import func, select
@@ -289,21 +288,21 @@ def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Sessio
             page_index + 1: (document.load_page(page_index).rect.width, document.load_page(page_index).rect.height)
             for page_index in range(document.page_count)
         }
-        compact_layouts = _build_compact_export_layouts(template_stickers, page_sizes)
+        template_layouts = _build_template_export_layouts(template_stickers, page_sizes)
 
         selected_groups: dict[tuple[float, float], list[Sticker]] = {}
         for sticker in stickers:
             group_key = _sticker_size_key(sticker, page_sizes)
             selected_groups.setdefault(group_key, []).append(sticker)
 
-        first_layout = next(iter(compact_layouts.values()), None)
-        initial_page_size = first_layout["page_size"] if first_layout else A4
+        first_layout = next(iter(template_layouts.values()), None)
+        initial_page_size = first_layout["page_size"] if first_layout else next(iter(page_sizes.values()), (595.2756, 841.8898))
         pdf = canvas.Canvas(str(export_path), pagesize=initial_page_size)
         pdf.setTitle(f"{collection.name} - figurinhas selecionadas")
 
         is_first_page = True
         for group_key, group_stickers in selected_groups.items():
-            layout = compact_layouts.get(group_key)
+            layout = template_layouts.get(group_key)
             if not layout or not layout["slots"]:
                 raise ValueError("Nao foi possivel montar um template de exportacao para esse conjunto de figurinhas.")
 
@@ -322,7 +321,7 @@ def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Sessio
                 for slot, sticker in zip(slots, batch, strict=False):
                     image_bytes = _render_sticker_export_image(document, sticker, page_sizes)
                     x_position = slot["x_pt"]
-                    y_position = slot["y_pt"]
+                    y_position = page_height - slot["y_pt"] - slot["height_pt"]
                     pdf.drawImage(
                         ImageReader(io.BytesIO(image_bytes)),
                         x_position,
@@ -364,7 +363,7 @@ def _sticker_size_key(sticker: Sticker, page_sizes: dict[int, tuple[float, float
     return round(width_pt), round(height_pt)
 
 
-def _build_compact_export_layouts(
+def _build_template_export_layouts(
     stickers: list[Sticker],
     page_sizes: dict[int, tuple[float, float]],
 ) -> dict[tuple[float, float], dict]:
@@ -374,58 +373,42 @@ def _build_compact_export_layouts(
 
     templates: dict[tuple[float, float], dict] = {}
     for size_key, group in by_size.items():
-        width_values: list[float] = []
-        height_values: list[float] = []
+        by_page: dict[int, list[Sticker]] = defaultdict(list)
         for sticker in group:
-            _, _, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes)
-            width_values.append(width_pt)
-            height_values.append(height_pt)
+            by_page[sticker.page.page_number].append(sticker)
 
-        width_pt = sum(width_values) / len(width_values)
-        height_pt = sum(height_values) / len(height_values)
-        layout = _best_compact_layout(width_pt, height_pt)
-        if layout is None:
-            raise ValueError("Nao foi possivel encaixar esse tamanho de figurinha em uma folha A4.")
-        templates[size_key] = layout
-
-    return templates
-
-
-def _best_compact_layout(width_pt: float, height_pt: float) -> dict | None:
-    margin_pt = 12.0
-    gap_pt = 8.5
-    page_width, page_height = A4
-    usable_width = page_width - (margin_pt * 2)
-    usable_height = page_height - (margin_pt * 2)
-    columns = int((usable_width + gap_pt) // (width_pt + gap_pt))
-    rows = int((usable_height + gap_pt) // (height_pt + gap_pt))
-    if columns <= 0 or rows <= 0:
-        return None
-
-    total_width = (columns * width_pt) + ((columns - 1) * gap_pt)
-    total_height = (rows * height_pt) + ((rows - 1) * gap_pt)
-    start_x = (page_width - total_width) / 2
-    top_margin = (page_height - total_height) / 2
-
-    slots = []
-    for row in range(rows):
-        for column in range(columns):
+        template_page_number, template_group = max(
+            by_page.items(),
+            key=lambda item: (len(item[1]), -item[0]),
+        )
+        page_width, page_height = page_sizes[template_page_number]
+        slots = []
+        for sticker in sorted(
+            template_group,
+            key=lambda current: (
+                round(current.y_ratio, 6),
+                round(current.x_ratio, 6),
+                current.sort_order,
+                current.id,
+            ),
+        ):
+            x_pt, y_pt, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes)
             slots.append(
                 {
-                    "x_pt": start_x + (column * (width_pt + gap_pt)),
-                    "y_pt": page_height - top_margin - height_pt - (row * (height_pt + gap_pt)),
+                    "x_pt": x_pt,
+                    "y_pt": y_pt,
                     "width_pt": width_pt,
                     "height_pt": height_pt,
                 }
             )
 
-    return {
-        "page_size": (page_width, page_height),
-        "slots": slots,
-        "columns": columns,
-        "rows": rows,
-        "capacity": columns * rows,
-    }
+        templates[size_key] = {
+            "page_size": (page_width, page_height),
+            "page_number": template_page_number,
+            "slots": slots,
+        }
+
+    return templates
 
 
 def _render_sticker_export_image(
