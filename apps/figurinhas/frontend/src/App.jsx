@@ -172,7 +172,6 @@ function PublicPage() {
     service_type: 'IMPRESSAO',
     customer_name: '',
     customer_whatsapp: '',
-    customer_nickname: '',
     notes: ''
   })
 
@@ -514,11 +513,7 @@ function PublicPage() {
             >
               <div className="fig-sticker-card-media">
                 <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} />
-                {selectedIds.includes(sticker.id) ? (
-                  <span className="fig-sticker-card-badge">Selecionada</span>
-                ) : (
-                  <span className="fig-sticker-card-hint">Toque para marcar</span>
-                )}
+                {!selectedIds.includes(sticker.id) ? <span className="fig-sticker-card-hint">Toque para marcar</span> : null}
               </div>
               <div className="fig-sticker-card-body">
                 <strong>{sticker.name}</strong>
@@ -725,18 +720,11 @@ function PublicPage() {
                   />
                 </label>
                 <label className="fig-field">
-                  <span>Apelido (opcional)</span>
-                  <input
-                    value={orderForm.customer_nickname}
-                    onChange={event => setOrderForm(current => ({ ...current, customer_nickname: event.target.value }))}
-                  />
-                </label>
-                <label className="fig-field">
                   <span>Observacao (opcional)</span>
                   <input
                     value={orderForm.notes}
                     onChange={event => setOrderForm(current => ({ ...current, notes: event.target.value }))}
-                    placeholder="Ex.: separar por primo, sobrinho..."
+                    placeholder="Ex.: alguma orientacao sobre o pedido"
                   />
                 </label>
               </div>

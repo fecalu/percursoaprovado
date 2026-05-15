@@ -392,7 +392,6 @@ a {
     0 14px 26px rgba(31, 122, 77, 0.12);
 }
 
-.fig-sticker-card-badge,
 .fig-sticker-card-hint {
   position: absolute;
   top: 1rem;
@@ -403,12 +402,6 @@ a {
   font-weight: 700;
   letter-spacing: 0.02em;
   backdrop-filter: blur(10px);
-}
-
-.fig-sticker-card-badge {
-  background: rgba(17, 34, 53, 0.8);
-  color: #fff;
-  box-shadow: 0 10px 20px rgba(17, 34, 53, 0.14);
 }
 
 .fig-sticker-card-hint {
