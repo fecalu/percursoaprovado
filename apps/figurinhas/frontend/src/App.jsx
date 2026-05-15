@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { NavLink, Route, Routes, useNavigate, useParams } from 'react-router-dom'
+import { NavLink, Route, Routes } from 'react-router-dom'
 
 const normalizedBase = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
 const apiBase = `${normalizedBase}/api`
@@ -10,10 +10,24 @@ const categoryOptions = [
   { value: 'DEFESA', label: 'Defesa' },
   { value: 'MEIO', label: 'Meio' },
   { value: 'ATAQUE', label: 'Ataque' },
-  { value: 'COMISSAO', label: 'Comissão' },
+  { value: 'COMISSAO', label: 'Comissao' },
   { value: 'ESCUDO', label: 'Escudo' },
   { value: 'ESPECIAL', label: 'Especial' }
 ]
+
+const orderStatusLabels = {
+  AGUARDANDO_PIX: 'Aguardando Pix',
+  PIX_CONFIRMADO: 'Pix confirmado',
+  EM_PRODUCAO: 'Em producao',
+  PRONTO_PARA_RETIRADA: 'Pronto para retirada',
+  ENTREGUE: 'Entregue',
+  CANCELADO: 'Cancelado'
+}
+
+const serviceTypeLabels = {
+  IMPRESSAO: 'So impressao',
+  IMPRESSAO_PACOTINHOS: 'Impressao + pacotinhos'
+}
 
 function useAdminToken() {
   const [token, setToken] = useState(() => window.localStorage.getItem('figurinhas_admin_token') || '')
@@ -32,7 +46,7 @@ function useAdminToken() {
 async function apiFetch(path, options = {}) {
   const response = await fetch(`${apiBase}${path}`, options)
   if (!response.ok) {
-    let detail = 'Não foi possível concluir a operação.'
+    let detail = 'Nao foi possivel concluir a operacao.'
     try {
       const payload = await response.json()
       detail = payload.detail || detail
@@ -64,11 +78,53 @@ function buildAdminHeaders(token, extra = {}) {
   }
 }
 
+function formatCurrency(cents) {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format((cents || 0) / 100)
+}
+
+function formatDateTime(value) {
+  if (!value) return '--'
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  }).format(new Date(value))
+}
+
 function formatOcrConfidence(confidence) {
   if (typeof confidence !== 'number' || Number.isNaN(confidence)) {
     return 'sem leitura'
   }
   return `${Math.round(confidence)}%`
+}
+
+function categoryLabel(category) {
+  return categoryOptions.find(option => option.value === category)?.label || category
+}
+
+function moneyInputFromCents(cents) {
+  return ((cents || 0) / 100).toFixed(2)
+}
+
+function centsFromInput(value) {
+  const normalized = Number(String(value).replace(',', '.'))
+  if (Number.isNaN(normalized)) {
+    return 0
+  }
+  return Math.round(normalized * 100)
+}
+
+function downloadBlob(blob, fileName) {
+  const objectUrl = window.URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = objectUrl
+  anchor.download = fileName
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  window.URL.revokeObjectURL(objectUrl)
 }
 
 function Layout({ children }) {
@@ -81,7 +137,7 @@ function Layout({ children }) {
         </div>
         <nav className="fig-nav">
           <NavLink to="/" className={({ isActive }) => `fig-nav-link${isActive ? ' is-active' : ''}`}>
-            Catálogo
+            Catalogo
           </NavLink>
           <NavLink to="/admin" className={({ isActive }) => `fig-nav-link${isActive ? ' is-active' : ''}`}>
             Admin
@@ -103,17 +159,34 @@ function PublicPage() {
   const [busy, setBusy] = useState(true)
   const [error, setError] = useState('')
   const [exporting, setExporting] = useState(false)
+  const [serviceConfig, setServiceConfig] = useState(null)
+  const [quote, setQuote] = useState(null)
+  const [quoteBusy, setQuoteBusy] = useState(false)
+  const [orderFormOpen, setOrderFormOpen] = useState(false)
+  const [orderSubmitting, setOrderSubmitting] = useState(false)
+  const [orderResult, setOrderResult] = useState(null)
+  const [orderForm, setOrderForm] = useState({
+    service_type: 'IMPRESSAO',
+    customer_name: '',
+    customer_whatsapp: '',
+    customer_nickname: '',
+    notes: ''
+  })
 
   useEffect(() => {
     let ignore = false
-    async function loadCollections() {
+    async function loadBootstrap() {
       setBusy(true)
       setError('')
       try {
-        const data = await apiFetch('/collections')
+        const [collectionsData, serviceData] = await Promise.all([
+          apiFetch('/collections'),
+          apiFetch('/service-config')
+        ])
         if (ignore) return
-        setCollections(data)
-        setSelectedCollectionSlug(current => current || data[0]?.slug || '')
+        setCollections(collectionsData)
+        setSelectedCollectionSlug(current => current || collectionsData[0]?.slug || '')
+        setServiceConfig(serviceData)
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -124,7 +197,7 @@ function PublicPage() {
         }
       }
     }
-    loadCollections()
+    loadBootstrap()
     return () => {
       ignore = true
     }
@@ -165,12 +238,58 @@ function PublicPage() {
     }
   }, [selectedCollectionSlug, search, category])
 
+  useEffect(() => {
+    if (!selectedCollectionSlug || selectedIds.length === 0) {
+      setQuote(null)
+      setOrderFormOpen(false)
+      return
+    }
+
+    let ignore = false
+    async function loadQuote() {
+      setQuoteBusy(true)
+      try {
+        const data = await apiFetch('/orders/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            collection_slug: selectedCollectionSlug,
+            sticker_ids: selectedIds
+          })
+        })
+        if (ignore) return
+        setQuote(data)
+      } catch (err) {
+        if (!ignore) {
+          setQuote(null)
+          setError(err.message)
+        }
+      } finally {
+        if (!ignore) {
+          setQuoteBusy(false)
+        }
+      }
+    }
+    loadQuote()
+    return () => {
+      ignore = true
+    }
+  }, [selectedCollectionSlug, selectedIds])
+
+  useEffect(() => {
+    setOrderResult(null)
+  }, [selectedCollectionSlug, selectedIds])
+
+  useEffect(() => {
+    if (quote && !quote.pack_eligible && orderForm.service_type === 'IMPRESSAO_PACOTINHOS') {
+      setOrderForm(current => ({ ...current, service_type: 'IMPRESSAO' }))
+    }
+  }, [quote, orderForm.service_type])
+
   const selectedCollection = useMemo(
     () => collections.find(collection => collection.slug === selectedCollectionSlug) || null,
     [collections, selectedCollectionSlug]
   )
-
-  const selectedCount = selectedIds.length
 
   function toggleSelection(stickerId) {
     setSelectedIds(current =>
@@ -199,11 +318,35 @@ function PublicPage() {
     }
   }
 
+  async function handleCreateOrder(event) {
+    event.preventDefault()
+    if (!selectedCollectionSlug || selectedIds.length === 0) return
+    setOrderSubmitting(true)
+    setError('')
+    try {
+      const data = await apiFetch('/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          collection_slug: selectedCollectionSlug,
+          sticker_ids: selectedIds,
+          ...orderForm
+        })
+      })
+      setOrderResult(data)
+      setOrderFormOpen(false)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setOrderSubmitting(false)
+    }
+  }
+
   return (
     <section className="fig-public-layout">
       <aside className="fig-sidebar-panel">
         <div className="fig-panel-header">
-          <p className="fig-kicker">Coleções publicadas</p>
+          <p className="fig-kicker">Colecoes publicadas</p>
           <h2>Escolha a base</h2>
         </div>
         <div className="fig-collection-list">
@@ -221,31 +364,43 @@ function PublicPage() {
               <span>{collection.sticker_count} figurinhas</span>
             </button>
           ))}
-          {!busy && collections.length === 0 ? <p className="fig-empty-note">Nenhuma coleção publicada ainda.</p> : null}
+          {!busy && collections.length === 0 ? <p className="fig-empty-note">Nenhuma colecao publicada ainda.</p> : null}
         </div>
       </aside>
 
       <div className="fig-content-panel">
         <div className="fig-hero">
           <div>
-            <p className="fig-kicker">Seleção rápida</p>
-            <h2>{selectedCollection?.name || 'Selecione uma coleção'}</h2>
-            <p>{selectedCollection?.description || 'Marque os jogadores que você precisa e gere um PDF final.'}</p>
+            <p className="fig-kicker">Selecao rapida</p>
+            <h2>{selectedCollection?.name || 'Selecione uma colecao'}</h2>
+            <p>{selectedCollection?.description || 'Marque os jogadores que voce precisa e gere seu PDF.'}</p>
           </div>
           <div className="fig-hero-actions">
-            <button type="button" className="fig-secondary-button" onClick={() => setSelectedIds(stickers.map(sticker => sticker.id))}>
+            <button
+              type="button"
+              className="fig-secondary-button"
+              onClick={() => setSelectedIds(stickers.map(sticker => sticker.id))}
+            >
               Selecionar todas
             </button>
             <button type="button" className="fig-secondary-button" onClick={() => setSelectedIds([])}>
-              Limpar seleção
+              Limpar selecao
+            </button>
+            <button
+              type="button"
+              className="fig-secondary-button"
+              disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
+              onClick={() => setOrderFormOpen(current => !current)}
+            >
+              Pedir impressao
             </button>
             <button
               type="button"
               className="fig-primary-button"
-              disabled={!selectedCollectionSlug || selectedCount === 0 || exporting}
+              disabled={!selectedCollectionSlug || selectedIds.length === 0 || exporting}
               onClick={handleExport}
             >
-              {exporting ? 'Gerando PDF...' : `Gerar PDF (${selectedCount})`}
+              {exporting ? 'Gerando PDF...' : `Gerar PDF gratis (${selectedIds.length})`}
             </button>
           </div>
         </div>
@@ -253,7 +408,7 @@ function PublicPage() {
         <div className="fig-toolbar">
           <label className="fig-field">
             <span>Buscar jogador</span>
-            <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Ex.: Vinícius" />
+            <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Ex.: Vinicius" />
           </label>
           <label className="fig-field">
             <span>Categoria</span>
@@ -268,8 +423,199 @@ function PublicPage() {
           </label>
         </div>
 
+        {quote ? (
+          <section className="fig-service-card">
+            <div className="fig-service-card-header">
+              <div>
+                <p className="fig-kicker">Servico opcional</p>
+                <h3>Quer que eu imprima para voce?</h3>
+              </div>
+              <span className={`fig-service-badge${quote.service_enabled ? ' is-ready' : ''}`}>
+                {quote.service_enabled ? 'Disponivel' : 'Em configuracao'}
+              </span>
+            </div>
+
+            <div className="fig-quote-grid">
+              <div className="fig-quote-item">
+                <strong>{quote.item_count}</strong>
+                <span>figurinhas selecionadas</span>
+              </div>
+              <div className="fig-quote-item">
+                <strong>{quote.sheet_count}</strong>
+                <span>folhas para imprimir</span>
+              </div>
+              <div className="fig-quote-item">
+                <strong>{formatCurrency(quote.print_total_cents)}</strong>
+                <span>so impressao</span>
+              </div>
+              <div className="fig-quote-item">
+                <strong>{quote.pack_eligible ? formatCurrency(quote.pack_total_cents || 0) : '--'}</strong>
+                <span>{quote.pack_eligible ? `${quote.pack_count} pacotinhos` : `pacotes de ${quote.pack_size}`}</span>
+              </div>
+            </div>
+
+            <div className="fig-service-notes">
+              <p>
+                Impressao por folha: <strong>{formatCurrency(quote.print_price_cents)}</strong>
+              </p>
+              <p>
+                Pacotinho de {quote.pack_size} figurinhas:{' '}
+                <strong>{formatCurrency(quote.pack_price_cents)}</strong>
+              </p>
+              {!quote.pack_eligible ? (
+                <p className="fig-warning-text">
+                  Para montar pacotinhos, escolha {quote.pack_size}, {quote.pack_size * 2}, {quote.pack_size * 3}...
+                  Sua selecao atual precisa de mais {quote.pack_size - quote.pack_remainder} figurinha(s).
+                </p>
+              ) : null}
+              {quote.pickup_note ? <p>{quote.pickup_note}</p> : null}
+            </div>
+          </section>
+        ) : null}
+
+        {!quote && serviceConfig && !serviceConfig.service_enabled ? (
+          <p className="fig-empty-note">O servico de impressao ainda nao foi ativado no momento.</p>
+        ) : null}
+
+        {orderFormOpen && quote ? (
+          <form className="fig-form-card fig-order-form" onSubmit={handleCreateOrder}>
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Pedido manual</p>
+              <h3>Pedir impressao comigo</h3>
+            </div>
+
+            <div className="fig-order-options">
+              <label className={`fig-order-option${orderForm.service_type === 'IMPRESSAO' ? ' is-active' : ''}`}>
+                <input
+                  type="radio"
+                  name="service_type"
+                  value="IMPRESSAO"
+                  checked={orderForm.service_type === 'IMPRESSAO'}
+                  onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
+                />
+                <div>
+                  <strong>So impressao</strong>
+                  <span>{quote.sheet_count} folha(s) · {formatCurrency(quote.print_total_cents)}</span>
+                </div>
+              </label>
+
+              <label
+                className={`fig-order-option${
+                  orderForm.service_type === 'IMPRESSAO_PACOTINHOS' ? ' is-active' : ''
+                }${!quote.pack_eligible ? ' is-disabled' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="service_type"
+                  value="IMPRESSAO_PACOTINHOS"
+                  checked={orderForm.service_type === 'IMPRESSAO_PACOTINHOS'}
+                  disabled={!quote.pack_eligible}
+                  onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
+                />
+                <div>
+                  <strong>Impressao + pacotinhos</strong>
+                  <span>
+                    {quote.pack_eligible
+                      ? `${quote.pack_count} pacote(s) · ${formatCurrency(quote.pack_total_cents || 0)}`
+                      : `Disponivel so em multiplos de ${quote.pack_size}`}
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            <div className="fig-form-grid">
+              <label className="fig-field">
+                <span>Nome</span>
+                <input
+                  value={orderForm.customer_name}
+                  onChange={event => setOrderForm(current => ({ ...current, customer_name: event.target.value }))}
+                  required
+                />
+              </label>
+              <label className="fig-field">
+                <span>WhatsApp</span>
+                <input
+                  value={orderForm.customer_whatsapp}
+                  onChange={event => setOrderForm(current => ({ ...current, customer_whatsapp: event.target.value }))}
+                  required
+                />
+              </label>
+              <label className="fig-field">
+                <span>Apelido (opcional)</span>
+                <input
+                  value={orderForm.customer_nickname}
+                  onChange={event => setOrderForm(current => ({ ...current, customer_nickname: event.target.value }))}
+                />
+              </label>
+              <label className="fig-field">
+                <span>Observacao (opcional)</span>
+                <input
+                  value={orderForm.notes}
+                  onChange={event => setOrderForm(current => ({ ...current, notes: event.target.value }))}
+                  placeholder="Ex.: separar por primo, sobrinho..."
+                />
+              </label>
+            </div>
+
+            <div className="fig-helper-strip">
+              <strong>Pagamento via Pix.</strong>{' '}
+              <span>
+                Chave: {quote.pix_key || 'a configurar'}
+                {quote.pix_holder ? ` · ${quote.pix_holder}` : ''}
+              </span>
+            </div>
+
+            <div className="fig-hero-actions">
+              <button type="button" className="fig-secondary-button" onClick={() => setOrderFormOpen(false)}>
+                Fechar
+              </button>
+              <button
+                type="submit"
+                className="fig-primary-button"
+                disabled={orderSubmitting || !quote.service_enabled}
+              >
+                {orderSubmitting ? 'Criando pedido...' : 'Confirmar pedido'}
+              </button>
+            </div>
+          </form>
+        ) : null}
+
+        {orderResult ? (
+          <section className="fig-success-panel">
+            <p className="fig-kicker">Pedido criado</p>
+            <h3>{orderResult.reference_code}</h3>
+            <div className="fig-quote-grid">
+              <div className="fig-quote-item">
+                <strong>{serviceTypeLabels[orderResult.service_type]}</strong>
+                <span>tipo de servico</span>
+              </div>
+              <div className="fig-quote-item">
+                <strong>{formatCurrency(orderResult.total_price_cents)}</strong>
+                <span>total do pedido</span>
+              </div>
+              <div className="fig-quote-item">
+                <strong>{orderStatusLabels[orderResult.status]}</strong>
+                <span>status atual</span>
+              </div>
+              <div className="fig-quote-item">
+                <strong>{orderResult.sheet_count}</strong>
+                <span>folhas reservadas</span>
+              </div>
+            </div>
+            <p>
+              Envie o Pix e me passe o codigo <strong>{orderResult.reference_code}</strong>.
+            </p>
+            <p>
+              Chave Pix: <strong>{orderResult.pix_key || 'a configurar'}</strong>
+              {orderResult.pix_holder ? ` · ${orderResult.pix_holder}` : ''}
+            </p>
+            {orderResult.pickup_note ? <p>{orderResult.pickup_note}</p> : null}
+          </section>
+        ) : null}
+
         {error ? <p className="fig-error-banner">{error}</p> : null}
         {busy ? <p className="fig-empty-note">Carregando figurinhas...</p> : null}
+        {quoteBusy && selectedIds.length > 0 ? <p className="fig-empty-note">Calculando folhas e servicos...</p> : null}
 
         <div className="fig-sticker-grid">
           {stickers.map(sticker => (
@@ -282,7 +628,7 @@ function PublicPage() {
               <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} />
               <div className="fig-sticker-card-body">
                 <strong>{sticker.name}</strong>
-                <span>{categoryOptions.find(option => option.value === sticker.category)?.label || sticker.category}</span>
+                <span>{categoryLabel(sticker.category)}</span>
               </div>
             </button>
           ))}
@@ -325,11 +671,27 @@ function AdminPage() {
   const [draftRect, setDraftRect] = useState(null)
   const [selectionRect, setSelectionRect] = useState(null)
   const [dragState, setDragState] = useState(null)
+  const [serviceForm, setServiceForm] = useState({
+    service_enabled: false,
+    pack_size: '7',
+    print_price: '0.00',
+    pack_price: '0.00',
+    pix_key: '',
+    pix_holder: '',
+    pickup_note: ''
+  })
+  const [savingService, setSavingService] = useState(false)
+  const [orders, setOrders] = useState([])
+  const [selectedOrderId, setSelectedOrderId] = useState(null)
+  const [orderAdminForm, setOrderAdminForm] = useState({
+    status: 'AGUARDANDO_PIX',
+    admin_notes: ''
+  })
+  const [savingOrder, setSavingOrder] = useState(false)
 
   async function fetchCollections(activeCollectionId = selectedCollectionId) {
     if (!token) return
     setLoading(true)
-    setError('')
     try {
       const data = await apiFetch('/admin/collections', {
         headers: buildAdminHeaders(token)
@@ -337,16 +699,52 @@ function AdminPage() {
       setCollections(data)
       const nextId = activeCollectionId || data[0]?.id || null
       setSelectedCollectionId(nextId)
-    } catch (err) {
-      setError(err.message)
     } finally {
       setLoading(false)
     }
   }
 
+  async function fetchServiceConfig() {
+    if (!token) return
+    const data = await apiFetch('/admin/service-config', {
+      headers: buildAdminHeaders(token)
+    })
+    setServiceForm({
+      service_enabled: data.service_enabled,
+      pack_size: String(data.pack_size),
+      print_price: moneyInputFromCents(data.print_price_cents),
+      pack_price: moneyInputFromCents(data.pack_price_cents),
+      pix_key: data.pix_key || '',
+      pix_holder: data.pix_holder || '',
+      pickup_note: data.pickup_note || ''
+    })
+  }
+
+  async function fetchOrders(activeOrderId = selectedOrderId) {
+    if (!token) return
+    const data = await apiFetch('/admin/orders', {
+      headers: buildAdminHeaders(token)
+    })
+    setOrders(data)
+    setSelectedOrderId(current => activeOrderId || current || data[0]?.id || null)
+  }
+
   useEffect(() => {
-    if (token) {
-      fetchCollections()
+    if (!token) return
+    let ignore = false
+    async function bootstrap() {
+      setError('')
+      try {
+        await Promise.all([fetchCollections(), fetchServiceConfig(), fetchOrders()])
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      }
+    }
+    bootstrap()
+    return () => {
+      ignore = true
     }
   }, [token])
 
@@ -398,6 +796,18 @@ function AdminPage() {
     () => stickers.find(sticker => sticker.id === editingStickerId) || null,
     [stickers, editingStickerId]
   )
+  const selectedOrder = useMemo(
+    () => orders.find(order => order.id === selectedOrderId) || null,
+    [orders, selectedOrderId]
+  )
+
+  useEffect(() => {
+    if (!selectedOrder) return
+    setOrderAdminForm({
+      status: selectedOrder.status,
+      admin_notes: selectedOrder.admin_notes || ''
+    })
+  }, [selectedOrder])
 
   function resetStickerForm() {
     setEditingStickerId(null)
@@ -443,12 +853,40 @@ function AdminPage() {
         body: JSON.stringify(createForm)
       })
       setCreateForm({ name: '', slug: '', description: '' })
-      setMessage('Coleção criada.')
+      setMessage('Colecao criada.')
       await fetchCollections(created.id)
     } catch (err) {
       setError(err.message)
     } finally {
       setSavingCollection(false)
+    }
+  }
+
+  async function handleSaveServiceConfig(event) {
+    event.preventDefault()
+    setSavingService(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch('/admin/service-config', {
+        method: 'PUT',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          service_enabled: serviceForm.service_enabled,
+          pack_size: Number(serviceForm.pack_size || 7),
+          print_price_cents: centsFromInput(serviceForm.print_price),
+          pack_price_cents: centsFromInput(serviceForm.pack_price),
+          pix_key: serviceForm.pix_key,
+          pix_holder: serviceForm.pix_holder,
+          pickup_note: serviceForm.pickup_note
+        })
+      })
+      setMessage('Configuracoes de impressao atualizadas.')
+      await fetchServiceConfig()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingService(false)
     }
   }
 
@@ -466,7 +904,7 @@ function AdminPage() {
         headers: buildAdminHeaders(token),
         body: formData
       })
-      setMessage('PDF enviado e páginas renderizadas.')
+      setMessage('PDF enviado e paginas renderizadas.')
       await fetchCollections(selectedCollectionId)
     } catch (err) {
       setError(err.message)
@@ -492,9 +930,7 @@ function AdminPage() {
         method: 'POST',
         headers: buildAdminHeaders(token)
       })
-      const pageSummary = data.page_results
-        .map(result => `P${result.page_number}: ${result.detected_count}`)
-        .join(' | ')
+      const pageSummary = data.page_results.map(result => `P${result.page_number}: ${result.detected_count}`).join(' | ')
       setMessage(
         data.detected_count > 0
           ? `Automacao gerou ${data.detected_count} recortes. ${pageSummary}`
@@ -625,7 +1061,7 @@ function AdminPage() {
         method: 'DELETE',
         headers: buildAdminHeaders(token)
       })
-      setMessage('Figurinha excluída.')
+      setMessage('Figurinha excluida.')
       await fetchCollections(selectedCollectionId)
       if (editingStickerId === stickerId) {
         resetStickerForm()
@@ -645,8 +1081,40 @@ function AdminPage() {
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({ status })
       })
-      setMessage(status === 'PUBLICADA' ? 'Coleção publicada.' : 'Coleção movida para rascunho.')
+      setMessage(status === 'PUBLICADA' ? 'Colecao publicada.' : 'Colecao movida para rascunho.')
       await fetchCollections(selectedCollectionId)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function handleUpdateOrder(event) {
+    event.preventDefault()
+    if (!selectedOrderId) return
+    setSavingOrder(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(`/admin/orders/${selectedOrderId}`, {
+        method: 'PUT',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify(orderAdminForm)
+      })
+      setMessage('Pedido atualizado.')
+      await fetchOrders(selectedOrderId)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingOrder(false)
+    }
+  }
+
+  async function handleDownloadOrder(order) {
+    try {
+      const blob = await apiFetch(order.export_download_path, {
+        headers: buildAdminHeaders(token)
+      })
+      downloadBlob(blob, `${order.reference_code}.pdf`)
     } catch (err) {
       setError(err.message)
     }
@@ -657,8 +1125,8 @@ function AdminPage() {
       <section className="fig-auth-panel">
         <form className="fig-form-card" onSubmit={handleLogin}>
           <p className="fig-kicker">Admin</p>
-          <h2>Acesso de gestão</h2>
-          <p>Use a senha compartilhada desse miniapp para gerenciar as coleções.</p>
+          <h2>Acesso de gestao</h2>
+          <p>Use a senha compartilhada desse miniapp para gerenciar as colecoes e pedidos.</p>
           <label className="fig-field">
             <span>Senha</span>
             <input type="password" value={password} onChange={event => setPassword(event.target.value)} />
@@ -676,8 +1144,8 @@ function AdminPage() {
     <section className="fig-admin-layout">
       <aside className="fig-sidebar-panel">
         <div className="fig-panel-header">
-          <p className="fig-kicker">Coleções</p>
-          <h2>Catálogo</h2>
+          <p className="fig-kicker">Colecoes</p>
+          <h2>Catalogo</h2>
         </div>
 
         <form className="fig-form-card fig-compact-form" onSubmit={handleCreateCollection}>
@@ -698,7 +1166,7 @@ function AdminPage() {
             />
           </label>
           <label className="fig-field">
-            <span>Descrição</span>
+            <span>Descricao</span>
             <textarea
               value={createForm.description}
               onChange={event => setCreateForm(current => ({ ...current, description: event.target.value }))}
@@ -707,7 +1175,7 @@ function AdminPage() {
             />
           </label>
           <button type="submit" className="fig-primary-button" disabled={savingCollection}>
-            {savingCollection ? 'Salvando...' : 'Criar coleção'}
+            {savingCollection ? 'Salvando...' : 'Criar colecao'}
           </button>
         </form>
 
@@ -735,17 +1203,11 @@ function AdminPage() {
       <div className="fig-content-panel fig-admin-content">
         <div className="fig-admin-header">
           <div>
-            <p className="fig-kicker">Gestão da coleção</p>
-            <h2>{selectedCollection?.name || 'Selecione uma coleção'}</h2>
-            <p>Suba o PDF, mapeie as áreas de corte e publique quando o catálogo estiver pronto.</p>
+            <p className="fig-kicker">Gestao</p>
+            <h2>{selectedCollection?.name || 'Selecione uma colecao'}</h2>
+            <p>Gerencie o catalogo, os pedidos impressos e a configuracao do atendimento local.</p>
           </div>
           <div className="fig-hero-actions">
-            <button type="button" className="fig-secondary-button" onClick={() => handlePublish('RASCUNHO')} disabled={!selectedCollection}>
-              Voltar para rascunho
-            </button>
-            <button type="button" className="fig-primary-button" onClick={() => handlePublish('PUBLICADA')} disabled={!selectedCollection}>
-              Publicar coleção
-            </button>
             <button type="button" className="fig-secondary-button" onClick={() => setToken('')}>
               Sair
             </button>
@@ -754,10 +1216,198 @@ function AdminPage() {
 
         {message ? <p className="fig-success-banner">{message}</p> : null}
         {error ? <p className="fig-error-banner">{error}</p> : null}
-        {loading ? <p className="fig-empty-note">Carregando dados da coleção...</p> : null}
+        {loading ? <p className="fig-empty-note">Carregando dados da colecao...</p> : null}
+
+        <section className="fig-admin-summary-grid">
+          <form className="fig-form-card" onSubmit={handleSaveServiceConfig}>
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Servico pago</p>
+              <h3>Impressao e pacotinhos</h3>
+            </div>
+
+            <label className="fig-checkbox">
+              <input
+                type="checkbox"
+                checked={serviceForm.service_enabled}
+                onChange={event => setServiceForm(current => ({ ...current, service_enabled: event.target.checked }))}
+              />
+              <span>Ativar pedidos de impressao</span>
+            </label>
+
+            <div className="fig-form-grid">
+              <label className="fig-field">
+                <span>Figurinhas por pacotinho</span>
+                <input
+                  type="number"
+                  min="1"
+                  value={serviceForm.pack_size}
+                  onChange={event => setServiceForm(current => ({ ...current, pack_size: event.target.value }))}
+                />
+              </label>
+              <label className="fig-field">
+                <span>Preco por folha (R$)</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={serviceForm.print_price}
+                  onChange={event => setServiceForm(current => ({ ...current, print_price: event.target.value }))}
+                />
+              </label>
+              <label className="fig-field">
+                <span>Preco por pacotinho (R$)</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={serviceForm.pack_price}
+                  onChange={event => setServiceForm(current => ({ ...current, pack_price: event.target.value }))}
+                />
+              </label>
+              <label className="fig-field">
+                <span>Chave Pix</span>
+                <input
+                  value={serviceForm.pix_key}
+                  onChange={event => setServiceForm(current => ({ ...current, pix_key: event.target.value }))}
+                />
+              </label>
+              <label className="fig-field">
+                <span>Nome do recebedor</span>
+                <input
+                  value={serviceForm.pix_holder}
+                  onChange={event => setServiceForm(current => ({ ...current, pix_holder: event.target.value }))}
+                />
+              </label>
+              <label className="fig-field">
+                <span>Observacao de retirada</span>
+                <input
+                  value={serviceForm.pickup_note}
+                  onChange={event => setServiceForm(current => ({ ...current, pickup_note: event.target.value }))}
+                />
+              </label>
+            </div>
+
+            <div className="fig-hero-actions">
+              <button type="submit" className="fig-primary-button" disabled={savingService}>
+                {savingService ? 'Salvando...' : 'Salvar configuracoes'}
+              </button>
+            </div>
+          </form>
+
+          <section className="fig-form-card">
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Pedidos</p>
+              <h3>Impressao local</h3>
+            </div>
+
+            <div className="fig-order-layout">
+              <div className="fig-order-list">
+                {orders.map(order => (
+                  <button
+                    key={order.id}
+                    type="button"
+                    className={`fig-order-list-item${order.id === selectedOrderId ? ' is-active' : ''}`}
+                    onClick={() => setSelectedOrderId(order.id)}
+                  >
+                    <strong>{order.reference_code}</strong>
+                    <span>{order.customer_name}</span>
+                    <span>{serviceTypeLabels[order.service_type]}</span>
+                    <span>
+                      {formatCurrency(order.total_price_cents)} · {orderStatusLabels[order.status]}
+                    </span>
+                  </button>
+                ))}
+                {orders.length === 0 ? <p className="fig-empty-note">Nenhum pedido criado ainda.</p> : null}
+              </div>
+
+              {selectedOrder ? (
+                <div className="fig-order-detail">
+                  <div className="fig-inline-meta">
+                    <strong>{selectedOrder.customer_name}</strong>
+                    <span>{selectedOrder.customer_whatsapp}</span>
+                  </div>
+                  <div className="fig-inline-meta">
+                    <strong>{serviceTypeLabels[selectedOrder.service_type]}</strong>
+                    <span>
+                      {selectedOrder.item_count} figurinhas · {selectedOrder.sheet_count} folha(s)
+                    </span>
+                  </div>
+                  {selectedOrder.pack_count > 0 ? (
+                    <div className="fig-inline-meta">
+                      <strong>{selectedOrder.pack_count} pacotinho(s)</strong>
+                      <span>{selectedOrder.pack_size} figurinhas por pacote</span>
+                    </div>
+                  ) : null}
+                  {selectedOrder.notes ? (
+                    <div className="fig-inline-meta">
+                      <strong>Observacao do cliente</strong>
+                      <span>{selectedOrder.notes}</span>
+                    </div>
+                  ) : null}
+
+                  <form className="fig-order-admin-form" onSubmit={handleUpdateOrder}>
+                    <label className="fig-field">
+                      <span>Status</span>
+                      <select
+                        value={orderAdminForm.status}
+                        onChange={event => setOrderAdminForm(current => ({ ...current, status: event.target.value }))}
+                      >
+                        {Object.entries(orderStatusLabels).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="fig-field">
+                      <span>Notas internas</span>
+                      <textarea
+                        rows="4"
+                        value={orderAdminForm.admin_notes}
+                        onChange={event => setOrderAdminForm(current => ({ ...current, admin_notes: event.target.value }))}
+                      />
+                    </label>
+                    <div className="fig-hero-actions">
+                      <button type="button" className="fig-secondary-button" onClick={() => handleDownloadOrder(selectedOrder)}>
+                        Baixar PDF do pedido
+                      </button>
+                      <button type="submit" className="fig-primary-button" disabled={savingOrder}>
+                        {savingOrder ? 'Salvando...' : 'Atualizar pedido'}
+                      </button>
+                    </div>
+                  </form>
+
+                  <div className="fig-selected-stickers">
+                    {selectedOrder.selected_stickers.map(sticker => (
+                      <span key={`${selectedOrder.id}-${sticker.id}`} className="fig-selection-chip">
+                        {sticker.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </section>
+        </section>
 
         {selectedCollection ? (
           <>
+            <div className="fig-admin-header fig-admin-section-head">
+              <div>
+                <p className="fig-kicker">Gestao da colecao</p>
+                <h3>{selectedCollection.name}</h3>
+                <p>Suba o PDF, mapeie as areas de corte e publique quando o catalogo estiver pronto.</p>
+              </div>
+              <div className="fig-hero-actions">
+                <button type="button" className="fig-secondary-button" onClick={() => handlePublish('RASCUNHO')}>
+                  Voltar para rascunho
+                </button>
+                <button type="button" className="fig-primary-button" onClick={() => handlePublish('PUBLICADA')}>
+                  Publicar colecao
+                </button>
+              </div>
+            </div>
+
             <div className="fig-toolbar">
               <label className="fig-field">
                 <span>PDF original</span>
@@ -768,7 +1418,7 @@ function AdminPage() {
                 <span>{selectedCollection.status === 'PUBLICADA' ? 'Publicado' : 'Rascunho'}</span>
               </div>
               <div className="fig-inline-meta">
-                <strong>Páginas</strong>
+                <strong>Paginas</strong>
                 <span>{selectedCollection.page_count}</span>
               </div>
               <div className="fig-inline-meta">
@@ -815,7 +1465,7 @@ function AdminPage() {
                         resetStickerForm()
                       }}
                     >
-                      Página {page.page_number}
+                      Pagina {page.page_number}
                     </button>
                   ))}
                 </div>
@@ -831,7 +1481,7 @@ function AdminPage() {
                         if (dragState) finalizeSelection()
                       }}
                     >
-                      <img src={apiFileUrl(currentPage.image_path)} alt={`Página ${currentPage.page_number}`} />
+                      <img src={apiFileUrl(currentPage.image_path)} alt={`Pagina ${currentPage.page_number}`} />
                       {currentPageStickers.map(sticker => (
                         <div
                           key={sticker.id}
@@ -868,10 +1518,10 @@ function AdminPage() {
                         />
                       ) : null}
                     </div>
-                    <p className="fig-helper-text">Clique e arraste sobre a página para desenhar a área da figurinha.</p>
+                    <p className="fig-helper-text">Clique e arraste sobre a pagina para desenhar a area da figurinha.</p>
                   </div>
                 ) : (
-                  <p className="fig-empty-note">Suba um PDF para começar a mapear as páginas.</p>
+                  <p className="fig-empty-note">Suba um PDF para comecar a mapear as paginas.</p>
                 )}
               </section>
 
@@ -906,7 +1556,7 @@ function AdminPage() {
                       <input value={stickerForm.name} onChange={event => setStickerForm(current => ({ ...current, name: event.target.value }))} />
                     </label>
                     <label className="fig-field">
-                      <span>Código</span>
+                      <span>Codigo</span>
                       <input value={stickerForm.code} onChange={event => setStickerForm(current => ({ ...current, code: event.target.value }))} />
                     </label>
                     <label className="fig-field">
@@ -952,12 +1602,12 @@ function AdminPage() {
                       checked={stickerForm.active}
                       onChange={event => setStickerForm(current => ({ ...current, active: event.target.checked }))}
                     />
-                    <span>Ativa na vitrine pública</span>
+                    <span>Ativa na vitrine publica</span>
                   </label>
 
                   <div className="fig-hero-actions">
                     <button type="button" className="fig-secondary-button" onClick={resetStickerForm}>
-                      Limpar formulário
+                      Limpar formulario
                     </button>
                     {editingStickerId ? (
                       <button type="button" className="fig-secondary-button" onClick={() => handleDeleteSticker(editingStickerId)}>
@@ -977,7 +1627,7 @@ function AdminPage() {
                       <div>
                         <strong>{sticker.name}</strong>
                         <span>
-                          Página {sticker.page_number} · {categoryOptions.find(option => option.value === sticker.category)?.label || sticker.category}
+                          Pagina {sticker.page_number} · {categoryLabel(sticker.category)}
                         </span>
                         <span className="fig-ocr-note">
                           {sticker.detected_automatically ? 'Auto' : 'Manual'}

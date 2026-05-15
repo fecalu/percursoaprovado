@@ -7,20 +7,36 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
+from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import Session, selectinload
 
 from .config import get_settings
 from .database import Base, engine, get_db
-from .models import Collection, CollectionStatus, Page, Sticker, StickerCategory
+from .models import (
+    Collection,
+    CollectionStatus,
+    Page,
+    PrintOrder,
+    PrintOrderStatus,
+    Sticker,
+    StickerCategory,
+)
 from .schemas import (
     AdminLoginRequest,
     AutoDetectResponse,
     CollectionCreate,
     CollectionResponse,
+    OrderQuoteRequest,
+    OrderQuoteResponse,
     ExportRequest,
     ExportResponse,
     PageResponse,
+    PrintOrderCreate,
+    PrintOrderResponse,
+    PrintOrderUpdate,
     PublishCollectionRequest,
+    ServiceConfigResponse,
+    ServiceConfigUpdate,
     StickerCreate,
     StickerResponse,
     StickerUpdate,
@@ -28,16 +44,22 @@ from .schemas import (
 from .services import (
     auto_detect_collection_pages,
     build_export_pdf,
+    build_order_quote,
     collection_stats,
     collection_to_response,
+    create_print_order,
     crop_sticker_image,
+    get_or_create_service_settings,
     ensure_collection_slug_unique,
     load_collection_by_slug_or_fail,
     load_collection_or_fail,
+    load_print_order_or_fail,
     load_sticker_or_fail,
     page_to_response,
+    print_order_to_response,
     refresh_sticker_ocr,
     save_pdf_and_render_pages,
+    service_settings_to_response,
     slugify,
     sticker_to_response,
     validate_sticker_bounds,
@@ -89,6 +111,9 @@ def ensure_runtime_schema() -> None:
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_runtime_schema()
+    with OrmSession(engine) as db:
+        get_or_create_service_settings(db)
+        db.commit()
 
 
 def require_admin(x_admin_token: str | None = Header(default=None, alias="X-Admin-Token")) -> None:
@@ -96,9 +121,32 @@ def require_admin(x_admin_token: str | None = Header(default=None, alias="X-Admi
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token administrativo invalido.")
 
 
+def selected_stickers_or_400(db: Session, collection: Collection, sticker_ids: list[int]) -> list[Sticker]:
+    statement = (
+        select(Sticker)
+        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+        .where(
+            Sticker.collection_id == collection.id,
+            Sticker.active.is_(True),
+            Sticker.id.in_(sticker_ids),
+        )
+        .order_by(Sticker.sort_order.asc(), Sticker.name.asc())
+    )
+    stickers = db.execute(statement).scalars().all()
+    if not stickers:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nenhuma figurinha valida foi selecionada.")
+    return stickers
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.get("/service-config", response_model=ServiceConfigResponse)
+def get_public_service_config(db: Session = Depends(get_db)) -> dict:
+    service_settings = get_or_create_service_settings(db)
+    return service_settings_to_response(service_settings)
 
 
 @app.post("/admin/session")
@@ -152,19 +200,7 @@ def list_public_stickers(
 @app.post("/exports", response_model=ExportResponse)
 def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
     collection = load_collection_by_slug_or_fail(db, payload.collection_slug, public_only=True)
-    statement = (
-        select(Sticker)
-        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
-        .where(
-            Sticker.collection_id == collection.id,
-            Sticker.active.is_(True),
-            Sticker.id.in_(payload.sticker_ids),
-        )
-        .order_by(Sticker.sort_order.asc(), Sticker.name.asc())
-    )
-    stickers = db.execute(statement).scalars().all()
-    if not stickers:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nenhuma figurinha valida foi selecionada.")
+    stickers = selected_stickers_or_400(db, collection, payload.sticker_ids)
     export_record = build_export_pdf(collection, stickers, db)
     db.commit()
     return {
@@ -173,6 +209,40 @@ def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict
         "download_path": f"/exports/{export_record.id}/download",
         "file_name": Path(export_record.file_path).name,
     }
+
+
+@app.post("/orders/quote", response_model=OrderQuoteResponse)
+def quote_print_order(payload: OrderQuoteRequest, db: Session = Depends(get_db)) -> dict:
+    collection = load_collection_by_slug_or_fail(db, payload.collection_slug, public_only=True)
+    stickers = selected_stickers_or_400(db, collection, payload.sticker_ids)
+    service_settings = get_or_create_service_settings(db)
+    quote = build_order_quote(collection, stickers, db, service_settings)
+    quote.pop("plan", None)
+    return quote
+
+
+@app.post("/orders", response_model=PrintOrderResponse)
+def create_public_print_order(payload: PrintOrderCreate, db: Session = Depends(get_db)) -> dict:
+    collection = load_collection_by_slug_or_fail(db, payload.collection_slug, public_only=True)
+    stickers = selected_stickers_or_400(db, collection, payload.sticker_ids)
+    service_settings = get_or_create_service_settings(db)
+    try:
+        order = create_print_order(
+            db=db,
+            collection=collection,
+            stickers=stickers,
+            service_type=payload.service_type,
+            customer_name=payload.customer_name,
+            customer_whatsapp=payload.customer_whatsapp,
+            customer_nickname=payload.customer_nickname,
+            notes=payload.notes,
+            service_settings=service_settings,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    db.refresh(order)
+    return print_order_to_response(order, service_settings)
 
 
 @app.get("/exports/{export_id}/download")
@@ -193,6 +263,58 @@ def list_admin_collections(db: Session = Depends(get_db)) -> list[dict]:
     collections = db.execute(select(Collection).order_by(Collection.updated_at.desc(), Collection.id.desc())).scalars().all()
     stats = collection_stats(db, [collection.id for collection in collections])
     return [collection_to_response(collection, stats.get(collection.id, {})) for collection in collections]
+
+
+@app.get("/admin/service-config", response_model=ServiceConfigResponse, dependencies=[Depends(require_admin)])
+def get_admin_service_config(db: Session = Depends(get_db)) -> dict:
+    service_settings = get_or_create_service_settings(db)
+    return service_settings_to_response(service_settings)
+
+
+@app.put("/admin/service-config", response_model=ServiceConfigResponse, dependencies=[Depends(require_admin)])
+def update_admin_service_config(payload: ServiceConfigUpdate, db: Session = Depends(get_db)) -> dict:
+    service_settings = get_or_create_service_settings(db)
+    service_settings.service_enabled = payload.service_enabled
+    service_settings.pack_size = payload.pack_size
+    service_settings.print_price_cents = payload.print_price_cents
+    service_settings.pack_price_cents = payload.pack_price_cents
+    service_settings.pix_key = (payload.pix_key or "").strip() or None
+    service_settings.pix_holder = (payload.pix_holder or "").strip() or None
+    service_settings.pickup_note = (payload.pickup_note or "").strip() or None
+    db.commit()
+    db.refresh(service_settings)
+    return service_settings_to_response(service_settings)
+
+
+@app.get("/admin/orders", response_model=list[PrintOrderResponse], dependencies=[Depends(require_admin)])
+def list_admin_orders(
+    status_filter: PrintOrderStatus | None = Query(default=None, alias="status"),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    statement = select(PrintOrder).order_by(PrintOrder.created_at.desc(), PrintOrder.id.desc())
+    if status_filter:
+        statement = statement.where(PrintOrder.status == status_filter)
+    orders = db.execute(statement).scalars().all()
+    return [print_order_to_response(order) for order in orders]
+
+
+@app.put("/admin/orders/{order_id}", response_model=PrintOrderResponse, dependencies=[Depends(require_admin)])
+def update_admin_order(order_id: int, payload: PrintOrderUpdate, db: Session = Depends(get_db)) -> dict:
+    order = load_print_order_or_fail(db, order_id)
+    order.status = payload.status
+    order.admin_notes = (payload.admin_notes or "").strip() or None
+    db.commit()
+    db.refresh(order)
+    return print_order_to_response(order)
+
+
+@app.get("/admin/orders/{order_id}/download", dependencies=[Depends(require_admin)])
+def download_admin_order_export(order_id: int, db: Session = Depends(get_db)) -> FileResponse:
+    order = load_print_order_or_fail(db, order_id)
+    file_path = settings.storage_root / order.export_file_path
+    if not file_path.exists():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Arquivo do pedido nao encontrado.")
+    return FileResponse(path=file_path, filename=file_path.name, media_type="application/pdf")
 
 
 @app.post("/admin/collections", response_model=CollectionResponse, dependencies=[Depends(require_admin)])

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import json
 import shutil
 import uuid
 from collections import defaultdict
@@ -16,7 +17,17 @@ from sqlalchemy.orm import Session, selectinload
 
 from .auto_detect import detect_sticker_rectangles
 from .config import get_settings
-from .models import Collection, CollectionStatus, Export, Page, Sticker
+from .models import (
+    Collection,
+    CollectionStatus,
+    Export,
+    Page,
+    PrintOrder,
+    PrintOrderStatus,
+    PrintServiceType,
+    ServiceSettings,
+    Sticker,
+)
 from .name_ocr import detect_sticker_name
 
 
@@ -158,6 +169,26 @@ def refresh_sticker_ocr(sticker: Sticker, update_name: bool = False) -> None:
         sticker.name = result.suggested_name
 
 
+def get_or_create_service_settings(db: Session) -> ServiceSettings:
+    settings_record = db.get(ServiceSettings, 1)
+    if settings_record:
+        return settings_record
+
+    settings_record = ServiceSettings(
+        id=1,
+        service_enabled=settings.default_service_enabled,
+        pack_size=settings.default_pack_size,
+        print_price_cents=settings.default_print_price_cents,
+        pack_price_cents=settings.default_pack_price_cents,
+        pix_key=settings.default_pix_key or None,
+        pix_holder=settings.default_pix_holder or None,
+        pickup_note=settings.default_pickup_note or None,
+    )
+    db.add(settings_record)
+    db.flush()
+    return settings_record
+
+
 def delete_sticker_assets(sticker: Sticker) -> None:
     for relative_path in {sticker.crop_path, sticker.preview_path}:
         if not relative_path:
@@ -263,12 +294,7 @@ def auto_detect_collection_pages(
     }
 
 
-def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Session) -> Export:
-    export_dir = settings.storage_root / "exports" / collection.slug
-    export_dir.mkdir(parents=True, exist_ok=True)
-    export_key = f"{datetime.utcnow():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
-    export_path = export_dir / f"{collection.slug}-{export_key}.pdf"
-
+def prepare_export_plan(collection: Collection, stickers: list[Sticker], db: Session) -> dict:
     if not collection.source_pdf_path:
         raise ValueError("A colecao nao possui PDF de origem para exportacao.")
 
@@ -288,51 +314,78 @@ def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Sessio
             page_index + 1: (document.load_page(page_index).rect.width, document.load_page(page_index).rect.height)
             for page_index in range(document.page_count)
         }
-        template_layouts = _build_template_export_layouts(template_stickers, page_sizes)
 
-        selected_groups: dict[tuple[float, float], list[Sticker]] = {}
-        for sticker in stickers:
-            group_key = _sticker_size_key(sticker, page_sizes)
-            selected_groups.setdefault(group_key, []).append(sticker)
+    template_layouts = _build_template_export_layouts(template_stickers, page_sizes)
+    selected_groups: dict[tuple[float, float], list[Sticker]] = {}
+    for sticker in stickers:
+        group_key = _sticker_size_key(sticker, page_sizes)
+        selected_groups.setdefault(group_key, []).append(sticker)
 
-        first_layout = next(iter(template_layouts.values()), None)
-        initial_page_size = first_layout["page_size"] if first_layout else next(iter(page_sizes.values()), (595.2756, 841.8898))
+    batches: list[dict] = []
+    for group_key, group_stickers in selected_groups.items():
+        layout = template_layouts.get(group_key)
+        if not layout or not layout["slots"]:
+            raise ValueError("Nao foi possivel montar um template de exportacao para esse conjunto de figurinhas.")
+
+        slots = layout["slots"]
+        slots_per_page = len(slots)
+        if slots_per_page <= 0:
+            raise ValueError("Template de exportacao invalido para a colecao.")
+
+        for offset in range(0, len(group_stickers), slots_per_page):
+            batch = group_stickers[offset : offset + slots_per_page]
+            batches.append(
+                {
+                    "page_size": layout["page_size"],
+                    "placements": list(zip(slots, batch, strict=False)),
+                }
+            )
+
+    return {
+        "source_pdf_path": source_pdf_path,
+        "page_sizes": page_sizes,
+        "batches": batches,
+        "sheet_count": len(batches),
+    }
+
+
+def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Session, plan: dict | None = None) -> Export:
+    export_dir = settings.storage_root / "exports" / collection.slug
+    export_dir.mkdir(parents=True, exist_ok=True)
+    export_key = f"{datetime.utcnow():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
+    export_path = export_dir / f"{collection.slug}-{export_key}.pdf"
+
+    plan = plan or prepare_export_plan(collection, stickers, db)
+    page_sizes = plan["page_sizes"]
+    batches = plan["batches"]
+    initial_page_size = batches[0]["page_size"] if batches else next(iter(page_sizes.values()), (595.2756, 841.8898))
+
+    with fitz.open(plan["source_pdf_path"]) as document:
         pdf = canvas.Canvas(str(export_path), pagesize=initial_page_size)
         pdf.setTitle(f"{collection.name} - figurinhas selecionadas")
 
         is_first_page = True
-        for group_key, group_stickers in selected_groups.items():
-            layout = template_layouts.get(group_key)
-            if not layout or not layout["slots"]:
-                raise ValueError("Nao foi possivel montar um template de exportacao para esse conjunto de figurinhas.")
+        for batch in batches:
+            page_width, page_height = batch["page_size"]
+            if not is_first_page:
+                pdf.showPage()
+            pdf.setPageSize((page_width, page_height))
 
-            page_width, page_height = layout["page_size"]
-            slots = layout["slots"]
-            slots_per_page = len(slots)
-            if slots_per_page <= 0:
-                raise ValueError("Template de exportacao invalido para a colecao.")
+            for slot, sticker in batch["placements"]:
+                image_bytes = _render_sticker_export_image(document, sticker, page_sizes)
+                x_position = slot["x_pt"]
+                y_position = page_height - slot["y_pt"] - slot["height_pt"]
+                pdf.drawImage(
+                    ImageReader(io.BytesIO(image_bytes)),
+                    x_position,
+                    y_position,
+                    width=slot["width_pt"],
+                    height=slot["height_pt"],
+                    preserveAspectRatio=False,
+                    mask="auto",
+                )
 
-            for offset in range(0, len(group_stickers), slots_per_page):
-                batch = group_stickers[offset : offset + slots_per_page]
-                if not is_first_page:
-                    pdf.showPage()
-                pdf.setPageSize((page_width, page_height))
-
-                for slot, sticker in zip(slots, batch, strict=False):
-                    image_bytes = _render_sticker_export_image(document, sticker, page_sizes)
-                    x_position = slot["x_pt"]
-                    y_position = page_height - slot["y_pt"] - slot["height_pt"]
-                    pdf.drawImage(
-                        ImageReader(io.BytesIO(image_bytes)),
-                        x_position,
-                        y_position,
-                        width=slot["width_pt"],
-                        height=slot["height_pt"],
-                        preserveAspectRatio=False,
-                        mask="auto",
-                    )
-
-                is_first_page = False
+            is_first_page = False
 
         pdf.save()
 
@@ -344,6 +397,116 @@ def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Sessio
     db.add(export_record)
     db.flush()
     return export_record
+
+
+def build_order_quote(collection: Collection, stickers: list[Sticker], db: Session, service_settings: ServiceSettings) -> dict:
+    plan = prepare_export_plan(collection, stickers, db)
+    item_count = len(stickers)
+    sheet_count = plan["sheet_count"]
+    pack_size = service_settings.pack_size
+    pack_remainder = item_count % pack_size
+    pack_eligible = pack_remainder == 0
+    pack_count = item_count // pack_size if pack_eligible else 0
+    print_total_cents = sheet_count * service_settings.print_price_cents
+    pack_total_cents = (
+        print_total_cents + (pack_count * service_settings.pack_price_cents)
+        if pack_eligible
+        else None
+    )
+
+    return {
+        "plan": plan,
+        "service_enabled": service_settings.service_enabled,
+        "item_count": item_count,
+        "sheet_count": sheet_count,
+        "pack_size": pack_size,
+        "print_price_cents": service_settings.print_price_cents,
+        "pack_price_cents": service_settings.pack_price_cents,
+        "print_total_cents": print_total_cents,
+        "pack_count": pack_count,
+        "pack_total_cents": pack_total_cents,
+        "pack_eligible": pack_eligible,
+        "pack_remainder": pack_remainder,
+        "pix_key": service_settings.pix_key,
+        "pix_holder": service_settings.pix_holder,
+        "pickup_note": service_settings.pickup_note,
+    }
+
+
+def create_print_order(
+    db: Session,
+    collection: Collection,
+    stickers: list[Sticker],
+    service_type: PrintServiceType,
+    customer_name: str,
+    customer_whatsapp: str,
+    customer_nickname: str | None,
+    notes: str | None,
+    service_settings: ServiceSettings,
+) -> PrintOrder:
+    if not service_settings.service_enabled:
+        raise ValueError("O servico de impressao ainda nao esta disponivel.")
+    if service_settings.print_price_cents <= 0:
+        raise ValueError("Configure o preco por folha antes de receber pedidos.")
+    if not (service_settings.pix_key or "").strip():
+        raise ValueError("Configure a chave Pix antes de receber pedidos.")
+
+    quote = build_order_quote(collection, stickers, db, service_settings)
+    total_price_cents = quote["print_total_cents"]
+    pack_count = 0
+    pack_price_cents = 0
+
+    if service_type == PrintServiceType.IMPRESSAO_PACOTINHOS:
+        if not quote["pack_eligible"]:
+            raise ValueError(
+                f"Pacotinhos sao montados com {quote['pack_size']} figurinhas. Ajuste a selecao para um multiplo desse valor."
+            )
+        if service_settings.pack_price_cents <= 0:
+            raise ValueError("Configure o preco dos pacotinhos antes de receber esse tipo de pedido.")
+        pack_count = quote["pack_count"]
+        pack_price_cents = service_settings.pack_price_cents
+        total_price_cents = quote["pack_total_cents"] or total_price_cents
+
+    export_record = build_export_pdf(collection, stickers, db, plan=quote["plan"])
+    sticker_payload = json.dumps(
+        [
+            {
+                "id": sticker.id,
+                "name": sticker.name,
+                "category": sticker.category.value,
+                "page_number": sticker.page.page_number,
+            }
+            for sticker in stickers
+        ],
+        ensure_ascii=False,
+    )
+
+    order = PrintOrder(
+        reference_code=f"PEND-{uuid.uuid4().hex[:10]}",
+        collection=collection,
+        collection_name=collection.name,
+        customer_name=customer_name.strip(),
+        customer_whatsapp=customer_whatsapp.strip(),
+        customer_nickname=(customer_nickname or "").strip() or None,
+        notes=(notes or "").strip() or None,
+        admin_notes=None,
+        service_type=service_type,
+        status=PrintOrderStatus.AGUARDANDO_PIX,
+        item_count=quote["item_count"],
+        sheet_count=quote["sheet_count"],
+        pack_count=pack_count,
+        pack_size=quote["pack_size"],
+        print_price_cents=quote["print_price_cents"],
+        pack_price_cents=pack_price_cents,
+        total_price_cents=total_price_cents,
+        export_file_path=export_record.file_path,
+        sticker_payload=sticker_payload,
+    )
+    db.add(order)
+    db.flush()
+    order.reference_code = f"FG-{order.id:05d}"
+    db.flush()
+    return order
 
 
 def _sticker_page_box_points(
@@ -452,6 +615,13 @@ def load_sticker_or_fail(db: Session, sticker_id: int) -> Sticker:
     return sticker
 
 
+def load_print_order_or_fail(db: Session, order_id: int) -> PrintOrder:
+    order = db.get(PrintOrder, order_id)
+    if not order:
+        raise LookupError("Pedido nao encontrado.")
+    return order
+
+
 def collection_to_response(collection: Collection, stats: dict[str, int]) -> dict:
     return {
         "id": collection.id,
@@ -502,3 +672,51 @@ def sticker_to_response(sticker: Sticker) -> dict:
         "updated_at": sticker.updated_at,
         "page_number": sticker.page.page_number,
     }
+
+
+def service_settings_to_response(service_settings: ServiceSettings) -> dict:
+    return {
+        "service_enabled": service_settings.service_enabled,
+        "pack_size": service_settings.pack_size,
+        "print_price_cents": service_settings.print_price_cents,
+        "pack_price_cents": service_settings.pack_price_cents,
+        "pix_key": service_settings.pix_key,
+        "pix_holder": service_settings.pix_holder,
+        "pickup_note": service_settings.pickup_note,
+    }
+
+
+def print_order_to_response(order: PrintOrder, service_settings: ServiceSettings | None = None) -> dict:
+    try:
+        selected_stickers = json.loads(order.sticker_payload)
+    except json.JSONDecodeError:
+        selected_stickers = []
+
+    response = {
+        "id": order.id,
+        "reference_code": order.reference_code,
+        "collection_id": order.collection_id,
+        "collection_name": order.collection_name,
+        "customer_name": order.customer_name,
+        "customer_whatsapp": order.customer_whatsapp,
+        "customer_nickname": order.customer_nickname,
+        "notes": order.notes,
+        "admin_notes": order.admin_notes,
+        "service_type": order.service_type,
+        "status": order.status,
+        "item_count": order.item_count,
+        "sheet_count": order.sheet_count,
+        "pack_count": order.pack_count,
+        "pack_size": order.pack_size,
+        "print_price_cents": order.print_price_cents,
+        "pack_price_cents": order.pack_price_cents,
+        "total_price_cents": order.total_price_cents,
+        "export_download_path": f"/admin/orders/{order.id}/download",
+        "selected_stickers": selected_stickers,
+        "created_at": order.created_at,
+        "updated_at": order.updated_at,
+        "pix_key": service_settings.pix_key if service_settings else None,
+        "pix_holder": service_settings.pix_holder if service_settings else None,
+        "pickup_note": service_settings.pickup_note if service_settings else None,
+    }
+    return response

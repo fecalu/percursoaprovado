@@ -25,6 +25,20 @@ class StickerCategory(str, enum.Enum):
     ESPECIAL = "ESPECIAL"
 
 
+class PrintServiceType(str, enum.Enum):
+    IMPRESSAO = "IMPRESSAO"
+    IMPRESSAO_PACOTINHOS = "IMPRESSAO_PACOTINHOS"
+
+
+class PrintOrderStatus(str, enum.Enum):
+    AGUARDANDO_PIX = "AGUARDANDO_PIX"
+    PIX_CONFIRMADO = "PIX_CONFIRMADO"
+    EM_PRODUCAO = "EM_PRODUCAO"
+    PRONTO_PARA_RETIRADA = "PRONTO_PARA_RETIRADA"
+    ENTREGUE = "ENTREGUE"
+    CANCELADO = "CANCELADO"
+
+
 class Collection(Base):
     __tablename__ = "figurinhas_collections"
 
@@ -49,6 +63,9 @@ class Collection(Base):
     )
     exports: Mapped[list["Export"]] = relationship(
         back_populates="collection", cascade="all, delete-orphan", order_by="Export.created_at.desc()"
+    )
+    print_orders: Mapped[list["PrintOrder"]] = relationship(
+        back_populates="collection", cascade="all, delete-orphan", order_by="PrintOrder.created_at.desc()"
     )
 
 
@@ -107,3 +124,53 @@ class Export(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     collection: Mapped[Collection] = relationship(back_populates="exports")
+
+
+class ServiceSettings(Base):
+    __tablename__ = "figurinhas_service_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    service_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    pack_size: Mapped[int] = mapped_column(Integer, default=7, nullable=False)
+    print_price_cents: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    pack_price_cents: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    pix_key: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    pix_holder: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    pickup_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+
+class PrintOrder(Base):
+    __tablename__ = "figurinhas_print_orders"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    reference_code: Mapped[str] = mapped_column(String(30), unique=True, nullable=False, index=True)
+    collection_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_collections.id"), nullable=False, index=True)
+    collection_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    customer_name: Mapped[str] = mapped_column(String(150), nullable=False)
+    customer_whatsapp: Mapped[str] = mapped_column(String(40), nullable=False)
+    customer_nickname: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    service_type: Mapped[PrintServiceType] = mapped_column(Enum(PrintServiceType), nullable=False)
+    status: Mapped[PrintOrderStatus] = mapped_column(
+        Enum(PrintOrderStatus), default=PrintOrderStatus.AGUARDANDO_PIX, nullable=False
+    )
+    item_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    sheet_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    pack_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    pack_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    print_price_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    pack_price_cents: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    total_price_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    export_file_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    sticker_payload: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    collection: Mapped[Collection] = relationship(back_populates="print_orders")

@@ -485,10 +485,207 @@ a {
   margin-bottom: 0.15rem;
 }
 
+.fig-service-card,
+.fig-success-panel {
+  margin-bottom: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.fig-service-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.fig-service-card-header h3,
+.fig-success-panel h3 {
+  margin: 0;
+}
+
+.fig-service-badge {
+  border-radius: 999px;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: rgba(17, 34, 53, 0.08);
+  color: #44546a;
+}
+
+.fig-service-badge.is-ready {
+  background: rgba(31, 122, 77, 0.12);
+  color: #14633c;
+}
+
+.fig-quote-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.fig-quote-item {
+  border-radius: 18px;
+  padding: 0.85rem 0.95rem;
+  background: rgba(17, 34, 53, 0.04);
+  border: 1px solid rgba(17, 34, 53, 0.08);
+}
+
+.fig-quote-item strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.fig-quote-item span,
+.fig-service-notes p,
+.fig-order-option span,
+.fig-order-list-item span,
+.fig-selected-stickers span {
+  color: #5a6c82;
+  font-size: 0.92rem;
+}
+
+.fig-service-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fig-service-notes p {
+  margin: 0;
+}
+
+.fig-warning-text {
+  color: #b25a00 !important;
+  font-weight: 600;
+}
+
+.fig-order-form {
+  margin-bottom: 1rem;
+}
+
+.fig-order-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.fig-order-option {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 34, 53, 0.1);
+  background: #fff;
+  cursor: pointer;
+}
+
+.fig-order-option.is-active {
+  border-color: rgba(31, 122, 77, 0.45);
+  background: rgba(31, 122, 77, 0.06);
+}
+
+.fig-order-option.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.fig-order-option input {
+  margin-top: 0.2rem;
+}
+
+.fig-admin-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.fig-order-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.fig-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.fig-order-list-item {
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fig-order-list-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(17, 34, 53, 0.18);
+  box-shadow: 0 12px 22px rgba(17, 34, 53, 0.06);
+}
+
+.fig-order-list-item.is-active {
+  border-color: rgba(31, 122, 77, 0.45);
+  background: rgba(31, 122, 77, 0.06);
+}
+
+.fig-order-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.fig-order-admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.fig-selected-stickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.fig-selection-chip {
+  border-radius: 999px;
+  padding: 0.42rem 0.7rem;
+  background: rgba(17, 34, 53, 0.06);
+  border: 1px solid rgba(17, 34, 53, 0.08);
+}
+
+.fig-admin-section-head {
+  margin-top: 0.25rem;
+}
+
 @media (max-width: 1100px) {
   .fig-public-layout,
   .fig-admin-layout,
   .fig-admin-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .fig-admin-summary-grid,
+  .fig-order-layout,
+  .fig-quote-grid,
+  .fig-order-options {
     grid-template-columns: 1fr;
   }
 

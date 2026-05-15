@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
-from .models import CollectionStatus, StickerCategory
+from .models import CollectionStatus, PrintOrderStatus, PrintServiceType, StickerCategory
 
 
 class CollectionCreate(BaseModel):
@@ -122,6 +122,98 @@ class ExportResponse(BaseModel):
     item_count: int
     download_path: str
     file_name: str
+
+
+class ServiceConfigResponse(BaseModel):
+    service_enabled: bool
+    pack_size: int
+    print_price_cents: int
+    pack_price_cents: int
+    pix_key: str | None
+    pix_holder: str | None
+    pickup_note: str | None
+
+
+class ServiceConfigUpdate(BaseModel):
+    service_enabled: bool = False
+    pack_size: int = Field(default=7, ge=1, le=100)
+    print_price_cents: int = Field(default=0, ge=0, le=100000)
+    pack_price_cents: int = Field(default=0, ge=0, le=100000)
+    pix_key: str | None = Field(default=None, max_length=255)
+    pix_holder: str | None = Field(default=None, max_length=150)
+    pickup_note: str | None = Field(default=None, max_length=500)
+
+
+class OrderQuoteRequest(BaseModel):
+    collection_slug: str
+    sticker_ids: list[int] = Field(min_length=1)
+
+
+class OrderQuoteResponse(BaseModel):
+    service_enabled: bool
+    item_count: int
+    sheet_count: int
+    pack_size: int
+    print_price_cents: int
+    pack_price_cents: int
+    print_total_cents: int
+    pack_count: int
+    pack_total_cents: int | None
+    pack_eligible: bool
+    pack_remainder: int
+    pix_key: str | None
+    pix_holder: str | None
+    pickup_note: str | None
+
+
+class PrintOrderCreate(BaseModel):
+    collection_slug: str
+    sticker_ids: list[int] = Field(min_length=1)
+    service_type: PrintServiceType
+    customer_name: str = Field(min_length=2, max_length=150)
+    customer_whatsapp: str = Field(min_length=8, max_length=40)
+    customer_nickname: str | None = Field(default=None, max_length=120)
+    notes: str | None = Field(default=None, max_length=500)
+
+
+class PrintOrderStickerSummary(BaseModel):
+    id: int
+    name: str
+    category: StickerCategory
+    page_number: int
+
+
+class PrintOrderResponse(BaseModel):
+    id: int
+    reference_code: str
+    collection_id: int
+    collection_name: str
+    customer_name: str
+    customer_whatsapp: str
+    customer_nickname: str | None
+    notes: str | None
+    admin_notes: str | None
+    service_type: PrintServiceType
+    status: PrintOrderStatus
+    item_count: int
+    sheet_count: int
+    pack_count: int
+    pack_size: int
+    print_price_cents: int
+    pack_price_cents: int
+    total_price_cents: int
+    export_download_path: str
+    selected_stickers: list[PrintOrderStickerSummary]
+    created_at: datetime
+    updated_at: datetime
+    pix_key: str | None = None
+    pix_holder: str | None = None
+    pickup_note: str | None = None
+
+
+class PrintOrderUpdate(BaseModel):
+    status: PrintOrderStatus
+    admin_notes: str | None = Field(default=None, max_length=1000)
 
 
 class AutoDetectPageResponse(BaseModel):
