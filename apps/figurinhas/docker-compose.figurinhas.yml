@@ -1,0 +1,31 @@
+services:
+  figurinhas_backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: figurinhas_backend
+    restart: unless-stopped
+    environment:
+      FIGURINHAS_STORAGE_ROOT: /app/storage
+      FIGURINHAS_DATABASE_URL: sqlite:////app/storage/figurinhas.sqlite3
+      FIGURINHAS_ADMIN_TOKEN: ${FIGURINHAS_ADMIN_TOKEN}
+      FIGURINHAS_PAGE_RENDER_SCALE: ${FIGURINHAS_PAGE_RENDER_SCALE:-4.0}
+      FIGURINHAS_PUBLIC_COLLECTION_LIMIT: ${FIGURINHAS_PUBLIC_COLLECTION_LIMIT:-50}
+    ports:
+      - "127.0.0.1:8091:8091"
+    volumes:
+      - ./storage:/app/storage
+
+  figurinhas_frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_BASE_PATH: /figurinhas/
+    container_name: figurinhas_frontend
+    restart: unless-stopped
+    depends_on:
+      - figurinhas_backend
+    ports:
+      - "127.0.0.1:4310:80"
+

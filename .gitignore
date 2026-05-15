@@ -9,6 +9,15 @@ edu-percurso-backend/target/
 # Frontend
 edu-percurso-frontend/node_modules/
 edu-percurso-frontend/dist/
+apps/figurinhas/frontend/node_modules/
+apps/figurinhas/frontend/dist/
+apps/figurinhas/backend/.venv/
+apps/figurinhas/storage/originals/
+apps/figurinhas/storage/pages/
+apps/figurinhas/storage/crops/
+apps/figurinhas/storage/exports/
+apps/figurinhas/storage/*.db
+apps/figurinhas/storage/*.sqlite3
 
 # Editor / OS
 .DS_Store
