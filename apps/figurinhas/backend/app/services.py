@@ -9,7 +9,7 @@ from pathlib import Path
 
 import fitz
 from PIL import Image
-from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from sqlalchemy import func, select
@@ -394,63 +394,37 @@ def _build_compact_export_layouts(
 def _best_compact_layout(width_pt: float, height_pt: float) -> dict | None:
     margin_pt = 12.0
     gap_pt = 8.5
-    candidates = []
-
-    for page_size, orientation in ((A4, "portrait"), (landscape(A4), "landscape")):
-        page_width, page_height = page_size
-        usable_width = page_width - (margin_pt * 2)
-        usable_height = page_height - (margin_pt * 2)
-        columns = int((usable_width + gap_pt) // (width_pt + gap_pt))
-        rows = int((usable_height + gap_pt) // (height_pt + gap_pt))
-        if columns <= 0 or rows <= 0:
-            continue
-
-        total_width = (columns * width_pt) + ((columns - 1) * gap_pt)
-        total_height = (rows * height_pt) + ((rows - 1) * gap_pt)
-        start_x = (page_width - total_width) / 2
-        top_margin = (page_height - total_height) / 2
-
-        slots = []
-        for row in range(rows):
-            for column in range(columns):
-                slots.append(
-                    {
-                        "x_pt": start_x + (column * (width_pt + gap_pt)),
-                        "y_pt": page_height - top_margin - height_pt - (row * (height_pt + gap_pt)),
-                        "width_pt": width_pt,
-                        "height_pt": height_pt,
-                    }
-                )
-
-        candidates.append(
-            {
-                "page_size": (page_width, page_height),
-                "orientation": orientation,
-                "slots": slots,
-                "capacity": columns * rows,
-                "columns": columns,
-                "rows": rows,
-                "remaining_area": (usable_width * usable_height) - (total_width * total_height),
-            }
-        )
-
-    if not candidates:
+    page_width, page_height = A4
+    usable_width = page_width - (margin_pt * 2)
+    usable_height = page_height - (margin_pt * 2)
+    columns = int((usable_width + gap_pt) // (width_pt + gap_pt))
+    rows = int((usable_height + gap_pt) // (height_pt + gap_pt))
+    if columns <= 0 or rows <= 0:
         return None
 
-    best = max(
-        candidates,
-        key=lambda current: (
-            current["capacity"],
-            -current["remaining_area"],
-            1 if current["orientation"] == "portrait" else 0,
-        ),
-    )
+    total_width = (columns * width_pt) + ((columns - 1) * gap_pt)
+    total_height = (rows * height_pt) + ((rows - 1) * gap_pt)
+    start_x = (page_width - total_width) / 2
+    top_margin = (page_height - total_height) / 2
+
+    slots = []
+    for row in range(rows):
+        for column in range(columns):
+            slots.append(
+                {
+                    "x_pt": start_x + (column * (width_pt + gap_pt)),
+                    "y_pt": page_height - top_margin - height_pt - (row * (height_pt + gap_pt)),
+                    "width_pt": width_pt,
+                    "height_pt": height_pt,
+                }
+            )
+
     return {
-        "page_size": best["page_size"],
-        "slots": best["slots"],
-        "columns": best["columns"],
-        "rows": best["rows"],
-        "capacity": best["capacity"],
+        "page_size": (page_width, page_height),
+        "slots": slots,
+        "columns": columns,
+        "rows": rows,
+        "capacity": columns * rows,
     }
 
 
