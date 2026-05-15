@@ -22,3 +22,4 @@ apps/figurinhas/storage/*.sqlite3
 # Editor / OS
 .DS_Store
 Thumbs.db
+__pycache__/
