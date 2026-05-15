@@ -29,6 +29,8 @@ const serviceTypeLabels = {
   IMPRESSAO_PACOTINHOS: 'Completo: imprimir, cortar e montar'
 }
 
+const STICKERS_PER_SHEET = 16
+
 function useAdminToken() {
   const [token, setToken] = useState(() => window.localStorage.getItem('figurinhas_admin_token') || '')
 
@@ -303,6 +305,17 @@ function PublicPage() {
     () => collections.find(collection => collection.slug === selectedCollectionSlug) || null,
     [collections, selectedCollectionSlug]
   )
+  const selectedStickerItems = useMemo(
+    () => stickers.filter(sticker => selectedIds.includes(sticker.id)),
+    [stickers, selectedIds]
+  )
+  const previewSheets = useMemo(() => {
+    const sheets = []
+    for (let index = 0; index < selectedStickerItems.length; index += STICKERS_PER_SHEET) {
+      sheets.push(selectedStickerItems.slice(index, index + STICKERS_PER_SHEET))
+    }
+    return sheets
+  }, [selectedStickerItems])
 
   function toggleSelection(stickerId) {
     setSelectedIds(current =>
@@ -520,6 +533,13 @@ function PublicPage() {
                 </span>
               </div>
 
+              <div className="fig-helper-strip fig-helper-strip--tight">
+                <strong>Cada folha comporta ate 16 figurinhas.</strong>
+                <span>
+                  Sua selecao atual ocupa {quote.sheet_count} folha(s) no total.
+                </span>
+              </div>
+
               <div className="fig-quote-grid">
                 <div className="fig-quote-item">
                   <strong>{quote.item_count}</strong>
@@ -558,6 +578,36 @@ function PublicPage() {
                   </p>
                 ) : null}
                 {quote.pickup_note ? <p>{quote.pickup_note}</p> : null}
+              </div>
+
+              <div className="fig-sheet-preview-section">
+                <div className="fig-sheet-preview-head">
+                  <strong>Miniatura da distribuicao</strong>
+                  <span>{previewSheets.length} folha(s) gerada(s)</span>
+                </div>
+                <div className="fig-sheet-preview-strip">
+                  {previewSheets.map((sheet, sheetIndex) => (
+                    <div key={`sheet-${sheetIndex + 1}`} className="fig-sheet-preview-card">
+                      <div className="fig-sheet-preview-meta">
+                        <strong>Folha {sheetIndex + 1}</strong>
+                        <span>{sheet.length}/{STICKERS_PER_SHEET}</span>
+                      </div>
+                      <div className="fig-sheet-preview-grid">
+                        {Array.from({ length: STICKERS_PER_SHEET }).map((_, slotIndex) => {
+                          const sticker = sheet[slotIndex]
+                          return (
+                            <div
+                              key={`sheet-${sheetIndex + 1}-slot-${slotIndex + 1}`}
+                              className={`fig-sheet-preview-slot${sticker ? ' is-filled' : ''}`}
+                            >
+                              {sticker ? <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} /> : null}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </section>
 

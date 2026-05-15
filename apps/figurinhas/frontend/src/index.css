@@ -488,7 +488,7 @@ a {
 .fig-service-card,
 .fig-success-panel {
   margin-bottom: 1rem;
-  padding: 1rem 1.1rem;
+  padding: 0.9rem 1rem;
   border-radius: 22px;
   border: 1px solid rgba(17, 34, 53, 0.08);
   background: rgba(255, 255, 255, 0.92);
@@ -497,6 +497,10 @@ a {
 .fig-service-card--modal,
 .fig-order-form--modal {
   margin-bottom: 0;
+}
+
+.fig-order-form--modal {
+  padding: 0.95rem 1rem;
 }
 
 .fig-modal-backdrop {
@@ -511,10 +515,10 @@ a {
 }
 
 .fig-modal-shell {
-  width: min(960px, 100%);
+  width: min(900px, 100%);
   max-height: calc(100vh - 3rem);
   overflow: auto;
-  padding: 1rem;
+  padding: 0.9rem;
   border-radius: 28px;
   background: #f8fbff;
   border: 1px solid rgba(255, 255, 255, 0.24);
@@ -526,7 +530,7 @@ a {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .fig-modal-header h3 {
@@ -538,7 +542,7 @@ a {
   background: rgba(17, 34, 53, 0.08);
   color: #112235;
   border-radius: 999px;
-  padding: 0.7rem 1rem;
+  padding: 0.58rem 0.9rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -548,7 +552,7 @@ a {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.7rem;
 }
 
 .fig-service-card-header h3,
@@ -573,20 +577,20 @@ a {
 .fig-quote-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 0.9rem;
+  gap: 0.55rem;
+  margin-bottom: 0.7rem;
 }
 
 .fig-quote-item {
   border-radius: 18px;
-  padding: 0.85rem 0.95rem;
+  padding: 0.68rem 0.8rem;
   background: rgba(17, 34, 53, 0.04);
   border: 1px solid rgba(17, 34, 53, 0.08);
 }
 
 .fig-quote-item strong {
   display: block;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
 }
 
 .fig-quote-item span,
@@ -595,13 +599,13 @@ a {
 .fig-order-list-item span,
 .fig-selected-stickers span {
   color: #5a6c82;
-  font-size: 0.92rem;
+  font-size: 0.86rem;
 }
 
 .fig-service-notes {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.22rem;
 }
 
 .fig-service-notes p {
@@ -614,21 +618,21 @@ a {
 }
 
 .fig-order-form {
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .fig-order-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
 }
 
 .fig-order-option {
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
-  padding: 0.9rem 1rem;
+  padding: 0.72rem 0.85rem;
   border-radius: 18px;
   border: 1px solid rgba(17, 34, 53, 0.1);
   background: #fff;
@@ -647,6 +651,87 @@ a {
 
 .fig-order-option input {
   margin-top: 0.2rem;
+}
+
+.fig-helper-strip--tight {
+  gap: 0.5rem;
+  margin-bottom: 0.7rem;
+  padding: 0.7rem 0.85rem;
+}
+
+.fig-sheet-preview-section {
+  margin-top: 0.75rem;
+}
+
+.fig-sheet-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.55rem;
+}
+
+.fig-sheet-preview-head strong {
+  font-size: 0.92rem;
+}
+
+.fig-sheet-preview-head span,
+.fig-sheet-preview-meta span {
+  color: #5a6c82;
+  font-size: 0.82rem;
+}
+
+.fig-sheet-preview-strip {
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.fig-sheet-preview-card {
+  min-width: 210px;
+  padding: 0.7rem;
+  border-radius: 18px;
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  background: rgba(17, 34, 53, 0.03);
+}
+
+.fig-sheet-preview-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+
+.fig-sheet-preview-meta strong {
+  font-size: 0.88rem;
+}
+
+.fig-sheet-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.22rem;
+}
+
+.fig-sheet-preview-slot {
+  aspect-ratio: 0.73;
+  border-radius: 8px;
+  border: 1px dashed rgba(17, 34, 53, 0.14);
+  background: rgba(255, 255, 255, 0.8);
+  overflow: hidden;
+}
+
+.fig-sheet-preview-slot.is-filled {
+  border-style: solid;
+  border-color: rgba(17, 34, 53, 0.08);
+  background: #fff;
+}
+
+.fig-sheet-preview-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .fig-admin-summary-grid {
