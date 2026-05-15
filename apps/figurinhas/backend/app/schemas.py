@@ -94,6 +94,11 @@ class StickerResponse(BaseModel):
     preview_path: str
     crop_path: str
     active: bool
+    detected_automatically: bool
+    ocr_name_raw: str | None
+    ocr_name_suggested: str | None
+    ocr_confidence: float | None
+    ocr_processed_at: datetime | None
     created_at: datetime
     updated_at: datetime
     page_number: int

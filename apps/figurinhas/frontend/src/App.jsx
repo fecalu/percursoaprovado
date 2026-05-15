@@ -64,6 +64,13 @@ function buildAdminHeaders(token, extra = {}) {
   }
 }
 
+function formatOcrConfidence(confidence) {
+  if (typeof confidence !== 'number' || Number.isNaN(confidence)) {
+    return 'sem leitura'
+  }
+  return `${Math.round(confidence)}%`
+}
+
 function Layout({ children }) {
   return (
     <div className="fig-app-shell">
@@ -387,6 +394,10 @@ function AdminPage() {
     () => stickers.filter(sticker => sticker.page_id === currentPageId),
     [stickers, currentPageId]
   )
+  const editingSticker = useMemo(
+    () => stickers.find(sticker => sticker.id === editingStickerId) || null,
+    [stickers, editingStickerId]
+  )
 
   function resetStickerForm() {
     setEditingStickerId(null)
@@ -563,6 +574,11 @@ function AdminPage() {
       widthRatio: sticker.width_ratio,
       heightRatio: sticker.height_ratio
     })
+  }
+
+  function applyOcrSuggestion() {
+    if (!editingSticker?.ocr_name_suggested) return
+    setStickerForm(current => ({ ...current, name: editingSticker.ocr_name_suggested }))
   }
 
   async function handleStickerSubmit(event) {
@@ -763,7 +779,8 @@ function AdminPage() {
 
             <div className="fig-auto-actions">
               <div className="fig-helper-strip">
-                A automacao usa o layout padrao do PDF para criar recortes e voce ainda pode ajustar manualmente depois.
+                A automacao usa o layout padrao do PDF para criar recortes, tenta sugerir nomes com OCR e deixa a
+                revisao final mais leve.
               </div>
               <div className="fig-hero-actions">
                 <button
@@ -864,6 +881,24 @@ function AdminPage() {
                   <h3>{editingStickerId ? 'Editar figurinha' : 'Nova figurinha'}</h3>
                 </div>
 
+                {editingSticker ? (
+                  <div className="fig-helper-strip fig-helper-strip--compact">
+                    <div>
+                      <strong>{editingSticker.detected_automatically ? 'Recorte automatico.' : 'Recorte manual.'}</strong>
+                      <span>
+                        {editingSticker.ocr_name_suggested
+                          ? ` OCR sugeriu ${editingSticker.ocr_name_suggested} (${formatOcrConfidence(editingSticker.ocr_confidence)}).`
+                          : ' OCR ainda nao encontrou um nome confiavel.'}
+                      </span>
+                    </div>
+                    {editingSticker.ocr_name_suggested && editingSticker.ocr_name_suggested !== stickerForm.name ? (
+                      <button type="button" className="fig-inline-link" onClick={applyOcrSuggestion}>
+                        Usar sugestao
+                      </button>
+                    ) : null}
+                  </div>
+                ) : null}
+
                 <form onSubmit={handleStickerSubmit}>
                   <div className="fig-form-grid">
                     <label className="fig-field">
@@ -943,6 +978,14 @@ function AdminPage() {
                         <strong>{sticker.name}</strong>
                         <span>
                           Página {sticker.page_number} · {categoryOptions.find(option => option.value === sticker.category)?.label || sticker.category}
+                        </span>
+                        <span className="fig-ocr-note">
+                          {sticker.detected_automatically ? 'Auto' : 'Manual'}
+                          {sticker.ocr_name_suggested
+                            ? ` · OCR ${sticker.ocr_name_suggested} (${formatOcrConfidence(sticker.ocr_confidence)})`
+                            : sticker.ocr_processed_at
+                              ? ' · OCR sem leitura'
+                              : ' · OCR pendente'}
                         </span>
                       </div>
                     </button>

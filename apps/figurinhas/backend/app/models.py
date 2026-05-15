@@ -83,6 +83,11 @@ class Sticker(Base):
     preview_path: Mapped[str] = mapped_column(String(255), nullable=False)
     crop_path: Mapped[str] = mapped_column(String(255), nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    detected_automatically: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    ocr_name_raw: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    ocr_name_suggested: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    ocr_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ocr_processed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
@@ -102,4 +107,3 @@ class Export(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     collection: Mapped[Collection] = relationship(back_populates="exports")
-

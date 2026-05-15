@@ -19,6 +19,7 @@ from sqlalchemy.orm import Session, selectinload
 from .auto_detect import detect_sticker_rectangles
 from .config import get_settings
 from .models import Collection, CollectionStatus, Export, Page, Sticker
+from .name_ocr import detect_sticker_name
 
 
 settings = get_settings()
@@ -144,6 +145,21 @@ def crop_sticker_image(sticker: Sticker) -> None:
     sticker.preview_path = relative
 
 
+def refresh_sticker_ocr(sticker: Sticker, update_name: bool = False) -> None:
+    if not sticker.crop_path:
+        return
+
+    crop_path = settings.storage_root / sticker.crop_path
+    result = detect_sticker_name(crop_path)
+    sticker.ocr_name_raw = result.raw_text
+    sticker.ocr_name_suggested = result.suggested_name
+    sticker.ocr_confidence = result.confidence
+    sticker.ocr_processed_at = datetime.utcnow()
+
+    if update_name and result.suggested_name:
+        sticker.name = result.suggested_name
+
+
 def delete_sticker_assets(sticker: Sticker) -> None:
     for relative_path in {sticker.crop_path, sticker.preview_path}:
         if not relative_path:
@@ -217,6 +233,7 @@ def auto_detect_collection_pages(
                 width_ratio=rectangle.width_ratio,
                 height_ratio=rectangle.height_ratio,
                 active=True,
+                detected_automatically=True,
                 preview_path="",
                 crop_path="",
             )
@@ -224,6 +241,7 @@ def auto_detect_collection_pages(
             db.add(sticker)
             db.flush()
             crop_sticker_image(sticker)
+            refresh_sticker_ocr(sticker, update_name=True)
 
         detected_count = len(detection.rectangles)
         total_detected += detected_count
@@ -370,6 +388,11 @@ def sticker_to_response(sticker: Sticker) -> dict:
         "preview_path": sticker.preview_path,
         "crop_path": sticker.crop_path,
         "active": sticker.active,
+        "detected_automatically": sticker.detected_automatically,
+        "ocr_name_raw": sticker.ocr_name_raw,
+        "ocr_name_suggested": sticker.ocr_name_suggested,
+        "ocr_confidence": sticker.ocr_confidence,
+        "ocr_processed_at": sticker.ocr_processed_at,
         "created_at": sticker.created_at,
         "updated_at": sticker.updated_at,
         "page_number": sticker.page.page_number,

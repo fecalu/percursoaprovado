@@ -26,6 +26,7 @@ from .schemas import (
     StickerUpdate,
 )
 from .services import (
+    auto_detect_collection_pages,
     build_export_pdf,
     collection_stats,
     collection_to_response,
@@ -35,11 +36,11 @@ from .services import (
     load_collection_or_fail,
     load_sticker_or_fail,
     page_to_response,
+    refresh_sticker_ocr,
     save_pdf_and_render_pages,
     slugify,
     sticker_to_response,
     validate_sticker_bounds,
-    auto_detect_collection_pages,
 )
 
 
@@ -56,9 +57,38 @@ app.add_middleware(
 app.mount("/files", StaticFiles(directory=str(settings.storage_root)), name="files")
 
 
+def ensure_runtime_schema() -> None:
+    with engine.begin() as connection:
+        if connection.dialect.name != "sqlite":
+            return
+
+        table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_stickers'"
+        ).fetchone()
+        if not table_exists:
+            return
+
+        existing_columns = {
+            row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_stickers)").fetchall()
+        }
+        required_columns = {
+            "detected_automatically": "BOOLEAN NOT NULL DEFAULT 0",
+            "ocr_name_raw": "VARCHAR(255)",
+            "ocr_name_suggested": "VARCHAR(255)",
+            "ocr_confidence": "FLOAT",
+            "ocr_processed_at": "DATETIME",
+        }
+
+        for column_name, definition in required_columns.items():
+            if column_name in existing_columns:
+                continue
+            connection.exec_driver_sql(f"ALTER TABLE figurinhas_stickers ADD COLUMN {column_name} {definition}")
+
+
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_runtime_schema()
 
 
 def require_admin(x_admin_token: str | None = Header(default=None, alias="X-Admin-Token")) -> None:
@@ -283,6 +313,7 @@ def create_sticker(payload: StickerCreate, db: Session = Depends(get_db)) -> dic
     db.add(sticker)
     db.flush()
     crop_sticker_image(sticker)
+    refresh_sticker_ocr(sticker, update_name=False)
     db.commit()
     db.refresh(sticker)
     sticker = load_sticker_or_fail(db, sticker.id)
@@ -306,7 +337,9 @@ def update_sticker(sticker_id: int, payload: StickerUpdate, db: Session = Depend
     sticker.width_ratio = payload.width_ratio
     sticker.height_ratio = payload.height_ratio
     sticker.active = payload.active
+    sticker.detected_automatically = False
     crop_sticker_image(sticker)
+    refresh_sticker_ocr(sticker, update_name=False)
     db.commit()
     sticker = load_sticker_or_fail(db, sticker.id)
     return sticker_to_response(sticker)
