@@ -152,12 +152,13 @@ function Layout({ children }) {
 }
 
 function PublicPage() {
-  const [collections, setCollections] = useState([])
+  const [albums, setAlbums] = useState([])
+  const [selectedAlbumSlug, setSelectedAlbumSlug] = useState('')
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState('')
   const [stickers, setStickers] = useState([])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
-  const [selectedIds, setSelectedIds] = useState([])
+  const [selectedStickers, setSelectedStickers] = useState([])
   const [busy, setBusy] = useState(true)
   const [error, setError] = useState('')
   const [exporting, setExporting] = useState(false)
@@ -182,12 +183,12 @@ function PublicPage() {
       setError('')
       try {
         const [collectionsData, serviceData] = await Promise.all([
-          apiFetch('/collections'),
+          apiFetch('/albums'),
           apiFetch('/service-config')
         ])
         if (ignore) return
-        setCollections(collectionsData)
-        setSelectedCollectionSlug(current => current || collectionsData[0]?.slug || '')
+        setAlbums(collectionsData)
+        setSelectedAlbumSlug(current => current || collectionsData[0]?.slug || '')
         setServiceConfig(serviceData)
       } catch (err) {
         if (!ignore) {
@@ -223,7 +224,9 @@ function PublicPage() {
         const data = await apiFetch(`/collections/${selectedCollectionSlug}/stickers${query}`)
         if (ignore) return
         setStickers(data)
-        setSelectedIds(current => current.filter(id => data.some(sticker => sticker.id === id)))
+        setSelectedStickers(current =>
+          current.filter(sticker => sticker.collection_slug !== selectedCollectionSlug || data.some(item => item.id === sticker.id))
+        )
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -241,7 +244,7 @@ function PublicPage() {
   }, [selectedCollectionSlug, search, category])
 
   useEffect(() => {
-    if (!selectedCollectionSlug || selectedIds.length === 0) {
+    if (!selectedAlbumSlug || selectedIds.length === 0) {
       setQuote(null)
       setOrderFormOpen(false)
       return
@@ -255,7 +258,7 @@ function PublicPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            collection_slug: selectedCollectionSlug,
+            album_slug: selectedAlbumSlug,
             sticker_ids: selectedIds
           })
         })
@@ -276,11 +279,11 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedCollectionSlug, selectedIds])
+  }, [selectedAlbumSlug, selectedIds])
 
   useEffect(() => {
     setOrderResult(null)
-  }, [selectedCollectionSlug, selectedIds])
+  }, [selectedAlbumSlug, selectedIds])
 
   useEffect(() => {
     if (quote && !quote.pack_eligible && orderForm.service_type === 'IMPRESSAO_PACOTINHOS') {
@@ -307,14 +310,25 @@ function PublicPage() {
     }
   }, [orderFormOpen])
 
+  const selectedAlbum = useMemo(
+    () => albums.find(album => album.slug === selectedAlbumSlug) || null,
+    [albums, selectedAlbumSlug]
+  )
+  const availableCollections = selectedAlbum?.collections || []
   const selectedCollection = useMemo(
-    () => collections.find(collection => collection.slug === selectedCollectionSlug) || null,
-    [collections, selectedCollectionSlug]
+    () => availableCollections.find(collection => collection.slug === selectedCollectionSlug) || null,
+    [availableCollections, selectedCollectionSlug]
   )
-  const selectedStickerItems = useMemo(
-    () => stickers.filter(sticker => selectedIds.includes(sticker.id)),
-    [stickers, selectedIds]
+  const selectedIds = useMemo(() => selectedStickers.map(sticker => sticker.id), [selectedStickers])
+  const selectedCountByCollection = useMemo(
+    () =>
+      selectedStickers.reduce((accumulator, sticker) => {
+        accumulator[sticker.collection_slug] = (accumulator[sticker.collection_slug] || 0) + 1
+        return accumulator
+      }, {}),
+    [selectedStickers]
   )
+  const selectedStickerItems = selectedStickers
   const previewSheets = useMemo(() => {
     const sheets = []
     for (let index = 0; index < selectedStickerItems.length; index += STICKERS_PER_SHEET) {
@@ -330,14 +344,36 @@ function PublicPage() {
     setPreviewPage(current => Math.min(current, previewPageCount - 1))
   }, [previewPageCount])
 
+  useEffect(() => {
+    if (!selectedAlbum) {
+      setSelectedCollectionSlug('')
+      return
+    }
+    setSelectedCollectionSlug(current =>
+      availableCollections.some(collection => collection.slug === current) ? current : availableCollections[0]?.slug || ''
+    )
+  }, [selectedAlbum, availableCollections])
+
   function toggleSelection(stickerId) {
-    setSelectedIds(current =>
-      current.includes(stickerId) ? current.filter(id => id !== stickerId) : [...current, stickerId]
+    const sticker = stickers.find(item => item.id === stickerId)
+    if (!sticker) return
+
+    setSelectedStickers(current =>
+      current.some(item => item.id === stickerId)
+        ? current.filter(item => item.id !== stickerId)
+        : [
+            ...current,
+            {
+              ...sticker,
+              collection_slug: selectedCollectionSlug,
+              collection_name: selectedCollection?.name || ''
+            }
+          ]
     )
   }
 
   async function handleExport() {
-    if (!selectedCollectionSlug || selectedIds.length === 0) return
+    if (!selectedAlbumSlug || selectedIds.length === 0) return
     setExporting(true)
     setError('')
     try {
@@ -345,7 +381,7 @@ function PublicPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          collection_slug: selectedCollectionSlug,
+          album_slug: selectedAlbumSlug,
           sticker_ids: selectedIds
         })
       })
@@ -359,7 +395,7 @@ function PublicPage() {
 
   async function handleCreateOrder(event) {
     event.preventDefault()
-    if (!selectedCollectionSlug || selectedIds.length === 0) return
+    if (!selectedAlbumSlug || selectedIds.length === 0) return
     setOrderSubmitting(true)
     setError('')
     try {
@@ -367,7 +403,7 @@ function PublicPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          collection_slug: selectedCollectionSlug,
+          album_slug: selectedAlbumSlug,
           sticker_ids: selectedIds,
           ...orderForm
         })
@@ -385,25 +421,28 @@ function PublicPage() {
     <section className="fig-public-layout">
       <aside className="fig-sidebar-panel">
         <div className="fig-panel-header">
-          <p className="fig-kicker">Colecoes publicadas</p>
-          <h2>Escolha a base</h2>
+          <p className="fig-kicker">Albuns publicados</p>
+          <h2>Escolha a edicao</h2>
         </div>
         <div className="fig-collection-list">
-          {collections.map(collection => (
+          {albums.map(album => (
             <button
-              key={collection.id}
+              key={album.id}
               type="button"
-              className={`fig-collection-button${collection.slug === selectedCollectionSlug ? ' is-active' : ''}`}
+              className={`fig-collection-button${album.slug === selectedAlbumSlug ? ' is-active' : ''}`}
               onClick={() => {
-                setSelectedCollectionSlug(collection.slug)
-                setSelectedIds([])
+                setSelectedAlbumSlug(album.slug)
+                setSelectedCollectionSlug('')
+                setSelectedStickers([])
+                setSearch('')
+                setCategory('')
               }}
             >
-              <strong>{collection.name}</strong>
-              <span>{collection.sticker_count} figurinhas</span>
+              <strong>{album.name}</strong>
+              <span>{album.published_collection_count} selecoes publicadas</span>
             </button>
           ))}
-          {!busy && collections.length === 0 ? <p className="fig-empty-note">Nenhuma colecao publicada ainda.</p> : null}
+          {!busy && albums.length === 0 ? <p className="fig-empty-note">Nenhum album publicado ainda.</p> : null}
         </div>
       </aside>
 
@@ -411,18 +450,34 @@ function PublicPage() {
         <div className="fig-hero">
           <div>
             <p className="fig-kicker">Selecao rapida</p>
-            <h2>{selectedCollection?.name || 'Selecione uma colecao'}</h2>
-            <p>{selectedCollection?.description || 'Marque os jogadores que voce precisa e gere seu PDF.'}</p>
+            <h2>{selectedAlbum?.name || 'Selecione um album'}</h2>
+            <p>
+              {selectedCollection
+                ? `Agora voce esta em ${selectedCollection.name}. Marque as figurinhas e misture selecoes desse album no mesmo PDF.`
+                : selectedAlbum?.description || 'Marque os jogadores que voce precisa e gere seu PDF.'}
+            </p>
           </div>
           <div className="fig-hero-actions">
             <button
               type="button"
               className="fig-secondary-button"
-              onClick={() => setSelectedIds(stickers.map(sticker => sticker.id))}
+              onClick={() =>
+                setSelectedStickers(current => {
+                  const selectedById = new Map(current.map(sticker => [sticker.id, sticker]))
+                  stickers.forEach(sticker => {
+                    selectedById.set(sticker.id, {
+                      ...sticker,
+                      collection_slug: selectedCollectionSlug,
+                      collection_name: selectedCollection?.name || ''
+                    })
+                  })
+                  return Array.from(selectedById.values())
+                })
+              }
             >
               Selecionar todas
             </button>
-            <button type="button" className="fig-secondary-button" onClick={() => setSelectedIds([])}>
+            <button type="button" className="fig-secondary-button" onClick={() => setSelectedStickers([])}>
               Limpar selecao
             </button>
             <button
@@ -436,13 +491,29 @@ function PublicPage() {
             <button
               type="button"
               className="fig-primary-button"
-              disabled={!selectedCollectionSlug || selectedIds.length === 0 || exporting}
+              disabled={!selectedAlbumSlug || selectedIds.length === 0 || exporting}
               onClick={handleExport}
             >
               {exporting ? 'Gerando PDF...' : `Gerar PDF gratis (${selectedIds.length})`}
             </button>
           </div>
         </div>
+
+        {availableCollections.length > 0 ? (
+          <div className="fig-page-selector fig-collection-switcher">
+            {availableCollections.map(collection => (
+              <button
+                key={collection.id}
+                type="button"
+                className={`fig-page-tab${collection.slug === selectedCollectionSlug ? ' is-active' : ''}`}
+                onClick={() => setSelectedCollectionSlug(collection.slug)}
+              >
+                {collection.name}
+                {selectedCountByCollection[collection.slug] ? ` (${selectedCountByCollection[collection.slug]})` : ''}
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         <div className="fig-toolbar">
           <label className="fig-field">
@@ -762,6 +833,8 @@ function AdminPage() {
   const [token, setToken] = useAdminToken()
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
+  const [albums, setAlbums] = useState([])
+  const [selectedAlbumId, setSelectedAlbumId] = useState(null)
   const [collections, setCollections] = useState([])
   const [selectedCollectionId, setSelectedCollectionId] = useState(null)
   const [selectedCollection, setSelectedCollection] = useState(null)
@@ -772,7 +845,9 @@ function AdminPage() {
   const [savingCollection, setSavingCollection] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const [createForm, setCreateForm] = useState({ name: '', slug: '', description: '' })
+  const [albumForm, setAlbumForm] = useState({ name: '', slug: '', description: '' })
+  const [createForm, setCreateForm] = useState({ album_id: '', name: '', slug: '', description: '' })
+  const [savingAlbum, setSavingAlbum] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [processingAuto, setProcessingAuto] = useState(false)
   const [editingStickerId, setEditingStickerId] = useState(null)
@@ -802,6 +877,7 @@ function AdminPage() {
   const [savingService, setSavingService] = useState(false)
   const [orders, setOrders] = useState([])
   const [selectedOrderId, setSelectedOrderId] = useState(null)
+  const [collectionAlbumTargetId, setCollectionAlbumTargetId] = useState('')
   const [orderAdminForm, setOrderAdminForm] = useState({
     status: 'AGUARDANDO_PIX',
     admin_notes: ''
@@ -821,6 +897,20 @@ function AdminPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function fetchAlbums(activeAlbumId = selectedAlbumId) {
+    if (!token) return
+    const data = await apiFetch('/admin/albums', {
+      headers: buildAdminHeaders(token)
+    })
+    setAlbums(data)
+    const nextId = activeAlbumId || data[0]?.id || null
+    setSelectedAlbumId(nextId)
+    setCreateForm(current => ({
+      ...current,
+      album_id: String(current.album_id || nextId || ''),
+    }))
   }
 
   async function fetchServiceConfig() {
@@ -854,7 +944,7 @@ function AdminPage() {
     async function bootstrap() {
       setError('')
       try {
-        await Promise.all([fetchCollections(), fetchServiceConfig(), fetchOrders()])
+        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchOrders()])
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -907,6 +997,11 @@ function AdminPage() {
   }, [token, selectedCollectionId])
 
   const currentPage = useMemo(() => pages.find(page => page.id === currentPageId) || null, [pages, currentPageId])
+  const selectedAlbum = useMemo(() => albums.find(album => album.id === selectedAlbumId) || null, [albums, selectedAlbumId])
+  const filteredCollections = useMemo(
+    () => collections.filter(collection => !selectedAlbumId || collection.album_id === selectedAlbumId),
+    [collections, selectedAlbumId]
+  )
   const currentPageStickers = useMemo(
     () => stickers.filter(sticker => sticker.page_id === currentPageId),
     [stickers, currentPageId]
@@ -927,6 +1022,24 @@ function AdminPage() {
       admin_notes: selectedOrder.admin_notes || ''
     })
   }, [selectedOrder])
+
+  useEffect(() => {
+    if (!filteredCollections.length) {
+      setSelectedCollectionId(null)
+      return
+    }
+
+    if (!filteredCollections.some(collection => collection.id === selectedCollectionId)) {
+      setSelectedCollectionId(filteredCollections[0]?.id || null)
+      setCurrentPageId(null)
+      resetStickerForm()
+    }
+  }, [filteredCollections, selectedCollectionId])
+
+  useEffect(() => {
+    if (!selectedCollection) return
+    setCollectionAlbumTargetId(String(selectedCollection.album_id || ''))
+  }, [selectedCollection])
 
   function resetStickerForm() {
     setEditingStickerId(null)
@@ -960,6 +1073,27 @@ function AdminPage() {
     }
   }
 
+  async function handleCreateAlbum(event) {
+    event.preventDefault()
+    setSavingAlbum(true)
+    setError('')
+    setMessage('')
+    try {
+      const created = await apiFetch('/admin/albums', {
+        method: 'POST',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify(albumForm)
+      })
+      setAlbumForm({ name: '', slug: '', description: '' })
+      setMessage('Album criado.')
+      await fetchAlbums(created.id)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingAlbum(false)
+    }
+  }
+
   async function handleCreateCollection(event) {
     event.preventDefault()
     setSavingCollection(true)
@@ -971,13 +1105,32 @@ function AdminPage() {
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify(createForm)
       })
-      setCreateForm({ name: '', slug: '', description: '' })
+      setCreateForm(current => ({ ...current, name: '', slug: '', description: '' }))
       setMessage('Colecao criada.')
+      setSelectedAlbumId(created.album_id || selectedAlbumId)
       await fetchCollections(created.id)
     } catch (err) {
       setError(err.message)
     } finally {
       setSavingCollection(false)
+    }
+  }
+
+  async function handleAssignCollectionAlbum() {
+    if (!selectedCollectionId || !collectionAlbumTargetId) return
+    setError('')
+    setMessage('')
+    try {
+      const updated = await apiFetch(`/admin/collections/${selectedCollectionId}/album`, {
+        method: 'PUT',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ album_id: Number(collectionAlbumTargetId) })
+      })
+      setMessage('Colecao movida para o album escolhido.')
+      setSelectedAlbumId(updated.album_id || null)
+      await Promise.all([fetchAlbums(updated.album_id || null), fetchCollections(updated.id)])
+    } catch (err) {
+      setError(err.message)
     }
   }
 
@@ -1263,17 +1416,88 @@ function AdminPage() {
     <section className="fig-admin-layout">
       <aside className="fig-sidebar-panel">
         <div className="fig-panel-header">
+          <p className="fig-kicker">Albuns</p>
+          <h2>Estrutura</h2>
+        </div>
+
+        <form className="fig-form-card fig-compact-form" onSubmit={handleCreateAlbum}>
+          <label className="fig-field">
+            <span>Nome</span>
+            <input
+              value={albumForm.name}
+              onChange={event => setAlbumForm(current => ({ ...current, name: event.target.value }))}
+              placeholder="Copa 2026"
+            />
+          </label>
+          <label className="fig-field">
+            <span>Slug</span>
+            <input
+              value={albumForm.slug}
+              onChange={event => setAlbumForm(current => ({ ...current, slug: event.target.value }))}
+              placeholder="copa-2026"
+            />
+          </label>
+          <label className="fig-field">
+            <span>Descricao</span>
+            <textarea
+              value={albumForm.description}
+              onChange={event => setAlbumForm(current => ({ ...current, description: event.target.value }))}
+              rows="2"
+              placeholder="Edicao principal para agrupar as selecoes."
+            />
+          </label>
+          <button type="submit" className="fig-primary-button" disabled={savingAlbum}>
+            {savingAlbum ? 'Salvando...' : 'Criar album'}
+          </button>
+        </form>
+
+        <div className="fig-collection-list">
+          {albums.map(album => (
+            <button
+              key={album.id}
+              type="button"
+              className={`fig-collection-button${album.id === selectedAlbumId ? ' is-active' : ''}`}
+              onClick={() => {
+                setSelectedAlbumId(album.id)
+                setCreateForm(current => ({ ...current, album_id: String(album.id) }))
+                setCurrentPageId(null)
+                resetStickerForm()
+              }}
+            >
+              <strong>{album.name}</strong>
+              <span>
+                {album.collection_count} colecoes · {album.published_collection_count} publicadas
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div className="fig-panel-header fig-admin-section-head">
           <p className="fig-kicker">Colecoes</p>
-          <h2>Catalogo</h2>
+          <h3>{selectedAlbum?.name || 'Escolha um album'}</h3>
         </div>
 
         <form className="fig-form-card fig-compact-form" onSubmit={handleCreateCollection}>
+          <label className="fig-field">
+            <span>Album</span>
+            <select
+              value={createForm.album_id}
+              onChange={event => setCreateForm(current => ({ ...current, album_id: event.target.value }))}
+            >
+              <option value="">Selecione</option>
+              {albums.map(album => (
+                <option key={album.id} value={album.id}>
+                  {album.name}
+                </option>
+              ))}
+            </select>
+          </label>
           <label className="fig-field">
             <span>Nome</span>
             <input
               value={createForm.name}
               onChange={event => setCreateForm(current => ({ ...current, name: event.target.value }))}
-              placeholder="Brasil 2026"
+              placeholder="Brasil"
             />
           </label>
           <label className="fig-field">
@@ -1281,7 +1505,7 @@ function AdminPage() {
             <input
               value={createForm.slug}
               onChange={event => setCreateForm(current => ({ ...current, slug: event.target.value }))}
-              placeholder="brasil-2026"
+              placeholder="brasil"
             />
           </label>
           <label className="fig-field">
@@ -1289,17 +1513,17 @@ function AdminPage() {
             <textarea
               value={createForm.description}
               onChange={event => setCreateForm(current => ({ ...current, description: event.target.value }))}
-              rows="3"
-              placeholder="Selecione os jogadores e gere seu PDF."
+              rows="2"
+              placeholder="Selecao publicada dentro do album."
             />
           </label>
-          <button type="submit" className="fig-primary-button" disabled={savingCollection}>
+          <button type="submit" className="fig-primary-button" disabled={savingCollection || !createForm.album_id}>
             {savingCollection ? 'Salvando...' : 'Criar colecao'}
           </button>
         </form>
 
         <div className="fig-collection-list">
-          {collections.map(collection => (
+          {filteredCollections.map(collection => (
             <button
               key={collection.id}
               type="button"
@@ -1316,6 +1540,9 @@ function AdminPage() {
               </span>
             </button>
           ))}
+          {selectedAlbumId && filteredCollections.length === 0 ? (
+            <p className="fig-empty-note">Nenhuma colecao cadastrada nesse album ainda.</p>
+          ) : null}
         </div>
       </aside>
 
@@ -1323,8 +1550,8 @@ function AdminPage() {
         <div className="fig-admin-header">
           <div>
             <p className="fig-kicker">Gestao</p>
-            <h2>{selectedCollection?.name || 'Selecione uma colecao'}</h2>
-            <p>Gerencie o catalogo, os pedidos impressos e a configuracao do atendimento local.</p>
+            <h2>{selectedCollection?.name || selectedAlbum?.name || 'Selecione um album'}</h2>
+            <p>Gerencie albuns, colecoes, pedidos impressos e a configuracao do atendimento local.</p>
           </div>
           <div className="fig-hero-actions">
             <button type="button" className="fig-secondary-button" onClick={() => setToken('')}>
@@ -1499,7 +1726,7 @@ function AdminPage() {
                   <div className="fig-selected-stickers">
                     {selectedOrder.selected_stickers.map(sticker => (
                       <span key={`${selectedOrder.id}-${sticker.id}`} className="fig-selection-chip">
-                        {sticker.name}
+                        {sticker.collection_name} · {sticker.name}
                       </span>
                     ))}
                   </div>
@@ -1515,9 +1742,33 @@ function AdminPage() {
               <div>
                 <p className="fig-kicker">Gestao da colecao</p>
                 <h3>{selectedCollection.name}</h3>
-                <p>Suba o PDF, mapeie as areas de corte e publique quando o catalogo estiver pronto.</p>
+                <p>
+                  Album atual: <strong>{selectedCollection.album_name || 'Sem album'}</strong>. Suba o PDF, mapeie as
+                  areas de corte e publique quando o catalogo estiver pronto.
+                </p>
               </div>
               <div className="fig-hero-actions">
+                <label className="fig-field fig-field--compact">
+                  <span>Mover para album</span>
+                  <select
+                    value={collectionAlbumTargetId}
+                    onChange={event => setCollectionAlbumTargetId(event.target.value)}
+                  >
+                    {albums.map(album => (
+                      <option key={album.id} value={album.id}>
+                        {album.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  className="fig-secondary-button"
+                  disabled={!collectionAlbumTargetId || Number(collectionAlbumTargetId) === selectedCollection.album_id}
+                  onClick={handleAssignCollectionAlbum}
+                >
+                  Salvar album
+                </button>
                 <button type="button" className="fig-secondary-button" onClick={() => handlePublish('RASCUNHO')}>
                   Voltar para rascunho
                 </button>

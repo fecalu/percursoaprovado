@@ -7,14 +7,51 @@ from pydantic import BaseModel, Field, field_validator
 from .models import CollectionStatus, PrintOrderStatus, PrintServiceType, StickerCategory
 
 
-class CollectionCreate(BaseModel):
+class AlbumCreate(BaseModel):
     name: str = Field(min_length=2, max_length=150)
     slug: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=500)
 
 
+class CollectionSummaryResponse(BaseModel):
+    id: int
+    album_id: int | None
+    name: str
+    slug: str
+    description: str | None
+    status: CollectionStatus
+    sticker_count: int
+    page_count: int
+
+
+class AlbumResponse(BaseModel):
+    id: int
+    name: str
+    slug: str
+    description: str | None
+    created_at: datetime
+    updated_at: datetime
+    collection_count: int
+    published_collection_count: int
+    collections: list[CollectionSummaryResponse] = []
+
+
+class CollectionCreate(BaseModel):
+    album_id: int = Field(ge=1)
+    name: str = Field(min_length=2, max_length=150)
+    slug: str = Field(min_length=2, max_length=150)
+    description: str | None = Field(default=None, max_length=500)
+
+
+class CollectionAlbumAssign(BaseModel):
+    album_id: int = Field(ge=1)
+
+
 class CollectionResponse(BaseModel):
     id: int
+    album_id: int | None
+    album_name: str | None
+    album_slug: str | None
     name: str
     slug: str
     description: str | None
@@ -113,7 +150,7 @@ class AdminLoginRequest(BaseModel):
 
 
 class ExportRequest(BaseModel):
-    collection_slug: str
+    album_slug: str
     sticker_ids: list[int] = Field(min_length=1)
 
 
@@ -145,7 +182,7 @@ class ServiceConfigUpdate(BaseModel):
 
 
 class OrderQuoteRequest(BaseModel):
-    collection_slug: str
+    album_slug: str
     sticker_ids: list[int] = Field(min_length=1)
 
 
@@ -167,7 +204,7 @@ class OrderQuoteResponse(BaseModel):
 
 
 class PrintOrderCreate(BaseModel):
-    collection_slug: str
+    album_slug: str
     sticker_ids: list[int] = Field(min_length=1)
     service_type: PrintServiceType
     customer_name: str = Field(min_length=2, max_length=150)
@@ -178,6 +215,7 @@ class PrintOrderCreate(BaseModel):
 
 class PrintOrderStickerSummary(BaseModel):
     id: int
+    collection_name: str
     name: str
     category: StickerCategory
     page_number: int
@@ -186,6 +224,8 @@ class PrintOrderStickerSummary(BaseModel):
 class PrintOrderResponse(BaseModel):
     id: int
     reference_code: str
+    album_id: int | None
+    album_name: str | None
     collection_id: int
     collection_name: str
     customer_name: str

@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session, selectinload
 from .config import get_settings
 from .database import Base, engine, get_db
 from .models import (
+    Album,
     Collection,
     CollectionStatus,
     Page,
@@ -23,7 +24,10 @@ from .models import (
 )
 from .schemas import (
     AdminLoginRequest,
+    AlbumCreate,
+    AlbumResponse,
     AutoDetectResponse,
+    CollectionAlbumAssign,
     CollectionCreate,
     CollectionResponse,
     OrderQuoteRequest,
@@ -42,6 +46,8 @@ from .schemas import (
     StickerUpdate,
 )
 from .services import (
+    album_stats,
+    album_to_response,
     auto_detect_collection_pages,
     build_export_pdf,
     build_order_quote,
@@ -49,8 +55,12 @@ from .services import (
     collection_to_response,
     create_print_order,
     crop_sticker_image,
+    ensure_album_slug_unique,
+    ensure_default_album_assignments,
     get_or_create_service_settings,
     ensure_collection_slug_unique,
+    load_album_by_slug_or_fail,
+    load_album_or_fail,
     load_collection_by_slug_or_fail,
     load_collection_or_fail,
     load_print_order_or_fail,
@@ -106,12 +116,35 @@ def ensure_runtime_schema() -> None:
                 continue
             connection.exec_driver_sql(f"ALTER TABLE figurinhas_stickers ADD COLUMN {column_name} {definition}")
 
+        collections_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_collections'"
+        ).fetchone()
+        if collections_table_exists:
+            collection_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_collections)").fetchall()
+            }
+            if "album_id" not in collection_columns:
+                connection.exec_driver_sql("ALTER TABLE figurinhas_collections ADD COLUMN album_id INTEGER")
+
+        print_orders_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_print_orders'"
+        ).fetchone()
+        if print_orders_table_exists:
+            order_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_print_orders)").fetchall()
+            }
+            if "album_id" not in order_columns:
+                connection.exec_driver_sql("ALTER TABLE figurinhas_print_orders ADD COLUMN album_id INTEGER")
+            if "album_name" not in order_columns:
+                connection.exec_driver_sql("ALTER TABLE figurinhas_print_orders ADD COLUMN album_name VARCHAR(150)")
+
 
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_runtime_schema()
     with OrmSession(engine) as db:
+        ensure_default_album_assignments(db)
         get_or_create_service_settings(db)
         db.commit()
 
@@ -121,19 +154,22 @@ def require_admin(x_admin_token: str | None = Header(default=None, alias="X-Admi
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token administrativo invalido.")
 
 
-def selected_stickers_or_400(db: Session, collection: Collection, sticker_ids: list[int]) -> list[Sticker]:
+def selected_stickers_for_album_or_400(db: Session, album: Album, sticker_ids: list[int]) -> list[Sticker]:
+    unique_ids = list(dict.fromkeys(sticker_ids))
     statement = (
         select(Sticker)
-        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+        .join(Collection, Sticker.collection_id == Collection.id)
+        .options(selectinload(Sticker.collection).selectinload(Collection.album), selectinload(Sticker.page))
         .where(
-            Sticker.collection_id == collection.id,
+            Collection.album_id == album.id,
+            Collection.status == CollectionStatus.PUBLICADA,
             Sticker.active.is_(True),
-            Sticker.id.in_(sticker_ids),
+            Sticker.id.in_(unique_ids),
         )
-        .order_by(Sticker.sort_order.asc(), Sticker.name.asc())
+        .order_by(Collection.name.asc(), Sticker.sort_order.asc(), Sticker.name.asc())
     )
     stickers = db.execute(statement).scalars().all()
-    if not stickers:
+    if not stickers or len(stickers) != len(unique_ids):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nenhuma figurinha valida foi selecionada.")
     return stickers
 
@@ -156,10 +192,40 @@ def admin_login(payload: AdminLoginRequest) -> dict[str, str]:
     return {"token": payload.password}
 
 
+@app.get("/albums", response_model=list[AlbumResponse])
+def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
+    albums = db.execute(
+        select(Album)
+        .options(selectinload(Album.collections).selectinload(Collection.album))
+        .order_by(Album.updated_at.desc(), Album.id.desc())
+    ).scalars().all()
+
+    visible_albums: list[Album] = []
+    collection_ids: list[int] = []
+    for album in albums:
+        published_collections = [collection for collection in album.collections if collection.status == CollectionStatus.PUBLICADA]
+        if not published_collections:
+            continue
+        visible_albums.append(album)
+        collection_ids.extend(collection.id for collection in published_collections)
+
+    collection_stats_map = collection_stats(db, collection_ids)
+    album_stats_map = album_stats(db, [album.id for album in visible_albums])
+    responses: list[dict] = []
+    for album in visible_albums:
+        published_collections = [collection for collection in album.collections if collection.status == CollectionStatus.PUBLICADA]
+        collection_payload = [
+            collection_to_response(collection, collection_stats_map.get(collection.id, {})) for collection in published_collections
+        ]
+        responses.append(album_to_response(album, album_stats_map.get(album.id, {}), collection_payload))
+    return responses
+
+
 @app.get("/collections", response_model=list[CollectionResponse])
 def list_public_collections(db: Session = Depends(get_db)) -> list[dict]:
     collections = db.execute(
         select(Collection)
+        .options(selectinload(Collection.album))
         .where(Collection.status == CollectionStatus.PUBLICADA)
         .order_by(Collection.updated_at.desc())
         .limit(settings.public_collection_limit)
@@ -199,9 +265,9 @@ def list_public_stickers(
 
 @app.post("/exports", response_model=ExportResponse)
 def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
-    collection = load_collection_by_slug_or_fail(db, payload.collection_slug, public_only=True)
-    stickers = selected_stickers_or_400(db, collection, payload.sticker_ids)
-    export_record = build_export_pdf(collection, stickers, db)
+    album = load_album_by_slug_or_fail(db, payload.album_slug)
+    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids)
+    export_record = build_export_pdf(album, stickers, db)
     db.commit()
     return {
         "export_id": export_record.id,
@@ -213,23 +279,23 @@ def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict
 
 @app.post("/orders/quote", response_model=OrderQuoteResponse)
 def quote_print_order(payload: OrderQuoteRequest, db: Session = Depends(get_db)) -> dict:
-    collection = load_collection_by_slug_or_fail(db, payload.collection_slug, public_only=True)
-    stickers = selected_stickers_or_400(db, collection, payload.sticker_ids)
+    album = load_album_by_slug_or_fail(db, payload.album_slug)
+    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids)
     service_settings = get_or_create_service_settings(db)
-    quote = build_order_quote(collection, stickers, db, service_settings)
+    quote = build_order_quote(album, stickers, db, service_settings)
     quote.pop("plan", None)
     return quote
 
 
 @app.post("/orders", response_model=PrintOrderResponse)
 def create_public_print_order(payload: PrintOrderCreate, db: Session = Depends(get_db)) -> dict:
-    collection = load_collection_by_slug_or_fail(db, payload.collection_slug, public_only=True)
-    stickers = selected_stickers_or_400(db, collection, payload.sticker_ids)
+    album = load_album_by_slug_or_fail(db, payload.album_slug)
+    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids)
     service_settings = get_or_create_service_settings(db)
     try:
         order = create_print_order(
             db=db,
-            collection=collection,
+            album=album,
             stickers=stickers,
             service_type=payload.service_type,
             customer_name=payload.customer_name,
@@ -260,9 +326,33 @@ def download_export(export_id: int, db: Session = Depends(get_db)) -> FileRespon
 
 @app.get("/admin/collections", response_model=list[CollectionResponse], dependencies=[Depends(require_admin)])
 def list_admin_collections(db: Session = Depends(get_db)) -> list[dict]:
-    collections = db.execute(select(Collection).order_by(Collection.updated_at.desc(), Collection.id.desc())).scalars().all()
+    collections = db.execute(
+        select(Collection).options(selectinload(Collection.album)).order_by(Collection.updated_at.desc(), Collection.id.desc())
+    ).scalars().all()
     stats = collection_stats(db, [collection.id for collection in collections])
     return [collection_to_response(collection, stats.get(collection.id, {})) for collection in collections]
+
+
+@app.get("/admin/albums", response_model=list[AlbumResponse], dependencies=[Depends(require_admin)])
+def list_admin_albums(db: Session = Depends(get_db)) -> list[dict]:
+    albums = db.execute(
+        select(Album)
+        .options(selectinload(Album.collections).selectinload(Collection.album))
+        .order_by(Album.updated_at.desc(), Album.id.desc())
+    ).scalars().all()
+    album_stats_map = album_stats(db, [album.id for album in albums])
+    collection_stats_map = collection_stats(
+        db,
+        [collection.id for album in albums for collection in album.collections],
+    )
+    return [
+        album_to_response(
+            album,
+            album_stats_map.get(album.id, {}),
+            [collection_to_response(collection, collection_stats_map.get(collection.id, {})) for collection in album.collections],
+        )
+        for album in albums
+    ]
 
 
 @app.get("/admin/service-config", response_model=ServiceConfigResponse, dependencies=[Depends(require_admin)])
@@ -317,12 +407,40 @@ def download_admin_order_export(order_id: int, db: Session = Depends(get_db)) ->
     return FileResponse(path=file_path, filename=file_path.name, media_type="application/pdf")
 
 
+@app.post("/admin/albums", response_model=AlbumResponse, dependencies=[Depends(require_admin)])
+def create_album(payload: AlbumCreate, db: Session = Depends(get_db)) -> dict:
+    slug = slugify(payload.slug)
+    ensure_album_slug_unique(db, slug)
+    album = Album(name=payload.name.strip(), slug=slug, description=(payload.description or "").strip() or None)
+    db.add(album)
+    db.commit()
+    db.refresh(album)
+    return album_to_response(album, {"collections": 0, "published_collections": 0}, [])
+
+
 @app.post("/admin/collections", response_model=CollectionResponse, dependencies=[Depends(require_admin)])
 def create_collection(payload: CollectionCreate, db: Session = Depends(get_db)) -> dict:
+    album = load_album_or_fail(db, payload.album_id)
     slug = slugify(payload.slug)
     ensure_collection_slug_unique(db, slug)
-    collection = Collection(name=payload.name.strip(), slug=slug, description=(payload.description or "").strip() or None)
+    collection = Collection(
+        album=album,
+        name=payload.name.strip(),
+        slug=slug,
+        description=(payload.description or "").strip() or None,
+    )
     db.add(collection)
+    db.commit()
+    db.refresh(collection)
+    stats = collection_stats(db, [collection.id])
+    return collection_to_response(collection, stats.get(collection.id, {}))
+
+
+@app.put("/admin/collections/{collection_id}/album", response_model=CollectionResponse, dependencies=[Depends(require_admin)])
+def assign_collection_album(collection_id: int, payload: CollectionAlbumAssign, db: Session = Depends(get_db)) -> dict:
+    collection = load_collection_or_fail(db, collection_id)
+    album = load_album_or_fail(db, payload.album_id)
+    collection.album = album
     db.commit()
     db.refresh(collection)
     stats = collection_stats(db, [collection.id])

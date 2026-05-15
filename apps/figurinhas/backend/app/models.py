@@ -39,10 +39,31 @@ class PrintOrderStatus(str, enum.Enum):
     CANCELADO = "CANCELADO"
 
 
+class Album(Base):
+    __tablename__ = "figurinhas_albums"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    slug: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    collections: Mapped[list["Collection"]] = relationship(
+        back_populates="album", cascade="all, delete-orphan", order_by="Collection.updated_at.desc()"
+    )
+    print_orders: Mapped[list["PrintOrder"]] = relationship(
+        back_populates="album", order_by="PrintOrder.created_at.desc()"
+    )
+
+
 class Collection(Base):
     __tablename__ = "figurinhas_collections"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    album_id: Mapped[int | None] = mapped_column(ForeignKey("figurinhas_albums.id"), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     slug: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -55,6 +76,7 @@ class Collection(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
+    album: Mapped[Album | None] = relationship(back_populates="collections")
     pages: Mapped[list["Page"]] = relationship(
         back_populates="collection", cascade="all, delete-orphan", order_by="Page.page_number"
     )
@@ -148,6 +170,8 @@ class PrintOrder(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     reference_code: Mapped[str] = mapped_column(String(30), unique=True, nullable=False, index=True)
+    album_id: Mapped[int | None] = mapped_column(ForeignKey("figurinhas_albums.id"), nullable=True, index=True)
+    album_name: Mapped[str | None] = mapped_column(String(150), nullable=True)
     collection_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_collections.id"), nullable=False, index=True)
     collection_name: Mapped[str] = mapped_column(String(150), nullable=False)
     customer_name: Mapped[str] = mapped_column(String(150), nullable=False)
@@ -173,4 +197,5 @@ class PrintOrder(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
+    album: Mapped[Album | None] = relationship(back_populates="print_orders")
     collection: Mapped[Collection] = relationship(back_populates="print_orders")

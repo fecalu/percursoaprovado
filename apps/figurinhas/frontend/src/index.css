@@ -505,10 +505,22 @@ a {
   margin-bottom: 1rem;
 }
 
+.fig-collection-switcher {
+  margin-top: -0.2rem;
+}
+
 .fig-page-tab {
   border-radius: 999px;
   padding: 0.65rem 0.95rem;
   box-shadow: 0 8px 18px rgba(17, 34, 53, 0.03);
+}
+
+.fig-field--compact {
+  min-width: 210px;
+}
+
+.fig-field--compact span {
+  white-space: nowrap;
 }
 
 .fig-page-image-shell {
