@@ -204,6 +204,17 @@ function PublicPage() {
   const previewPageCount = Math.max(1, Math.ceil(previewSheets.length / 2))
   const clampedPreviewPage = Math.min(previewPage, previewPageCount - 1)
   const visiblePreviewSheets = previewSheets.slice(clampedPreviewPage * 2, clampedPreviewPage * 2 + 2)
+  const selectedCollectionsSummary = useMemo(
+    () =>
+      availableCollections
+        .filter(collection => selectedCountByCollection[collection.slug])
+        .map(collection => ({
+          slug: collection.slug,
+          name: collection.name,
+          count: selectedCountByCollection[collection.slug]
+        })),
+    [availableCollections, selectedCountByCollection]
+  )
 
   useEffect(() => {
     let ignore = false
@@ -443,18 +454,70 @@ function PublicPage() {
           ))}
           {!busy && albums.length === 0 ? <p className="fig-empty-note">Nenhum album publicado ainda.</p> : null}
         </div>
+
+        {selectedAlbum ? (
+          <div className="fig-sidebar-subsection">
+            <div className="fig-panel-header fig-panel-header--compact">
+              <p className="fig-kicker">Selecoes</p>
+              <h3>{selectedAlbum.name}</h3>
+            </div>
+            <div className="fig-collection-list fig-collection-list--nested">
+              {availableCollections.map(collection => (
+                <button
+                  key={collection.id}
+                  type="button"
+                  className={`fig-collection-button fig-collection-button--compact${
+                    collection.slug === selectedCollectionSlug ? ' is-active' : ''
+                  }`}
+                  onClick={() => setSelectedCollectionSlug(collection.slug)}
+                >
+                  <strong>{collection.name}</strong>
+                  <span>
+                    {selectedCountByCollection[collection.slug]
+                      ? `${selectedCountByCollection[collection.slug]} marcada(s)`
+                      : `${collection.sticker_count} figurinhas`}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="fig-sidebar-summary">
+          <div className="fig-inline-meta">
+            <strong>{selectedIds.length}</strong>
+            <span>figurinhas no PDF</span>
+          </div>
+          {selectedCollectionsSummary.length > 0 ? (
+            <div className="fig-summary-chip-list">
+              {selectedCollectionsSummary.map(collection => (
+                <span key={collection.slug} className="fig-summary-chip">
+                  {collection.name} {collection.count}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="fig-empty-note">Monte sua selecao misturando quantas selecoes quiser dentro do album.</p>
+          )}
+        </div>
       </aside>
 
       <div className="fig-content-panel">
         <div className="fig-hero">
           <div>
             <p className="fig-kicker">Selecao rapida</p>
-            <h2>{selectedAlbum?.name || 'Selecione um album'}</h2>
+            <h2>{selectedCollection?.name || selectedAlbum?.name || 'Selecione um album'}</h2>
             <p>
               {selectedCollection
                 ? `Agora voce esta em ${selectedCollection.name}. Marque as figurinhas e misture selecoes desse album no mesmo PDF.`
                 : selectedAlbum?.description || 'Marque os jogadores que voce precisa e gere seu PDF.'}
             </p>
+            {selectedCollection ? (
+              <div className="fig-hero-meta-row">
+                <span className="fig-mini-chip">Album: {selectedAlbum?.name}</span>
+                <span className="fig-mini-chip">{selectedCollection.sticker_count} figurinhas publicadas</span>
+              </div>
+            ) : null}
           </div>
           <div className="fig-hero-actions">
             <button
@@ -497,22 +560,6 @@ function PublicPage() {
             </button>
           </div>
         </div>
-
-        {availableCollections.length > 0 ? (
-          <div className="fig-page-selector fig-collection-switcher">
-            {availableCollections.map(collection => (
-              <button
-                key={collection.id}
-                type="button"
-                className={`fig-page-tab${collection.slug === selectedCollectionSlug ? ' is-active' : ''}`}
-                onClick={() => setSelectedCollectionSlug(collection.slug)}
-              >
-                {collection.name}
-                {selectedCountByCollection[collection.slug] ? ` (${selectedCountByCollection[collection.slug]})` : ''}
-              </button>
-            ))}
-          </div>
-        ) : null}
 
         <div className="fig-toolbar">
           <label className="fig-field">
@@ -876,6 +923,7 @@ function AdminPage() {
   const [savingService, setSavingService] = useState(false)
   const [orders, setOrders] = useState([])
   const [selectedOrderId, setSelectedOrderId] = useState(null)
+  const [adminView, setAdminView] = useState('structure')
   const [collectionAlbumTargetId, setCollectionAlbumTargetId] = useState('')
   const [orderAdminForm, setOrderAdminForm] = useState({
     status: 'AGUARDANDO_PIX',
@@ -1039,6 +1087,12 @@ function AdminPage() {
     if (!selectedCollection) return
     setCollectionAlbumTargetId(String(selectedCollection.album_id || ''))
   }, [selectedCollection])
+
+  useEffect(() => {
+    if (!selectedCollection && (adminView === 'collection' || adminView === 'mapping')) {
+      setAdminView('structure')
+    }
+  }, [adminView, selectedCollection])
 
   function resetStickerForm() {
     setEditingStickerId(null)
@@ -1418,38 +1472,6 @@ function AdminPage() {
           <p className="fig-kicker">Albuns</p>
           <h2>Estrutura</h2>
         </div>
-
-        <form className="fig-form-card fig-compact-form" onSubmit={handleCreateAlbum}>
-          <label className="fig-field">
-            <span>Nome</span>
-            <input
-              value={albumForm.name}
-              onChange={event => setAlbumForm(current => ({ ...current, name: event.target.value }))}
-              placeholder="Copa 2026"
-            />
-          </label>
-          <label className="fig-field">
-            <span>Slug</span>
-            <input
-              value={albumForm.slug}
-              onChange={event => setAlbumForm(current => ({ ...current, slug: event.target.value }))}
-              placeholder="copa-2026"
-            />
-          </label>
-          <label className="fig-field">
-            <span>Descricao</span>
-            <textarea
-              value={albumForm.description}
-              onChange={event => setAlbumForm(current => ({ ...current, description: event.target.value }))}
-              rows="2"
-              placeholder="Edicao principal para agrupar as selecoes."
-            />
-          </label>
-          <button type="submit" className="fig-primary-button" disabled={savingAlbum}>
-            {savingAlbum ? 'Salvando...' : 'Criar album'}
-          </button>
-        </form>
-
         <div className="fig-collection-list">
           {albums.map(album => (
             <button
@@ -1461,6 +1483,7 @@ function AdminPage() {
                 setCreateForm(current => ({ ...current, album_id: String(album.id) }))
                 setCurrentPageId(null)
                 resetStickerForm()
+                setAdminView('structure')
               }}
             >
               <strong>{album.name}</strong>
@@ -1475,52 +1498,6 @@ function AdminPage() {
           <p className="fig-kicker">Colecoes</p>
           <h3>{selectedAlbum?.name || 'Escolha um album'}</h3>
         </div>
-
-        <form className="fig-form-card fig-compact-form" onSubmit={handleCreateCollection}>
-          <label className="fig-field">
-            <span>Album</span>
-            <select
-              value={createForm.album_id}
-              onChange={event => setCreateForm(current => ({ ...current, album_id: event.target.value }))}
-            >
-              <option value="">Selecione</option>
-              {albums.map(album => (
-                <option key={album.id} value={album.id}>
-                  {album.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="fig-field">
-            <span>Nome</span>
-            <input
-              value={createForm.name}
-              onChange={event => setCreateForm(current => ({ ...current, name: event.target.value }))}
-              placeholder="Brasil"
-            />
-          </label>
-          <label className="fig-field">
-            <span>Slug</span>
-            <input
-              value={createForm.slug}
-              onChange={event => setCreateForm(current => ({ ...current, slug: event.target.value }))}
-              placeholder="brasil"
-            />
-          </label>
-          <label className="fig-field">
-            <span>Descricao</span>
-            <textarea
-              value={createForm.description}
-              onChange={event => setCreateForm(current => ({ ...current, description: event.target.value }))}
-              rows="2"
-              placeholder="Selecao publicada dentro do album."
-            />
-          </label>
-          <button type="submit" className="fig-primary-button" disabled={savingCollection || !createForm.album_id}>
-            {savingCollection ? 'Salvando...' : 'Criar colecao'}
-          </button>
-        </form>
-
         <div className="fig-collection-list">
           {filteredCollections.map(collection => (
             <button
@@ -1531,6 +1508,7 @@ function AdminPage() {
                 setSelectedCollectionId(collection.id)
                 setCurrentPageId(null)
                 resetStickerForm()
+                setAdminView('collection')
               }}
             >
               <strong>{collection.name}</strong>
@@ -1550,7 +1528,7 @@ function AdminPage() {
           <div>
             <p className="fig-kicker">Gestao</p>
             <h2>{selectedCollection?.name || selectedAlbum?.name || 'Selecione um album'}</h2>
-            <p>Gerencie albuns, colecoes, pedidos impressos e a configuracao do atendimento local.</p>
+            <p>Organize a estrutura do album, o atendimento local e o mapeamento sem abrir tudo ao mesmo tempo.</p>
           </div>
           <div className="fig-hero-actions">
             <button type="button" className="fig-secondary-button" onClick={() => setToken('')}>
@@ -1559,10 +1537,140 @@ function AdminPage() {
           </div>
         </div>
 
+        <div className="fig-admin-section-tabs">
+          <button
+            type="button"
+            className={`fig-admin-section-tab${adminView === 'structure' ? ' is-active' : ''}`}
+            onClick={() => setAdminView('structure')}
+          >
+            Estrutura
+          </button>
+          <button
+            type="button"
+            className={`fig-admin-section-tab${adminView === 'atendimento' ? ' is-active' : ''}`}
+            onClick={() => setAdminView('atendimento')}
+          >
+            Atendimento
+          </button>
+          <button
+            type="button"
+            className={`fig-admin-section-tab${adminView === 'collection' ? ' is-active' : ''}`}
+            onClick={() => selectedCollection && setAdminView('collection')}
+            disabled={!selectedCollection}
+          >
+            Colecao
+          </button>
+          <button
+            type="button"
+            className={`fig-admin-section-tab${adminView === 'mapping' ? ' is-active' : ''}`}
+            onClick={() => selectedCollection && setAdminView('mapping')}
+            disabled={!selectedCollection}
+          >
+            Mapeamento
+          </button>
+        </div>
+
         {message ? <p className="fig-success-banner">{message}</p> : null}
         {error ? <p className="fig-error-banner">{error}</p> : null}
         {loading ? <p className="fig-empty-note">Carregando dados da colecao...</p> : null}
 
+        {adminView === 'structure' ? (
+          <section className="fig-admin-panel-grid">
+            <form className="fig-form-card" onSubmit={handleCreateAlbum}>
+              <div className="fig-panel-header">
+                <p className="fig-kicker">Novo album</p>
+                <h3>Criar edicao principal</h3>
+              </div>
+              <div className="fig-form-grid">
+                <label className="fig-field">
+                  <span>Nome</span>
+                  <input
+                    value={albumForm.name}
+                    onChange={event => setAlbumForm(current => ({ ...current, name: event.target.value }))}
+                    placeholder="Copa 2026"
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Slug</span>
+                  <input
+                    value={albumForm.slug}
+                    onChange={event => setAlbumForm(current => ({ ...current, slug: event.target.value }))}
+                    placeholder="copa-2026"
+                  />
+                </label>
+                <label className="fig-field fig-field--full">
+                  <span>Descricao</span>
+                  <textarea
+                    value={albumForm.description}
+                    onChange={event => setAlbumForm(current => ({ ...current, description: event.target.value }))}
+                    rows="3"
+                    placeholder="Edicao principal para agrupar as selecoes."
+                  />
+                </label>
+              </div>
+              <div className="fig-hero-actions">
+                <button type="submit" className="fig-primary-button" disabled={savingAlbum}>
+                  {savingAlbum ? 'Salvando...' : 'Criar album'}
+                </button>
+              </div>
+            </form>
+
+            <form className="fig-form-card" onSubmit={handleCreateCollection}>
+              <div className="fig-panel-header">
+                <p className="fig-kicker">Nova colecao</p>
+                <h3>Adicionar selecao ao album</h3>
+              </div>
+              <div className="fig-form-grid">
+                <label className="fig-field">
+                  <span>Album</span>
+                  <select
+                    value={createForm.album_id}
+                    onChange={event => setCreateForm(current => ({ ...current, album_id: event.target.value }))}
+                  >
+                    <option value="">Selecione</option>
+                    {albums.map(album => (
+                      <option key={album.id} value={album.id}>
+                        {album.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="fig-field">
+                  <span>Nome</span>
+                  <input
+                    value={createForm.name}
+                    onChange={event => setCreateForm(current => ({ ...current, name: event.target.value }))}
+                    placeholder="Brasil"
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Slug</span>
+                  <input
+                    value={createForm.slug}
+                    onChange={event => setCreateForm(current => ({ ...current, slug: event.target.value }))}
+                    placeholder="brasil"
+                  />
+                </label>
+                <label className="fig-field fig-field--full">
+                  <span>Descricao</span>
+                  <textarea
+                    value={createForm.description}
+                    onChange={event => setCreateForm(current => ({ ...current, description: event.target.value }))}
+                    rows="3"
+                    placeholder="Selecao publicada dentro do album."
+                  />
+                </label>
+              </div>
+              <div className="fig-hero-actions">
+                <button type="submit" className="fig-primary-button" disabled={savingCollection || !createForm.album_id}>
+                  {savingCollection ? 'Salvando...' : 'Criar colecao'}
+                </button>
+              </div>
+            </form>
+          </section>
+        ) : null}
+
+        {adminView === 'atendimento' ? (
         <section className="fig-admin-summary-grid">
           <form className="fig-form-card" onSubmit={handleSaveServiceConfig}>
             <div className="fig-panel-header">
@@ -1734,8 +1842,9 @@ function AdminPage() {
             </div>
           </section>
         </section>
+        ) : null}
 
-        {selectedCollection ? (
+        {selectedCollection && (adminView === 'collection' || adminView === 'mapping') ? (
           <>
             <div className="fig-admin-header fig-admin-section-head">
               <div>
@@ -1821,6 +1930,7 @@ function AdminPage() {
               </div>
             </div>
 
+            {adminView === 'mapping' ? (
             <div className="fig-admin-workspace">
               <section className="fig-page-panel">
                 <div className="fig-page-selector">
@@ -2013,7 +2123,15 @@ function AdminPage() {
                 </div>
               </section>
             </div>
+            ) : null}
           </>
+        ) : null}
+        {!selectedCollection && (adminView === 'collection' || adminView === 'mapping') ? (
+          <section className="fig-form-card fig-admin-empty-state">
+            <p className="fig-kicker">Colecao necessaria</p>
+            <h3>Escolha uma colecao na lateral para continuar</h3>
+            <p>Depois disso voce pode subir o PDF, publicar a selecao e fazer o mapeamento dos recortes.</p>
+          </section>
         ) : null}
       </div>
     </section>
