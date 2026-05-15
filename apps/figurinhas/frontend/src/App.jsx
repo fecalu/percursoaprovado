@@ -512,7 +512,14 @@ function PublicPage() {
               className={`fig-sticker-card${selectedIds.includes(sticker.id) ? ' is-selected' : ''}`}
               onClick={() => toggleSelection(sticker.id)}
             >
-              <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} />
+              <div className="fig-sticker-card-media">
+                <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} />
+                {selectedIds.includes(sticker.id) ? (
+                  <span className="fig-sticker-card-badge">Selecionada</span>
+                ) : (
+                  <span className="fig-sticker-card-hint">Toque para marcar</span>
+                )}
+              </div>
               <div className="fig-sticker-card-body">
                 <strong>{sticker.name}</strong>
                 <span>{categoryLabel(sticker.category)}</span>
