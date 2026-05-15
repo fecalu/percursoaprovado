@@ -25,8 +25,8 @@ const orderStatusLabels = {
 }
 
 const serviceTypeLabels = {
-  IMPRESSAO: 'So impressao',
-  IMPRESSAO_PACOTINHOS: 'Impressao + pacotinhos'
+  IMPRESSAO: 'So imprimir para mim',
+  IMPRESSAO_PACOTINHOS: 'Completo: imprimir, cortar e montar'
 }
 
 function useAdminToken() {
@@ -392,7 +392,7 @@ function PublicPage() {
               disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
               onClick={() => setOrderFormOpen(current => !current)}
             >
-              Pedir impressao
+              Quero que voce prepare para mim
             </button>
             <button
               type="button"
@@ -428,7 +428,7 @@ function PublicPage() {
             <div className="fig-service-card-header">
               <div>
                 <p className="fig-kicker">Servico opcional</p>
-                <h3>Quer que eu imprima para voce?</h3>
+                <h3>Quer que eu prepare tudo para voce?</h3>
               </div>
               <span className={`fig-service-badge${quote.service_enabled ? ' is-ready' : ''}`}>
                 {quote.service_enabled ? 'Disponivel' : 'Em configuracao'}
@@ -446,25 +446,29 @@ function PublicPage() {
               </div>
               <div className="fig-quote-item">
                 <strong>{formatCurrency(quote.print_total_cents)}</strong>
-                <span>so impressao</span>
+                <span>so impressao das folhas</span>
               </div>
               <div className="fig-quote-item">
                 <strong>{quote.pack_eligible ? formatCurrency(quote.pack_total_cents || 0) : '--'}</strong>
-                <span>{quote.pack_eligible ? `${quote.pack_count} pacotinhos` : `pacotes de ${quote.pack_size}`}</span>
+                <span>
+                  {quote.pack_eligible
+                    ? `${quote.pack_count} pacotinho(s) montado(s)`
+                    : `pacotinhos de ${quote.pack_size}`}
+                </span>
               </div>
             </div>
 
             <div className="fig-service-notes">
               <p>
-                Impressao por folha: <strong>{formatCurrency(quote.print_price_cents)}</strong>
+                <strong>Servico 1:</strong> impressao por folha: <strong>{formatCurrency(quote.print_price_cents)}</strong>
               </p>
               <p>
-                Pacotinho de {quote.pack_size} figurinhas:{' '}
-                <strong>{formatCurrency(quote.pack_price_cents)}</strong>
+                <strong>Servico 2:</strong> montagem de cada pacotinho com corte e separacao de{' '}
+                {quote.pack_size} figurinhas: <strong>{formatCurrency(quote.pack_price_cents)}</strong>
               </p>
               {!quote.pack_eligible ? (
                 <p className="fig-warning-text">
-                  Para montar pacotinhos, escolha {quote.pack_size}, {quote.pack_size * 2}, {quote.pack_size * 3}...
+                  Para eu montar os pacotinhos, a quantidade precisa fechar em grupos de {quote.pack_size}.
                   Sua selecao atual precisa de mais {quote.pack_size - quote.pack_remainder} figurinha(s).
                 </p>
               ) : null}
@@ -480,8 +484,8 @@ function PublicPage() {
         {orderFormOpen && quote ? (
           <form className="fig-form-card fig-order-form" onSubmit={handleCreateOrder}>
             <div className="fig-panel-header">
-              <p className="fig-kicker">Pedido manual</p>
-              <h3>Pedir impressao comigo</h3>
+              <p className="fig-kicker">Pedido local</p>
+              <h3>Escolha como voce quer receber</h3>
             </div>
 
             <div className="fig-order-options">
@@ -494,8 +498,8 @@ function PublicPage() {
                   onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
                 />
                 <div>
-                  <strong>So impressao</strong>
-                  <span>{quote.sheet_count} folha(s) · {formatCurrency(quote.print_total_cents)}</span>
+                  <strong>So imprimir para mim</strong>
+                  <span>{quote.sheet_count} folha(s) impressa(s) · {formatCurrency(quote.print_total_cents)}</span>
                 </div>
               </label>
 
@@ -513,11 +517,11 @@ function PublicPage() {
                   onChange={event => setOrderForm(current => ({ ...current, service_type: event.target.value }))}
                 />
                 <div>
-                  <strong>Impressao + pacotinhos</strong>
+                  <strong>Completo: imprimir, cortar e montar</strong>
                   <span>
                     {quote.pack_eligible
-                      ? `${quote.pack_count} pacote(s) · ${formatCurrency(quote.pack_total_cents || 0)}`
-                      : `Disponivel so em multiplos de ${quote.pack_size}`}
+                      ? `${quote.pack_count} pacotinho(s) · ${formatCurrency(quote.pack_total_cents || 0)}`
+                      : `Disponivel so quando fechar grupos de ${quote.pack_size}`}
                   </span>
                 </div>
               </label>
@@ -587,7 +591,7 @@ function PublicPage() {
             <div className="fig-quote-grid">
               <div className="fig-quote-item">
                 <strong>{serviceTypeLabels[orderResult.service_type]}</strong>
-                <span>tipo de servico</span>
+                <span>servico escolhido</span>
               </div>
               <div className="fig-quote-item">
                 <strong>{formatCurrency(orderResult.total_price_cents)}</strong>
@@ -1222,7 +1226,7 @@ function AdminPage() {
           <form className="fig-form-card" onSubmit={handleSaveServiceConfig}>
             <div className="fig-panel-header">
               <p className="fig-kicker">Servico pago</p>
-              <h3>Impressao e pacotinhos</h3>
+              <h3>Impressao e montagem</h3>
             </div>
 
             <label className="fig-checkbox">
@@ -1231,12 +1235,12 @@ function AdminPage() {
                 checked={serviceForm.service_enabled}
                 onChange={event => setServiceForm(current => ({ ...current, service_enabled: event.target.checked }))}
               />
-              <span>Ativar pedidos de impressao</span>
+              <span>Ativar pedidos de impressao e montagem</span>
             </label>
 
             <div className="fig-form-grid">
               <label className="fig-field">
-                <span>Figurinhas por pacotinho</span>
+                <span>Figurinhas em cada pacotinho</span>
                 <input
                   type="number"
                   min="1"
@@ -1255,7 +1259,7 @@ function AdminPage() {
                 />
               </label>
               <label className="fig-field">
-                <span>Preco por pacotinho (R$)</span>
+                <span>Preco da montagem por pacotinho (R$)</span>
                 <input
                   type="number"
                   min="0"
@@ -1297,7 +1301,7 @@ function AdminPage() {
           <section className="fig-form-card">
             <div className="fig-panel-header">
               <p className="fig-kicker">Pedidos</p>
-              <h3>Impressao local</h3>
+              <h3>Retirada local</h3>
             </div>
 
             <div className="fig-order-layout">
@@ -1335,7 +1339,7 @@ function AdminPage() {
                   {selectedOrder.pack_count > 0 ? (
                     <div className="fig-inline-meta">
                       <strong>{selectedOrder.pack_count} pacotinho(s)</strong>
-                      <span>{selectedOrder.pack_size} figurinhas por pacote</span>
+                      <span>{selectedOrder.pack_size} figurinhas em cada pacotinho</span>
                     </div>
                   ) : null}
                   {selectedOrder.notes ? (
