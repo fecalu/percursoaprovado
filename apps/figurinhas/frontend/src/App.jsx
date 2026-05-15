@@ -494,7 +494,7 @@ function PublicPage() {
             </p>
             <p>
               Chave Pix: <strong>{orderResult.pix_key || 'a configurar'}</strong>
-              {orderResult.pix_holder ? ` ? ${orderResult.pix_holder}` : ''}
+              {orderResult.pix_holder ? ` · ${orderResult.pix_holder}` : ''}
             </p>
             {orderResult.pickup_note ? <p>{orderResult.pickup_note}</p> : null}
           </section>
@@ -745,7 +745,7 @@ function PublicPage() {
                 <strong>Pagamento via Pix.</strong>{' '}
                 <span>
                   Chave: {quote.pix_key || 'a configurar'}
-                  {quote.pix_holder ? ` ? ${quote.pix_holder}` : ''}
+                  {quote.pix_holder ? ` · ${quote.pix_holder}` : ''}
                 </span>
               </div>
 
