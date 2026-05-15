@@ -14,6 +14,7 @@ class Settings:
     )
     admin_token = os.getenv("FIGURINHAS_ADMIN_TOKEN", "change-me")
     render_scale = float(os.getenv("FIGURINHAS_PAGE_RENDER_SCALE", "4.0"))
+    export_render_scale = float(os.getenv("FIGURINHAS_EXPORT_RENDER_SCALE", "6.0"))
     public_collection_limit = int(os.getenv("FIGURINHAS_PUBLIC_COLLECTION_LIMIT", "50"))
 
 
@@ -24,4 +25,3 @@ def get_settings() -> Settings:
     for subdir in ("originals", "pages", "crops", "exports"):
         (settings.storage_root / subdir).mkdir(parents=True, exist_ok=True)
     return settings
-

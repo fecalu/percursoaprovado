@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-import math
-import os
+import io
 import shutil
 import uuid
+from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from statistics import median
 
 import fitz
 from PIL import Image
-from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from sqlalchemy import func, select
@@ -271,43 +269,75 @@ def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Sessio
     export_key = f"{datetime.utcnow():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
     export_path = export_dir / f"{collection.slug}-{export_key}.pdf"
 
-    crop_sizes: list[tuple[int, int]] = []
-    image_paths: list[Path] = []
-    for sticker in stickers:
-        crop_path = settings.storage_root / sticker.crop_path
-        if not crop_path.exists():
-            crop_sticker_image(sticker)
-            db.flush()
-        crop_path = settings.storage_root / sticker.crop_path
-        image_paths.append(crop_path)
-        with Image.open(crop_path) as image:
-            crop_sizes.append(image.size)
+    if not collection.source_pdf_path:
+        raise ValueError("A colecao nao possui PDF de origem para exportacao.")
 
-    aspect_ratio = median(size[0] / size[1] for size in crop_sizes) if crop_sizes else 0.7
-    page_width, page_height = A4
-    margin = 18
-    gap = 8
-    columns = 4
-    cell_width = (page_width - (2 * margin) - ((columns - 1) * gap)) / columns
-    cell_height = cell_width / max(aspect_ratio, 0.1)
-    rows = max(1, math.floor((page_height - (2 * margin) + gap) / (cell_height + gap)))
+    source_pdf_path = settings.storage_root / collection.source_pdf_path
+    if not source_pdf_path.exists():
+        raise FileNotFoundError("PDF de origem da colecao nao encontrado.")
 
-    pdf = canvas.Canvas(str(export_path), pagesize=A4)
-    pdf.setTitle(f"{collection.name} - figurinhas selecionadas")
+    template_stickers = db.execute(
+        select(Sticker)
+        .options(selectinload(Sticker.page))
+        .where(Sticker.collection_id == collection.id, Sticker.active.is_(True))
+        .order_by(Sticker.sort_order.asc(), Sticker.id.asc())
+    ).scalars().all()
 
-    for index, crop_path in enumerate(image_paths):
-        page_index = index // (rows * columns)
-        position = index % (rows * columns)
-        if index > 0 and position == 0:
-            pdf.showPage()
+    with fitz.open(source_pdf_path) as document:
+        page_sizes = {
+            page_index + 1: (document.load_page(page_index).rect.width, document.load_page(page_index).rect.height)
+            for page_index in range(document.page_count)
+        }
+        layout_templates = _build_export_layout_templates(template_stickers, page_sizes)
 
-        row = position // columns
-        col = position % columns
-        x = margin + col * (cell_width + gap)
-        y = page_height - margin - ((row + 1) * cell_height) - (row * gap)
-        pdf.drawImage(ImageReader(str(crop_path)), x, y, width=cell_width, height=cell_height, preserveAspectRatio=True)
+        selected_groups: dict[tuple[float, float], list[Sticker]] = {}
+        for sticker in stickers:
+            group_key = _sticker_size_key(sticker, page_sizes)
+            selected_groups.setdefault(group_key, []).append(sticker)
 
-    pdf.save()
+        first_layout = next(iter(layout_templates.values()), None)
+        initial_page_size = (
+            first_layout["page_size"] if first_layout else next(iter(page_sizes.values()), (595.2756, 841.8898))
+        )
+        pdf = canvas.Canvas(str(export_path), pagesize=initial_page_size)
+        pdf.setTitle(f"{collection.name} - figurinhas selecionadas")
+
+        is_first_page = True
+        for group_key, group_stickers in selected_groups.items():
+            layout = layout_templates.get(group_key)
+            if not layout or not layout["slots"]:
+                raise ValueError("Nao foi possivel montar um template de exportacao para esse conjunto de figurinhas.")
+
+            page_width, page_height = layout["page_size"]
+            slots = layout["slots"]
+            slots_per_page = len(slots)
+            if slots_per_page <= 0:
+                raise ValueError("Template de exportacao invalido para a colecao.")
+
+            for offset in range(0, len(group_stickers), slots_per_page):
+                batch = group_stickers[offset : offset + slots_per_page]
+                if not is_first_page:
+                    pdf.showPage()
+                pdf.setPageSize((page_width, page_height))
+
+                for slot, sticker in zip(slots, batch, strict=False):
+                    image_bytes = _render_sticker_export_image(document, sticker, page_sizes)
+                    x_position = slot["x_pt"]
+                    y_position = page_height - slot["y_pt"] - slot["height_pt"]
+                    pdf.drawImage(
+                        ImageReader(io.BytesIO(image_bytes)),
+                        x_position,
+                        y_position,
+                        width=slot["width_pt"],
+                        height=slot["height_pt"],
+                        preserveAspectRatio=False,
+                        mask="auto",
+                    )
+
+                is_first_page = False
+
+        pdf.save()
+
     export_record = Export(
         collection=collection,
         file_path=str(export_path.relative_to(settings.storage_root).as_posix()),
@@ -316,6 +346,83 @@ def build_export_pdf(collection: Collection, stickers: list[Sticker], db: Sessio
     db.add(export_record)
     db.flush()
     return export_record
+
+
+def _sticker_page_box_points(
+    sticker: Sticker,
+    page_sizes: dict[int, tuple[float, float]],
+) -> tuple[float, float, float, float, float, float]:
+    page_width, page_height = page_sizes[sticker.page.page_number]
+    x_pt = page_width * sticker.x_ratio
+    y_pt = page_height * sticker.y_ratio
+    width_pt = page_width * sticker.width_ratio
+    height_pt = page_height * sticker.height_ratio
+    return x_pt, y_pt, width_pt, height_pt, page_width, page_height
+
+
+def _sticker_size_key(sticker: Sticker, page_sizes: dict[int, tuple[float, float]]) -> tuple[float, float]:
+    _, _, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes)
+    return round(width_pt, 1), round(height_pt, 1)
+
+
+def _build_export_layout_templates(
+    stickers: list[Sticker],
+    page_sizes: dict[int, tuple[float, float]],
+) -> dict[tuple[float, float], dict]:
+    by_size: dict[tuple[float, float], list[Sticker]] = defaultdict(list)
+    for sticker in stickers:
+        by_size[_sticker_size_key(sticker, page_sizes)].append(sticker)
+
+    templates: dict[tuple[float, float], dict] = {}
+    for size_key, group in by_size.items():
+        by_page: dict[int, list[Sticker]] = defaultdict(list)
+        for sticker in group:
+            by_page[sticker.page.page_number].append(sticker)
+
+        template_page_number, template_group = max(
+            by_page.items(),
+            key=lambda item: (len(item[1]), -item[0]),
+        )
+        page_width, page_height = page_sizes[template_page_number]
+        slots = []
+        for sticker in sorted(
+            template_group,
+            key=lambda current: (
+                round(current.y_ratio, 6),
+                round(current.x_ratio, 6),
+                current.sort_order,
+                current.id,
+            ),
+        ):
+            x_pt, y_pt, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes)
+            slots.append(
+                {
+                    "x_pt": x_pt,
+                    "y_pt": y_pt,
+                    "width_pt": width_pt,
+                    "height_pt": height_pt,
+                }
+            )
+
+        templates[size_key] = {
+            "page_size": (page_width, page_height),
+            "page_number": template_page_number,
+            "slots": slots,
+        }
+
+    return templates
+
+
+def _render_sticker_export_image(
+    document: fitz.Document,
+    sticker: Sticker,
+    page_sizes: dict[int, tuple[float, float]],
+) -> bytes:
+    page = document.load_page(sticker.page.page_number - 1)
+    x_pt, y_pt, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes)
+    clip = fitz.Rect(x_pt, y_pt, x_pt + width_pt, y_pt + height_pt)
+    pixmap = page.get_pixmap(matrix=fitz.Matrix(settings.export_render_scale, settings.export_render_scale), clip=clip, alpha=False)
+    return pixmap.tobytes("png")
 
 
 def load_collection_or_fail(db: Session, collection_id: int) -> Collection:
