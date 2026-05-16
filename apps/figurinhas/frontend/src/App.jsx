@@ -1405,8 +1405,9 @@ function AdminPage() {
     () => orders.find(order => order.id === selectedOrderId) || null,
     [orders, selectedOrderId]
   )
-  const isCreatingAlbum = adminView === 'structure' && albumStructureMode === 'create'
-  const isCreatingCollection = adminView === 'structure' && collectionStructureMode === 'create'
+  const isCreatingAlbum = albumStructureMode === 'create'
+  const isCreatingCollection = collectionStructureMode === 'create'
+  const isCreationLocked = isCreatingAlbum || isCreatingCollection
   const adminTitle = isCreatingAlbum
     ? 'Novo album'
     : isCreatingCollection
@@ -1432,10 +1433,7 @@ function AdminPage() {
       return
     }
 
-    const shouldKeepCollectionDetached =
-      adminView === 'structure' &&
-      (albumStructureMode === 'create' || collectionStructureMode === 'create') &&
-      selectedCollectionId === null
+    const shouldKeepCollectionDetached = isCreationLocked && selectedCollectionId === null
 
     if (shouldKeepCollectionDetached) {
       return
@@ -1446,7 +1444,7 @@ function AdminPage() {
       setCurrentPageId(null)
       resetStickerForm()
     }
-  }, [adminView, albumStructureMode, collectionStructureMode, filteredCollections, selectedCollectionId])
+  }, [filteredCollections, isCreationLocked, selectedCollectionId])
 
   useEffect(() => {
     if (!selectedCollection) return
@@ -1650,7 +1648,11 @@ function AdminPage() {
     setAlbumForm({ name: '', slug: '', description: '', sort_order: String(nextOrder) })
     setAlbumStructureMode('create')
     setCollectionStructureMode('edit')
+    setAdminView('structure')
     setSelectedCollectionId(null)
+    setSelectedCollection(null)
+    setPages([])
+    setStickers([])
     setCurrentPageId(null)
     resetStickerForm()
   }
@@ -1667,7 +1669,11 @@ function AdminPage() {
     })
     setCollectionStructureMode('create')
     setAlbumStructureMode('edit')
+    setAdminView('structure')
     setSelectedCollectionId(null)
+    setSelectedCollection(null)
+    setPages([])
+    setStickers([])
     setCurrentPageId(null)
     resetStickerForm()
   }
@@ -2063,6 +2069,11 @@ function AdminPage() {
             <p className="fig-kicker">Gestao</p>
             <h2>{adminTitle}</h2>
             <p>{adminDescription}</p>
+            {isCreationLocked ? (
+              <span className="fig-admin-mode-badge">
+                Modo criacao {isCreatingAlbum ? 'de album' : 'de selecao'}
+              </span>
+            ) : null}
           </div>
           <div className="fig-hero-actions">
             <button type="button" className="fig-secondary-button" onClick={() => setToken('')}>
@@ -2083,6 +2094,7 @@ function AdminPage() {
             type="button"
             className={`fig-admin-section-tab${adminView === 'atendimento' ? ' is-active' : ''}`}
             onClick={() => setAdminView('atendimento')}
+            disabled={isCreationLocked}
           >
             Atendimento
           </button>
@@ -2090,7 +2102,7 @@ function AdminPage() {
             type="button"
             className={`fig-admin-section-tab${adminView === 'collection' ? ' is-active' : ''}`}
             onClick={() => selectedCollection && setAdminView('collection')}
-            disabled={!selectedCollection}
+            disabled={!selectedCollection || isCreationLocked}
           >
             Colecao
           </button>
@@ -2098,7 +2110,7 @@ function AdminPage() {
             type="button"
             className={`fig-admin-section-tab${adminView === 'mapping' ? ' is-active' : ''}`}
             onClick={() => selectedCollection && setAdminView('mapping')}
-            disabled={!selectedCollection}
+            disabled={!selectedCollection || isCreationLocked}
           >
             Mapeamento
           </button>
