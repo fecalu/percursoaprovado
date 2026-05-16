@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-import base64
 import io
 from dataclasses import dataclass
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 try:
-    from openai import OpenAI
+    from google import genai
+    from google.genai import types as genai_types
 except ImportError:  # pragma: no cover - handled by fallback generation
-    OpenAI = None  # type: ignore[assignment]
+    genai = None  # type: ignore[assignment]
+    genai_types = None  # type: ignore[assignment]
 
 
 PROFILE_LABELS = {
@@ -94,8 +95,8 @@ def _generate_portrait_with_fallback(
     target_width_px: int,
     target_height_px: int,
 ) -> Image.Image:
-    if settings.openai_api_key and OpenAI is not None:
-        generated = _generate_portrait_with_openai(
+    if settings.gemini_api_key and genai is not None and genai_types is not None:
+        generated = _generate_portrait_with_gemini(
             settings,
             uploaded_photo=uploaded_photo,
             name=name,
@@ -107,7 +108,7 @@ def _generate_portrait_with_fallback(
     return _build_stylized_fallback(uploaded_photo, profile_type, (target_width_px, target_height_px))
 
 
-def _generate_portrait_with_openai(
+def _generate_portrait_with_gemini(
     settings,
     *,
     uploaded_photo: Image.Image,
@@ -116,55 +117,51 @@ def _generate_portrait_with_openai(
     city_or_team: str | None,
 ) -> Image.Image | None:
     try:
-        client = OpenAI(api_key=settings.openai_api_key)
-        upload_buffer = io.BytesIO()
         working_image = uploaded_photo.copy()
         working_image.thumbnail((1536, 1536))
-        working_image.save(upload_buffer, format="JPEG", quality=92, optimize=True)
-        image_base64 = base64.b64encode(upload_buffer.getvalue()).decode("ascii")
-        prompt = _build_openai_prompt(name=name, profile_type=profile_type, city_or_team=city_or_team)
-        response = client.responses.create(
-            model=settings.openai_response_model,
-            input=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "input_text", "text": prompt},
-                        {
-                            "type": "input_image",
-                            "image_url": f"data:image/jpeg;base64,{image_base64}",
-                        },
-                    ],
-                }
-            ],
-            tools=[
-                {
-                    "type": "image_generation",
-                    "action": "edit",
-                    "input_fidelity": "high",
-                }
-            ],
+        client = genai.Client(api_key=settings.gemini_api_key)
+        prompt = _build_gemini_prompt(name=name, profile_type=profile_type, city_or_team=city_or_team)
+        response = client.models.generate_content(
+            model=settings.gemini_image_model,
+            contents=[prompt, working_image],
+            config=genai_types.GenerateContentConfig(
+                response_modalities=["TEXT", "IMAGE"],
+            ),
         )
-        generated_images = [
-            output.result
-            for output in getattr(response, "output", [])
-            if getattr(output, "type", None) == "image_generation_call" and getattr(output, "result", None)
-        ]
-        if not generated_images:
-            return None
-        return _open_uploaded_photo(base64.b64decode(generated_images[0]))
+
+        for part in _iter_gemini_response_parts(response):
+            if getattr(part, "inline_data", None) is not None:
+                image = part.as_image()
+                return image.convert("RGB")
+        return None
     except Exception:
         return None
 
 
-def _build_openai_prompt(*, name: str, profile_type: str, city_or_team: str | None) -> str:
+def _iter_gemini_response_parts(response) -> list:
+    parts = getattr(response, "parts", None)
+    if parts:
+        return list(parts)
+
+    candidates = getattr(response, "candidates", None) or []
+    if not candidates:
+        return []
+
+    content = getattr(candidates[0], "content", None)
+    if content is None:
+        return []
+    return list(getattr(content, "parts", None) or [])
+
+
+def _build_gemini_prompt(*, name: str, profile_type: str, city_or_team: str | None) -> str:
     profile_label = PROFILE_LABELS.get(profile_type, "Pessoa")
     city_hint = f" The background can subtly reference {city_or_team}." if city_or_team else ""
     return (
-        f"Using the uploaded face as the main reference, create a polished collectible football sticker portrait of a "
-        f"{profile_label.lower()} named {name}. Keep strong facial resemblance, clean sportswear, confident pose, "
-        f"waist-up framing, premium lighting, and a friendly editorial sports look. Do not add any text, frame, "
-        f"logo, watermark, hands covering the face, extra people, or duplicated limbs.{city_hint}"
+        f"Use the uploaded photo as the main facial reference and create a polished collectible football sticker portrait "
+        f"of a {profile_label.lower()} named {name}. Preserve facial resemblance, natural skin tone, hair, and key face "
+        f"features. Show a confident waist-up sports portrait with clean sportswear, premium lighting, and an editorial "
+        f"football-card look. Do not add any text, badge, logo, frame, watermark, extra people, extra limbs, duplicate "
+        f"features, hands covering the face, or any collage effect.{city_hint} Return a single portrait image only."
     )
 
 
