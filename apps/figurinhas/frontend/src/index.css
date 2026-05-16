@@ -939,6 +939,13 @@ a {
   line-height: 1.45;
 }
 
+.fig-code-block {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.74rem !important;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
 .fig-modal-close {
   border: 0;
   background: rgba(17, 34, 53, 0.08);
@@ -1044,6 +1051,10 @@ a {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 0.88rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(17, 34, 53, 0.06);
 }
 
 .fig-section-block + .fig-section-block {
@@ -1789,9 +1800,31 @@ a {
   }
 
   .fig-custom-card {
-    padding: 0.88rem 0.92rem;
+    padding: 0.82rem 0.86rem;
     border-radius: 20px;
-    gap: 0.85rem;
+    gap: 0.78rem;
+  }
+
+  .fig-custom-card-copy p {
+    font-size: 0.82rem;
+    line-height: 1.42;
+  }
+
+  .fig-custom-card-copy h3 {
+    margin-bottom: 0.24rem;
+    font-size: 1rem;
+    line-height: 1.18;
+  }
+
+  .fig-custom-card .fig-hero-actions {
+    gap: 0.5rem;
+  }
+
+  .fig-custom-card .fig-hero-actions .fig-primary-button,
+  .fig-custom-card .fig-hero-actions .fig-secondary-button {
+    min-height: 42px;
+    padding: 0.72rem 0.82rem;
+    border-radius: 14px;
   }
 
   .fig-custom-preview {
@@ -1907,7 +1940,7 @@ a {
     width: 100%;
     max-height: 94vh;
     min-height: 72vh;
-    padding: 0.95rem 0.95rem 1rem;
+    padding: 0.82rem 0.82rem 0.92rem;
     border-radius: 28px 28px 0 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -1915,7 +1948,7 @@ a {
   }
 
   .fig-modal-shell--public-flow .fig-form-card {
-    padding: 0.9rem;
+    padding: 0.82rem;
     border-radius: 20px;
   }
 
@@ -1929,7 +1962,8 @@ a {
   }
 
   .fig-modal-shell--public-flow .fig-modal-close {
-    padding: 0.54rem 0.82rem;
+    padding: 0.5rem 0.76rem;
+    font-size: 0.82rem;
   }
 
   .fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile {
@@ -1953,8 +1987,17 @@ a {
   }
 
   .fig-modal-shell--public-flow .fig-choice-card {
-    padding: 0.92rem;
+    padding: 0.84rem;
     border-radius: 18px;
+  }
+
+  .fig-modal-shell--public-flow .fig-choice-card strong {
+    font-size: 0.92rem;
+    line-height: 1.2;
+  }
+
+  .fig-modal-shell--public-flow .fig-choice-card span {
+    font-size: 0.78rem;
   }
 
   .fig-modal-shell--public-flow .fig-quote-grid,
@@ -1963,8 +2006,42 @@ a {
     gap: 0.5rem;
   }
 
+  .fig-modal-shell--public-flow .fig-quote-item {
+    padding: 0.62rem 0.68rem;
+    border-radius: 16px;
+  }
+
+  .fig-modal-shell--public-flow .fig-quote-item strong {
+    font-size: 0.9rem;
+  }
+
+  .fig-modal-shell--public-flow .fig-quote-item span,
+  .fig-modal-shell--public-flow .fig-service-notes p,
+  .fig-modal-shell--public-flow .fig-modal-subtitle,
+  .fig-modal-shell--public-flow .fig-section-block-head span {
+    font-size: 0.78rem;
+    line-height: 1.42;
+  }
+
+  .fig-modal-shell--public-flow .fig-section-block {
+    gap: 0.62rem;
+    padding: 0.72rem;
+    border-radius: 16px;
+  }
+
+  .fig-modal-shell--public-flow .fig-flow-step-row {
+    gap: 0.36rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .fig-modal-shell--public-flow .fig-flow-step {
+    min-height: 30px;
+    padding: 0.42rem 0.62rem;
+    font-size: 0.72rem;
+  }
+
   .fig-modal-shell--public-flow .fig-payment-qr-card {
-    padding: 0.82rem;
+    padding: 0.72rem;
     border-radius: 20px;
   }
 

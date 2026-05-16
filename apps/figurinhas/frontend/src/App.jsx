@@ -1191,8 +1191,8 @@ function PublicPage() {
               <h3>{customSticker ? 'Sua figurinha ja esta pronta' : 'Leve voce junto no mesmo PDF'}</h3>
               <p>
                 {customSticker
-                  ? 'Ela pode ser marcada junto com as outras selecoes do album e segue o mesmo tamanho fisico na folha.'
-                  : 'Envie sua foto, preencha seus dados e o sistema monta uma figurinha personalizada no mesmo padrao das outras.'}
+                  ? 'Ela entra no mesmo PDF das outras figurinhas.'
+                  : 'Crie sua figurinha no mesmo padrao das outras.'}
               </p>
               <div className="fig-hero-actions">
                 <button
@@ -1370,7 +1370,7 @@ function PublicPage() {
               <div>
                 <p className="fig-kicker">Minha Figurinha</p>
                 <h3>Crie uma figurinha personalizada</h3>
-                <p className="fig-modal-subtitle">Preencha seus dados, envie a foto e revise o resultado antes de usar no PDF.</p>
+                <p className="fig-modal-subtitle">Dados, foto e pronto.</p>
               </div>
               <button type="button" className="fig-modal-close" onClick={() => setMyStickerModalOpen(false)}>
                 Fechar
@@ -1386,15 +1386,14 @@ function PublicPage() {
 
               <div className="fig-service-notes">
                 <p>
-                  Envie uma foto com o rosto visivel. O sistema estiliza a imagem e encaixa a sua figurinha no mesmo
-                  tamanho fisico das demais.
+                  Envie uma foto com o rosto visivel.
                 </p>
               </div>
 
               <div className="fig-section-block">
                 <div className="fig-section-block-head">
                   <strong>Informacoes da figurinha</strong>
-                  <span>Esses dados aparecem no card final.</span>
+                  <span>Preencha do seu jeito.</span>
                 </div>
               <div className="fig-form-grid">
                 <label className="fig-field">
@@ -1426,8 +1425,7 @@ function PublicPage() {
                     <div className="fig-custom-base-inline-copy">
                       <strong>Base oficial do perfil</strong>
                       <span>
-                        A IA vai usar essa base como referencia visual e manter o layout final da sua figurinha no mesmo
-                        estilo.
+                        A IA vai seguir esse estilo.
                       </span>
                     </div>
                   </div>
@@ -1436,8 +1434,7 @@ function PublicPage() {
                     <div>
                       <strong>Base padrao.</strong>
                       <span>
-                        Ainda nao existe uma base oficial cadastrada para esse perfil, entao o sistema vai usar o layout
-                        padrao atual.
+                        O sistema vai usar o layout padrao atual.
                       </span>
                     </div>
                   </div>
@@ -1491,7 +1488,7 @@ function PublicPage() {
               <div className="fig-section-block">
                 <div className="fig-section-block-head">
                   <strong>Foto e estilo base</strong>
-                  <span>Escolha o perfil certo para guiar a composicao da figurinha.</span>
+                  <span>Escolha o perfil certo.</span>
                 </div>
 
               {customSticker ? (
@@ -1501,7 +1498,7 @@ function PublicPage() {
                     <strong>{customSticker.name}</strong>
                     <span>Atual: {customProfileLabel(customSticker.profile_type)}</span>
                     <small>
-                      Crie novamente se quiser atualizar a foto ou os dados que aparecem na sua figurinha.
+                      Recrie se quiser trocar foto ou dados.
                     </small>
                   </div>
                 </div>
@@ -1761,8 +1758,8 @@ function PublicPage() {
                 </h3>
                 <p className="fig-modal-subtitle">
                   {customUnlockStep === 'payment'
-                    ? 'Pague o Pix para manter sua figurinha personalizada no arquivo.'
-                    : 'Voce escolhe entre baixar gratis sem a figurinha personalizada ou liberar o PDF completo.'}
+                    ? 'Pague o Pix para manter sua figurinha no arquivo.'
+                    : 'Escolha como quer baixar.'}
                 </p>
               </div>
               <button type="button" className="fig-modal-close" onClick={() => setCustomUnlockModalOpen(false)}>
@@ -1810,8 +1807,8 @@ function PublicPage() {
                       <strong>Baixar gratis sem Minha Figurinha</strong>
                       <span>
                         {freeSelectedIds.length > 0
-                          ? 'Remove so a figurinha personalizada do arquivo e baixa agora.'
-                          : 'Adicione outras figurinhas para ter uma versao gratis sem a personalizada.'}
+                          ? 'Baixa agora sem a personalizada.'
+                          : 'Adicione outras figurinhas para liberar essa opcao.'}
                       </span>
                     </button>
                     <button
@@ -1825,7 +1822,7 @@ function PublicPage() {
                           ? 'Gerando Pix...'
                           : `Liberar PDF completo por ${formatCurrency(serviceConfig.custom_sticker_unlock_price_cents)}`}
                       </strong>
-                      <span>Mantem sua figurinha personalizada no mesmo PDF das outras.</span>
+                      <span>Mantem sua figurinha no PDF.</span>
                     </button>
                   </div>
                 </>
@@ -1837,7 +1834,7 @@ function PublicPage() {
                     <span className="fig-flow-step">3. Baixar</span>
                   </div>
                   <div className="fig-service-notes">
-                    <p>Pague o Pix abaixo para liberar o download completo com a sua figurinha personalizada.</p>
+                    <p>Pague o Pix para liberar o PDF completo.</p>
                   </div>
 
                   <div className="fig-quote-grid fig-quote-grid--donation">
@@ -1875,7 +1872,7 @@ function PublicPage() {
                   <div className="fig-helper-strip fig-helper-strip--donation">
                     <div>
                       <strong>Pix copia e cola</strong>
-                      <span>{customUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
+                      <span className="fig-code-block">{customUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
                     </div>
                     <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
                       {customUnlockCopied ? 'Codigo copiado' : 'Copiar codigo Pix'}
