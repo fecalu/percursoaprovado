@@ -36,6 +36,13 @@ const customProfileOptions = [
   { value: 'MENINA', label: 'Menina' }
 ]
 
+const customBaseFieldByProfile = {
+  HOMEM: 'custom_base_homem_path',
+  MULHER: 'custom_base_mulher_path',
+  MENINO: 'custom_base_menino_path',
+  MENINA: 'custom_base_menina_path'
+}
+
 const STICKERS_PER_SHEET = 16
 
 function useAdminToken() {
@@ -128,6 +135,29 @@ function categoryLabel(category) {
 
 function customProfileLabel(profile) {
   return customProfileOptions.find(option => option.value === profile)?.label || profile || 'Minha Figurinha'
+}
+
+function customBasePathForProfile(config, profile) {
+  if (!config || !profile) return ''
+  return config[customBaseFieldByProfile[profile]] || ''
+}
+
+function serviceConfigToForm(data) {
+  return {
+    service_enabled: data.service_enabled,
+    donation_enabled: data.donation_enabled,
+    pack_size: String(data.pack_size),
+    print_price: moneyInputFromCents(data.print_price_cents),
+    pack_price: moneyInputFromCents(data.pack_price_cents),
+    pix_key: data.pix_key || '',
+    pix_holder: data.pix_holder || '',
+    donation_message: data.donation_message || '',
+    pickup_note: data.pickup_note || '',
+    custom_base_homem_path: data.custom_base_homem_path || '',
+    custom_base_mulher_path: data.custom_base_mulher_path || '',
+    custom_base_menino_path: data.custom_base_menino_path || '',
+    custom_base_menina_path: data.custom_base_menina_path || ''
+  }
 }
 
 function moneyInputFromCents(cents) {
@@ -307,6 +337,10 @@ function PublicPage() {
   const customStickerSelected = useMemo(
     () => !!customSticker && selectedStickers.some(sticker => sticker.id === customSticker.id),
     [customSticker, selectedStickers]
+  )
+  const currentCustomBasePreview = useMemo(
+    () => customBasePathForProfile(serviceConfig, myStickerForm.profile_type),
+    [serviceConfig, myStickerForm.profile_type]
   )
 
   useEffect(() => {
@@ -1216,6 +1250,30 @@ function PublicPage() {
                     ))}
                   </select>
                 </label>
+                {currentCustomBasePreview ? (
+                  <div className="fig-custom-base-inline">
+                    <div className="fig-custom-base-inline-preview">
+                      <img src={apiFileUrl(currentCustomBasePreview)} alt={`Base ${customProfileLabel(myStickerForm.profile_type)}`} />
+                    </div>
+                    <div className="fig-custom-base-inline-copy">
+                      <strong>Base oficial do perfil</strong>
+                      <span>
+                        A IA vai usar essa base como referencia visual e manter o layout final da sua figurinha no mesmo
+                        estilo.
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                    <div>
+                      <strong>Base padrao.</strong>
+                      <span>
+                        Ainda nao existe uma base oficial cadastrada para esse perfil, entao o sistema vai usar o layout
+                        padrao atual.
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <label className="fig-field fig-field--full">
                   <span>Foto</span>
                   <input
@@ -1639,9 +1697,15 @@ function AdminPage() {
     pix_key: '',
     pix_holder: '',
     donation_message: '',
-    pickup_note: ''
+    pickup_note: '',
+    custom_base_homem_path: '',
+    custom_base_mulher_path: '',
+    custom_base_menino_path: '',
+    custom_base_menina_path: ''
   })
   const [savingService, setSavingService] = useState(false)
+  const [uploadingBaseProfile, setUploadingBaseProfile] = useState('')
+  const [deletingBaseProfile, setDeletingBaseProfile] = useState('')
   const [orders, setOrders] = useState([])
   const [selectedOrderId, setSelectedOrderId] = useState(null)
   const [adminView, setAdminView] = useState('structure')
@@ -1712,17 +1776,7 @@ function AdminPage() {
     const data = await apiFetch('/admin/service-config', {
       headers: buildAdminHeaders(token)
     })
-    setServiceForm({
-      service_enabled: data.service_enabled,
-      donation_enabled: data.donation_enabled,
-      pack_size: String(data.pack_size),
-      print_price: moneyInputFromCents(data.print_price_cents),
-      pack_price: moneyInputFromCents(data.pack_price_cents),
-      pix_key: data.pix_key || '',
-      pix_holder: data.pix_holder || '',
-      donation_message: data.donation_message || '',
-      pickup_note: data.pickup_note || ''
-    })
+    setServiceForm(serviceConfigToForm(data))
   }
 
   async function fetchOrders(activeOrderId = selectedOrderId) {
@@ -2221,6 +2275,47 @@ function AdminPage() {
       setError(err.message)
     } finally {
       setSavingService(false)
+    }
+  }
+
+  async function handleCustomBaseUpload(profile, file) {
+    if (!file) return
+    setUploadingBaseProfile(profile)
+    setError('')
+    setMessage('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const data = await apiFetch(`/admin/service-config/custom-bases/${profile}`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token),
+        body: formData
+      })
+      setServiceForm(serviceConfigToForm(data))
+      setMessage(`Base de ${customProfileLabel(profile).toLowerCase()} atualizada.`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploadingBaseProfile('')
+    }
+  }
+
+  async function handleCustomBaseDelete(profile) {
+    if (!window.confirm(`Remover a base de ${customProfileLabel(profile).toLowerCase()}?`)) return
+    setDeletingBaseProfile(profile)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/service-config/custom-bases/${profile}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      setServiceForm(serviceConfigToForm(data))
+      setMessage(`Base de ${customProfileLabel(profile).toLowerCase()} removida.`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingBaseProfile('')
     }
   }
 
@@ -3000,6 +3095,7 @@ function AdminPage() {
 
         {adminView === 'atendimento' ? (
         <section className="fig-admin-summary-grid">
+            <div className="fig-admin-stack">
             <form className="fig-form-card" onSubmit={handleSaveServiceConfig}>
               <div className="fig-panel-header">
                 <p className="fig-kicker">Configuracao publica</p>
@@ -3092,6 +3188,70 @@ function AdminPage() {
               </button>
             </div>
           </form>
+
+          <section className="fig-form-card">
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Minha Figurinha</p>
+              <h3>Bases oficiais por perfil</h3>
+            </div>
+            <p className="fig-empty-note">
+              Envie 4 templates prontos, um para homem, mulher, menino e menina. O ideal e que cada base ja tenha o
+              layout final da figurinha e uma area central limpa para receber o retrato.
+            </p>
+
+            <div className="fig-custom-base-grid">
+              {customProfileOptions.map(option => {
+                const basePath = serviceForm[customBaseFieldByProfile[option.value]] || ''
+                const isUploading = uploadingBaseProfile === option.value
+                const isDeleting = deletingBaseProfile === option.value
+                return (
+                  <article key={option.value} className="fig-custom-base-card">
+                    <div className="fig-custom-base-card-head">
+                      <div>
+                        <strong>{option.label}</strong>
+                        <span>{basePath ? 'Base configurada' : 'Base ainda nao enviada'}</span>
+                      </div>
+                    </div>
+
+                    <div className="fig-custom-base-card-preview">
+                      {basePath ? (
+                        <img src={apiFileUrl(basePath)} alt={`Base ${option.label}`} />
+                      ) : (
+                        <div className="fig-custom-base-card-empty">
+                          <span>Sem base</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="fig-custom-base-card-actions">
+                      <label className="fig-secondary-button fig-file-button">
+                        {isUploading ? 'Enviando...' : basePath ? 'Trocar base' : 'Enviar base'}
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          disabled={isUploading}
+                          onChange={event => {
+                            const file = event.target.files?.[0]
+                            handleCustomBaseUpload(option.value, file)
+                            event.target.value = ''
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="fig-inline-link"
+                        disabled={!basePath || isDeleting}
+                        onClick={() => handleCustomBaseDelete(option.value)}
+                      >
+                        {isDeleting ? 'Removendo...' : 'Remover'}
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+          </div>
 
           <section className="fig-form-card">
             <div className="fig-panel-header">

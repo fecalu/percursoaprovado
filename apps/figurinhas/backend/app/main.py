@@ -61,6 +61,7 @@ from .services import (
     collection_to_response,
     create_print_order,
     crop_sticker_image,
+    delete_custom_base_image,
     delete_generated_stickers_for_session,
     ensure_album_slug_unique,
     ensure_default_album_assignments,
@@ -76,6 +77,7 @@ from .services import (
     page_to_response,
     print_order_to_response,
     refresh_sticker_ocr,
+    save_custom_base_image,
     save_pdf_and_render_pages,
     service_settings_to_response,
     slugify,
@@ -180,6 +182,26 @@ def ensure_runtime_schema() -> None:
             if "donation_message" not in service_columns:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_service_settings ADD COLUMN donation_message TEXT"
+                )
+            if "pickup_note" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN pickup_note TEXT"
+                )
+            if "custom_base_homem_path" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_base_homem_path VARCHAR(255)"
+                )
+            if "custom_base_mulher_path" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_base_mulher_path VARCHAR(255)"
+                )
+            if "custom_base_menino_path" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_base_menino_path VARCHAR(255)"
+                )
+            if "custom_base_menina_path" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_base_menina_path VARCHAR(255)"
                 )
 
         print_orders_table_exists = connection.exec_driver_sql(
@@ -546,6 +568,59 @@ def update_admin_service_config(payload: ServiceConfigUpdate, db: Session = Depe
     service_settings.pix_holder = (payload.pix_holder or "").strip() or None
     service_settings.donation_message = (payload.donation_message or "").strip() or None
     service_settings.pickup_note = (payload.pickup_note or "").strip() or None
+    db.commit()
+    db.refresh(service_settings)
+    return service_settings_to_response(service_settings)
+
+
+@app.post(
+    "/admin/service-config/custom-bases/{profile_type}",
+    response_model=ServiceConfigResponse,
+    dependencies=[Depends(require_admin)],
+)
+async def upload_admin_custom_base(
+    profile_type: CustomProfileType,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    if not file.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem valida para a base.")
+    if not (file.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem JPG ou PNG valida.")
+
+    upload_bytes = await file.read()
+    if not upload_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A imagem base enviada esta vazia.")
+    if len(upload_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A imagem base passou do limite de {settings.custom_upload_limit_mb} MB.",
+        )
+
+    service_settings = get_or_create_service_settings(db)
+    try:
+        save_custom_base_image(
+            service_settings,
+            profile_type=profile_type,
+            upload_bytes=upload_bytes,
+            original_name=file.filename,
+        )
+    except OSError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nao foi possivel ler essa imagem base.") from err
+
+    db.commit()
+    db.refresh(service_settings)
+    return service_settings_to_response(service_settings)
+
+
+@app.delete(
+    "/admin/service-config/custom-bases/{profile_type}",
+    response_model=ServiceConfigResponse,
+    dependencies=[Depends(require_admin)],
+)
+def delete_admin_custom_base(profile_type: CustomProfileType, db: Session = Depends(get_db)) -> dict:
+    service_settings = get_or_create_service_settings(db)
+    delete_custom_base_image(service_settings, profile_type)
     db.commit()
     db.refresh(service_settings)
     return service_settings_to_response(service_settings)

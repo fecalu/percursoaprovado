@@ -40,6 +40,15 @@ class Settings:
 def get_settings() -> Settings:
     settings = Settings()
     settings.storage_root.mkdir(parents=True, exist_ok=True)
-    for subdir in ("originals", "pages", "crops", "exports", "custom_uploads", "custom_portraits", "custom_stickers"):
+    for subdir in (
+        "originals",
+        "pages",
+        "crops",
+        "exports",
+        "custom_uploads",
+        "custom_portraits",
+        "custom_stickers",
+        "custom_bases",
+    ):
         (settings.storage_root / subdir).mkdir(parents=True, exist_ok=True)
     return settings

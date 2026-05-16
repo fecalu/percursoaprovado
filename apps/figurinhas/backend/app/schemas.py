@@ -204,6 +204,10 @@ class ServiceConfigResponse(BaseModel):
     pix_holder: str | None
     donation_message: str | None
     pickup_note: str | None
+    custom_base_homem_path: str | None = None
+    custom_base_mulher_path: str | None = None
+    custom_base_menino_path: str | None = None
+    custom_base_menina_path: str | None = None
 
 
 class ServiceConfigUpdate(BaseModel):

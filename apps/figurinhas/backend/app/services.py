@@ -38,6 +38,13 @@ from .name_ocr import detect_sticker_name
 
 settings = get_settings()
 
+CUSTOM_BASE_FIELD_BY_PROFILE: dict[CustomProfileType, str] = {
+    CustomProfileType.HOMEM: "custom_base_homem_path",
+    CustomProfileType.MULHER: "custom_base_mulher_path",
+    CustomProfileType.MENINO: "custom_base_menino_path",
+    CustomProfileType.MENINA: "custom_base_menina_path",
+}
+
 
 def slugify(value: str) -> str:
     normalized = "".join(char.lower() if char.isalnum() else "-" for char in value.strip())
@@ -284,6 +291,57 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
     db.add(settings_record)
     db.flush()
     return settings_record
+
+
+def get_custom_base_relative_path(service_settings: ServiceSettings, profile_type: CustomProfileType) -> str | None:
+    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[profile_type]
+    return getattr(service_settings, field_name, None)
+
+
+def get_custom_base_file_path(service_settings: ServiceSettings, profile_type: CustomProfileType) -> Path | None:
+    relative_path = get_custom_base_relative_path(service_settings, profile_type)
+    if not relative_path:
+        return None
+    file_path = settings.storage_root / relative_path
+    return file_path if file_path.exists() else None
+
+
+def save_custom_base_image(
+    service_settings: ServiceSettings,
+    *,
+    profile_type: CustomProfileType,
+    upload_bytes: bytes,
+    original_name: str,
+) -> str:
+    with Image.open(io.BytesIO(upload_bytes)) as raw_image:
+        image = raw_image.convert("RGBA")
+
+    target_dir = settings.storage_root / "custom_bases"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    file_name = f"{profile_type.value.lower()}-{uuid.uuid4().hex[:10]}.png"
+    file_path = target_dir / file_name
+    image.save(file_path, format="PNG", optimize=True)
+
+    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[profile_type]
+    previous_relative_path = getattr(service_settings, field_name, None)
+    if previous_relative_path:
+        previous_path = settings.storage_root / previous_relative_path
+        if previous_path.exists():
+            previous_path.unlink(missing_ok=True)
+
+    relative_path = str(file_path.relative_to(settings.storage_root).as_posix())
+    setattr(service_settings, field_name, relative_path)
+    return relative_path
+
+
+def delete_custom_base_image(service_settings: ServiceSettings, profile_type: CustomProfileType) -> None:
+    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[profile_type]
+    previous_relative_path = getattr(service_settings, field_name, None)
+    if previous_relative_path:
+        previous_path = settings.storage_root / previous_relative_path
+        if previous_path.exists():
+            previous_path.unlink(missing_ok=True)
+    setattr(service_settings, field_name, None)
 
 
 def delete_sticker_assets(sticker: Sticker) -> None:
@@ -539,6 +597,7 @@ def upsert_generated_sticker(
     if not session_token:
         raise ValueError("Sessao invalida para criar a figurinha personalizada.")
 
+    service_settings = get_or_create_service_settings(db)
     template_sticker = resolve_generated_template_sticker(db, album)
     collection, page = ensure_generated_collection_page(db, album, template_sticker)
     delete_generated_stickers_for_session(db, album.id, session_token)
@@ -566,6 +625,7 @@ def upsert_generated_sticker(
         city_or_team=(city_or_team or "").strip() or None,
         target_width_px=width_px,
         target_height_px=height_px,
+        base_template_path=get_custom_base_file_path(service_settings, profile_type),
     )
 
     upload_dir = settings.storage_root / "custom_uploads" / album.slug
@@ -1154,6 +1214,10 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
         "pix_holder": service_settings.pix_holder,
         "donation_message": service_settings.donation_message,
         "pickup_note": service_settings.pickup_note,
+        "custom_base_homem_path": service_settings.custom_base_homem_path,
+        "custom_base_mulher_path": service_settings.custom_base_mulher_path,
+        "custom_base_menino_path": service_settings.custom_base_menino_path,
+        "custom_base_menina_path": service_settings.custom_base_menina_path,
     }
 
 

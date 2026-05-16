@@ -655,6 +655,36 @@ a {
   margin: 0.9rem 0 0;
 }
 
+.fig-custom-base-inline {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.8rem;
+  border-radius: 18px;
+  background: rgba(17, 34, 53, 0.04);
+  border: 1px solid rgba(17, 34, 53, 0.08);
+}
+
+.fig-custom-base-inline-preview img {
+  width: 88px;
+  aspect-ratio: 0.73;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 10px 22px rgba(17, 34, 53, 0.08);
+}
+
+.fig-custom-base-inline-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+}
+
+.fig-custom-base-inline-copy span {
+  color: #5a6c82;
+  font-size: 0.84rem;
+}
+
 .fig-inline-link:disabled {
   opacity: 0.48;
   cursor: not-allowed;
@@ -1153,6 +1183,12 @@ a {
   margin-bottom: 1rem;
 }
 
+.fig-admin-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .fig-admin-panel-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1311,6 +1347,84 @@ a {
   text-align: center;
 }
 
+.fig-custom-base-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.fig-custom-base-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(251, 253, 255, 0.98), rgba(243, 248, 252, 0.95));
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  box-shadow: 0 14px 26px rgba(17, 34, 53, 0.045);
+}
+
+.fig-custom-base-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fig-custom-base-card-head strong {
+  display: block;
+}
+
+.fig-custom-base-card-head span {
+  color: #5a6c82;
+  font-size: 0.82rem;
+}
+
+.fig-custom-base-card-preview {
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(17, 34, 53, 0.04);
+  border: 1px solid rgba(17, 34, 53, 0.08);
+}
+
+.fig-custom-base-card-preview img {
+  width: 100%;
+  aspect-ratio: 0.73;
+  object-fit: cover;
+}
+
+.fig-custom-base-card-empty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 0.73;
+  color: #6f8198;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.fig-custom-base-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.fig-file-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.fig-file-button input[type='file'] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .fig-admin-empty-state h3 {
   margin: 0;
 }
@@ -1338,7 +1452,8 @@ a {
   .fig-admin-panel-grid,
   .fig-order-layout,
   .fig-quote-grid,
-  .fig-order-options {
+  .fig-order-options,
+  .fig-custom-base-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1383,6 +1498,10 @@ a {
   }
 
   .fig-custom-card {
+    grid-template-columns: 1fr;
+  }
+
+  .fig-custom-base-inline {
     grid-template-columns: 1fr;
   }
 }

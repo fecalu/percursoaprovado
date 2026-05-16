@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 from dataclasses import dataclass
+from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 
@@ -38,6 +39,7 @@ def generate_custom_sticker_render(
     settings,
     *,
     uploaded_photo_bytes: bytes,
+    base_template_path: Path | None = None,
     name: str,
     profile_type: str,
     birth_date_text: str | None,
@@ -48,9 +50,11 @@ def generate_custom_sticker_render(
     target_height_px: int,
 ) -> CustomStickerRender:
     uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
+    base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
     portrait_image = _generate_portrait_with_fallback(
         settings,
         uploaded_photo=uploaded_photo,
+        base_template=base_template,
         name=name,
         profile_type=profile_type,
         city_or_team=city_or_team,
@@ -63,6 +67,7 @@ def generate_custom_sticker_render(
 
     final_image = _compose_sticker_card(
         portrait_image,
+        base_template=base_template,
         name=name,
         profile_type=profile_type,
         birth_date_text=birth_date_text,
@@ -85,10 +90,19 @@ def _open_uploaded_photo(uploaded_photo_bytes: bytes) -> Image.Image:
         return ImageOps.exif_transpose(raw_image).convert("RGB")
 
 
+def _open_base_template(base_template_path: Path | None, *, target_size: tuple[int, int]) -> Image.Image | None:
+    if base_template_path is None or not base_template_path.exists():
+        return None
+    with Image.open(base_template_path) as raw_image:
+        base_template = ImageOps.exif_transpose(raw_image).convert("RGBA")
+    return _fit_cover(base_template, target_size).convert("RGBA")
+
+
 def _generate_portrait_with_fallback(
     settings,
     *,
     uploaded_photo: Image.Image,
+    base_template: Image.Image | None,
     name: str,
     profile_type: str,
     city_or_team: str | None,
@@ -99,6 +113,7 @@ def _generate_portrait_with_fallback(
         generated = _generate_portrait_with_gemini(
             settings,
             uploaded_photo=uploaded_photo,
+            base_template=base_template,
             name=name,
             profile_type=profile_type,
             city_or_team=city_or_team,
@@ -112,6 +127,7 @@ def _generate_portrait_with_gemini(
     settings,
     *,
     uploaded_photo: Image.Image,
+    base_template: Image.Image | None,
     name: str,
     profile_type: str,
     city_or_team: str | None,
@@ -120,10 +136,20 @@ def _generate_portrait_with_gemini(
         working_image = uploaded_photo.copy()
         working_image.thumbnail((1536, 1536))
         client = genai.Client(api_key=settings.gemini_api_key)
-        prompt = _build_gemini_prompt(name=name, profile_type=profile_type, city_or_team=city_or_team)
+        prompt = _build_gemini_prompt(
+            name=name,
+            profile_type=profile_type,
+            city_or_team=city_or_team,
+            has_base_template=base_template is not None,
+        )
+        contents = [prompt, working_image]
+        if base_template is not None:
+            base_reference = base_template.copy().convert("RGB")
+            base_reference.thumbnail((1536, 1536))
+            contents.append(base_reference)
         response = client.models.generate_content(
             model=settings.gemini_image_model,
-            contents=[prompt, working_image],
+            contents=contents,
             config=genai_types.GenerateContentConfig(
                 response_modalities=["TEXT", "IMAGE"],
             ),
@@ -153,15 +179,28 @@ def _iter_gemini_response_parts(response) -> list:
     return list(getattr(content, "parts", None) or [])
 
 
-def _build_gemini_prompt(*, name: str, profile_type: str, city_or_team: str | None) -> str:
+def _build_gemini_prompt(
+    *,
+    name: str,
+    profile_type: str,
+    city_or_team: str | None,
+    has_base_template: bool,
+) -> str:
     profile_label = PROFILE_LABELS.get(profile_type, "Pessoa")
     city_hint = f" The background can subtly reference {city_or_team}." if city_or_team else ""
+    base_hint = (
+        " Use the second image as the official sticker base and visual style reference. Keep the same shirt mood, "
+        "layout energy, and overall collectible look, but generate only the central athlete portrait layer for "
+        "placement in that template."
+        if has_base_template
+        else ""
+    )
     return (
         f"Use the uploaded photo as the main facial reference and create a polished collectible football sticker portrait "
         f"of a {profile_label.lower()} named {name}. Preserve facial resemblance, natural skin tone, hair, and key face "
         f"features. Show a confident waist-up sports portrait with clean sportswear, premium lighting, and an editorial "
-        f"football-card look. Do not add any text, badge, logo, frame, watermark, extra people, extra limbs, duplicate "
-        f"features, hands covering the face, or any collage effect.{city_hint} Return a single portrait image only."
+        f"football-card look.{base_hint} Do not add any text, badge, logo, frame, watermark, extra people, extra limbs, "
+        f"duplicate features, hands covering the face, or any collage effect.{city_hint} Return a single portrait image only."
     )
 
 
@@ -193,6 +232,7 @@ def _build_stylized_fallback(
 def _compose_sticker_card(
     portrait_image: Image.Image,
     *,
+    base_template: Image.Image | None,
     name: str,
     profile_type: str,
     birth_date_text: str | None,
@@ -202,6 +242,20 @@ def _compose_sticker_card(
     width_px: int,
     height_px: int,
 ) -> Image.Image:
+    if base_template is not None:
+        return _compose_sticker_card_from_base(
+            base_template,
+            portrait_image,
+            name=name,
+            profile_type=profile_type,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
+            city_or_team=city_or_team,
+            width_px=width_px,
+            height_px=height_px,
+        )
+
     primary, secondary, soft = PROFILE_THEMES.get(profile_type, PROFILE_THEMES["HOMEM"])
     canvas = _vertical_gradient((width_px, height_px), primary, secondary)
     draw = ImageDraw.Draw(canvas)
@@ -334,6 +388,117 @@ def _compose_sticker_card(
     return canvas
 
 
+def _compose_sticker_card_from_base(
+    base_template: Image.Image,
+    portrait_image: Image.Image,
+    *,
+    name: str,
+    profile_type: str,
+    birth_date_text: str | None,
+    height_text: str | None,
+    weight_text: str | None,
+    city_or_team: str | None,
+    width_px: int,
+    height_px: int,
+) -> Image.Image:
+    primary, secondary, soft = PROFILE_THEMES.get(profile_type, PROFILE_THEMES["HOMEM"])
+    canvas = _fit_cover(base_template, (width_px, height_px)).convert("RGBA")
+
+    portrait_box = (
+        int(width_px * 0.11),
+        int(height_px * 0.12),
+        int(width_px * 0.89),
+        int(height_px * 0.64),
+    )
+    portrait_shadow = Image.new("RGBA", (width_px, height_px), (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(portrait_shadow)
+    shadow_draw.rounded_rectangle(
+        (
+            portrait_box[0] + max(width_px // 160, 4),
+            portrait_box[1] + max(height_px // 120, 8),
+            portrait_box[2] + max(width_px // 160, 4),
+            portrait_box[3] + max(height_px // 120, 8),
+        ),
+        radius=max(int(width_px * 0.045), 20),
+        fill=(7, 15, 29, 72),
+    )
+    portrait_shadow = portrait_shadow.filter(ImageFilter.GaussianBlur(radius=14))
+    canvas = Image.alpha_composite(canvas, portrait_shadow)
+
+    portrait_mask = Image.new("L", (portrait_box[2] - portrait_box[0], portrait_box[3] - portrait_box[1]), 0)
+    ImageDraw.Draw(portrait_mask).rounded_rectangle(
+        (0, 0, portrait_mask.width, portrait_mask.height),
+        radius=max(int(width_px * 0.045), 20),
+        fill=255,
+    )
+    fitted_portrait = _fit_cover(portrait_image, (portrait_mask.width, portrait_mask.height)).convert("RGBA")
+    canvas.paste(fitted_portrait, (portrait_box[0], portrait_box[1]), portrait_mask)
+
+    draw = ImageDraw.Draw(canvas)
+    name_font = _load_font(max(int(width_px * 0.074), 30), bold=True)
+    meta_font = _load_font(max(int(width_px * 0.035), 17), bold=False)
+    meta_label_font = _load_font(max(int(width_px * 0.028), 14), bold=True)
+    badge_font = _load_font(max(int(width_px * 0.032), 16), bold=True)
+
+    badge_text = PROFILE_LABELS.get(profile_type, "Perfil")
+    badge_width = int(badge_font.getbbox(badge_text)[2] - badge_font.getbbox(badge_text)[0]) + max(int(width_px * 0.09), 52)
+    badge_box = (
+        int(width_px * 0.11),
+        int(height_px * 0.665),
+        int(width_px * 0.11) + badge_width,
+        int(height_px * 0.665) + max(int(height_px * 0.05), 32),
+    )
+    draw.rounded_rectangle(badge_box, radius=max(int(width_px * 0.026), 16), fill=(255, 255, 255, 225))
+    draw.text(
+        (badge_box[0] + max(int(width_px * 0.025), 16), badge_box[1] + max(int(height_px * 0.009), 8)),
+        badge_text,
+        fill=primary,
+        font=badge_font,
+    )
+
+    name_top = badge_box[3] + max(int(height_px * 0.012), 10)
+    _draw_text_with_shadow(
+        draw,
+        (int(width_px * 0.11), name_top),
+        name.upper(),
+        font=name_font,
+        fill=(255, 255, 255),
+        shadow_fill=(7, 15, 29, 160),
+        shadow_offset=(0, max(height_px // 420, 2)),
+    )
+
+    info_items = [
+        ("Data", birth_date_text or "--"),
+        ("Altura", height_text or "--"),
+        ("Peso", weight_text or "--"),
+        ("Cidade ou time", city_or_team or "--"),
+    ]
+    info_top = int(height_px * 0.785)
+    info_height = max(int(height_px * 0.078), 54)
+    info_gap = max(int(width_px * 0.022), 14)
+    info_left = int(width_px * 0.11)
+    info_width = int((width_px * 0.78 - info_gap) / 2)
+
+    for index, (label, value) in enumerate(info_items):
+        column = index % 2
+        row = index // 2
+        left = info_left + column * (info_width + info_gap)
+        top = info_top + row * (info_height + max(int(height_px * 0.018), 12))
+        right = left + info_width
+        bottom = top + info_height
+        draw.rounded_rectangle(
+            (left, top, right, bottom),
+            radius=max(int(width_px * 0.025), 15),
+            fill=(255, 255, 255, 214),
+            outline=(255, 255, 255, 150),
+            width=max(width_px // 260, 2),
+        )
+        draw.text((left + max(int(width_px * 0.022), 14), top + max(int(height_px * 0.01), 8)), label, fill=secondary, font=meta_label_font)
+        draw.text((left + max(int(width_px * 0.022), 14), top + max(int(height_px * 0.038), 28)), value, fill=primary, font=meta_font)
+
+    return canvas.convert("RGB")
+
+
 def _fit_cover(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
     target_width, target_height = target_size
     if target_width <= 0 or target_height <= 0:
@@ -380,3 +545,17 @@ def _load_font(size: int, *, bold: bool) -> ImageFont.FreeTypeFont | ImageFont.I
         except OSError:
             continue
     return ImageFont.load_default()
+
+
+def _draw_text_with_shadow(
+    draw: ImageDraw.ImageDraw,
+    position: tuple[int, int],
+    text: str,
+    *,
+    font: ImageFont.FreeTypeFont | ImageFont.ImageFont,
+    fill,
+    shadow_fill,
+    shadow_offset: tuple[int, int] = (0, 2),
+) -> None:
+    draw.text((position[0] + shadow_offset[0], position[1] + shadow_offset[1]), text, fill=shadow_fill, font=font)
+    draw.text(position, text, fill=fill, font=font)
