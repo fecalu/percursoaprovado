@@ -67,18 +67,21 @@ def generate_custom_sticker_render(
     base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
     gemini_sticker_image = None
     if base_template is not None and settings.gemini_api_key and genai is not None and genai_types is not None:
-        gemini_sticker_image = _generate_sticker_with_gemini(
-            settings,
-            uploaded_photo=uploaded_photo,
-            base_template=base_template,
-            prompt_template=prompt_template,
-            name=name,
-            profile_type=profile_type,
-            birth_date_text=birth_date_text,
-            height_text=height_text,
-            weight_text=weight_text,
-            city_or_team=city_or_team,
-        )
+        try:
+            gemini_sticker_image = _generate_sticker_with_gemini(
+                settings,
+                uploaded_photo=uploaded_photo,
+                base_template=base_template,
+                prompt_template=prompt_template,
+                name=name,
+                profile_type=profile_type,
+                birth_date_text=birth_date_text,
+                height_text=height_text,
+                weight_text=weight_text,
+                city_or_team=city_or_team,
+            )
+        except Exception as exc:
+            raise ValueError(_humanize_gemini_error(exc)) from exc
         if gemini_sticker_image is None:
             raise ValueError("Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente.")
 
@@ -168,36 +171,49 @@ def _generate_sticker_with_gemini(
     weight_text: str | None,
     city_or_team: str | None,
 ) -> Image.Image | None:
-    try:
-        working_image = uploaded_photo.copy()
-        working_image.thumbnail((1536, 1536))
-        base_reference = base_template.copy().convert("RGB")
-        base_reference.thumbnail((1536, 1536))
-        client = genai.Client(api_key=settings.gemini_api_key)
-        prompt = _build_gemini_prompt(
-            prompt_template=prompt_template,
-            name=name,
-            profile_type=profile_type,
-            birth_date_text=birth_date_text,
-            height_text=height_text,
-            weight_text=weight_text,
-            city_or_team=city_or_team,
-            has_base_template=True,
-        )
-        response = client.models.generate_content(
-            model=settings.gemini_image_model,
-            contents=[prompt, working_image, base_reference],
-            config=genai_types.GenerateContentConfig(
-                response_modalities=["TEXT", "IMAGE"],
-            ),
-        )
-        for part in _iter_gemini_response_parts(response):
-            if getattr(part, "inline_data", None) is not None:
-                image = part.as_image()
-                return image.convert("RGB")
-        return None
-    except Exception:
-        return None
+    working_image = uploaded_photo.copy()
+    working_image.thumbnail((1536, 1536))
+    base_reference = base_template.copy().convert("RGB")
+    base_reference.thumbnail((1536, 1536))
+    client = genai.Client(api_key=settings.gemini_api_key)
+    prompt = _build_gemini_prompt(
+        prompt_template=prompt_template,
+        name=name,
+        profile_type=profile_type,
+        birth_date_text=birth_date_text,
+        height_text=height_text,
+        weight_text=weight_text,
+        city_or_team=city_or_team,
+        has_base_template=True,
+    )
+    response = client.models.generate_content(
+        model=settings.gemini_image_model,
+        contents=[prompt, working_image, base_reference],
+        config=genai_types.GenerateContentConfig(
+            response_modalities=["TEXT", "IMAGE"],
+        ),
+    )
+    for part in _iter_gemini_response_parts(response):
+        if getattr(part, "inline_data", None) is not None:
+            image = part.as_image()
+            return image.convert("RGB")
+    return None
+
+
+def _humanize_gemini_error(exc: Exception) -> str:
+    message = str(exc)
+    normalized = message.lower()
+    if "resource_exhausted" in normalized or "quota" in normalized or "429" in normalized:
+        return "A chave Gemini configurada esta sem cota para gerar imagens agora. Verifique o plano ou use outra chave."
+    if "api key" in normalized or "invalid" in normalized or "permission" in normalized:
+        return "A chave Gemini configurada nao conseguiu autorizar a geracao dessa figurinha."
+    if "deadline" in normalized or "timed out" in normalized or "timeout" in normalized:
+        return "A Gemini demorou demais para responder. Tente novamente em instantes."
+    if "safety" in normalized or "blocked" in normalized:
+        return "A Gemini bloqueou essa geracao por politica de seguranca. Tente outra foto."
+    if message.strip():
+        return f"Nao foi possivel gerar a figurinha com IA: {message}"
+    return "Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente."
 
 
 def _iter_gemini_response_parts(response) -> list:
