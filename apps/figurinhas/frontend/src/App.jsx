@@ -1223,10 +1223,13 @@ function AdminPage() {
   const [createForm, setCreateForm] = useState({ album_id: '', name: '', slug: '', description: '', sort_order: '0' })
   const [albumSlugEdited, setAlbumSlugEdited] = useState(false)
   const [createCollectionSlugEdited, setCreateCollectionSlugEdited] = useState(false)
+  const [albumSlugManualOpen, setAlbumSlugManualOpen] = useState(false)
+  const [createCollectionSlugManualOpen, setCreateCollectionSlugManualOpen] = useState(false)
   const [albumStructureMode, setAlbumStructureMode] = useState('edit')
   const [collectionStructureMode, setCollectionStructureMode] = useState('edit')
   const [selectedAlbumForm, setSelectedAlbumForm] = useState({ name: '', slug: '', description: '', sort_order: '0' })
   const [selectedAlbumSlugEdited, setSelectedAlbumSlugEdited] = useState(false)
+  const [selectedAlbumSlugManualOpen, setSelectedAlbumSlugManualOpen] = useState(false)
   const [selectedCollectionForm, setSelectedCollectionForm] = useState({
     name: '',
     slug: '',
@@ -1234,6 +1237,7 @@ function AdminPage() {
     sort_order: '0'
   })
   const [selectedCollectionSlugEdited, setSelectedCollectionSlugEdited] = useState(false)
+  const [selectedCollectionSlugManualOpen, setSelectedCollectionSlugManualOpen] = useState(false)
   const [savingAlbum, setSavingAlbum] = useState(false)
   const [savingAlbumEdit, setSavingAlbumEdit] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -1470,6 +1474,7 @@ function AdminPage() {
     if (!selectedAlbum) {
       setSelectedAlbumForm({ name: '', slug: '', description: '', sort_order: '0' })
       setSelectedAlbumSlugEdited(false)
+      setSelectedAlbumSlugManualOpen(false)
       return
     }
     setSelectedAlbumForm({
@@ -1479,12 +1484,14 @@ function AdminPage() {
       sort_order: String(selectedAlbum.sort_order ?? 0)
     })
     setSelectedAlbumSlugEdited(false)
+    setSelectedAlbumSlugManualOpen(false)
   }, [selectedAlbum])
 
   useEffect(() => {
     if (!selectedCollection) {
       setSelectedCollectionForm({ name: '', slug: '', description: '', sort_order: '0' })
       setSelectedCollectionSlugEdited(false)
+      setSelectedCollectionSlugManualOpen(false)
       return
     }
     setSelectedCollectionForm({
@@ -1494,6 +1501,7 @@ function AdminPage() {
       sort_order: String(selectedCollection.sort_order ?? 0)
     })
     setSelectedCollectionSlugEdited(false)
+    setSelectedCollectionSlugManualOpen(false)
   }, [selectedCollection])
 
   useEffect(() => {
@@ -1544,6 +1552,12 @@ function AdminPage() {
     setAlbumForm(current => ({ ...current, slug: buildSlug(value) }))
   }
 
+  function handleAlbumSlugAutoMode() {
+    setAlbumSlugEdited(false)
+    setAlbumSlugManualOpen(false)
+    setAlbumForm(current => ({ ...current, slug: buildSlug(current.name) }))
+  }
+
   function handleCreateCollectionNameChange(value) {
     setCreateForm(current => ({
       ...current,
@@ -1555,6 +1569,12 @@ function AdminPage() {
   function handleCreateCollectionSlugChange(value) {
     setCreateCollectionSlugEdited(true)
     setCreateForm(current => ({ ...current, slug: buildSlug(value) }))
+  }
+
+  function handleCreateCollectionSlugAutoMode() {
+    setCreateCollectionSlugEdited(false)
+    setCreateCollectionSlugManualOpen(false)
+    setCreateForm(current => ({ ...current, slug: buildSlug(current.name) }))
   }
 
   function handleSelectedAlbumNameChange(value) {
@@ -1570,6 +1590,12 @@ function AdminPage() {
     setSelectedAlbumForm(current => ({ ...current, slug: buildSlug(value) }))
   }
 
+  function handleSelectedAlbumSlugAutoMode() {
+    setSelectedAlbumSlugEdited(false)
+    setSelectedAlbumSlugManualOpen(false)
+    setSelectedAlbumForm(current => ({ ...current, slug: buildSlug(current.name) }))
+  }
+
   function handleSelectedCollectionNameChange(value) {
     setSelectedCollectionForm(current => ({
       ...current,
@@ -1581,6 +1607,12 @@ function AdminPage() {
   function handleSelectedCollectionSlugChange(value) {
     setSelectedCollectionSlugEdited(true)
     setSelectedCollectionForm(current => ({ ...current, slug: buildSlug(value) }))
+  }
+
+  function handleSelectedCollectionSlugAutoMode() {
+    setSelectedCollectionSlugEdited(false)
+    setSelectedCollectionSlugManualOpen(false)
+    setSelectedCollectionForm(current => ({ ...current, slug: buildSlug(current.name) }))
   }
 
   function resetStickerForm() {
@@ -1631,6 +1663,7 @@ function AdminPage() {
       })
       setAlbumForm({ name: '', slug: '', description: '', sort_order: '0' })
       setAlbumSlugEdited(false)
+      setAlbumSlugManualOpen(false)
       setAlbumStructureMode('edit')
       setMessage('Album criado.')
       await fetchAlbums(created.id)
@@ -1657,6 +1690,7 @@ function AdminPage() {
       })
       setCreateForm(current => ({ ...current, name: '', slug: '', description: '', sort_order: '0' }))
       setCreateCollectionSlugEdited(false)
+      setCreateCollectionSlugManualOpen(false)
       setCollectionStructureMode('edit')
       setMessage('Colecao criada.')
       setSelectedAlbumId(created.album_id || selectedAlbumId)
@@ -1720,6 +1754,7 @@ function AdminPage() {
     const nextOrder = albums.reduce((maxValue, album) => Math.max(maxValue, Number(album.sort_order || 0)), 0) + 1
     setAlbumForm({ name: '', slug: '', description: '', sort_order: String(nextOrder) })
     setAlbumSlugEdited(false)
+    setAlbumSlugManualOpen(false)
     setAlbumStructureMode('create')
     setCollectionStructureMode('edit')
     setAdminView('structure')
@@ -1742,6 +1777,7 @@ function AdminPage() {
       sort_order: String(nextOrder)
     })
     setCreateCollectionSlugEdited(false)
+    setCreateCollectionSlugManualOpen(false)
     setCollectionStructureMode('create')
     setAlbumStructureMode('edit')
     setAdminView('structure')
@@ -1756,6 +1792,8 @@ function AdminPage() {
   function handleCancelCreation() {
     setAlbumStructureMode('edit')
     setCollectionStructureMode('edit')
+    setAlbumSlugManualOpen(false)
+    setCreateCollectionSlugManualOpen(false)
     setAdminView('structure')
     setSelectedCollectionId(null)
     setSelectedCollection(null)
@@ -2246,16 +2284,51 @@ function AdminPage() {
                   </label>
                   <label className="fig-field">
                     <span>Slug</span>
-                    <input
-                      value={isCreatingAlbum ? albumForm.slug : selectedAlbumForm.slug}
-                      onChange={event =>
-                        isCreatingAlbum
-                          ? handleAlbumSlugChange(event.target.value)
-                          : handleSelectedAlbumSlugChange(event.target.value)
-                      }
-                      placeholder="Gerado automaticamente"
-                    />
-                    <p className="fig-helper-text">Gerado automaticamente pelo nome. Se quiser, voce ainda pode ajustar.</p>
+                    {isCreatingAlbum ? (
+                      albumSlugManualOpen ? (
+                        <>
+                          <input
+                            value={albumForm.slug}
+                            onChange={event => handleAlbumSlugChange(event.target.value)}
+                            placeholder="Gerado automaticamente"
+                          />
+                          <div className="fig-field-inline-actions">
+                            <p className="fig-helper-text">Voce esta ajustando o slug manualmente.</p>
+                            <button type="button" className="fig-inline-link" onClick={handleAlbumSlugAutoMode}>
+                              Voltar ao automatico
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="fig-field-collapsed">
+                          <p className="fig-helper-text">URL: {albumForm.slug || 'sera gerado pelo nome'}</p>
+                          <button type="button" className="fig-inline-link" onClick={() => setAlbumSlugManualOpen(true)}>
+                            Ajustar slug manualmente
+                          </button>
+                        </div>
+                      )
+                    ) : selectedAlbumSlugManualOpen ? (
+                      <>
+                        <input
+                          value={selectedAlbumForm.slug}
+                          onChange={event => handleSelectedAlbumSlugChange(event.target.value)}
+                          placeholder="Gerado automaticamente"
+                        />
+                        <div className="fig-field-inline-actions">
+                          <p className="fig-helper-text">Voce esta ajustando o slug manualmente.</p>
+                          <button type="button" className="fig-inline-link" onClick={handleSelectedAlbumSlugAutoMode}>
+                            Voltar ao automatico
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="fig-field-collapsed">
+                        <p className="fig-helper-text">URL: {selectedAlbumForm.slug || 'sera gerado pelo nome'}</p>
+                        <button type="button" className="fig-inline-link" onClick={() => setSelectedAlbumSlugManualOpen(true)}>
+                          Ajustar slug manualmente
+                        </button>
+                      </div>
+                    )}
                   </label>
                   <label className="fig-field">
                     <span>Ordem na barra lateral</span>
@@ -2355,16 +2428,55 @@ function AdminPage() {
                   </label>
                   <label className="fig-field">
                     <span>Slug</span>
-                    <input
-                      value={isCreatingCollection ? createForm.slug : selectedCollectionForm.slug}
-                      onChange={event =>
-                        isCreatingCollection
-                          ? handleCreateCollectionSlugChange(event.target.value)
-                          : handleSelectedCollectionSlugChange(event.target.value)
-                      }
-                      placeholder="Gerado automaticamente"
-                    />
-                    <p className="fig-helper-text">Gerado automaticamente pelo nome. Se quiser, voce ainda pode ajustar.</p>
+                    {isCreatingCollection ? (
+                      createCollectionSlugManualOpen ? (
+                        <>
+                          <input
+                            value={createForm.slug}
+                            onChange={event => handleCreateCollectionSlugChange(event.target.value)}
+                            placeholder="Gerado automaticamente"
+                          />
+                          <div className="fig-field-inline-actions">
+                            <p className="fig-helper-text">Voce esta ajustando o slug manualmente.</p>
+                            <button type="button" className="fig-inline-link" onClick={handleCreateCollectionSlugAutoMode}>
+                              Voltar ao automatico
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="fig-field-collapsed">
+                          <p className="fig-helper-text">URL: {createForm.slug || 'sera gerado pelo nome'}</p>
+                          <button type="button" className="fig-inline-link" onClick={() => setCreateCollectionSlugManualOpen(true)}>
+                            Ajustar slug manualmente
+                          </button>
+                        </div>
+                      )
+                    ) : selectedCollectionSlugManualOpen ? (
+                      <>
+                        <input
+                          value={selectedCollectionForm.slug}
+                          onChange={event => handleSelectedCollectionSlugChange(event.target.value)}
+                          placeholder="Gerado automaticamente"
+                        />
+                        <div className="fig-field-inline-actions">
+                          <p className="fig-helper-text">Voce esta ajustando o slug manualmente.</p>
+                          <button type="button" className="fig-inline-link" onClick={handleSelectedCollectionSlugAutoMode}>
+                            Voltar ao automatico
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="fig-field-collapsed">
+                        <p className="fig-helper-text">URL: {selectedCollectionForm.slug || 'sera gerado pelo nome'}</p>
+                        <button
+                          type="button"
+                          className="fig-inline-link"
+                          onClick={() => setSelectedCollectionSlugManualOpen(true)}
+                        >
+                          Ajustar slug manualmente
+                        </button>
+                      </div>
+                    )}
                   </label>
                   <label className="fig-field">
                     <span>Ordem na barra lateral</span>

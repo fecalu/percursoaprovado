@@ -375,6 +375,33 @@ a {
   white-space: nowrap;
 }
 
+.fig-field-collapsed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 16px;
+  border: 1px dashed rgba(17, 34, 53, 0.12);
+  background: rgba(248, 251, 255, 0.72);
+}
+
+.fig-field-collapsed .fig-helper-text {
+  margin: 0;
+}
+
+.fig-field-inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.4rem;
+}
+
+.fig-field-inline-actions .fig-helper-text {
+  margin: 0;
+}
+
 .fig-form-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
