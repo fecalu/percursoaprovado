@@ -1,17 +1,12 @@
 from __future__ import annotations
 
+import base64
 import io
 from dataclasses import dataclass
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
-
-try:
-    from google import genai
-    from google.genai import types as genai_types
-except ImportError:  # pragma: no cover - handled by fallback generation
-    genai = None  # type: ignore[assignment]
-    genai_types = None  # type: ignore[assignment]
+from openai import APIConnectionError, APIStatusError, AuthenticationError, OpenAI, RateLimitError
 
 
 PROFILE_LABELS = {
@@ -29,8 +24,7 @@ PROFILE_THEMES = {
 }
 
 DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE = (
-    "Use the first image as the real photo reference for {name}, a {profile_label_lower}. "
-    "{base_hint}Preserve the person's real facial features, skin tone, hair, smile and identity. "
+    "{base_hint}Preserve the person's real facial features, skin tone, hair, smile and identity from the second image. "
     "The final result must look like one single authentic collectible football sticker, never like a pasted portrait, cutout or collage. "
     "{details_hint}{city_hint}Do not redesign the base, do not remove borders, do not alter the official shirt, do not add extra people, extra hands, duplicated features, random logos, watermarks or collage artifacts. "
     "Return one complete finished sticker image only."
@@ -65,10 +59,10 @@ def generate_custom_sticker_render(
 ) -> CustomStickerRender:
     uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
     base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
-    gemini_sticker_image = None
-    if base_template is not None and settings.gemini_api_key and genai is not None and genai_types is not None:
+    openai_sticker_image = None
+    if base_template is not None and settings.openai_api_key:
         try:
-            gemini_sticker_image = _generate_sticker_with_gemini(
+            openai_sticker_image = _generate_sticker_with_openai(
                 settings,
                 uploaded_photo=uploaded_photo,
                 base_template=base_template,
@@ -79,14 +73,18 @@ def generate_custom_sticker_render(
                 height_text=height_text,
                 weight_text=weight_text,
                 city_or_team=city_or_team,
+                target_width_px=target_width_px,
+                target_height_px=target_height_px,
             )
         except Exception as exc:
-            raise ValueError(_humanize_gemini_error(exc)) from exc
-        if gemini_sticker_image is None:
+            raise ValueError(_humanize_openai_error(exc)) from exc
+        if openai_sticker_image is None:
             raise ValueError("Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente.")
+    elif base_template is not None:
+        raise ValueError("Configure uma chave da OpenAI para gerar a figurinha com IA usando a base oficial.")
 
-    if gemini_sticker_image is not None:
-        final_image = _resize_to_exact(gemini_sticker_image, (target_width_px, target_height_px))
+    if openai_sticker_image is not None:
+        final_image = _resize_to_exact(openai_sticker_image, (target_width_px, target_height_px))
         portrait_image = final_image
     else:
         portrait_image = _generate_portrait_with_fallback(
@@ -158,7 +156,7 @@ def _generate_portrait_with_fallback(
     return _build_stylized_fallback(uploaded_photo, profile_type, (target_width_px, target_height_px))
 
 
-def _generate_sticker_with_gemini(
+def _generate_sticker_with_openai(
     settings,
     *,
     uploaded_photo: Image.Image,
@@ -170,13 +168,11 @@ def _generate_sticker_with_gemini(
     height_text: str | None,
     weight_text: str | None,
     city_or_team: str | None,
+    target_width_px: int,
+    target_height_px: int,
 ) -> Image.Image | None:
-    working_image = uploaded_photo.copy()
-    working_image.thumbnail((1536, 1536))
-    base_reference = base_template.copy().convert("RGB")
-    base_reference.thumbnail((1536, 1536))
-    client = genai.Client(api_key=settings.gemini_api_key)
-    prompt = _build_gemini_prompt(
+    client = OpenAI(api_key=settings.openai_api_key)
+    prompt = _build_openai_prompt(
         prompt_template=prompt_template,
         name=name,
         profile_type=profile_type,
@@ -186,52 +182,50 @@ def _generate_sticker_with_gemini(
         city_or_team=city_or_team,
         has_base_template=True,
     )
-    response = client.models.generate_content(
-        model=settings.gemini_image_model,
-        contents=[prompt, working_image, base_reference],
-        config=genai_types.GenerateContentConfig(
-            response_modalities=["TEXT", "IMAGE"],
-        ),
+    response = client.images.edit(
+        model=settings.openai_image_model,
+        image=[
+            _image_to_upload_file(base_template, "base.png"),
+            _image_to_upload_file(uploaded_photo, "photo.png"),
+        ],
+        prompt=prompt,
+        size=_normalize_openai_size(target_width_px, target_height_px),
+        quality=settings.openai_image_quality,
     )
-    for part in _iter_gemini_response_parts(response):
-        if getattr(part, "inline_data", None) is not None:
-            image = part.as_image()
-            return image.convert("RGB")
+    if response.data and response.data[0].b64_json:
+        return Image.open(io.BytesIO(base64.b64decode(response.data[0].b64_json))).convert("RGB")
     return None
 
 
-def _humanize_gemini_error(exc: Exception) -> str:
+def _humanize_openai_error(exc: Exception) -> str:
+    if isinstance(exc, AuthenticationError):
+        return "A chave da OpenAI configurada nao conseguiu autorizar a geracao dessa figurinha."
+    if isinstance(exc, RateLimitError):
+        return "A chave da OpenAI atingiu o limite de uso para gerar imagens agora. Tente outra chave ou aguarde."
+    if isinstance(exc, APIConnectionError):
+        return "A OpenAI nao respondeu a tempo para gerar a figurinha. Tente novamente em instantes."
+    if isinstance(exc, APIStatusError):
+        status_code = getattr(exc, "status_code", None)
+        if status_code == 429:
+            return "A chave da OpenAI atingiu o limite de uso para gerar imagens agora. Tente outra chave ou aguarde."
+        if status_code == 400:
+            return "A OpenAI recusou essa geracao de imagem. Revise a foto, a base ou o prompt configurado."
     message = str(exc)
     normalized = message.lower()
-    if "resource_exhausted" in normalized or "quota" in normalized or "429" in normalized:
-        return "A chave Gemini configurada esta sem cota para gerar imagens agora. Verifique o plano ou use outra chave."
-    if "api key" in normalized or "invalid" in normalized or "permission" in normalized:
-        return "A chave Gemini configurada nao conseguiu autorizar a geracao dessa figurinha."
+    if "quota" in normalized or "429" in normalized:
+        return "A chave da OpenAI atingiu o limite de uso para gerar imagens agora. Tente outra chave ou aguarde."
+    if "api key" in normalized or "invalid" in normalized or "permission" in normalized or "unauthorized" in normalized:
+        return "A chave da OpenAI configurada nao conseguiu autorizar a geracao dessa figurinha."
     if "deadline" in normalized or "timed out" in normalized or "timeout" in normalized:
-        return "A Gemini demorou demais para responder. Tente novamente em instantes."
+        return "A OpenAI demorou demais para responder. Tente novamente em instantes."
     if "safety" in normalized or "blocked" in normalized:
-        return "A Gemini bloqueou essa geracao por politica de seguranca. Tente outra foto."
+        return "A OpenAI bloqueou essa geracao por politica de seguranca. Tente outra foto."
     if message.strip():
         return f"Nao foi possivel gerar a figurinha com IA: {message}"
     return "Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente."
 
 
-def _iter_gemini_response_parts(response) -> list:
-    parts = getattr(response, "parts", None)
-    if parts:
-        return list(parts)
-
-    candidates = getattr(response, "candidates", None) or []
-    if not candidates:
-        return []
-
-    content = getattr(candidates[0], "content", None)
-    if content is None:
-        return []
-    return list(getattr(content, "parts", None) or [])
-
-
-def _build_gemini_prompt(
+def _build_openai_prompt(
     *,
     prompt_template: str | None,
     name: str,
@@ -245,9 +239,9 @@ def _build_gemini_prompt(
     profile_label = PROFILE_LABELS.get(profile_type, "Pessoa")
     city_hint = f" If the sticker has a field for city or team, use exactly '{city_or_team}'." if city_or_team else ""
     base_hint = (
-        " Use the second image as the official finished sticker base. Keep the same frame, shirt, background, layout, "
+        " Use the first image as the official finished sticker base. Keep the same frame, shirt, background, layout, "
         "colors, badges, shadows and collectible card design, and replace only the person in that sticker with the "
-        "real person from the first image."
+        "real person from the second image."
         if has_base_template
         else ""
     )
@@ -284,6 +278,43 @@ def _build_gemini_prompt(
         }
     )
     return " ".join(template.format_map(values).split())
+
+
+def _image_to_upload_file(image: Image.Image, file_name: str) -> io.BytesIO:
+    buffer = io.BytesIO()
+    image.convert("RGB").save(buffer, format="PNG", optimize=True)
+    buffer.seek(0)
+    buffer.name = file_name
+    return buffer
+
+
+def _normalize_openai_size(target_width_px: int, target_height_px: int) -> str:
+    width = max(16, int(round(target_width_px / 16)) * 16)
+    height = max(16, int(round(target_height_px / 16)) * 16)
+
+    max_edge = max(width, height)
+    if max_edge > 3840:
+        scale = 3840 / max_edge
+        width = max(16, int(round((width * scale) / 16)) * 16)
+        height = max(16, int(round((height * scale) / 16)) * 16)
+
+    ratio = max(width, height) / max(min(width, height), 1)
+    if ratio > 3:
+        if width > height:
+            height = max(16, int(round((width / 3) / 16)) * 16)
+        else:
+            width = max(16, int(round((height / 3) / 16)) * 16)
+
+    min_pixels = 655_360
+    total_pixels = width * height
+    if total_pixels < min_pixels:
+        scale = (min_pixels / max(total_pixels, 1)) ** 0.5
+        width = max(16, int(round((width * scale) / 16)) * 16)
+        height = max(16, int(round((height * scale) / 16)) * 16)
+
+    width = min(width, 3840)
+    height = min(height, 3840)
+    return f"{width}x{height}"
 
 
 def _build_stylized_fallback(

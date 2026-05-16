@@ -31,8 +31,9 @@ class Settings:
         "FIGURINHAS_PICKUP_NOTE",
         "Pagamento via Pix e retirada combinada diretamente comigo.",
     )
-    gemini_api_key = os.getenv("FIGURINHAS_GEMINI_API_KEY") or os.getenv("GEMINI_API_KEY", "")
-    gemini_image_model = os.getenv("FIGURINHAS_GEMINI_IMAGE_MODEL", "gemini-3.1-flash-image-preview")
+    openai_api_key = os.getenv("FIGURINHAS_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+    openai_image_model = os.getenv("FIGURINHAS_OPENAI_IMAGE_MODEL", "gpt-image-2")
+    openai_image_quality = os.getenv("FIGURINHAS_OPENAI_IMAGE_QUALITY", "medium")
     custom_upload_limit_mb = int(os.getenv("FIGURINHAS_CUSTOM_UPLOAD_LIMIT_MB", "12"))
 
 

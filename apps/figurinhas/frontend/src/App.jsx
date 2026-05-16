@@ -3261,7 +3261,7 @@ function AdminPage() {
               <h3>Prompt da IA</h3>
             </div>
             <p className="fig-empty-note">
-              Esse texto orienta a Gemini na composicao completa da figurinha usando a foto enviada e a base oficial do
+              Esse texto orienta a OpenAI na composicao completa da figurinha usando a foto enviada e a base oficial do
               perfil. Se quiser ajustar, mantenha as variaveis abaixo para o sistema continuar montando o prompt
               corretamente.
             </p>
