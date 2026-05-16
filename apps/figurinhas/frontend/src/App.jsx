@@ -171,6 +171,8 @@ function PublicPage() {
   const [quote, setQuote] = useState(null)
   const [quoteBusy, setQuoteBusy] = useState(false)
   const [orderFormOpen, setOrderFormOpen] = useState(false)
+  const [mobileAlbumPickerOpen, setMobileAlbumPickerOpen] = useState(false)
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [donationModalOpen, setDonationModalOpen] = useState(false)
   const [previewPage, setPreviewPage] = useState(0)
   const [orderSubmitting, setOrderSubmitting] = useState(false)
@@ -223,6 +225,10 @@ function PublicPage() {
           count: selectedCountByCollection[collection.slug]
         })),
     [availableCollections, selectedCountByCollection]
+  )
+  const activeCategoryLabel = useMemo(
+    () => categoryOptions.find(option => option.value === category)?.label || 'Filtros',
+    [category]
   )
 
   useEffect(() => {
@@ -367,6 +373,20 @@ function PublicPage() {
   }, [donationModalOpen])
 
   useEffect(() => {
+    if (!mobileAlbumPickerOpen && !mobileFilterOpen) return undefined
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setMobileAlbumPickerOpen(false)
+        setMobileFilterOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [mobileAlbumPickerOpen, mobileFilterOpen])
+
+  useEffect(() => {
     if (!orderFormOpen) {
       setPreviewPage(0)
     }
@@ -408,6 +428,24 @@ function PublicPage() {
             }
           ]
     )
+  }
+
+  function selectCurrentCollectionStickers() {
+    setSelectedStickers(current => {
+      const selectedById = new Map(current.map(sticker => [sticker.id, sticker]))
+      stickers.forEach(sticker => {
+        selectedById.set(sticker.id, {
+          ...sticker,
+          collection_slug: selectedCollectionSlug,
+          collection_name: selectedCollection?.name || ''
+        })
+      })
+      return Array.from(selectedById.values())
+    })
+  }
+
+  function clearSelection() {
+    setSelectedStickers([])
   }
 
   async function handleExport() {
@@ -555,7 +593,83 @@ function PublicPage() {
       </aside>
 
       <div className="fig-content-panel">
-        <div className="fig-hero">
+        <div className="fig-mobile-only fig-mobile-catalog-shell">
+          <div className="fig-mobile-catalog-top">
+            <div className="fig-mobile-catalog-copy">
+              <p className="fig-kicker">Catalogo</p>
+              <h2>{selectedCollection?.name || selectedAlbum?.name || 'Escolha um album'}</h2>
+              <p>
+                {selectedAlbum
+                  ? `${selectedAlbum.name}${selectedCollection ? ` · ${selectedCollection.sticker_count} figurinhas` : ''}`
+                  : 'Escolha uma edicao e comece pelas figurinhas.'}
+              </p>
+            </div>
+            <button
+              type="button"
+              className="fig-secondary-button fig-mobile-top-button"
+              onClick={() => setMobileAlbumPickerOpen(true)}
+            >
+              Trocar album
+            </button>
+          </div>
+
+          {selectedAlbum ? (
+            <div className="fig-mobile-collection-strip">
+              {availableCollections.map(collection => (
+                <button
+                  key={collection.id}
+                  type="button"
+                  className={`fig-mobile-collection-chip${collection.slug === selectedCollectionSlug ? ' is-active' : ''}`}
+                  onClick={() => setSelectedCollectionSlug(collection.slug)}
+                >
+                  <strong>{collection.name}</strong>
+                  <span>
+                    {selectedCountByCollection[collection.slug]
+                      ? `${selectedCountByCollection[collection.slug]} marcada(s)`
+                      : `${collection.sticker_count} figurinhas`}
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="fig-mobile-search-row">
+            <label className="fig-mobile-search-field">
+              <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar jogador" />
+            </label>
+            <button
+              type="button"
+              className={`fig-secondary-button fig-mobile-filter-button${category ? ' is-active' : ''}`}
+              onClick={() => setMobileFilterOpen(true)}
+            >
+              {activeCategoryLabel}
+            </button>
+          </div>
+
+          <div className="fig-mobile-summary-row">
+            <span className="fig-mobile-summary-pill">
+              <strong>{selectedIds.length}</strong>
+              <span>no PDF</span>
+            </span>
+            {selectedCollectionsSummary.slice(0, 2).map(collection => (
+              <span key={collection.slug} className="fig-mobile-summary-pill fig-mobile-summary-pill--soft">
+                <strong>{collection.count}</strong>
+                <span>{collection.name}</span>
+              </span>
+            ))}
+          </div>
+
+          <div className="fig-mobile-inline-actions">
+            <button type="button" className="fig-inline-link" onClick={selectCurrentCollectionStickers}>
+              Selecionar todas
+            </button>
+            <button type="button" className="fig-inline-link" onClick={clearSelection}>
+              Limpar selecao
+            </button>
+          </div>
+        </div>
+
+        <div className="fig-hero fig-desktop-only">
           <div>
             <p className="fig-kicker">Selecao rapida</p>
             <h2>{selectedCollection?.name || selectedAlbum?.name || 'Selecione um album'}</h2>
@@ -575,23 +689,11 @@ function PublicPage() {
             <button
               type="button"
               className="fig-secondary-button"
-              onClick={() =>
-                setSelectedStickers(current => {
-                  const selectedById = new Map(current.map(sticker => [sticker.id, sticker]))
-                  stickers.forEach(sticker => {
-                    selectedById.set(sticker.id, {
-                      ...sticker,
-                      collection_slug: selectedCollectionSlug,
-                      collection_name: selectedCollection?.name || ''
-                    })
-                  })
-                  return Array.from(selectedById.values())
-                })
-              }
+              onClick={selectCurrentCollectionStickers}
             >
               Selecionar todas
             </button>
-            <button type="button" className="fig-secondary-button" onClick={() => setSelectedStickers([])}>
+            <button type="button" className="fig-secondary-button" onClick={clearSelection}>
               Limpar selecao
             </button>
             {serviceConfig?.service_enabled ? (
@@ -615,7 +717,7 @@ function PublicPage() {
           </div>
         </div>
 
-        <div className="fig-toolbar">
+        <div className="fig-toolbar fig-desktop-only">
           <label className="fig-field">
             <span>Buscar jogador</span>
             <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Ex.: Vinicius" />
@@ -692,7 +794,114 @@ function PublicPage() {
           ))}
         </div>
         {!busy && stickers.length === 0 ? <p className="fig-empty-note">Nenhuma figurinha encontrada para esse filtro.</p> : null}
+
+        <div className="fig-mobile-only fig-mobile-bottom-bar">
+          <div className="fig-mobile-bottom-copy">
+            <strong>{selectedIds.length}</strong>
+            <span>{selectedIds.length === 1 ? 'figurinha selecionada' : 'figurinhas selecionadas'}</span>
+          </div>
+          <div className="fig-mobile-bottom-actions">
+            {serviceConfig?.service_enabled ? (
+              <button
+                type="button"
+                className="fig-secondary-button fig-mobile-bottom-secondary"
+                disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
+                onClick={() => setOrderFormOpen(true)}
+              >
+                Preparar
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="fig-primary-button fig-mobile-bottom-primary"
+              disabled={!selectedAlbumSlug || selectedIds.length === 0 || exporting}
+              onClick={handleExport}
+            >
+              {exporting ? 'Gerando...' : 'Gerar PDF'}
+            </button>
+          </div>
+        </div>
       </div>
+
+      {mobileAlbumPickerOpen ? (
+        <div className="fig-modal-backdrop" onClick={() => setMobileAlbumPickerOpen(false)}>
+          <div className="fig-modal-shell fig-modal-shell--mobile" onClick={event => event.stopPropagation()}>
+            <div className="fig-modal-header">
+              <div>
+                <p className="fig-kicker">Albuns</p>
+                <h3>Escolha a edicao</h3>
+              </div>
+              <button type="button" className="fig-modal-close" onClick={() => setMobileAlbumPickerOpen(false)}>
+                Fechar
+              </button>
+            </div>
+            <div className="fig-mobile-modal-list">
+              {albums.map(album => (
+                <button
+                  key={album.id}
+                  type="button"
+                  className={`fig-mobile-modal-item${album.slug === selectedAlbumSlug ? ' is-active' : ''}`}
+                  onClick={() => {
+                    setSelectedAlbumSlug(album.slug)
+                    setSelectedCollectionSlug('')
+                    setSelectedStickers([])
+                    setSearch('')
+                    setCategory('')
+                    setMobileAlbumPickerOpen(false)
+                  }}
+                >
+                  <strong>{album.name}</strong>
+                  <span>{album.published_collection_count} selecoes publicadas</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {mobileFilterOpen ? (
+        <div className="fig-modal-backdrop" onClick={() => setMobileFilterOpen(false)}>
+          <div className="fig-modal-shell fig-modal-shell--mobile" onClick={event => event.stopPropagation()}>
+            <div className="fig-modal-header">
+              <div>
+                <p className="fig-kicker">Filtros</p>
+                <h3>Refinar catalogo</h3>
+              </div>
+              <button type="button" className="fig-modal-close" onClick={() => setMobileFilterOpen(false)}>
+                Fechar
+              </button>
+            </div>
+            <div className="fig-form-grid">
+              <label className="fig-field fig-field--full">
+                <span>Categoria</span>
+                <select value={category} onChange={event => setCategory(event.target.value)}>
+                  <option value="">Todas</option>
+                  {categoryOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <div className="fig-hero-actions">
+              <button
+                type="button"
+                className="fig-secondary-button"
+                onClick={() => {
+                  setCategory('')
+                  setMobileFilterOpen(false)
+                }}
+              >
+                Limpar filtro
+              </button>
+              <button type="button" className="fig-primary-button" onClick={() => setMobileFilterOpen(false)}>
+                Aplicar
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {orderFormOpen && quote ? (
         <div className="fig-modal-backdrop" onClick={() => setOrderFormOpen(false)}>
