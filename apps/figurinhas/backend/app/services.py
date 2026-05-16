@@ -204,27 +204,33 @@ def validate_sticker_bounds(x_ratio: float, y_ratio: float, width_ratio: float, 
         raise ValueError("A altura do recorte ultrapassa os limites da pagina.")
 
 
-def crop_sticker_image(sticker: Sticker) -> None:
+def crop_sticker_image(sticker: Sticker, page_image: Image.Image | None = None) -> None:
     collection_slug = sticker.collection.slug
     page_image_path = settings.storage_root / sticker.page.image_path
-    if not page_image_path.exists():
-        raise FileNotFoundError("Imagem da pagina nao encontrada.")
+    if page_image is None:
+        if not page_image_path.exists():
+            raise FileNotFoundError("Imagem da pagina nao encontrada.")
+        with Image.open(page_image_path) as opened_page_image:
+            _crop_sticker_image_from_page(sticker, opened_page_image, collection_slug)
+    else:
+        _crop_sticker_image_from_page(sticker, page_image, collection_slug)
 
-    with Image.open(page_image_path) as page_image:
-        width, height = page_image.size
-        left = max(0, int(round(sticker.x_ratio * width)))
-        top = max(0, int(round(sticker.y_ratio * height)))
-        right = min(width, int(round((sticker.x_ratio + sticker.width_ratio) * width)))
-        bottom = min(height, int(round((sticker.y_ratio + sticker.height_ratio) * height)))
-        if right <= left or bottom <= top:
-            raise ValueError("Area de recorte invalida.")
 
-        crop = page_image.crop((left, top, right, bottom))
-        crops_dir = settings.storage_root / "crops" / collection_slug
-        crops_dir.mkdir(parents=True, exist_ok=True)
-        file_name = f"sticker-{sticker.id}.png"
-        crop_path = crops_dir / file_name
-        crop.save(crop_path, optimize=True)
+def _crop_sticker_image_from_page(sticker: Sticker, page_image: Image.Image, collection_slug: str) -> None:
+    width, height = page_image.size
+    left = max(0, int(round(sticker.x_ratio * width)))
+    top = max(0, int(round(sticker.y_ratio * height)))
+    right = min(width, int(round((sticker.x_ratio + sticker.width_ratio) * width)))
+    bottom = min(height, int(round((sticker.y_ratio + sticker.height_ratio) * height)))
+    if right <= left or bottom <= top:
+        raise ValueError("Area de recorte invalida.")
+
+    crop = page_image.crop((left, top, right, bottom))
+    crops_dir = settings.storage_root / "crops" / collection_slug
+    crops_dir.mkdir(parents=True, exist_ok=True)
+    file_name = f"sticker-{sticker.id}.png"
+    crop_path = crops_dir / file_name
+    crop.save(crop_path, optimize=True)
 
     relative = str(crop_path.relative_to(settings.storage_root).as_posix())
     sticker.crop_path = relative
@@ -327,6 +333,7 @@ def auto_detect_collection_pages(
             select(func.max(Sticker.sort_order)).where(Sticker.collection_id == collection.id)
         ).scalar_one()
         next_sort_order = (current_max_order or 0) + 1
+        detected_stickers: list[Sticker] = []
 
         for index, rectangle in enumerate(detection.rectangles, start=1):
             sticker = Sticker(
@@ -347,9 +354,18 @@ def auto_detect_collection_pages(
             )
             next_sort_order += 1
             db.add(sticker)
+            detected_stickers.append(sticker)
+
+        if detected_stickers:
             db.flush()
-            crop_sticker_image(sticker)
-            refresh_sticker_ocr(sticker, update_name=True)
+            page_image_path = settings.storage_root / page.image_path
+            if not page_image_path.exists():
+                raise FileNotFoundError("Imagem da pagina nao encontrada.")
+            with Image.open(page_image_path) as page_image:
+                for sticker in detected_stickers:
+                    crop_sticker_image(sticker, page_image=page_image)
+            for sticker in detected_stickers:
+                refresh_sticker_ocr(sticker, update_name=True)
 
         detected_count = len(detection.rectangles)
         total_detected += detected_count

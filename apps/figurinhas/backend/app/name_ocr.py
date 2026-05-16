@@ -18,6 +18,8 @@ LOWERCASE_CONNECTORS = {"da", "de", "do", "das", "dos", "e"}
 INVALID_NAME_TOKENS = {"PANINI", "FIFA", "BRA", "BRAS", "BRASIL", "FC", "ENG"}
 OCR_LANGS = "por+eng"
 OCR_CONFIG = "--oem 3"
+FAST_ACCEPT_CONFIDENCE = 83
+GOOD_ACCEPT_CONFIDENCE = 72
 
 
 @dataclass(slots=True)
@@ -42,8 +44,42 @@ def detect_sticker_name(image_path: Path) -> OCRNameResult:
     best_raw = None
     best_confidence = None
 
-    for variant in _build_ocr_variants(band):
-        for psm in (6, 7, 11):
+    variants = _build_ocr_variants(band)
+    primary_plan = (
+        (variants[0], (7, 6)),
+        (variants[1], (7,)),
+    )
+    fallback_plan = (
+        (variants[0], (11,)),
+        (variants[2], (7, 11)),
+    )
+
+    for variant, psms in primary_plan:
+        for psm in psms:
+            raw_text, confidence = _run_ocr(variant, psm=psm)
+            if not raw_text:
+                continue
+
+            if best_raw is None or (confidence or 0.0) > (best_confidence or 0.0):
+                best_raw = raw_text
+                best_confidence = confidence
+
+            suggested = _normalize_player_name(raw_text)
+            if not suggested:
+                continue
+
+            score = _candidate_score(suggested, confidence)
+            if best_valid_result is None or score > best_valid_result[3]:
+                best_valid_result = (raw_text, suggested, confidence, score)
+                if _is_fast_accept_candidate(confidence):
+                    return OCRNameResult(raw_text=raw_text, suggested_name=suggested, confidence=confidence)
+
+    if best_valid_result is not None and _is_good_enough_candidate(best_valid_result[2]):
+        raw_text, suggested, confidence, _ = best_valid_result
+        return OCRNameResult(raw_text=raw_text, suggested_name=suggested, confidence=confidence)
+
+    for variant, psms in fallback_plan:
+        for psm in psms:
             raw_text, confidence = _run_ocr(variant, psm=psm)
             if not raw_text:
                 continue
@@ -80,6 +116,14 @@ def _candidate_score(suggested_name: str, confidence: float | None) -> float:
     if words > 4:
         score -= 12
     return score
+
+
+def _is_fast_accept_candidate(confidence: float | None) -> bool:
+    return confidence is not None and confidence >= FAST_ACCEPT_CONFIDENCE
+
+
+def _is_good_enough_candidate(confidence: float | None) -> bool:
+    return confidence is not None and confidence >= GOOD_ACCEPT_CONFIDENCE
 
 
 def _extract_name_band(image: Image.Image) -> Image.Image:
