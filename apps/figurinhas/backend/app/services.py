@@ -17,10 +17,12 @@ from sqlalchemy.orm import Session, selectinload
 
 from .auto_detect import detect_sticker_rectangles
 from .config import get_settings
+from .custom_stickers import generate_custom_sticker_render
 from .models import (
     Album,
     Collection,
     CollectionStatus,
+    CustomProfileType,
     Export,
     Page,
     PrintOrder,
@@ -28,6 +30,8 @@ from .models import (
     PrintServiceType,
     ServiceSettings,
     Sticker,
+    StickerCategory,
+    StickerSourceType,
 )
 from .name_ocr import detect_sticker_name
 
@@ -47,6 +51,10 @@ def album_sort_key(album: Album) -> tuple[int, str, int]:
 
 def collection_sort_key(collection: Collection) -> tuple[int, str, int]:
     return (collection.sort_order, collection.name.lower(), collection.id)
+
+
+def is_visible_collection(collection: Collection) -> bool:
+    return not collection.is_system
 
 
 def ensure_collection_slug_unique(db: Session, slug: str, excluding_id: int | None = None) -> None:
@@ -75,7 +83,7 @@ def album_stats(db: Session, album_ids: list[int]) -> dict[int, dict[str, int]]:
         row.album_id: row.total
         for row in db.execute(
             select(Collection.album_id, func.count(Collection.id).label("total"))
-            .where(Collection.album_id.in_(album_ids))
+            .where(Collection.album_id.in_(album_ids), Collection.is_system.is_(False))
             .group_by(Collection.album_id)
         )
         if row.album_id is not None
@@ -84,7 +92,11 @@ def album_stats(db: Session, album_ids: list[int]) -> dict[int, dict[str, int]]:
         row.album_id: row.total
         for row in db.execute(
             select(Collection.album_id, func.count(Collection.id).label("total"))
-            .where(Collection.album_id.in_(album_ids), Collection.status == CollectionStatus.PUBLICADA)
+            .where(
+                Collection.album_id.in_(album_ids),
+                Collection.status == CollectionStatus.PUBLICADA,
+                Collection.is_system.is_(False),
+            )
             .group_by(Collection.album_id)
         )
         if row.album_id is not None
@@ -275,7 +287,12 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
 
 
 def delete_sticker_assets(sticker: Sticker) -> None:
-    for relative_path in {sticker.crop_path, sticker.preview_path}:
+    for relative_path in {
+        sticker.crop_path,
+        sticker.preview_path,
+        sticker.uploaded_photo_path,
+        sticker.generated_portrait_path,
+    }:
         if not relative_path:
             continue
         file_path = settings.storage_root / relative_path
@@ -389,17 +406,239 @@ def auto_detect_collection_pages(
     }
 
 
+def load_generated_sticker_for_session(db: Session, album_id: int, session_token: str) -> Sticker | None:
+    if not session_token.strip():
+        return None
+    return (
+        db.execute(
+            select(Sticker)
+            .join(Collection, Sticker.collection_id == Collection.id)
+            .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+            .where(
+                Collection.album_id == album_id,
+                Collection.is_system.is_(True),
+                Sticker.source_type == StickerSourceType.GENERATED,
+                Sticker.session_token == session_token.strip(),
+                Sticker.active.is_(True),
+            )
+            .order_by(Sticker.updated_at.desc(), Sticker.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+
+
+def delete_generated_stickers_for_session(db: Session, album_id: int, session_token: str) -> None:
+    stickers = db.execute(
+        select(Sticker)
+        .join(Collection, Sticker.collection_id == Collection.id)
+        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+        .where(
+            Collection.album_id == album_id,
+            Collection.is_system.is_(True),
+            Sticker.source_type == StickerSourceType.GENERATED,
+            Sticker.session_token == session_token.strip(),
+        )
+    ).scalars().all()
+    for sticker in stickers:
+        delete_sticker_record(db, sticker)
+    db.flush()
+
+
+def resolve_generated_template_sticker(db: Session, album: Album) -> Sticker:
+    stickers = db.execute(
+        select(Sticker)
+        .join(Collection, Sticker.collection_id == Collection.id)
+        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+        .where(
+            Collection.album_id == album.id,
+            Collection.is_system.is_(False),
+            Collection.status == CollectionStatus.PUBLICADA,
+            Sticker.active.is_(True),
+            Sticker.source_type == StickerSourceType.PDF,
+        )
+        .order_by(Collection.sort_order.asc(), Collection.name.asc(), Sticker.sort_order.asc(), Sticker.id.asc())
+    ).scalars().all()
+    if not stickers:
+        raise ValueError("Publique pelo menos uma selecao com figurinhas antes de criar a Minha Figurinha.")
+
+    preferred_categories = {
+        StickerCategory.JOGADOR,
+        StickerCategory.GOLEIRO,
+        StickerCategory.DEFESA,
+        StickerCategory.MEIO,
+        StickerCategory.ATAQUE,
+    }
+    for sticker in stickers:
+        if sticker.category in preferred_categories:
+            return sticker
+    return stickers[0]
+
+
+def ensure_generated_collection_page(
+    db: Session,
+    album: Album,
+    template_sticker: Sticker,
+) -> tuple[Collection, Page]:
+    generated_slug = slugify(f"{album.slug}-minha-figurinha")
+    collection = db.execute(
+        select(Collection)
+        .options(selectinload(Collection.pages))
+        .where(Collection.album_id == album.id, Collection.slug == generated_slug)
+    ).scalar_one_or_none()
+    if not collection:
+        collection = Collection(
+            album=album,
+            name="Minha Figurinha",
+            slug=generated_slug,
+            description="Colecao interna para figurinhas personalizadas por sessao.",
+            sort_order=9999,
+            is_system=True,
+            status=CollectionStatus.RASCUNHO,
+        )
+        db.add(collection)
+        db.flush()
+
+    page = next((current for current in collection.pages if current.page_number == 1), None)
+    if page is None:
+        page = Page(collection=collection, page_number=1, image_path="", width=template_sticker.page.width, height=template_sticker.page.height)
+        db.add(page)
+        db.flush()
+
+    regenerate_page_image = (
+        page.width != template_sticker.page.width
+        or page.height != template_sticker.page.height
+    )
+    page.width = template_sticker.page.width
+    page.height = template_sticker.page.height
+
+    page_dir = settings.storage_root / "pages" / collection.slug
+    page_dir.mkdir(parents=True, exist_ok=True)
+    page_path = page_dir / "page-1.png"
+    if not page_path.exists() or regenerate_page_image:
+        Image.new("RGB", (template_sticker.page.width, template_sticker.page.height), "#ffffff").save(page_path, optimize=True)
+    page.image_path = str(page_path.relative_to(settings.storage_root).as_posix())
+    db.flush()
+    return collection, page
+
+
+def upsert_generated_sticker(
+    db: Session,
+    *,
+    album: Album,
+    session_token: str,
+    name: str,
+    profile_type: CustomProfileType,
+    birth_date_text: str | None,
+    height_text: str | None,
+    weight_text: str | None,
+    city_or_team: str | None,
+    uploaded_photo_bytes: bytes,
+) -> Sticker:
+    session_token = session_token.strip()
+    if not session_token:
+        raise ValueError("Sessao invalida para criar a figurinha personalizada.")
+
+    template_sticker = resolve_generated_template_sticker(db, album)
+    collection, page = ensure_generated_collection_page(db, album, template_sticker)
+    delete_generated_stickers_for_session(db, album.id, session_token)
+
+    if not template_sticker.collection.source_pdf_path:
+        raise ValueError("A selecao base desse album ainda nao tem PDF de origem configurado.")
+    source_pdf_path = settings.storage_root / template_sticker.collection.source_pdf_path
+    with fitz.open(source_pdf_path) as document:
+        page_rect = document.load_page(template_sticker.page.page_number - 1).rect
+        export_width_pt = float(page_rect.width * template_sticker.width_ratio)
+        export_height_pt = float(page_rect.height * template_sticker.height_ratio)
+
+    scale = max(settings.export_render_scale, 6.0)
+    width_px = max(int(round(export_width_pt * scale)), 680)
+    height_px = max(int(round(export_height_pt * scale)), 920)
+
+    render = generate_custom_sticker_render(
+        settings,
+        uploaded_photo_bytes=uploaded_photo_bytes,
+        name=name.strip(),
+        profile_type=profile_type.value,
+        birth_date_text=(birth_date_text or "").strip() or None,
+        height_text=(height_text or "").strip() or None,
+        weight_text=(weight_text or "").strip() or None,
+        city_or_team=(city_or_team or "").strip() or None,
+        target_width_px=width_px,
+        target_height_px=height_px,
+    )
+
+    upload_dir = settings.storage_root / "custom_uploads" / album.slug
+    portrait_dir = settings.storage_root / "custom_portraits" / album.slug
+    sticker_dir = settings.storage_root / "custom_stickers" / album.slug
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    portrait_dir.mkdir(parents=True, exist_ok=True)
+    sticker_dir.mkdir(parents=True, exist_ok=True)
+
+    asset_key = uuid.uuid4().hex[:10]
+    upload_path = upload_dir / f"{asset_key}-upload.png"
+    portrait_path = portrait_dir / f"{asset_key}-portrait.png"
+    sticker_path = sticker_dir / f"{asset_key}-sticker.png"
+    upload_path.write_bytes(uploaded_photo_bytes)
+    portrait_path.write_bytes(render.portrait_bytes)
+    sticker_path.write_bytes(render.final_bytes)
+
+    current_max_order = db.execute(
+        select(func.max(Sticker.sort_order)).where(Sticker.collection_id == collection.id)
+    ).scalar_one()
+
+    sticker = Sticker(
+        collection=collection,
+        page=page,
+        name=name.strip(),
+        code=f"minha-figurinha-{asset_key}",
+        category=StickerCategory.JOGADOR,
+        source_type=StickerSourceType.GENERATED,
+        session_token=session_token,
+        profile_type=profile_type,
+        birth_date_text=(birth_date_text or "").strip() or None,
+        height_text=(height_text or "").strip() or None,
+        weight_text=(weight_text or "").strip() or None,
+        city_or_team=(city_or_team or "").strip() or None,
+        uploaded_photo_path=str(upload_path.relative_to(settings.storage_root).as_posix()),
+        generated_portrait_path=str(portrait_path.relative_to(settings.storage_root).as_posix()),
+        export_width_pt=export_width_pt,
+        export_height_pt=export_height_pt,
+        sort_order=(current_max_order or 0) + 1,
+        x_ratio=template_sticker.x_ratio,
+        y_ratio=template_sticker.y_ratio,
+        width_ratio=template_sticker.width_ratio,
+        height_ratio=template_sticker.height_ratio,
+        preview_path=str(sticker_path.relative_to(settings.storage_root).as_posix()),
+        crop_path=str(sticker_path.relative_to(settings.storage_root).as_posix()),
+        active=True,
+        detected_automatically=False,
+    )
+    db.add(sticker)
+    db.flush()
+    return sticker
+
+
 def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> dict:
     if not stickers:
         raise ValueError("Selecione pelo menos uma figurinha para exportar.")
 
-    collection_ids = sorted({sticker.collection_id for sticker in stickers})
+    selected_collection_ids = sorted({sticker.collection_id for sticker in stickers})
     collections = db.execute(
         select(Collection)
         .options(selectinload(Collection.pages))
-        .where(Collection.id.in_(collection_ids))
+        .where(Collection.id.in_(selected_collection_ids))
     ).scalars().all()
     collections_by_id = {collection.id: collection for collection in collections}
+    template_collections = db.execute(
+        select(Collection)
+        .options(selectinload(Collection.pages))
+        .where(
+            Collection.album_id == album.id,
+            Collection.is_system.is_(False),
+            Collection.status == CollectionStatus.PUBLICADA,
+        )
+    ).scalars().all()
 
     source_pdf_paths: dict[int, Path] = {}
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]] = {}
@@ -408,30 +647,44 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
     for collection in collections:
         if collection.album_id != album.id:
             raise ValueError("Nao e possivel misturar figurinhas de albuns diferentes.")
-        if not collection.source_pdf_path:
-            raise ValueError(f"A colecao {collection.name} nao possui PDF de origem para exportacao.")
+        page_sizes_by_collection[collection.id] = {
+            page.page_number: (float(page.width), float(page.height))
+            for page in collection.pages
+        }
+        if collection.source_pdf_path:
+            source_pdf_path = settings.storage_root / collection.source_pdf_path
+            if not source_pdf_path.exists():
+                raise FileNotFoundError(f"PDF de origem da colecao {collection.name} nao encontrado.")
+            source_pdf_paths[collection.id] = source_pdf_path
 
-        source_pdf_path = settings.storage_root / collection.source_pdf_path
-        if not source_pdf_path.exists():
-            raise FileNotFoundError(f"PDF de origem da colecao {collection.name} nao encontrado.")
+    if not template_collections:
+        raise ValueError("Nao existe uma selecao publicada para servir de base de exportacao nesse album.")
 
-        source_pdf_paths[collection.id] = source_pdf_path
-        with fitz.open(source_pdf_path) as document:
-            page_sizes = {
-                page_index + 1: (document.load_page(page_index).rect.width, document.load_page(page_index).rect.height)
-                for page_index in range(document.page_count)
-            }
-        page_sizes_by_collection[collection.id] = page_sizes
-
+    for collection in template_collections:
+        page_sizes = {
+            page.page_number: (float(page.width), float(page.height))
+            for page in collection.pages
+        }
         template_stickers = db.execute(
             select(Sticker)
             .options(selectinload(Sticker.page))
-            .where(Sticker.collection_id == collection.id, Sticker.active.is_(True))
+            .where(
+                Sticker.collection_id == collection.id,
+                Sticker.active.is_(True),
+                Sticker.source_type == StickerSourceType.PDF,
+            )
             .order_by(Sticker.sort_order.asc(), Sticker.id.asc())
         ).scalars().all()
 
         for size_key, layout in _build_template_export_layouts(template_stickers, page_sizes).items():
             template_layouts.setdefault(size_key, layout)
+
+    if not template_layouts:
+        raise ValueError("Nao foi encontrada uma grade valida de exportacao para esse album.")
+
+    for sticker in stickers:
+        if sticker.source_type == StickerSourceType.PDF and sticker.collection_id not in source_pdf_paths:
+            raise ValueError(f"A colecao {sticker.collection.name} nao possui PDF de origem para exportacao.")
 
     selected_groups: dict[tuple[float, float], list[Sticker]] = defaultdict(list)
     for sticker in stickers:
@@ -451,6 +704,7 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
         ordered_group = sorted(
             group_stickers,
             key=lambda current: (
+                1 if current.source_type == StickerSourceType.GENERATED else 0,
                 collections_by_id[current.collection_id].name.lower(),
                 current.sort_order,
                 current.name.lower(),
@@ -524,8 +778,9 @@ def build_export_pdf(album: Album, stickers: list[Sticker], db: Session, plan: d
         for document in documents.values():
             document.close()
 
+    primary_collection = next((sticker.collection for sticker in stickers if not sticker.collection.is_system), stickers[0].collection)
     export_record = Export(
-        collection=stickers[0].collection,
+        collection=primary_collection,
         file_path=str(export_path.relative_to(settings.storage_root).as_posix()),
         item_count=len(stickers),
     )
@@ -604,12 +859,12 @@ def create_print_order(
 
     export_record = build_export_pdf(album, stickers, db, plan=quote["plan"])
     selected_collection_names = sorted({sticker.collection.name for sticker in stickers}, key=str.lower)
-    primary_collection = stickers[0].collection
+    primary_collection = next((sticker.collection for sticker in stickers if not sticker.collection.is_system), stickers[0].collection)
     sticker_payload = json.dumps(
         [
             {
                 "id": sticker.id,
-                "collection_name": sticker.collection.name,
+                "collection_name": "Minha Figurinha" if sticker.source_type == StickerSourceType.GENERATED else sticker.collection.name,
                 "name": sticker.name,
                 "category": sticker.category.value,
                 "page_number": sticker.page.page_number,
@@ -665,6 +920,12 @@ def _sticker_size_key(
     sticker: Sticker,
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]],
 ) -> tuple[float, float]:
+    if (
+        sticker.source_type == StickerSourceType.GENERATED
+        and sticker.export_width_pt is not None
+        and sticker.export_height_pt is not None
+    ):
+        return round(sticker.export_width_pt), round(sticker.export_height_pt)
     _, _, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes_by_collection)
     return round(width_pt), round(height_pt)
 
@@ -724,6 +985,12 @@ def _render_sticker_export_image(
     sticker: Sticker,
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]],
 ) -> bytes:
+    if sticker.source_type == StickerSourceType.GENERATED:
+        sticker_file = settings.storage_root / sticker.crop_path
+        if not sticker_file.exists():
+            raise FileNotFoundError(f"Arquivo da figurinha personalizada {sticker.name} nao encontrado.")
+        return sticker_file.read_bytes()
+
     document = documents.get(sticker.collection_id)
     if document is None:
         document = fitz.open(source_pdf_paths[sticker.collection_id])
@@ -745,7 +1012,11 @@ def load_collection_or_fail(db: Session, collection_id: int) -> Collection:
 
 
 def load_collection_by_slug_or_fail(db: Session, slug: str, public_only: bool = False) -> Collection:
-    statement = select(Collection).options(selectinload(Collection.album)).where(Collection.slug == slug)
+    statement = (
+        select(Collection)
+        .options(selectinload(Collection.album))
+        .where(Collection.slug == slug, Collection.is_system.is_(False))
+    )
     if public_only:
         statement = statement.where(Collection.status == CollectionStatus.PUBLICADA)
     collection = db.execute(statement).scalar_one_or_none()
@@ -839,6 +1110,12 @@ def sticker_to_response(sticker: Sticker) -> dict:
         "name": sticker.name,
         "code": sticker.code,
         "category": sticker.category,
+        "source_type": sticker.source_type,
+        "profile_type": sticker.profile_type,
+        "birth_date_text": sticker.birth_date_text,
+        "height_text": sticker.height_text,
+        "weight_text": sticker.weight_text,
+        "city_or_team": sticker.city_or_team,
         "sort_order": sticker.sort_order,
         "x_ratio": sticker.x_ratio,
         "y_ratio": sticker.y_ratio,

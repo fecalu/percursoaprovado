@@ -4,7 +4,14 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, field_validator
 
-from .models import CollectionStatus, PrintOrderStatus, PrintServiceType, StickerCategory
+from .models import (
+    CollectionStatus,
+    CustomProfileType,
+    PrintOrderStatus,
+    PrintServiceType,
+    StickerCategory,
+    StickerSourceType,
+)
 
 
 class AlbumCreate(BaseModel):
@@ -142,6 +149,12 @@ class StickerResponse(BaseModel):
     name: str
     code: str | None
     category: StickerCategory
+    source_type: StickerSourceType
+    profile_type: CustomProfileType | None
+    birth_date_text: str | None
+    height_text: str | None
+    weight_text: str | None
+    city_or_team: str | None
     sort_order: int
     x_ratio: float
     y_ratio: float
@@ -171,6 +184,7 @@ class AdminLoginRequest(BaseModel):
 class ExportRequest(BaseModel):
     album_slug: str
     sticker_ids: list[int] = Field(min_length=1)
+    session_token: str | None = Field(default=None, max_length=120)
 
 
 class ExportResponse(BaseModel):
@@ -207,6 +221,7 @@ class ServiceConfigUpdate(BaseModel):
 class OrderQuoteRequest(BaseModel):
     album_slug: str
     sticker_ids: list[int] = Field(min_length=1)
+    session_token: str | None = Field(default=None, max_length=120)
 
 
 class OrderQuoteResponse(BaseModel):
@@ -229,6 +244,7 @@ class OrderQuoteResponse(BaseModel):
 class PrintOrderCreate(BaseModel):
     album_slug: str
     sticker_ids: list[int] = Field(min_length=1)
+    session_token: str | None = Field(default=None, max_length=120)
     service_type: PrintServiceType
     customer_name: str = Field(min_length=2, max_length=150)
     customer_whatsapp: str = Field(min_length=8, max_length=40)

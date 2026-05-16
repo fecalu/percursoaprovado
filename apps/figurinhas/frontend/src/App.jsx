@@ -29,6 +29,13 @@ const serviceTypeLabels = {
   IMPRESSAO_PACOTINHOS: 'Completo: imprimir, cortar e montar'
 }
 
+const customProfileOptions = [
+  { value: 'HOMEM', label: 'Homem' },
+  { value: 'MULHER', label: 'Mulher' },
+  { value: 'MENINO', label: 'Menino' },
+  { value: 'MENINA', label: 'Menina' }
+]
+
 const STICKERS_PER_SHEET = 16
 
 function useAdminToken() {
@@ -43,6 +50,19 @@ function useAdminToken() {
   }, [token])
 
   return [token, setToken]
+}
+
+function usePublicSessionToken() {
+  const [sessionToken] = useState(() => {
+    const storageKey = 'figurinhas_public_session_token'
+    const current = window.localStorage.getItem(storageKey)
+    if (current) return current
+    const generated = window.crypto?.randomUUID?.() || `sessao-${Math.random().toString(36).slice(2)}${Date.now()}`
+    window.localStorage.setItem(storageKey, generated)
+    return generated
+  })
+
+  return sessionToken
 }
 
 async function apiFetch(path, options = {}) {
@@ -104,6 +124,10 @@ function formatOcrConfidence(confidence) {
 
 function categoryLabel(category) {
   return categoryOptions.find(option => option.value === category)?.label || category
+}
+
+function customProfileLabel(profile) {
+  return customProfileOptions.find(option => option.value === profile)?.label || profile || 'Minha Figurinha'
 }
 
 function moneyInputFromCents(cents) {
@@ -168,10 +192,12 @@ function Layout({ children }) {
 }
 
 function PublicPage() {
+  const sessionToken = usePublicSessionToken()
   const [albums, setAlbums] = useState([])
   const [selectedAlbumSlug, setSelectedAlbumSlug] = useState('')
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState('')
   const [stickers, setStickers] = useState([])
+  const [customSticker, setCustomSticker] = useState(null)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [selectedStickers, setSelectedStickers] = useState([])
@@ -185,18 +211,37 @@ function PublicPage() {
   const [mobileAlbumPickerOpen, setMobileAlbumPickerOpen] = useState(false)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [donationModalOpen, setDonationModalOpen] = useState(false)
+  const [myStickerModalOpen, setMyStickerModalOpen] = useState(false)
   const [previewPage, setPreviewPage] = useState(0)
   const [orderSubmitting, setOrderSubmitting] = useState(false)
+  const [myStickerSubmitting, setMyStickerSubmitting] = useState(false)
   const [orderResult, setOrderResult] = useState(null)
   const [pendingDownloadPath, setPendingDownloadPath] = useState('')
   const [pendingDownloadFileName, setPendingDownloadFileName] = useState('')
   const [pixCopied, setPixCopied] = useState(false)
+  const [myStickerForm, setMyStickerForm] = useState({
+    name: '',
+    profile_type: 'HOMEM',
+    birth_date_text: '',
+    height_text: '',
+    weight_text: '',
+    city_or_team: '',
+    photo: null
+  })
   const [orderForm, setOrderForm] = useState({
     service_type: 'IMPRESSAO',
     customer_name: '',
     customer_whatsapp: '',
     notes: ''
   })
+  function toCustomSelectionItem(sticker) {
+    return {
+      ...sticker,
+      category: sticker.category || 'JOGADOR',
+      collection_slug: '__minha_figurinha__',
+      collection_name: 'Minha Figurinha'
+    }
+  }
   const selectedAlbum = useMemo(
     () => albums.find(album => album.slug === selectedAlbumSlug) || null,
     [albums, selectedAlbumSlug]
@@ -227,19 +272,41 @@ function PublicPage() {
   const clampedPreviewPage = Math.min(previewPage, previewPageCount - 1)
   const visiblePreviewSheets = previewSheets.slice(clampedPreviewPage * 2, clampedPreviewPage * 2 + 2)
   const selectedCollectionsSummary = useMemo(
-    () =>
-      availableCollections
-        .filter(collection => selectedCountByCollection[collection.slug])
-        .map(collection => ({
-          slug: collection.slug,
-          name: collection.name,
-          count: selectedCountByCollection[collection.slug]
-        })),
-    [availableCollections, selectedCountByCollection]
+    () => {
+      const grouped = selectedStickers.reduce((accumulator, sticker) => {
+        const key = sticker.collection_slug
+        if (!accumulator[key]) {
+          accumulator[key] = {
+            slug: key,
+            name: sticker.collection_name,
+            count: 0
+          }
+        }
+        accumulator[key].count += 1
+        return accumulator
+      }, {})
+
+      const ordered = []
+      availableCollections.forEach(collection => {
+        if (grouped[collection.slug]) {
+          ordered.push(grouped[collection.slug])
+          delete grouped[collection.slug]
+        }
+      })
+      Object.values(grouped)
+        .sort((left, right) => left.name.localeCompare(right.name, 'pt-BR'))
+        .forEach(item => ordered.push(item))
+      return ordered
+    },
+    [availableCollections, selectedStickers]
   )
   const activeCategoryLabel = useMemo(
     () => categoryOptions.find(option => option.value === category)?.label || 'Filtros',
     [category]
+  )
+  const customStickerSelected = useMemo(
+    () => !!customSticker && selectedStickers.some(sticker => sticker.id === customSticker.id),
+    [customSticker, selectedStickers]
   )
 
   useEffect(() => {
@@ -310,6 +377,30 @@ function PublicPage() {
   }, [selectedCollectionSlug, search, category])
 
   useEffect(() => {
+    if (!selectedAlbumSlug) {
+      setCustomSticker(null)
+      return
+    }
+
+    let ignore = false
+    async function loadMySticker() {
+      try {
+        const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker?session_token=${encodeURIComponent(sessionToken)}`)
+        if (ignore) return
+        setCustomSticker(data)
+      } catch (err) {
+        if (!ignore) {
+          setCustomSticker(null)
+        }
+      }
+    }
+    loadMySticker()
+    return () => {
+      ignore = true
+    }
+  }, [selectedAlbumSlug, sessionToken])
+
+  useEffect(() => {
     if (!selectedAlbumSlug || selectedIds.length === 0 || !serviceConfig?.service_enabled) {
       setQuote(null)
       setOrderFormOpen(false)
@@ -325,7 +416,8 @@ function PublicPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             album_slug: selectedAlbumSlug,
-            sticker_ids: selectedIds
+            sticker_ids: selectedIds,
+            session_token: sessionToken
           })
         })
         if (ignore) return
@@ -345,7 +437,7 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedAlbumSlug, selectedIds, serviceConfig?.service_enabled])
+  }, [selectedAlbumSlug, selectedIds, serviceConfig?.service_enabled, sessionToken])
 
   useEffect(() => {
     setOrderResult(null)
@@ -384,6 +476,19 @@ function PublicPage() {
   }, [donationModalOpen])
 
   useEffect(() => {
+    if (!myStickerModalOpen) return undefined
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setMyStickerModalOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [myStickerModalOpen])
+
+  useEffect(() => {
     if (!mobileAlbumPickerOpen && !mobileFilterOpen) return undefined
 
     function handleEscape(event) {
@@ -408,6 +513,19 @@ function PublicPage() {
       setPixCopied(false)
     }
   }, [donationModalOpen])
+
+  useEffect(() => {
+    if (!myStickerModalOpen) return
+    setMyStickerForm(current => ({
+      name: customSticker?.name || current.name || '',
+      profile_type: customSticker?.profile_type || current.profile_type || 'HOMEM',
+      birth_date_text: customSticker?.birth_date_text || '',
+      height_text: customSticker?.height_text || '',
+      weight_text: customSticker?.weight_text || '',
+      city_or_team: customSticker?.city_or_team || '',
+      photo: null
+    }))
+  }, [myStickerModalOpen, customSticker])
 
   useEffect(() => {
     setPreviewPage(current => Math.min(current, previewPageCount - 1))
@@ -441,6 +559,16 @@ function PublicPage() {
     )
   }
 
+  function toggleCustomStickerSelection() {
+    if (!customSticker) return
+    const selectionItem = toCustomSelectionItem(customSticker)
+    setSelectedStickers(current =>
+      current.some(sticker => sticker.id === customSticker.id)
+        ? current.filter(sticker => sticker.id !== customSticker.id)
+        : [...current.filter(sticker => sticker.source_type !== 'GENERATED'), selectionItem]
+    )
+  }
+
   function selectCurrentCollectionStickers() {
     setSelectedStickers(current => {
       const selectedById = new Map(current.map(sticker => [sticker.id, sticker]))
@@ -459,6 +587,68 @@ function PublicPage() {
     setSelectedStickers([])
   }
 
+  async function handleDeleteMySticker() {
+    if (!customSticker || !selectedAlbumSlug) return
+    setError('')
+    try {
+      await apiFetch(
+        `/albums/${selectedAlbumSlug}/my-sticker/${customSticker.id}?session_token=${encodeURIComponent(sessionToken)}`,
+        { method: 'DELETE' }
+      )
+      setCustomSticker(null)
+      setSelectedStickers(current => current.filter(sticker => sticker.id !== customSticker.id))
+      setMyStickerModalOpen(false)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function handleSubmitMySticker(event) {
+    event.preventDefault()
+    if (!selectedAlbumSlug || !myStickerForm.photo) {
+      setError('Envie uma foto para criar a sua figurinha.')
+      return
+    }
+
+    setMyStickerSubmitting(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('session_token', sessionToken)
+      formData.append('name', myStickerForm.name)
+      formData.append('profile_type', myStickerForm.profile_type)
+      formData.append('birth_date_text', myStickerForm.birth_date_text)
+      formData.append('height_text', myStickerForm.height_text)
+      formData.append('weight_text', myStickerForm.weight_text)
+      formData.append('city_or_team', myStickerForm.city_or_team)
+      formData.append('photo', myStickerForm.photo)
+
+      const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker`, {
+        method: 'POST',
+        body: formData
+      })
+      setCustomSticker(data)
+      setSelectedStickers(current => [
+        ...current.filter(sticker => sticker.source_type !== 'GENERATED'),
+        toCustomSelectionItem(data)
+      ])
+      setMyStickerForm({
+        name: data.name,
+        profile_type: data.profile_type || 'HOMEM',
+        birth_date_text: data.birth_date_text || '',
+        height_text: data.height_text || '',
+        weight_text: data.weight_text || '',
+        city_or_team: data.city_or_team || '',
+        photo: null
+      })
+      setMyStickerModalOpen(false)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setMyStickerSubmitting(false)
+    }
+  }
+
   async function handleExport() {
     if (!selectedAlbumSlug || selectedIds.length === 0) return
     setExporting(true)
@@ -469,7 +659,8 @@ function PublicPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           album_slug: selectedAlbumSlug,
-          sticker_ids: selectedIds
+          sticker_ids: selectedIds,
+          session_token: sessionToken
         })
       })
       if (serviceConfig?.donation_enabled && serviceConfig?.pix_key) {
@@ -516,6 +707,7 @@ function PublicPage() {
         body: JSON.stringify({
           album_slug: selectedAlbumSlug,
           sticker_ids: selectedIds,
+          session_token: sessionToken,
           ...orderForm
         })
       })
@@ -544,6 +736,7 @@ function PublicPage() {
               onClick={() => {
                 setSelectedAlbumSlug(album.slug)
                 setSelectedCollectionSlug('')
+                setCustomSticker(null)
                 setSelectedStickers([])
                 setSearch('')
                 setCategory('')
@@ -677,6 +870,14 @@ function PublicPage() {
             <button type="button" className="fig-inline-link" onClick={clearSelection}>
               Limpar selecao
             </button>
+            <button
+              type="button"
+              className="fig-inline-link"
+              onClick={() => setMyStickerModalOpen(true)}
+              disabled={!selectedAlbumSlug}
+            >
+              {customSticker ? 'Refazer minha figurinha' : 'Minha Figurinha'}
+            </button>
           </div>
         </div>
 
@@ -706,6 +907,14 @@ function PublicPage() {
             </button>
             <button type="button" className="fig-secondary-button" onClick={clearSelection}>
               Limpar selecao
+            </button>
+            <button
+              type="button"
+              className="fig-secondary-button"
+              onClick={() => setMyStickerModalOpen(true)}
+              disabled={!selectedAlbumSlug}
+            >
+              {customSticker ? 'Refazer minha figurinha' : 'Minha Figurinha'}
             </button>
             {serviceConfig?.service_enabled ? (
               <button
@@ -785,6 +994,55 @@ function PublicPage() {
           <p className="fig-empty-note">Calculando folhas e servicos...</p>
         ) : null}
 
+        {selectedAlbum ? (
+          <section className={`fig-custom-card${customSticker ? ' is-ready' : ''}`}>
+            <div className="fig-custom-card-copy">
+              <p className="fig-kicker">Minha Figurinha</p>
+              <h3>{customSticker ? 'Sua figurinha ja esta pronta' : 'Leve voce junto no mesmo PDF'}</h3>
+              <p>
+                {customSticker
+                  ? 'Ela pode ser marcada junto com as outras selecoes do album e segue o mesmo tamanho fisico na folha.'
+                  : 'Envie sua foto, preencha seus dados e o sistema monta uma figurinha personalizada no mesmo padrao das outras.'}
+              </p>
+              <div className="fig-hero-actions">
+                <button
+                  type="button"
+                  className="fig-primary-button"
+                  onClick={() => setMyStickerModalOpen(true)}
+                  disabled={!selectedAlbumSlug}
+                >
+                  {customSticker ? 'Refazer minha figurinha' : 'Criar minha figurinha'}
+                </button>
+                {customSticker ? (
+                  <>
+                    <button type="button" className="fig-secondary-button" onClick={toggleCustomStickerSelection}>
+                      {customStickerSelected ? 'Remover do PDF' : 'Usar no PDF'}
+                    </button>
+                    <button type="button" className="fig-secondary-button" onClick={handleDeleteMySticker}>
+                      Excluir
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </div>
+
+            {customSticker ? (
+              <div className={`fig-custom-preview${customStickerSelected ? ' is-selected' : ''}`}>
+                <img src={apiFileUrl(customSticker.preview_path)} alt={customSticker.name} />
+                <div className="fig-custom-preview-body">
+                  <strong>{customSticker.name}</strong>
+                  <span>{customProfileLabel(customSticker.profile_type)}</span>
+                  <small>
+                    {[customSticker.birth_date_text, customSticker.height_text, customSticker.weight_text, customSticker.city_or_team]
+                      .filter(Boolean)
+                      .join(' · ') || 'Sem dados extras preenchidos'}
+                  </small>
+                </div>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
         <div className="fig-sticker-grid">
           {stickers.map(sticker => (
             <button
@@ -855,6 +1113,7 @@ function PublicPage() {
                   onClick={() => {
                     setSelectedAlbumSlug(album.slug)
                     setSelectedCollectionSlug('')
+                    setCustomSticker(null)
                     setSelectedStickers([])
                     setSearch('')
                     setCategory('')
@@ -910,6 +1169,120 @@ function PublicPage() {
                 Aplicar
               </button>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {myStickerModalOpen ? (
+        <div className="fig-modal-backdrop" onClick={() => setMyStickerModalOpen(false)}>
+          <div className="fig-modal-shell fig-modal-shell--donation" onClick={event => event.stopPropagation()}>
+            <div className="fig-modal-header">
+              <div>
+                <p className="fig-kicker">Minha Figurinha</p>
+                <h3>Crie uma figurinha personalizada</h3>
+              </div>
+              <button type="button" className="fig-modal-close" onClick={() => setMyStickerModalOpen(false)}>
+                Fechar
+              </button>
+            </div>
+
+            <form className="fig-form-card fig-order-form fig-order-form--modal" onSubmit={handleSubmitMySticker}>
+              <div className="fig-service-notes">
+                <p>
+                  Envie uma foto com o rosto visivel. O sistema estiliza a imagem e encaixa a sua figurinha no mesmo
+                  tamanho fisico das demais.
+                </p>
+              </div>
+
+              <div className="fig-form-grid">
+                <label className="fig-field">
+                  <span>Nome</span>
+                  <input
+                    value={myStickerForm.name}
+                    onChange={event => setMyStickerForm(current => ({ ...current, name: event.target.value }))}
+                    required
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Perfil da figurinha</span>
+                  <select
+                    value={myStickerForm.profile_type}
+                    onChange={event => setMyStickerForm(current => ({ ...current, profile_type: event.target.value }))}
+                  >
+                    {customProfileOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="fig-field fig-field--full">
+                  <span>Foto</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    onChange={event =>
+                      setMyStickerForm(current => ({ ...current, photo: event.target.files?.[0] || null }))
+                    }
+                    required
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Data</span>
+                  <input
+                    value={myStickerForm.birth_date_text}
+                    onChange={event => setMyStickerForm(current => ({ ...current, birth_date_text: event.target.value }))}
+                    placeholder="Ex.: 14/03/2018"
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Altura</span>
+                  <input
+                    value={myStickerForm.height_text}
+                    onChange={event => setMyStickerForm(current => ({ ...current, height_text: event.target.value }))}
+                    placeholder="Ex.: 1,62 m"
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Peso</span>
+                  <input
+                    value={myStickerForm.weight_text}
+                    onChange={event => setMyStickerForm(current => ({ ...current, weight_text: event.target.value }))}
+                    placeholder="Ex.: 58 kg"
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Cidade ou time</span>
+                  <input
+                    value={myStickerForm.city_or_team}
+                    onChange={event => setMyStickerForm(current => ({ ...current, city_or_team: event.target.value }))}
+                    placeholder="Ex.: Fortaleza ou Brasil"
+                  />
+                </label>
+              </div>
+
+              {customSticker ? (
+                <div className="fig-custom-preview fig-custom-preview--modal">
+                  <img src={apiFileUrl(customSticker.preview_path)} alt={customSticker.name} />
+                  <div className="fig-custom-preview-body">
+                    <strong>{customSticker.name}</strong>
+                    <span>Atual: {customProfileLabel(customSticker.profile_type)}</span>
+                    <small>
+                      Crie novamente se quiser atualizar a foto ou os dados que aparecem na sua figurinha.
+                    </small>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="fig-hero-actions">
+                <button type="button" className="fig-secondary-button" onClick={() => setMyStickerModalOpen(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="fig-primary-button" disabled={myStickerSubmitting}>
+                  {myStickerSubmitting ? 'Criando figurinha...' : 'Criar e adicionar ao PDF'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       ) : null}

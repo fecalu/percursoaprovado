@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, File, Header, HTTPException, Query, Response, UploadFile, status
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import Session, selectinload
 
@@ -16,11 +16,13 @@ from .models import (
     Album,
     Collection,
     CollectionStatus,
+    CustomProfileType,
     Page,
     PrintOrder,
     PrintOrderStatus,
     Sticker,
     StickerCategory,
+    StickerSourceType,
 )
 from .schemas import (
     AdminLoginRequest,
@@ -59,6 +61,7 @@ from .services import (
     collection_to_response,
     create_print_order,
     crop_sticker_image,
+    delete_generated_stickers_for_session,
     ensure_album_slug_unique,
     ensure_default_album_assignments,
     get_or_create_service_settings,
@@ -67,6 +70,7 @@ from .services import (
     load_album_or_fail,
     load_collection_by_slug_or_fail,
     load_collection_or_fail,
+    load_generated_sticker_for_session,
     load_print_order_or_fail,
     load_sticker_or_fail,
     page_to_response,
@@ -76,6 +80,7 @@ from .services import (
     service_settings_to_response,
     slugify,
     sticker_to_response,
+    upsert_generated_sticker,
     validate_sticker_bounds,
 )
 
@@ -113,6 +118,17 @@ def ensure_runtime_schema() -> None:
             "ocr_name_suggested": "VARCHAR(255)",
             "ocr_confidence": "FLOAT",
             "ocr_processed_at": "DATETIME",
+            "source_type": "VARCHAR(20) NOT NULL DEFAULT 'PDF'",
+            "session_token": "VARCHAR(120)",
+            "profile_type": "VARCHAR(20)",
+            "birth_date_text": "VARCHAR(40)",
+            "height_text": "VARCHAR(40)",
+            "weight_text": "VARCHAR(40)",
+            "city_or_team": "VARCHAR(150)",
+            "uploaded_photo_path": "VARCHAR(255)",
+            "generated_portrait_path": "VARCHAR(255)",
+            "export_width_pt": "FLOAT",
+            "export_height_pt": "FLOAT",
         }
 
         for column_name, definition in required_columns.items():
@@ -132,6 +148,10 @@ def ensure_runtime_schema() -> None:
             if "sort_order" not in collection_columns:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_collections ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0"
+                )
+            if "is_system" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN is_system BOOLEAN NOT NULL DEFAULT 0"
                 )
 
         albums_table_exists = connection.exec_driver_sql(
@@ -190,17 +210,32 @@ def require_admin(x_admin_token: str | None = Header(default=None, alias="X-Admi
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token administrativo invalido.")
 
 
-def selected_stickers_for_album_or_400(db: Session, album: Album, sticker_ids: list[int]) -> list[Sticker]:
+def selected_stickers_for_album_or_400(
+    db: Session,
+    album: Album,
+    sticker_ids: list[int],
+    session_token: str | None = None,
+) -> list[Sticker]:
     unique_ids = list(dict.fromkeys(sticker_ids))
+    public_filter = and_(
+        Collection.is_system.is_(False),
+        Collection.status == CollectionStatus.PUBLICADA,
+        Sticker.source_type == StickerSourceType.PDF,
+    )
+    private_filter = and_(
+        Collection.is_system.is_(True),
+        Sticker.source_type == StickerSourceType.GENERATED,
+        Sticker.session_token == (session_token or "").strip(),
+    )
     statement = (
         select(Sticker)
         .join(Collection, Sticker.collection_id == Collection.id)
         .options(selectinload(Sticker.collection).selectinload(Collection.album), selectinload(Sticker.page))
         .where(
             Collection.album_id == album.id,
-            Collection.status == CollectionStatus.PUBLICADA,
             Sticker.active.is_(True),
             Sticker.id.in_(unique_ids),
+            or_(public_filter, private_filter),
         )
         .order_by(Collection.sort_order.asc(), Collection.name.asc(), Sticker.sort_order.asc(), Sticker.name.asc())
     )
@@ -239,7 +274,11 @@ def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
     visible_albums: list[Album] = []
     collection_ids: list[int] = []
     for album in albums:
-        published_collections = [collection for collection in album.collections if collection.status == CollectionStatus.PUBLICADA]
+        published_collections = [
+            collection
+            for collection in album.collections
+            if collection.status == CollectionStatus.PUBLICADA and not collection.is_system
+        ]
         if not published_collections:
             continue
         visible_albums.append(album)
@@ -251,7 +290,11 @@ def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
     responses: list[dict] = []
     for album in visible_albums:
         published_collections = sorted(
-            [collection for collection in album.collections if collection.status == CollectionStatus.PUBLICADA],
+            [
+                collection
+                for collection in album.collections
+                if collection.status == CollectionStatus.PUBLICADA and not collection.is_system
+            ],
             key=collection_sort_key,
         )
         collection_payload = [
@@ -266,7 +309,7 @@ def list_public_collections(db: Session = Depends(get_db)) -> list[dict]:
     collections = db.execute(
         select(Collection)
         .options(selectinload(Collection.album))
-        .where(Collection.status == CollectionStatus.PUBLICADA)
+        .where(Collection.status == CollectionStatus.PUBLICADA, Collection.is_system.is_(False))
         .order_by(Collection.sort_order.asc(), Collection.name.asc(), Collection.id.asc())
         .limit(settings.public_collection_limit)
     ).scalars().all()
@@ -303,10 +346,91 @@ def list_public_stickers(
     return [sticker_to_response(sticker) for sticker in stickers]
 
 
+@app.get("/albums/{album_slug}/my-sticker", response_model=StickerResponse | None)
+def get_my_sticker(
+    album_slug: str,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> dict | None:
+    album = load_album_by_slug_or_fail(db, album_slug)
+    sticker = load_generated_sticker_for_session(db, album.id, session_token)
+    return sticker_to_response(sticker) if sticker else None
+
+
+@app.post("/albums/{album_slug}/my-sticker", response_model=StickerResponse)
+async def create_or_replace_my_sticker(
+    album_slug: str,
+    session_token: str = Form(..., min_length=12, max_length=120),
+    name: str = Form(..., min_length=2, max_length=150),
+    profile_type: CustomProfileType = Form(...),
+    birth_date_text: str | None = Form(default=None, max_length=40),
+    height_text: str | None = Form(default=None, max_length=40),
+    weight_text: str | None = Form(default=None, max_length=40),
+    city_or_team: str | None = Form(default=None, max_length=150),
+    photo: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    album = load_album_by_slug_or_fail(db, album_slug)
+    if not photo.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para criar a figurinha.")
+    if not (photo.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem JPG ou PNG valida.")
+
+    uploaded_photo_bytes = await photo.read()
+    if not uploaded_photo_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A foto enviada esta vazia.")
+    if len(uploaded_photo_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A foto enviada passou do limite de {settings.custom_upload_limit_mb} MB.",
+        )
+
+    try:
+        sticker = upsert_generated_sticker(
+            db,
+            album=album,
+            session_token=session_token,
+            name=name,
+            profile_type=profile_type,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
+            city_or_team=city_or_team,
+            uploaded_photo_bytes=uploaded_photo_bytes,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+
+    db.commit()
+    sticker = load_sticker_or_fail(db, sticker.id)
+    return sticker_to_response(sticker)
+
+
+@app.delete("/albums/{album_slug}/my-sticker/{sticker_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_sticker(
+    album_slug: str,
+    sticker_id: int,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> Response:
+    album = load_album_by_slug_or_fail(db, album_slug)
+    sticker = load_sticker_or_fail(db, sticker_id)
+    if (
+        sticker.collection.album_id != album.id
+        or sticker.source_type != StickerSourceType.GENERATED
+        or sticker.session_token != session_token.strip()
+    ):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Minha Figurinha nao encontrada para essa sessao.")
+
+    delete_generated_stickers_for_session(db, album.id, session_token)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @app.post("/exports", response_model=ExportResponse)
 def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
     album = load_album_by_slug_or_fail(db, payload.album_slug)
-    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids)
+    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     export_record = build_export_pdf(album, stickers, db)
     db.commit()
     return {
@@ -320,7 +444,7 @@ def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict
 @app.post("/orders/quote", response_model=OrderQuoteResponse)
 def quote_print_order(payload: OrderQuoteRequest, db: Session = Depends(get_db)) -> dict:
     album = load_album_by_slug_or_fail(db, payload.album_slug)
-    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids)
+    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     service_settings = get_or_create_service_settings(db)
     quote = build_order_quote(album, stickers, db, service_settings)
     quote.pop("plan", None)
@@ -330,7 +454,7 @@ def quote_print_order(payload: OrderQuoteRequest, db: Session = Depends(get_db))
 @app.post("/orders", response_model=PrintOrderResponse)
 def create_public_print_order(payload: PrintOrderCreate, db: Session = Depends(get_db)) -> dict:
     album = load_album_by_slug_or_fail(db, payload.album_slug)
-    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids)
+    stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     service_settings = get_or_create_service_settings(db)
     try:
         order = create_print_order(
@@ -369,6 +493,7 @@ def list_admin_collections(db: Session = Depends(get_db)) -> list[dict]:
     collections = db.execute(
         select(Collection)
         .options(selectinload(Collection.album))
+        .where(Collection.is_system.is_(False))
         .order_by(Collection.sort_order.asc(), Collection.name.asc(), Collection.id.asc())
     ).scalars().all()
     stats = collection_stats(db, [collection.id for collection in collections])
@@ -393,7 +518,10 @@ def list_admin_albums(db: Session = Depends(get_db)) -> list[dict]:
             album_stats_map.get(album.id, {}),
             [
                 collection_to_response(collection, collection_stats_map.get(collection.id, {}))
-                for collection in sorted(album.collections, key=collection_sort_key)
+                for collection in sorted(
+                    [collection for collection in album.collections if not collection.is_system],
+                    key=collection_sort_key,
+                )
             ],
         )
         for album in albums

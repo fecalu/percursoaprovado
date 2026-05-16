@@ -31,12 +31,15 @@ class Settings:
         "FIGURINHAS_PICKUP_NOTE",
         "Pagamento via Pix e retirada combinada diretamente comigo.",
     )
+    openai_api_key = os.getenv("FIGURINHAS_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "")
+    openai_response_model = os.getenv("FIGURINHAS_OPENAI_RESPONSE_MODEL", "gpt-4.1")
+    custom_upload_limit_mb = int(os.getenv("FIGURINHAS_CUSTOM_UPLOAD_LIMIT_MB", "12"))
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     settings = Settings()
     settings.storage_root.mkdir(parents=True, exist_ok=True)
-    for subdir in ("originals", "pages", "crops", "exports"):
+    for subdir in ("originals", "pages", "crops", "exports", "custom_uploads", "custom_portraits", "custom_stickers"):
         (settings.storage_root / subdir).mkdir(parents=True, exist_ok=True)
     return settings

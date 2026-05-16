@@ -39,6 +39,18 @@ class PrintOrderStatus(str, enum.Enum):
     CANCELADO = "CANCELADO"
 
 
+class StickerSourceType(str, enum.Enum):
+    PDF = "PDF"
+    GENERATED = "GENERATED"
+
+
+class CustomProfileType(str, enum.Enum):
+    HOMEM = "HOMEM"
+    MULHER = "MULHER"
+    MENINO = "MENINO"
+    MENINA = "MENINA"
+
+
 class Album(Base):
     __tablename__ = "figurinhas_albums"
 
@@ -69,6 +81,7 @@ class Collection(Base):
     slug: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_system: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     status: Mapped[CollectionStatus] = mapped_column(
         Enum(CollectionStatus), default=CollectionStatus.RASCUNHO, nullable=False
     )
@@ -116,6 +129,19 @@ class Sticker(Base):
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     code: Mapped[str | None] = mapped_column(String(80), nullable=True)
     category: Mapped[StickerCategory] = mapped_column(Enum(StickerCategory), default=StickerCategory.JOGADOR)
+    source_type: Mapped[StickerSourceType] = mapped_column(
+        Enum(StickerSourceType), default=StickerSourceType.PDF, nullable=False
+    )
+    session_token: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    profile_type: Mapped[CustomProfileType | None] = mapped_column(Enum(CustomProfileType), nullable=True)
+    birth_date_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    height_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    weight_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    city_or_team: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    uploaded_photo_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    generated_portrait_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    export_width_pt: Mapped[float | None] = mapped_column(Float, nullable=True)
+    export_height_pt: Mapped[float | None] = mapped_column(Float, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     x_ratio: Mapped[float] = mapped_column(Float, nullable=False)
     y_ratio: Mapped[float] = mapped_column(Float, nullable=False)
