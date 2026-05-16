@@ -862,6 +862,21 @@ def print_order_to_response(order: PrintOrder, service_settings: ServiceSettings
     except json.JSONDecodeError:
         selected_stickers = []
 
+    normalized_selected_stickers = []
+    fallback_collection_name = order.collection_name or (order.collection.name if order.collection else None) or "Selecao"
+    for sticker in selected_stickers:
+        if not isinstance(sticker, dict):
+            continue
+        normalized_selected_stickers.append(
+            {
+                "id": sticker.get("id"),
+                "collection_name": sticker.get("collection_name") or fallback_collection_name,
+                "name": sticker.get("name") or "Figurinha",
+                "category": sticker.get("category") or "JOGADOR",
+                "page_number": sticker.get("page_number") or 1,
+            }
+        )
+
     response = {
         "id": order.id,
         "reference_code": order.reference_code,
@@ -884,7 +899,7 @@ def print_order_to_response(order: PrintOrder, service_settings: ServiceSettings
         "pack_price_cents": order.pack_price_cents,
         "total_price_cents": order.total_price_cents,
         "export_download_path": f"/admin/orders/{order.id}/download",
-        "selected_stickers": selected_stickers,
+        "selected_stickers": normalized_selected_stickers,
         "created_at": order.created_at,
         "updated_at": order.updated_at,
         "pix_key": service_settings.pix_key if service_settings else None,

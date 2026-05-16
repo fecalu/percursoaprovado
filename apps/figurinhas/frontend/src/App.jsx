@@ -1261,6 +1261,31 @@ function AdminPage() {
   const [savingOrder, setSavingOrder] = useState(false)
   const [savingCollectionEdit, setSavingCollectionEdit] = useState(false)
 
+  async function fetchCollectionWorkspace(collectionId, preferredPageId = currentPageId, shouldApply = () => true) {
+    if (!token || !collectionId) return
+    setLoading(true)
+    try {
+      const [collection, pagesData, stickersData] = await Promise.all([
+        apiFetch(`/admin/collections/${collectionId}`, { headers: buildAdminHeaders(token) }),
+        apiFetch(`/admin/collections/${collectionId}/pages`, { headers: buildAdminHeaders(token) }),
+        apiFetch(`/admin/collections/${collectionId}/stickers`, { headers: buildAdminHeaders(token) })
+      ])
+      if (!shouldApply()) return
+      setSelectedCollection(collection)
+      setPages(pagesData)
+      setStickers(stickersData)
+      const nextPageId = pagesData.some(page => page.id === preferredPageId) ? preferredPageId : pagesData[0]?.id || null
+      setCurrentPageId(nextPageId)
+      if (editingStickerId && !stickersData.some(sticker => sticker.id === editingStickerId)) {
+        setEditingStickerId(null)
+        setDraftRect(null)
+      }
+    } finally {
+      if (!shouldApply()) return
+      setLoading(false)
+    }
+  }
+
   async function fetchCollections(activeCollectionId = selectedCollectionId) {
     if (!token) return
     setLoading(true)
@@ -1346,26 +1371,13 @@ function AdminPage() {
 
     let ignore = false
     async function fetchCollectionDetail() {
-      setLoading(true)
-      setError('')
       try {
-        const [collection, pagesData, stickersData] = await Promise.all([
-          apiFetch(`/admin/collections/${selectedCollectionId}`, { headers: buildAdminHeaders(token) }),
-          apiFetch(`/admin/collections/${selectedCollectionId}/pages`, { headers: buildAdminHeaders(token) }),
-          apiFetch(`/admin/collections/${selectedCollectionId}/stickers`, { headers: buildAdminHeaders(token) })
-        ])
+        setError('')
+        await fetchCollectionWorkspace(selectedCollectionId, currentPageId, () => !ignore)
         if (ignore) return
-        setSelectedCollection(collection)
-        setPages(pagesData)
-        setStickers(stickersData)
-        setCurrentPageId(current => current || pagesData[0]?.id || null)
       } catch (err) {
         if (!ignore) {
           setError(err.message)
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false)
         }
       }
     }
@@ -1694,7 +1706,8 @@ function AdminPage() {
         body: formData
       })
       setMessage('PDF enviado e paginas renderizadas.')
-      await fetchCollections(selectedCollectionId)
+      await Promise.all([fetchCollections(selectedCollectionId), fetchCollectionWorkspace(selectedCollectionId, null)])
+      resetStickerForm()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -1725,10 +1738,11 @@ function AdminPage() {
           ? `Automacao gerou ${data.detected_count} recortes. ${pageSummary}`
           : 'A automacao nao encontrou uma grade compativel nessa selecao.'
       )
-      await fetchCollections(selectedCollectionId)
-      if (scope === 'current' && currentPageId) {
-        setCurrentPageId(currentPageId)
-      }
+      await Promise.all([
+        fetchCollections(selectedCollectionId),
+        fetchCollectionWorkspace(selectedCollectionId, scope === 'current' ? currentPageId : currentPageId),
+      ])
+      resetStickerForm()
     } catch (err) {
       setError(err.message)
     } finally {
@@ -1834,7 +1848,7 @@ function AdminPage() {
         body: JSON.stringify(editingStickerId ? { ...payload, collection_id: undefined } : payload)
       })
       setMessage(editingStickerId ? 'Figurinha atualizada.' : 'Figurinha cadastrada.')
-      await fetchCollections(selectedCollectionId)
+      await Promise.all([fetchCollections(selectedCollectionId), fetchCollectionWorkspace(selectedCollectionId, currentPageId)])
       resetStickerForm()
     } catch (err) {
       setError(err.message)
@@ -1851,7 +1865,7 @@ function AdminPage() {
         headers: buildAdminHeaders(token)
       })
       setMessage('Figurinha excluida.')
-      await fetchCollections(selectedCollectionId)
+      await Promise.all([fetchCollections(selectedCollectionId), fetchCollectionWorkspace(selectedCollectionId, currentPageId)])
       if (editingStickerId === stickerId) {
         resetStickerForm()
       }
@@ -1871,7 +1885,7 @@ function AdminPage() {
         body: JSON.stringify({ status })
       })
       setMessage(status === 'PUBLICADA' ? 'Colecao publicada.' : 'Colecao movida para rascunho.')
-      await fetchCollections(selectedCollectionId)
+      await Promise.all([fetchCollections(selectedCollectionId), fetchCollectionWorkspace(selectedCollectionId, currentPageId)])
     } catch (err) {
       setError(err.message)
     }
