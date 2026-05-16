@@ -3,7 +3,7 @@ from __future__ import annotations
 import base64
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime
 
 import httpx
 
@@ -39,13 +39,10 @@ class MercadoPagoPixClient:
         payer_email: str,
         external_reference: str,
     ) -> PixPayment:
-        expiration = datetime.now(UTC) + timedelta(hours=24)
-        expiration_text = expiration.strftime("%Y-%m-%dT%H:%M:%S%z")
         payload = {
             "transaction_amount": round(amount_cents / 100, 2),
             "description": description,
             "payment_method_id": "pix",
-            "date_of_expiration": expiration_text,
             "external_reference": external_reference,
             "payer": {
                 "email": payer_email,
@@ -99,6 +96,9 @@ class MercadoPagoPixClient:
         if isinstance(message, dict):
             return message.get("description") or message.get("message") or f"Mercado Pago respondeu com erro {response.status_code}."
         if isinstance(message, str) and message.strip():
+            normalized = message.lower()
+            if "unauthorized use of live credentials" in normalized:
+                return "As credenciais atuais do Mercado Pago nao estao autorizadas para criar esse Pix. Revise se a conta/app esta no modo correto."
             return message
         return f"Mercado Pago respondeu com erro {response.status_code}."
 
