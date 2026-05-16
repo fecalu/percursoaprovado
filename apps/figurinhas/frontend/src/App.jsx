@@ -1187,11 +1187,20 @@ function PublicPage() {
         {selectedAlbum ? (
           <section className={`fig-custom-card${customSticker ? ' is-ready' : ''}`}>
             <div className="fig-custom-card-copy">
-              <p className="fig-kicker">Minha Figurinha</p>
+              <div className="fig-custom-card-topline">
+                <p className="fig-kicker">Minha Figurinha</p>
+                {customSticker ? (
+                  <span className={`fig-inline-status-chip${customStickerSelected ? ' is-active' : ''}`}>
+                    {customStickerSelected ? 'Incluida no PDF' : 'Fora do PDF'}
+                  </span>
+                ) : null}
+              </div>
               <h3>{customSticker ? 'Sua figurinha ja esta pronta' : 'Leve voce junto no mesmo PDF'}</h3>
               <p>
                 {customSticker
-                  ? 'Ela entra no mesmo PDF das outras figurinhas.'
+                  ? customStickerSelected
+                    ? 'Ela ja vai junto com as outras no seu PDF.'
+                    : 'Ela esta pronta, mas ainda nao entra no PDF.'
                   : 'Crie sua figurinha no mesmo padrao das outras.'}
               </p>
               <div className="fig-hero-actions">
@@ -1222,6 +1231,9 @@ function PublicPage() {
                 <div className="fig-custom-preview-body">
                   <strong>{customSticker.name}</strong>
                   <span>{customProfileLabel(customSticker.profile_type)}</span>
+                  <em className={`fig-preview-selection-note${customStickerSelected ? ' is-active' : ''}`}>
+                    {customStickerSelected ? 'Ja incluida no PDF atual' : 'Toque em "Usar no PDF" para incluir'}
+                  </em>
                   <small>
                     {[customSticker.birth_date_text, customSticker.height_text, customSticker.weight_text, customSticker.city_or_team]
                       .filter(Boolean)
@@ -1258,6 +1270,11 @@ function PublicPage() {
           <div className="fig-mobile-bottom-copy">
             <strong>{selectedIds.length}</strong>
             <span>{selectedIds.length === 1 ? 'figurinha selecionada' : 'figurinhas selecionadas'}</span>
+            {customSticker ? (
+              <small className={`fig-mobile-bottom-accent${customStickerSelected ? ' is-active' : ''}`}>
+                {customStickerSelected ? 'Minha Figurinha incluida' : 'Minha Figurinha fora do PDF'}
+              </small>
+            ) : null}
           </div>
           <div className="fig-mobile-bottom-actions">
             {serviceConfig?.service_enabled ? (
@@ -1785,15 +1802,15 @@ function PublicPage() {
                   <div className="fig-quote-grid fig-quote-grid--donation">
                     <div className="fig-quote-item">
                       <strong>{freeSelectedIds.length}</strong>
-                      <span>figurinhas no PDF gratis</span>
+                      <span>gratis sem a personalizada</span>
                     </div>
                     <div className="fig-quote-item">
                       <strong>{selectedIds.length}</strong>
-                      <span>figurinhas no PDF completo</span>
+                      <span>com sua figurinha</span>
                     </div>
                     <div className="fig-quote-item">
                       <strong>{formatCurrency(serviceConfig.custom_sticker_unlock_price_cents)}</strong>
-                      <span>para manter sua figurinha</span>
+                      <span>para liberar a personalizada</span>
                     </div>
                   </div>
 
@@ -1834,19 +1851,20 @@ function PublicPage() {
                     <span className="fig-flow-step">3. Baixar</span>
                   </div>
                   <div className="fig-service-notes">
-                    <p>Pague o Pix para liberar o PDF completo.</p>
+                    <p>Escaneie o Pix para liberar sua figurinha no PDF.</p>
                   </div>
 
-                  <div className="fig-quote-grid fig-quote-grid--donation">
-                    <div className="fig-quote-item">
+                  <div className="fig-unlock-hero-card">
+                    <div>
+                      <span className="fig-unlock-hero-label">Liberacao</span>
                       <strong>{formatCurrency(customUnlockData?.amount_cents || serviceConfig.custom_sticker_unlock_price_cents)}</strong>
-                      <span>valor da liberacao</span>
                     </div>
-                    <div className="fig-quote-item">
-                      <strong>{selectedIds.length}</strong>
-                      <span>figurinhas no PDF completo</span>
+                    <div>
+                      <span className="fig-unlock-hero-label">Seu PDF</span>
+                      <strong>{selectedIds.length} figurinhas</strong>
                     </div>
-                    <div className="fig-quote-item">
+                    <div>
+                      <span className="fig-unlock-hero-label">Status</span>
                       <strong>
                         {customUnlockData?.status === 'PAGO'
                           ? 'Pago'
@@ -1856,7 +1874,6 @@ function PublicPage() {
                               ? 'Falhou'
                               : 'Aguardando'}
                       </strong>
-                      <span>status do pagamento</span>
                     </div>
                   </div>
 
@@ -1868,6 +1885,11 @@ function PublicPage() {
                       />
                     </div>
                   ) : null}
+
+                  <div className="fig-payment-focus-note">
+                    <strong>Sua Minha Figurinha entra no PDF assim que o Pix confirmar.</strong>
+                    <span>Se preferir, voce ainda pode voltar e baixar gratis sem ela.</span>
+                  </div>
 
                   <div className="fig-helper-strip fig-helper-strip--donation">
                     <div>
