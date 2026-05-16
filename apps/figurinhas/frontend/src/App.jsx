@@ -118,6 +118,17 @@ function centsFromInput(value) {
   return Math.round(normalized * 100)
 }
 
+function buildSlug(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 150)
+}
+
 function downloadBlob(blob, fileName) {
   const objectUrl = window.URL.createObjectURL(blob)
   const anchor = document.createElement('a')
@@ -1210,15 +1221,19 @@ function AdminPage() {
   const [error, setError] = useState('')
   const [albumForm, setAlbumForm] = useState({ name: '', slug: '', description: '', sort_order: '0' })
   const [createForm, setCreateForm] = useState({ album_id: '', name: '', slug: '', description: '', sort_order: '0' })
+  const [albumSlugEdited, setAlbumSlugEdited] = useState(false)
+  const [createCollectionSlugEdited, setCreateCollectionSlugEdited] = useState(false)
   const [albumStructureMode, setAlbumStructureMode] = useState('edit')
   const [collectionStructureMode, setCollectionStructureMode] = useState('edit')
   const [selectedAlbumForm, setSelectedAlbumForm] = useState({ name: '', slug: '', description: '', sort_order: '0' })
+  const [selectedAlbumSlugEdited, setSelectedAlbumSlugEdited] = useState(false)
   const [selectedCollectionForm, setSelectedCollectionForm] = useState({
     name: '',
     slug: '',
     description: '',
     sort_order: '0'
   })
+  const [selectedCollectionSlugEdited, setSelectedCollectionSlugEdited] = useState(false)
   const [savingAlbum, setSavingAlbum] = useState(false)
   const [savingAlbumEdit, setSavingAlbumEdit] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -1454,6 +1469,7 @@ function AdminPage() {
   useEffect(() => {
     if (!selectedAlbum) {
       setSelectedAlbumForm({ name: '', slug: '', description: '', sort_order: '0' })
+      setSelectedAlbumSlugEdited(false)
       return
     }
     setSelectedAlbumForm({
@@ -1462,11 +1478,13 @@ function AdminPage() {
       description: selectedAlbum.description || '',
       sort_order: String(selectedAlbum.sort_order ?? 0)
     })
+    setSelectedAlbumSlugEdited(false)
   }, [selectedAlbum])
 
   useEffect(() => {
     if (!selectedCollection) {
       setSelectedCollectionForm({ name: '', slug: '', description: '', sort_order: '0' })
+      setSelectedCollectionSlugEdited(false)
       return
     }
     setSelectedCollectionForm({
@@ -1475,6 +1493,7 @@ function AdminPage() {
       description: selectedCollection.description || '',
       sort_order: String(selectedCollection.sort_order ?? 0)
     })
+    setSelectedCollectionSlugEdited(false)
   }, [selectedCollection])
 
   useEffect(() => {
@@ -1511,6 +1530,58 @@ function AdminPage() {
       sort_order: String(nextOrder)
     }))
   }, [filteredCollections, selectedAlbumId, createForm.name, createForm.slug, createForm.description])
+
+  function handleAlbumNameChange(value) {
+    setAlbumForm(current => ({
+      ...current,
+      name: value,
+      slug: albumSlugEdited ? current.slug : buildSlug(value)
+    }))
+  }
+
+  function handleAlbumSlugChange(value) {
+    setAlbumSlugEdited(true)
+    setAlbumForm(current => ({ ...current, slug: buildSlug(value) }))
+  }
+
+  function handleCreateCollectionNameChange(value) {
+    setCreateForm(current => ({
+      ...current,
+      name: value,
+      slug: createCollectionSlugEdited ? current.slug : buildSlug(value)
+    }))
+  }
+
+  function handleCreateCollectionSlugChange(value) {
+    setCreateCollectionSlugEdited(true)
+    setCreateForm(current => ({ ...current, slug: buildSlug(value) }))
+  }
+
+  function handleSelectedAlbumNameChange(value) {
+    setSelectedAlbumForm(current => ({
+      ...current,
+      name: value,
+      slug: selectedAlbumSlugEdited ? current.slug : buildSlug(value)
+    }))
+  }
+
+  function handleSelectedAlbumSlugChange(value) {
+    setSelectedAlbumSlugEdited(true)
+    setSelectedAlbumForm(current => ({ ...current, slug: buildSlug(value) }))
+  }
+
+  function handleSelectedCollectionNameChange(value) {
+    setSelectedCollectionForm(current => ({
+      ...current,
+      name: value,
+      slug: selectedCollectionSlugEdited ? current.slug : buildSlug(value)
+    }))
+  }
+
+  function handleSelectedCollectionSlugChange(value) {
+    setSelectedCollectionSlugEdited(true)
+    setSelectedCollectionForm(current => ({ ...current, slug: buildSlug(value) }))
+  }
 
   function resetStickerForm() {
     setEditingStickerId(null)
@@ -1559,6 +1630,7 @@ function AdminPage() {
         })
       })
       setAlbumForm({ name: '', slug: '', description: '', sort_order: '0' })
+      setAlbumSlugEdited(false)
       setAlbumStructureMode('edit')
       setMessage('Album criado.')
       await fetchAlbums(created.id)
@@ -1584,6 +1656,7 @@ function AdminPage() {
         })
       })
       setCreateForm(current => ({ ...current, name: '', slug: '', description: '', sort_order: '0' }))
+      setCreateCollectionSlugEdited(false)
       setCollectionStructureMode('edit')
       setMessage('Colecao criada.')
       setSelectedAlbumId(created.album_id || selectedAlbumId)
@@ -1646,6 +1719,7 @@ function AdminPage() {
   function handleStartCreateAlbum() {
     const nextOrder = albums.reduce((maxValue, album) => Math.max(maxValue, Number(album.sort_order || 0)), 0) + 1
     setAlbumForm({ name: '', slug: '', description: '', sort_order: String(nextOrder) })
+    setAlbumSlugEdited(false)
     setAlbumStructureMode('create')
     setCollectionStructureMode('edit')
     setAdminView('structure')
@@ -1667,6 +1741,7 @@ function AdminPage() {
       description: '',
       sort_order: String(nextOrder)
     })
+    setCreateCollectionSlugEdited(false)
     setCollectionStructureMode('create')
     setAlbumStructureMode('edit')
     setAdminView('structure')
@@ -2163,8 +2238,8 @@ function AdminPage() {
                       value={isCreatingAlbum ? albumForm.name : selectedAlbumForm.name}
                       onChange={event =>
                         isCreatingAlbum
-                          ? setAlbumForm(current => ({ ...current, name: event.target.value }))
-                          : setSelectedAlbumForm(current => ({ ...current, name: event.target.value }))
+                          ? handleAlbumNameChange(event.target.value)
+                          : handleSelectedAlbumNameChange(event.target.value)
                       }
                       placeholder="Copa 2026"
                     />
@@ -2175,11 +2250,12 @@ function AdminPage() {
                       value={isCreatingAlbum ? albumForm.slug : selectedAlbumForm.slug}
                       onChange={event =>
                         isCreatingAlbum
-                          ? setAlbumForm(current => ({ ...current, slug: event.target.value }))
-                          : setSelectedAlbumForm(current => ({ ...current, slug: event.target.value }))
+                          ? handleAlbumSlugChange(event.target.value)
+                          : handleSelectedAlbumSlugChange(event.target.value)
                       }
-                      placeholder="copa-2026"
+                      placeholder="Gerado automaticamente"
                     />
+                    <p className="fig-helper-text">Gerado automaticamente pelo nome. Se quiser, voce ainda pode ajustar.</p>
                   </label>
                   <label className="fig-field">
                     <span>Ordem na barra lateral</span>
@@ -2271,8 +2347,8 @@ function AdminPage() {
                       value={isCreatingCollection ? createForm.name : selectedCollectionForm.name}
                       onChange={event =>
                         isCreatingCollection
-                          ? setCreateForm(current => ({ ...current, name: event.target.value }))
-                          : setSelectedCollectionForm(current => ({ ...current, name: event.target.value }))
+                          ? handleCreateCollectionNameChange(event.target.value)
+                          : handleSelectedCollectionNameChange(event.target.value)
                       }
                       placeholder="Brasil"
                     />
@@ -2283,11 +2359,12 @@ function AdminPage() {
                       value={isCreatingCollection ? createForm.slug : selectedCollectionForm.slug}
                       onChange={event =>
                         isCreatingCollection
-                          ? setCreateForm(current => ({ ...current, slug: event.target.value }))
-                          : setSelectedCollectionForm(current => ({ ...current, slug: event.target.value }))
+                          ? handleCreateCollectionSlugChange(event.target.value)
+                          : handleSelectedCollectionSlugChange(event.target.value)
                       }
-                      placeholder="brasil"
+                      placeholder="Gerado automaticamente"
                     />
+                    <p className="fig-helper-text">Gerado automaticamente pelo nome. Se quiser, voce ainda pode ajustar.</p>
                   </label>
                   <label className="fig-field">
                     <span>Ordem na barra lateral</span>
