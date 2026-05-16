@@ -198,6 +198,8 @@ def _generate_sticker_with_openai(
 
 
 def _humanize_openai_error(exc: Exception) -> str:
+    message = str(exc)
+    normalized = message.lower()
     if isinstance(exc, AuthenticationError):
         return "A chave da OpenAI configurada nao conseguiu autorizar a geracao dessa figurinha."
     if isinstance(exc, RateLimitError):
@@ -209,9 +211,11 @@ def _humanize_openai_error(exc: Exception) -> str:
         if status_code == 429:
             return "A chave da OpenAI atingiu o limite de uso para gerar imagens agora. Tente outra chave ou aguarde."
         if status_code == 400:
+            if "billing" in normalized or "hard limit" in normalized:
+                return "A chave da OpenAI foi aceita, mas a conta atingiu o limite de cobranca para gerar imagens."
             return "A OpenAI recusou essa geracao de imagem. Revise a foto, a base ou o prompt configurado."
-    message = str(exc)
-    normalized = message.lower()
+    if "billing" in normalized or "hard limit" in normalized:
+        return "A chave da OpenAI foi aceita, mas a conta atingiu o limite de cobranca para gerar imagens."
     if "quota" in normalized or "429" in normalized:
         return "A chave da OpenAI atingiu o limite de uso para gerar imagens agora. Tente outra chave ou aguarde."
     if "api key" in normalized or "invalid" in normalized or "permission" in normalized or "unauthorized" in normalized:
