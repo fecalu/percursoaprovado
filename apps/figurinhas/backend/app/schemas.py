@@ -197,6 +197,9 @@ class ExportResponse(BaseModel):
 class ServiceConfigResponse(BaseModel):
     service_enabled: bool
     donation_enabled: bool
+    custom_sticker_unlock_enabled: bool
+    custom_sticker_unlock_price_cents: int
+    custom_sticker_unlock_message: str | None
     pack_size: int
     print_price_cents: int
     pack_price_cents: int
@@ -214,6 +217,9 @@ class ServiceConfigResponse(BaseModel):
 class ServiceConfigUpdate(BaseModel):
     service_enabled: bool = False
     donation_enabled: bool = False
+    custom_sticker_unlock_enabled: bool = False
+    custom_sticker_unlock_price_cents: int = Field(default=500, ge=0, le=100000)
+    custom_sticker_unlock_message: str | None = Field(default=None, max_length=500)
     pack_size: int = Field(default=7, ge=1, le=100)
     print_price_cents: int = Field(default=0, ge=0, le=100000)
     pack_price_cents: int = Field(default=0, ge=0, le=100000)
@@ -299,6 +305,26 @@ class PrintOrderResponse(BaseModel):
 class PrintOrderUpdate(BaseModel):
     status: PrintOrderStatus
     admin_notes: str | None = Field(default=None, max_length=1000)
+
+
+class CustomStickerUnlockRequest(BaseModel):
+    session_token: str = Field(min_length=12, max_length=120)
+
+
+class CustomStickerUnlockResponse(BaseModel):
+    id: int
+    album_id: int
+    sticker_id: int
+    status: str
+    amount_cents: int
+    payment_required: bool
+    qr_code_base64: str | None = None
+    qr_code: str | None = None
+    ticket_url: str | None = None
+    expires_at: datetime | None = None
+    paid_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
 
 
 class AutoDetectPageResponse(BaseModel):

@@ -51,6 +51,13 @@ class CustomProfileType(str, enum.Enum):
     MENINA = "MENINA"
 
 
+class CustomStickerUnlockStatus(str, enum.Enum):
+    PENDENTE = "PENDENTE"
+    PAGO = "PAGO"
+    EXPIRADO = "EXPIRADO"
+    FALHOU = "FALHOU"
+
+
 class Album(Base):
     __tablename__ = "figurinhas_albums"
 
@@ -194,10 +201,42 @@ class ServiceSettings(Base):
     custom_base_mulher_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     custom_base_menino_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     custom_base_menina_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    custom_sticker_unlock_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    custom_sticker_unlock_price_cents: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    custom_sticker_unlock_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
+
+
+class CustomStickerUnlock(Base):
+    __tablename__ = "figurinhas_custom_sticker_unlocks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    album_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_albums.id"), nullable=False, index=True)
+    sticker_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_stickers.id"), nullable=False, index=True)
+    session_token: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[CustomStickerUnlockStatus] = mapped_column(
+        Enum(CustomStickerUnlockStatus), default=CustomStickerUnlockStatus.PENDENTE, nullable=False
+    )
+    mp_payment_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    mp_external_reference: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    mp_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    mp_status_detail: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    qr_code_base64: Mapped[str | None] = mapped_column(Text, nullable=True)
+    qr_code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ticket_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    album: Mapped[Album] = relationship()
+    sticker: Mapped[Sticker] = relationship()
 
 
 class PrintOrder(Base):

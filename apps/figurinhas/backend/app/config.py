@@ -31,6 +31,17 @@ class Settings:
         "FIGURINHAS_PICKUP_NOTE",
         "Pagamento via Pix e retirada combinada diretamente comigo.",
     )
+    default_custom_sticker_unlock_enabled = (
+        os.getenv("FIGURINHAS_CUSTOM_STICKER_UNLOCK_ENABLED", "false").lower() == "true"
+    )
+    default_custom_sticker_unlock_price_cents = int(
+        os.getenv("FIGURINHAS_CUSTOM_STICKER_UNLOCK_PRICE_CENTS", "500")
+    )
+    default_custom_sticker_unlock_message = os.getenv(
+        "FIGURINHAS_CUSTOM_STICKER_UNLOCK_MESSAGE",
+        "Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00.",
+    )
+    mercadopago_access_token = os.getenv("FIGURINHAS_MP_ACCESS_TOKEN") or os.getenv("MP_ACCESS_TOKEN", "")
     openai_api_key = os.getenv("FIGURINHAS_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "")
     openai_image_model = os.getenv("FIGURINHAS_OPENAI_IMAGE_MODEL", "gpt-image-2")
     openai_image_quality = os.getenv("FIGURINHAS_OPENAI_IMAGE_QUALITY", "medium")

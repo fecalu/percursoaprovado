@@ -5,7 +5,7 @@ import json
 import shutil
 import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import fitz
@@ -18,11 +18,14 @@ from sqlalchemy.orm import Session, selectinload
 from .auto_detect import detect_sticker_rectangles
 from .config import get_settings
 from .custom_stickers import DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE, generate_custom_sticker_render
+from .mercadopago import MercadoPagoError, MercadoPagoPixClient
 from .models import (
     Album,
     Collection,
     CollectionStatus,
     CustomProfileType,
+    CustomStickerUnlock,
+    CustomStickerUnlockStatus,
     Export,
     Page,
     PrintOrder,
@@ -280,6 +283,9 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
         id=1,
         service_enabled=settings.default_service_enabled,
         donation_enabled=settings.default_donation_enabled,
+        custom_sticker_unlock_enabled=settings.default_custom_sticker_unlock_enabled,
+        custom_sticker_unlock_price_cents=settings.default_custom_sticker_unlock_price_cents,
+        custom_sticker_unlock_message=settings.default_custom_sticker_unlock_message or None,
         pack_size=settings.default_pack_size,
         print_price_cents=settings.default_print_price_cents,
         pack_price_cents=settings.default_pack_price_cents,
@@ -292,6 +298,14 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
     db.add(settings_record)
     db.flush()
     return settings_record
+
+
+def has_generated_sticker(stickers: list[Sticker]) -> bool:
+    return any(sticker.source_type == StickerSourceType.GENERATED for sticker in stickers)
+
+
+def generated_sticker_for_selection(stickers: list[Sticker]) -> Sticker | None:
+    return next((sticker for sticker in stickers if sticker.source_type == StickerSourceType.GENERATED), None)
 
 
 def get_custom_base_relative_path(service_settings: ServiceSettings, profile_type: CustomProfileType) -> str | None:
@@ -502,6 +516,133 @@ def delete_generated_stickers_for_session(db: Session, album_id: int, session_to
     for sticker in stickers:
         delete_sticker_record(db, sticker)
     db.flush()
+
+
+def load_latest_custom_sticker_unlock(
+    db: Session,
+    *,
+    album_id: int,
+    session_token: str,
+) -> CustomStickerUnlock | None:
+    normalized = session_token.strip()
+    if not normalized:
+        return None
+    return (
+        db.execute(
+            select(CustomStickerUnlock)
+            .where(
+                CustomStickerUnlock.album_id == album_id,
+                CustomStickerUnlock.session_token == normalized,
+            )
+            .order_by(CustomStickerUnlock.updated_at.desc(), CustomStickerUnlock.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+
+
+def is_custom_sticker_unlocked(
+    db: Session,
+    *,
+    album_id: int,
+    session_token: str,
+) -> bool:
+    unlock = load_latest_custom_sticker_unlock(db, album_id=album_id, session_token=session_token)
+    return bool(unlock and unlock.status == CustomStickerUnlockStatus.PAGO)
+
+
+def _mercadopago_client() -> MercadoPagoPixClient:
+    return MercadoPagoPixClient(settings.mercadopago_access_token)
+
+
+def _mercadopago_payer_email(session_token: str, album: Album) -> str:
+    safe_session = "".join(char for char in session_token.lower() if char.isalnum())[:24] or uuid.uuid4().hex[:12]
+    safe_album = "".join(char for char in album.slug.lower() if char.isalnum())[:18] or "album"
+    return f"{safe_session}@{safe_album}.figurinhas.local"
+
+
+def _map_unlock_status(mp_status: str | None, mp_status_detail: str | None) -> CustomStickerUnlockStatus:
+    normalized = (mp_status or "").lower()
+    detail = (mp_status_detail or "").lower()
+    if normalized == "approved":
+        return CustomStickerUnlockStatus.PAGO
+    if normalized in {"rejected", "cancelled"}:
+        return CustomStickerUnlockStatus.FALHOU
+    if normalized == "expired" or "expired" in detail:
+        return CustomStickerUnlockStatus.EXPIRADO
+    return CustomStickerUnlockStatus.PENDENTE
+
+
+def sync_custom_sticker_unlock_status(unlock: CustomStickerUnlock) -> CustomStickerUnlock:
+    if not unlock.mp_payment_id:
+        return unlock
+    payment = _mercadopago_client().get_payment(unlock.mp_payment_id)
+    unlock.mp_status = payment.status or None
+    unlock.mp_status_detail = payment.status_detail or None
+    unlock.status = _map_unlock_status(payment.status, payment.status_detail)
+    unlock.qr_code_base64 = payment.qr_code_base64 or unlock.qr_code_base64
+    unlock.qr_code = payment.qr_code or unlock.qr_code
+    unlock.ticket_url = payment.ticket_url or unlock.ticket_url
+    unlock.expires_at = payment.expires_at or unlock.expires_at
+    if unlock.status == CustomStickerUnlockStatus.PAGO:
+        unlock.paid_at = payment.paid_at or unlock.paid_at or datetime.now(UTC)
+    return unlock
+
+
+def get_or_create_custom_sticker_unlock(
+    db: Session,
+    *,
+    album: Album,
+    sticker: Sticker,
+    session_token: str,
+    service_settings: ServiceSettings,
+) -> CustomStickerUnlock:
+    normalized_session = session_token.strip()
+    if not normalized_session:
+        raise ValueError("Sessao invalida para liberar a Minha Figurinha.")
+    if sticker.source_type != StickerSourceType.GENERATED:
+        raise ValueError("A liberacao paga so vale para a Minha Figurinha.")
+    if sticker.session_token != normalized_session:
+        raise ValueError("Essa Minha Figurinha nao pertence a esta sessao.")
+    if not service_settings.custom_sticker_unlock_enabled:
+        raise ValueError("A cobranca da Minha Figurinha nao esta ativa no momento.")
+    if service_settings.custom_sticker_unlock_price_cents <= 0:
+        raise ValueError("Configure o valor da liberacao da Minha Figurinha antes de cobrar.")
+
+    current = load_latest_custom_sticker_unlock(db, album_id=album.id, session_token=normalized_session)
+    if current and current.status == CustomStickerUnlockStatus.PENDENTE:
+        current = sync_custom_sticker_unlock_status(current)
+        if current.status == CustomStickerUnlockStatus.PENDENTE:
+            return current
+    if current and current.status == CustomStickerUnlockStatus.PAGO:
+        return current
+
+    payment = _mercadopago_client().create_pix_payment(
+        amount_cents=service_settings.custom_sticker_unlock_price_cents,
+        description=f"Liberacao da Minha Figurinha - {album.name}",
+        payer_email=_mercadopago_payer_email(normalized_session, album),
+        external_reference=f"fig-{album.slug}-{normalized_session[:24]}-{uuid.uuid4().hex[:8]}",
+    )
+
+    unlock = CustomStickerUnlock(
+        album_id=album.id,
+        sticker_id=sticker.id,
+        session_token=normalized_session,
+        amount_cents=service_settings.custom_sticker_unlock_price_cents,
+        status=_map_unlock_status(payment.status, payment.status_detail),
+        mp_payment_id=payment.payment_id or None,
+        mp_external_reference=payment.external_reference or None,
+        mp_status=payment.status or None,
+        mp_status_detail=payment.status_detail or None,
+        qr_code_base64=payment.qr_code_base64,
+        qr_code=payment.qr_code,
+        ticket_url=payment.ticket_url,
+        expires_at=payment.expires_at,
+        paid_at=payment.paid_at,
+    )
+    db.add(unlock)
+    db.flush()
+    return unlock
 
 
 def resolve_generated_template_sticker(db: Session, album: Album) -> Sticker:
@@ -1209,6 +1350,9 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
     return {
         "service_enabled": service_settings.service_enabled,
         "donation_enabled": service_settings.donation_enabled,
+        "custom_sticker_unlock_enabled": service_settings.custom_sticker_unlock_enabled,
+        "custom_sticker_unlock_price_cents": service_settings.custom_sticker_unlock_price_cents,
+        "custom_sticker_unlock_message": service_settings.custom_sticker_unlock_message,
         "pack_size": service_settings.pack_size,
         "print_price_cents": service_settings.print_price_cents,
         "pack_price_cents": service_settings.pack_price_cents,
@@ -1221,6 +1365,27 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
         "custom_base_mulher_path": service_settings.custom_base_mulher_path,
         "custom_base_menino_path": service_settings.custom_base_menino_path,
         "custom_base_menina_path": service_settings.custom_base_menina_path,
+    }
+
+
+def custom_sticker_unlock_to_response(unlock: CustomStickerUnlock, service_settings: ServiceSettings | None = None) -> dict:
+    payment_required = True
+    if service_settings and not service_settings.custom_sticker_unlock_enabled:
+        payment_required = False
+    return {
+        "id": unlock.id,
+        "album_id": unlock.album_id,
+        "sticker_id": unlock.sticker_id,
+        "status": unlock.status.value,
+        "amount_cents": unlock.amount_cents,
+        "payment_required": payment_required,
+        "qr_code_base64": unlock.qr_code_base64,
+        "qr_code": unlock.qr_code,
+        "ticket_url": unlock.ticket_url,
+        "expires_at": unlock.expires_at,
+        "paid_at": unlock.paid_at,
+        "created_at": unlock.created_at,
+        "updated_at": unlock.updated_at,
     }
 
 

@@ -146,6 +146,9 @@ function serviceConfigToForm(data) {
   return {
     service_enabled: data.service_enabled,
     donation_enabled: data.donation_enabled,
+    custom_sticker_unlock_enabled: data.custom_sticker_unlock_enabled,
+    custom_sticker_unlock_price: moneyInputFromCents(data.custom_sticker_unlock_price_cents),
+    custom_sticker_unlock_message: data.custom_sticker_unlock_message || '',
     pack_size: String(data.pack_size),
     print_price: moneyInputFromCents(data.print_price_cents),
     pack_price: moneyInputFromCents(data.pack_price_cents),
@@ -242,6 +245,10 @@ function PublicPage() {
   const [mobileAlbumPickerOpen, setMobileAlbumPickerOpen] = useState(false)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [donationModalOpen, setDonationModalOpen] = useState(false)
+  const [customUnlockModalOpen, setCustomUnlockModalOpen] = useState(false)
+  const [customUnlockStep, setCustomUnlockStep] = useState('choice')
+  const [customUnlockData, setCustomUnlockData] = useState(null)
+  const [customUnlockBusy, setCustomUnlockBusy] = useState(false)
   const [myStickerModalOpen, setMyStickerModalOpen] = useState(false)
   const [previewPage, setPreviewPage] = useState(0)
   const [orderSubmitting, setOrderSubmitting] = useState(false)
@@ -250,6 +257,7 @@ function PublicPage() {
   const [pendingDownloadPath, setPendingDownloadPath] = useState('')
   const [pendingDownloadFileName, setPendingDownloadFileName] = useState('')
   const [pixCopied, setPixCopied] = useState(false)
+  const [customUnlockCopied, setCustomUnlockCopied] = useState(false)
   const [myStickerForm, setMyStickerForm] = useState({
     name: '',
     profile_type: 'HOMEM',
@@ -339,6 +347,10 @@ function PublicPage() {
     () => !!customSticker && selectedStickers.some(sticker => sticker.id === customSticker.id),
     [customSticker, selectedStickers]
   )
+  const freeSelectedIds = useMemo(
+    () => selectedStickers.filter(sticker => sticker.source_type !== 'GENERATED').map(sticker => sticker.id),
+    [selectedStickers]
+  )
   const currentCustomBasePreview = useMemo(
     () => customBasePathForProfile(serviceConfig, myStickerForm.profile_type),
     [serviceConfig, myStickerForm.profile_type]
@@ -414,6 +426,7 @@ function PublicPage() {
   useEffect(() => {
     if (!selectedAlbumSlug) {
       setCustomSticker(null)
+      setCustomUnlockData(null)
       return
     }
 
@@ -434,6 +447,43 @@ function PublicPage() {
       ignore = true
     }
   }, [selectedAlbumSlug, sessionToken])
+
+  useEffect(() => {
+    if (!selectedAlbumSlug || !customSticker || !serviceConfig?.custom_sticker_unlock_enabled) {
+      setCustomUnlockData(null)
+      return
+    }
+
+    let ignore = false
+    async function loadCustomUnlock() {
+      try {
+        const data = await apiFetch(
+          `/albums/${selectedAlbumSlug}/my-sticker-unlock?session_token=${encodeURIComponent(sessionToken)}`
+        )
+        if (!ignore) {
+          setCustomUnlockData(data)
+        }
+      } catch {
+        if (!ignore) {
+          setCustomUnlockData(null)
+        }
+      }
+    }
+    loadCustomUnlock()
+    return () => {
+      ignore = true
+    }
+  }, [selectedAlbumSlug, customSticker, serviceConfig?.custom_sticker_unlock_enabled, sessionToken])
+
+  useEffect(() => {
+    if (!customUnlockModalOpen || customUnlockStep !== 'payment' || customUnlockData?.status !== 'PENDENTE') {
+      return undefined
+    }
+    const timer = window.setInterval(() => {
+      refreshCustomUnlock(false)
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [customUnlockModalOpen, customUnlockStep, customUnlockData?.status, selectedAlbumSlug, sessionToken, selectedIds, customStickerSelected])
 
   useEffect(() => {
     if (!selectedAlbumSlug || selectedIds.length === 0 || !serviceConfig?.service_enabled) {
@@ -511,6 +561,19 @@ function PublicPage() {
   }, [donationModalOpen])
 
   useEffect(() => {
+    if (!customUnlockModalOpen) return undefined
+
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setCustomUnlockModalOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [customUnlockModalOpen])
+
+  useEffect(() => {
     if (!myStickerModalOpen) return undefined
 
     function handleEscape(event) {
@@ -548,6 +611,13 @@ function PublicPage() {
       setPixCopied(false)
     }
   }, [donationModalOpen])
+
+  useEffect(() => {
+    if (!customUnlockModalOpen) {
+      setCustomUnlockCopied(false)
+      setCustomUnlockStep('choice')
+    }
+  }, [customUnlockModalOpen])
 
   useEffect(() => {
     if (!myStickerModalOpen) return
@@ -684,31 +754,106 @@ function PublicPage() {
     }
   }
 
+  async function requestExport(stickerIds) {
+    const data = await apiFetch('/exports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        album_slug: selectedAlbumSlug,
+        sticker_ids: stickerIds,
+        session_token: sessionToken
+      })
+    })
+    if (serviceConfig?.donation_enabled && serviceConfig?.pix_key) {
+      setPendingDownloadPath(data.download_path)
+      setPendingDownloadFileName(data.file_name)
+      setDonationModalOpen(true)
+    } else {
+      triggerFileDownload(data.download_path)
+    }
+  }
+
   async function handleExport() {
     if (!selectedAlbumSlug || selectedIds.length === 0) return
+    if (customStickerSelected && serviceConfig?.custom_sticker_unlock_enabled) {
+      if (customUnlockData?.status === 'PAGO') {
+        setExporting(true)
+        setError('')
+        try {
+          await requestExport(selectedIds)
+        } catch (err) {
+          setError(err.message)
+        } finally {
+          setExporting(false)
+        }
+        return
+      }
+      setCustomUnlockStep('choice')
+      setCustomUnlockModalOpen(true)
+      return
+    }
+
     setExporting(true)
     setError('')
     try {
-      const data = await apiFetch('/exports', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          album_slug: selectedAlbumSlug,
-          sticker_ids: selectedIds,
-          session_token: sessionToken
-        })
-      })
-      if (serviceConfig?.donation_enabled && serviceConfig?.pix_key) {
-        setPendingDownloadPath(data.download_path)
-        setPendingDownloadFileName(data.file_name)
-        setDonationModalOpen(true)
-      } else {
-        triggerFileDownload(data.download_path)
-      }
+      await requestExport(selectedIds)
     } catch (err) {
       setError(err.message)
     } finally {
       setExporting(false)
+    }
+  }
+
+  async function handleExportWithoutMySticker() {
+    if (!selectedAlbumSlug || freeSelectedIds.length === 0) return
+    setCustomUnlockModalOpen(false)
+    setExporting(true)
+    setError('')
+    try {
+      await requestExport(freeSelectedIds)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  async function handleStartCustomUnlock() {
+    if (!selectedAlbumSlug || !customSticker) return
+    setCustomUnlockBusy(true)
+    setError('')
+    try {
+      const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker-unlock`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_token: sessionToken })
+      })
+      setCustomUnlockData(data)
+      setCustomUnlockStep('payment')
+      if (data.status === 'PAGO') {
+        setCustomUnlockModalOpen(false)
+        await requestExport(selectedIds)
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setCustomUnlockBusy(false)
+    }
+  }
+
+  async function refreshCustomUnlock(showErrors = false) {
+    if (!selectedAlbumSlug || !customStickerSelected) return
+    try {
+      const data = await apiFetch(
+        `/albums/${selectedAlbumSlug}/my-sticker-unlock?session_token=${encodeURIComponent(sessionToken)}`
+      )
+      setCustomUnlockData(data)
+      if (data?.status === 'PAGO') {
+        setCustomUnlockModalOpen(false)
+        await requestExport(selectedIds)
+      }
+    } catch (err) {
+      if (showErrors) setError(err.message)
     }
   }
 
@@ -719,6 +864,16 @@ function PublicPage() {
       setPixCopied(true)
     } catch {
       setError('Nao foi possivel copiar a chave Pix automaticamente.')
+    }
+  }
+
+  async function handleCopyCustomUnlockPix() {
+    if (!customUnlockData?.qr_code) return
+    try {
+      await navigator.clipboard.writeText(customUnlockData.qr_code)
+      setCustomUnlockCopied(true)
+    } catch {
+      setError('Nao foi possivel copiar o codigo Pix automaticamente.')
     }
   }
 
@@ -1575,6 +1730,143 @@ function PublicPage() {
         </div>
       ) : null}
 
+      {customUnlockModalOpen && serviceConfig ? (
+        <div className="fig-modal-backdrop" onClick={() => setCustomUnlockModalOpen(false)}>
+          <div className="fig-modal-shell fig-modal-shell--donation" onClick={event => event.stopPropagation()}>
+            <div className="fig-modal-header">
+              <div>
+                <p className="fig-kicker">Minha Figurinha</p>
+                <h3>
+                  {customUnlockStep === 'payment' ? 'Libere o PDF completo por Pix' : 'Como voce quer baixar seu PDF?'}
+                </h3>
+              </div>
+              <button type="button" className="fig-modal-close" onClick={() => setCustomUnlockModalOpen(false)}>
+                Fechar
+              </button>
+            </div>
+
+            <section className="fig-form-card fig-donation-modal-card">
+              {customUnlockStep === 'choice' ? (
+                <>
+                  <div className="fig-service-notes">
+                    <p>
+                      {serviceConfig.custom_sticker_unlock_message ||
+                        'Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00.'}
+                    </p>
+                  </div>
+
+                  <div className="fig-quote-grid fig-quote-grid--donation">
+                    <div className="fig-quote-item">
+                      <strong>{freeSelectedIds.length}</strong>
+                      <span>figurinhas no PDF gratis</span>
+                    </div>
+                    <div className="fig-quote-item">
+                      <strong>{selectedIds.length}</strong>
+                      <span>figurinhas no PDF completo</span>
+                    </div>
+                    <div className="fig-quote-item">
+                      <strong>{formatCurrency(serviceConfig.custom_sticker_unlock_price_cents)}</strong>
+                      <span>para manter sua figurinha</span>
+                    </div>
+                  </div>
+
+                  <div className="fig-order-choice-grid">
+                    <button
+                      type="button"
+                      className="fig-choice-card"
+                      onClick={handleExportWithoutMySticker}
+                      disabled={freeSelectedIds.length === 0}
+                    >
+                      <strong>Baixar gratis sem Minha Figurinha</strong>
+                      <span>
+                        {freeSelectedIds.length > 0
+                          ? 'Remove so a figurinha personalizada do arquivo e baixa agora.'
+                          : 'Adicione outras figurinhas para ter uma versao gratis sem a personalizada.'}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-choice-card fig-choice-card--primary"
+                      onClick={handleStartCustomUnlock}
+                      disabled={customUnlockBusy}
+                    >
+                      <strong>
+                        {customUnlockBusy
+                          ? 'Gerando Pix...'
+                          : `Liberar PDF completo por ${formatCurrency(serviceConfig.custom_sticker_unlock_price_cents)}`}
+                      </strong>
+                      <span>Mantem sua figurinha personalizada no mesmo PDF das outras.</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="fig-service-notes">
+                    <p>Pague o Pix abaixo para liberar o download completo com a sua figurinha personalizada.</p>
+                  </div>
+
+                  <div className="fig-quote-grid fig-quote-grid--donation">
+                    <div className="fig-quote-item">
+                      <strong>{formatCurrency(customUnlockData?.amount_cents || serviceConfig.custom_sticker_unlock_price_cents)}</strong>
+                      <span>valor da liberacao</span>
+                    </div>
+                    <div className="fig-quote-item">
+                      <strong>{selectedIds.length}</strong>
+                      <span>figurinhas no PDF completo</span>
+                    </div>
+                    <div className="fig-quote-item">
+                      <strong>
+                        {customUnlockData?.status === 'PAGO'
+                          ? 'Pago'
+                          : customUnlockData?.status === 'EXPIRADO'
+                            ? 'Expirado'
+                            : customUnlockData?.status === 'FALHOU'
+                              ? 'Falhou'
+                              : 'Aguardando'}
+                      </strong>
+                      <span>status do pagamento</span>
+                    </div>
+                  </div>
+
+                  {customUnlockData?.qr_code_base64 ? (
+                    <div className="fig-payment-qr-card">
+                      <img
+                        src={`data:image/png;base64,${customUnlockData.qr_code_base64}`}
+                        alt="QR Code Pix para liberar Minha Figurinha"
+                      />
+                    </div>
+                  ) : null}
+
+                  <div className="fig-helper-strip fig-helper-strip--donation">
+                    <div>
+                      <strong>Pix copia e cola</strong>
+                      <span>{customUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
+                    </div>
+                    <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
+                      {customUnlockCopied ? 'Codigo copiado' : 'Copiar codigo Pix'}
+                    </button>
+                  </div>
+
+                  <div className="fig-hero-actions">
+                    <button type="button" className="fig-secondary-button" onClick={() => setCustomUnlockStep('choice')}>
+                      Voltar
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-primary-button"
+                      onClick={() => refreshCustomUnlock(true)}
+                      disabled={customUnlockBusy}
+                    >
+                      {customUnlockData?.status === 'PAGO' ? 'Liberado' : 'Ja paguei, verificar agora'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </section>
+          </div>
+        </div>
+      ) : null}
+
       {donationModalOpen && serviceConfig ? (
         <div className="fig-modal-backdrop" onClick={() => setDonationModalOpen(false)}>
           <div className="fig-modal-shell fig-modal-shell--donation" onClick={event => event.stopPropagation()}>
@@ -1692,6 +1984,9 @@ function AdminPage() {
   const [serviceForm, setServiceForm] = useState({
     service_enabled: false,
     donation_enabled: false,
+    custom_sticker_unlock_enabled: false,
+    custom_sticker_unlock_price: '5.00',
+    custom_sticker_unlock_message: '',
     pack_size: '7',
     print_price: '0.00',
     pack_price: '0.00',
@@ -2262,6 +2557,9 @@ function AdminPage() {
         body: JSON.stringify({
           service_enabled: serviceForm.service_enabled,
           donation_enabled: serviceForm.donation_enabled,
+          custom_sticker_unlock_enabled: serviceForm.custom_sticker_unlock_enabled,
+          custom_sticker_unlock_price_cents: centsFromInput(serviceForm.custom_sticker_unlock_price),
+          custom_sticker_unlock_message: serviceForm.custom_sticker_unlock_message,
           pack_size: Number(serviceForm.pack_size || 7),
           print_price_cents: centsFromInput(serviceForm.print_price),
           pack_price_cents: centsFromInput(serviceForm.pack_price),
@@ -3117,6 +3415,17 @@ function AdminPage() {
               <label className="fig-checkbox">
                 <input
                   type="checkbox"
+                  checked={serviceForm.custom_sticker_unlock_enabled}
+                  onChange={event =>
+                    setServiceForm(current => ({ ...current, custom_sticker_unlock_enabled: event.target.checked }))
+                  }
+                />
+                <span>Cobrar para liberar o PDF com Minha Figurinha</span>
+              </label>
+
+              <label className="fig-checkbox">
+                <input
+                  type="checkbox"
                   checked={serviceForm.service_enabled}
                   onChange={event => setServiceForm(current => ({ ...current, service_enabled: event.target.checked }))}
                 />
@@ -3131,6 +3440,29 @@ function AdminPage() {
                     onChange={event => setServiceForm(current => ({ ...current, donation_message: event.target.value }))}
                     rows="3"
                     placeholder="Se este material te ajudou, voce pode apoiar o projeto com uma doacao via Pix. O download continua gratuito."
+                  />
+                </label>
+                <label className="fig-field fig-field--full">
+                  <span>Mensagem da liberacao da Minha Figurinha</span>
+                  <textarea
+                    value={serviceForm.custom_sticker_unlock_message}
+                    onChange={event =>
+                      setServiceForm(current => ({ ...current, custom_sticker_unlock_message: event.target.value }))
+                    }
+                    rows="3"
+                    placeholder="Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00."
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Preco para liberar Minha Figurinha (R$)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={serviceForm.custom_sticker_unlock_price}
+                    onChange={event =>
+                      setServiceForm(current => ({ ...current, custom_sticker_unlock_price: event.target.value }))
+                    }
                   />
                 </label>
                 <label className="fig-field">

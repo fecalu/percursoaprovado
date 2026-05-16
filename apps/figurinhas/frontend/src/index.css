@@ -1850,11 +1850,11 @@ a {
     gap: 0.65rem;
   }
 
-  .fig-mobile-modal-item {
-    width: 100%;
-    padding: 0.88rem 0.95rem;
-    border-radius: 18px;
-    display: flex;
+.fig-mobile-modal-item {
+  width: 100%;
+  padding: 0.88rem 0.95rem;
+  border-radius: 18px;
+  display: flex;
     flex-direction: column;
     gap: 0.16rem;
     box-shadow: 0 10px 22px rgba(17, 34, 53, 0.045);
@@ -1865,5 +1865,66 @@ a {
   .fig-form-card {
     padding: 1rem;
     border-radius: 22px;
+  }
+}
+
+.fig-order-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.fig-choice-card {
+  border: 1px solid rgba(17, 34, 53, 0.1);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 249, 252, 0.94));
+  padding: 1rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  color: #17293b;
+  box-shadow: 0 14px 28px rgba(17, 34, 53, 0.06);
+}
+
+.fig-choice-card strong {
+  font-size: 0.98rem;
+}
+
+.fig-choice-card span {
+  color: #607286;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.fig-choice-card:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fig-choice-card--primary {
+  border-color: rgba(12, 120, 95, 0.18);
+  background: linear-gradient(180deg, rgba(241, 253, 250, 0.98), rgba(233, 248, 242, 0.94));
+}
+
+.fig-payment-qr-card {
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  border-radius: 24px;
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(247, 250, 253, 0.95));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.fig-payment-qr-card img {
+  width: min(100%, 280px);
+  height: auto;
+  border-radius: 18px;
+}
+
+@media (max-width: 820px) {
+  .fig-order-choice-grid {
+    grid-template-columns: 1fr;
   }
 }

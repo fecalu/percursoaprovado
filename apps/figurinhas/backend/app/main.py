@@ -17,6 +17,8 @@ from .models import (
     Collection,
     CollectionStatus,
     CustomProfileType,
+    CustomStickerUnlock,
+    CustomStickerUnlockStatus,
     Page,
     PrintOrder,
     PrintOrderStatus,
@@ -34,6 +36,8 @@ from .schemas import (
     CollectionCreate,
     CollectionResponse,
     CollectionUpdate,
+    CustomStickerUnlockRequest,
+    CustomStickerUnlockResponse,
     OrderQuoteRequest,
     OrderQuoteResponse,
     ExportRequest,
@@ -59,19 +63,24 @@ from .services import (
     collection_stats,
     collection_sort_key,
     collection_to_response,
+    custom_sticker_unlock_to_response,
     create_print_order,
     crop_sticker_image,
     delete_custom_base_image,
     delete_generated_stickers_for_session,
     ensure_album_slug_unique,
     ensure_default_album_assignments,
+    generated_sticker_for_selection,
     get_or_create_service_settings,
+    get_or_create_custom_sticker_unlock,
+    has_generated_sticker,
     ensure_collection_slug_unique,
     load_album_by_slug_or_fail,
     load_album_or_fail,
     load_collection_by_slug_or_fail,
     load_collection_or_fail,
     load_generated_sticker_for_session,
+    load_latest_custom_sticker_unlock,
     load_print_order_or_fail,
     load_sticker_or_fail,
     page_to_response,
@@ -81,9 +90,11 @@ from .services import (
     save_pdf_and_render_pages,
     service_settings_to_response,
     slugify,
+    sync_custom_sticker_unlock_status,
     sticker_to_response,
     upsert_generated_sticker,
     validate_sticker_bounds,
+    is_custom_sticker_unlocked,
 )
 
 
@@ -207,6 +218,18 @@ def ensure_runtime_schema() -> None:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_base_menina_path VARCHAR(255)"
                 )
+            if "custom_sticker_unlock_enabled" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_sticker_unlock_enabled BOOLEAN NOT NULL DEFAULT 0"
+                )
+            if "custom_sticker_unlock_price_cents" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_sticker_unlock_price_cents INTEGER NOT NULL DEFAULT 500"
+                )
+            if "custom_sticker_unlock_message" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_sticker_unlock_message TEXT"
+                )
 
         print_orders_table_exists = connection.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_print_orders'"
@@ -219,6 +242,18 @@ def ensure_runtime_schema() -> None:
                 connection.exec_driver_sql("ALTER TABLE figurinhas_print_orders ADD COLUMN album_id INTEGER")
             if "album_name" not in order_columns:
                 connection.exec_driver_sql("ALTER TABLE figurinhas_print_orders ADD COLUMN album_name VARCHAR(150)")
+
+        unlocks_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_custom_sticker_unlocks'"
+        ).fetchone()
+        if unlocks_table_exists:
+            unlock_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_custom_sticker_unlocks)").fetchall()
+            }
+            if "paid_at" not in unlock_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_custom_sticker_unlocks ADD COLUMN paid_at DATETIME"
+                )
 
 
 @app.on_event("startup")
@@ -453,10 +488,63 @@ def delete_my_sticker(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+@app.get("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse | None)
+def get_my_sticker_unlock(
+    album_slug: str,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> dict | None:
+    album = load_album_by_slug_or_fail(db, album_slug)
+    unlock = load_latest_custom_sticker_unlock(db, album_id=album.id, session_token=session_token)
+    if not unlock:
+        return None
+    if unlock.status == CustomStickerUnlockStatus.PENDENTE:
+        sync_custom_sticker_unlock_status(unlock)
+        db.commit()
+        db.refresh(unlock)
+    return custom_sticker_unlock_to_response(unlock, get_or_create_service_settings(db))
+
+
+@app.post("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse)
+def create_my_sticker_unlock(
+    album_slug: str,
+    payload: CustomStickerUnlockRequest,
+    db: Session = Depends(get_db),
+) -> dict:
+    album = load_album_by_slug_or_fail(db, album_slug)
+    service_settings = get_or_create_service_settings(db)
+    sticker = load_generated_sticker_for_session(db, album.id, payload.session_token)
+    if not sticker:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crie a Minha Figurinha antes de liberar o PDF completo.")
+    try:
+        unlock = get_or_create_custom_sticker_unlock(
+            db,
+            album=album,
+            sticker=sticker,
+            session_token=payload.session_token,
+            service_settings=service_settings,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    db.refresh(unlock)
+    return custom_sticker_unlock_to_response(unlock, service_settings)
+
+
 @app.post("/exports", response_model=ExportResponse)
 def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
     album = load_album_by_slug_or_fail(db, payload.album_slug)
     stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
+    service_settings = get_or_create_service_settings(db)
+    if (
+        has_generated_sticker(stickers)
+        and service_settings.custom_sticker_unlock_enabled
+        and not is_custom_sticker_unlocked(db, album_id=album.id, session_token=(payload.session_token or ""))
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="Pague para liberar o PDF com a Minha Figurinha ou baixe gratis sem ela.",
+        )
     export_record = build_export_pdf(album, stickers, db)
     db.commit()
     return {
@@ -565,6 +653,9 @@ def update_admin_service_config(payload: ServiceConfigUpdate, db: Session = Depe
     service_settings = get_or_create_service_settings(db)
     service_settings.service_enabled = payload.service_enabled
     service_settings.donation_enabled = payload.donation_enabled
+    service_settings.custom_sticker_unlock_enabled = payload.custom_sticker_unlock_enabled
+    service_settings.custom_sticker_unlock_price_cents = payload.custom_sticker_unlock_price_cents
+    service_settings.custom_sticker_unlock_message = (payload.custom_sticker_unlock_message or "").strip() or None
     service_settings.pack_size = payload.pack_size
     service_settings.print_price_cents = payload.print_price_cents
     service_settings.pack_price_cents = payload.pack_price_cents
