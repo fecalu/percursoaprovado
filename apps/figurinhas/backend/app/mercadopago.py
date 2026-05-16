@@ -41,8 +41,6 @@ class MercadoPagoPixClient:
     ) -> PixPayment:
         expiration = datetime.now(UTC) + timedelta(hours=24)
         expiration_text = expiration.strftime("%Y-%m-%dT%H:%M:%S%z")
-        if expiration_text.endswith("+0000"):
-            expiration_text = expiration_text[:-5] + "Z"
         payload = {
             "transaction_amount": round(amount_cents / 100, 2),
             "description": description,
