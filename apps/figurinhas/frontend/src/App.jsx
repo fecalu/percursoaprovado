@@ -1950,6 +1950,32 @@ function AdminPage() {
           <p className="fig-kicker">Albuns</p>
           <h2>Estrutura</h2>
         </div>
+        <div className="fig-admin-sidebar-actions">
+          <button
+            type="button"
+            className="fig-primary-button fig-admin-sidebar-action"
+            onClick={() => {
+              handleStartCreateAlbum()
+              setAdminView('structure')
+            }}
+          >
+            Novo album
+          </button>
+          <button
+            type="button"
+            className="fig-secondary-button fig-admin-sidebar-action"
+            disabled={!selectedAlbumId}
+            onClick={() => {
+              handleStartCreateCollection()
+              setAdminView('structure')
+            }}
+          >
+            Nova selecao
+          </button>
+          <p className="fig-admin-sidebar-helper">
+            Use os botões acima para criar. A lista abaixo serve só para escolher o que já existe.
+          </p>
+        </div>
         <div className="fig-collection-list">
           {albums.map(album => (
             <button

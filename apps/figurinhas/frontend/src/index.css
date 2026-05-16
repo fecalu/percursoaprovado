@@ -127,6 +127,26 @@ a {
   gap: 1rem;
 }
 
+.fig-admin-sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.2rem 0 0.95rem;
+  border-bottom: 1px solid rgba(17, 34, 53, 0.08);
+}
+
+.fig-admin-sidebar-action {
+  width: 100%;
+  justify-content: center;
+}
+
+.fig-admin-sidebar-helper {
+  margin: 0.05rem 0 0;
+  color: #5a6c82;
+  font-size: 0.83rem;
+  line-height: 1.35;
+}
+
 .fig-panel-header {
   display: flex;
   flex-direction: column;
