@@ -644,27 +644,35 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]] = {}
     template_layouts: dict[tuple[float, float], dict] = {}
 
-    for collection in collections:
-        if collection.album_id != album.id:
-            raise ValueError("Nao e possivel misturar figurinhas de albuns diferentes.")
-        page_sizes_by_collection[collection.id] = {
-            page.page_number: (float(page.width), float(page.height))
-            for page in collection.pages
-        }
+    def resolve_page_sizes(collection: Collection) -> dict[int, tuple[float, float]]:
         if collection.source_pdf_path:
             source_pdf_path = settings.storage_root / collection.source_pdf_path
             if not source_pdf_path.exists():
                 raise FileNotFoundError(f"PDF de origem da colecao {collection.name} nao encontrado.")
             source_pdf_paths[collection.id] = source_pdf_path
+            with fitz.open(source_pdf_path) as document:
+                return {
+                    page_index + 1: (
+                        float(document.load_page(page_index).rect.width),
+                        float(document.load_page(page_index).rect.height),
+                    )
+                    for page_index in range(document.page_count)
+                }
+        return {
+            page.page_number: (float(page.width), float(page.height))
+            for page in collection.pages
+        }
+
+    for collection in collections:
+        if collection.album_id != album.id:
+            raise ValueError("Nao e possivel misturar figurinhas de albuns diferentes.")
+        page_sizes_by_collection[collection.id] = resolve_page_sizes(collection)
 
     if not template_collections:
         raise ValueError("Nao existe uma selecao publicada para servir de base de exportacao nesse album.")
 
     for collection in template_collections:
-        page_sizes = {
-            page.page_number: (float(page.width), float(page.height))
-            for page in collection.pages
-        }
+        page_sizes = resolve_page_sizes(collection)
         template_stickers = db.execute(
             select(Sticker)
             .options(selectinload(Sticker.page))
