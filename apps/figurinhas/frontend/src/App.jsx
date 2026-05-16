@@ -1027,10 +1027,7 @@ function PublicPage() {
             </div>
           ) : null}
 
-          <div className="fig-mobile-search-row">
-            <label className="fig-mobile-search-field">
-              <input value={search} onChange={event => setSearch(event.target.value)} placeholder="Buscar jogador" />
-            </label>
+          <div className="fig-mobile-search-row fig-mobile-search-row--filters-only">
             <button
               type="button"
               className={`fig-secondary-button fig-mobile-filter-button${category ? ' is-active' : ''}`}

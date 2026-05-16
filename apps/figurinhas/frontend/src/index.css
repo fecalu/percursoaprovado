@@ -1745,6 +1745,10 @@ a {
     gap: 0.55rem;
   }
 
+  .fig-mobile-search-row--filters-only {
+    grid-template-columns: 1fr;
+  }
+
   .fig-mobile-search-field {
     display: block;
   }
