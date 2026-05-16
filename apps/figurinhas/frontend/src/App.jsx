@@ -1365,11 +1365,12 @@ function PublicPage() {
 
       {myStickerModalOpen ? (
         <div className="fig-modal-backdrop" onClick={() => setMyStickerModalOpen(false)}>
-          <div className="fig-modal-shell fig-modal-shell--donation" onClick={event => event.stopPropagation()}>
+          <div className="fig-modal-shell fig-modal-shell--donation fig-modal-shell--public-flow" onClick={event => event.stopPropagation()}>
             <div className="fig-modal-header">
               <div>
                 <p className="fig-kicker">Minha Figurinha</p>
                 <h3>Crie uma figurinha personalizada</h3>
+                <p className="fig-modal-subtitle">Preencha seus dados, envie a foto e revise o resultado antes de usar no PDF.</p>
               </div>
               <button type="button" className="fig-modal-close" onClick={() => setMyStickerModalOpen(false)}>
                 Fechar
@@ -1377,6 +1378,12 @@ function PublicPage() {
             </div>
 
             <form className="fig-form-card fig-order-form fig-order-form--modal" onSubmit={handleSubmitMySticker}>
+              <div className="fig-flow-step-row">
+                <span className="fig-flow-step is-active">1. Dados</span>
+                <span className="fig-flow-step is-active">2. Foto</span>
+                <span className="fig-flow-step">3. Criar</span>
+              </div>
+
               <div className="fig-service-notes">
                 <p>
                   Envie uma foto com o rosto visivel. O sistema estiliza a imagem e encaixa a sua figurinha no mesmo
@@ -1384,6 +1391,11 @@ function PublicPage() {
                 </p>
               </div>
 
+              <div className="fig-section-block">
+                <div className="fig-section-block-head">
+                  <strong>Informacoes da figurinha</strong>
+                  <span>Esses dados aparecem no card final.</span>
+                </div>
               <div className="fig-form-grid">
                 <label className="fig-field">
                   <span>Nome</span>
@@ -1474,6 +1486,13 @@ function PublicPage() {
                   />
                 </label>
               </div>
+              </div>
+
+              <div className="fig-section-block">
+                <div className="fig-section-block-head">
+                  <strong>Foto e estilo base</strong>
+                  <span>Escolha o perfil certo para guiar a composicao da figurinha.</span>
+                </div>
 
               {customSticker ? (
                 <div className="fig-custom-preview fig-custom-preview--modal">
@@ -1487,8 +1506,9 @@ function PublicPage() {
                   </div>
                 </div>
               ) : null}
+              </div>
 
-              <div className="fig-hero-actions">
+              <div className="fig-hero-actions fig-hero-actions--sticky-mobile">
                 <button type="button" className="fig-secondary-button" onClick={() => setMyStickerModalOpen(false)}>
                   Cancelar
                 </button>
@@ -1732,13 +1752,18 @@ function PublicPage() {
 
       {customUnlockModalOpen && serviceConfig ? (
         <div className="fig-modal-backdrop" onClick={() => setCustomUnlockModalOpen(false)}>
-          <div className="fig-modal-shell fig-modal-shell--donation" onClick={event => event.stopPropagation()}>
+          <div className="fig-modal-shell fig-modal-shell--donation fig-modal-shell--public-flow" onClick={event => event.stopPropagation()}>
             <div className="fig-modal-header">
               <div>
                 <p className="fig-kicker">Minha Figurinha</p>
                 <h3>
                   {customUnlockStep === 'payment' ? 'Libere o PDF completo por Pix' : 'Como voce quer baixar seu PDF?'}
                 </h3>
+                <p className="fig-modal-subtitle">
+                  {customUnlockStep === 'payment'
+                    ? 'Pague o Pix para manter sua figurinha personalizada no arquivo.'
+                    : 'Voce escolhe entre baixar gratis sem a figurinha personalizada ou liberar o PDF completo.'}
+                </p>
               </div>
               <button type="button" className="fig-modal-close" onClick={() => setCustomUnlockModalOpen(false)}>
                 Fechar
@@ -1748,6 +1773,11 @@ function PublicPage() {
             <section className="fig-form-card fig-donation-modal-card">
               {customUnlockStep === 'choice' ? (
                 <>
+                  <div className="fig-flow-step-row">
+                    <span className="fig-flow-step is-active">1. Escolha</span>
+                    <span className="fig-flow-step">2. Pix</span>
+                    <span className="fig-flow-step">3. Baixar</span>
+                  </div>
                   <div className="fig-service-notes">
                     <p>
                       {serviceConfig.custom_sticker_unlock_message ||
@@ -1801,6 +1831,11 @@ function PublicPage() {
                 </>
               ) : (
                 <>
+                  <div className="fig-flow-step-row">
+                    <span className="fig-flow-step is-active">1. Escolha</span>
+                    <span className="fig-flow-step is-active">2. Pix</span>
+                    <span className="fig-flow-step">3. Baixar</span>
+                  </div>
                   <div className="fig-service-notes">
                     <p>Pague o Pix abaixo para liberar o download completo com a sua figurinha personalizada.</p>
                   </div>
@@ -1847,7 +1882,7 @@ function PublicPage() {
                     </button>
                   </div>
 
-                  <div className="fig-hero-actions">
+                  <div className="fig-hero-actions fig-hero-actions--sticky-mobile">
                     <button type="button" className="fig-secondary-button" onClick={() => setCustomUnlockStep('choice')}>
                       Voltar
                     </button>
