@@ -1405,6 +1405,18 @@ function AdminPage() {
     () => orders.find(order => order.id === selectedOrderId) || null,
     [orders, selectedOrderId]
   )
+  const isCreatingAlbum = adminView === 'structure' && albumStructureMode === 'create'
+  const isCreatingCollection = adminView === 'structure' && collectionStructureMode === 'create'
+  const adminTitle = isCreatingAlbum
+    ? 'Novo album'
+    : isCreatingCollection
+      ? 'Nova selecao'
+      : selectedCollection?.name || selectedAlbum?.name || 'Selecione um album'
+  const adminDescription = isCreatingAlbum
+    ? 'Crie uma nova edicao principal sem depender da selecao que estava aberta antes.'
+    : isCreatingCollection
+      ? `Cadastre uma nova selecao dentro de ${selectedAlbum?.name || 'um album escolhido'}.`
+      : 'Organize a estrutura do album, o atendimento local e o mapeamento sem abrir tudo ao mesmo tempo.'
 
   useEffect(() => {
     if (!selectedOrder) return
@@ -1420,12 +1432,21 @@ function AdminPage() {
       return
     }
 
+    const shouldKeepCollectionDetached =
+      adminView === 'structure' &&
+      (albumStructureMode === 'create' || collectionStructureMode === 'create') &&
+      selectedCollectionId === null
+
+    if (shouldKeepCollectionDetached) {
+      return
+    }
+
     if (!filteredCollections.some(collection => collection.id === selectedCollectionId)) {
       setSelectedCollectionId(filteredCollections[0]?.id || null)
       setCurrentPageId(null)
       resetStickerForm()
     }
-  }, [filteredCollections, selectedCollectionId])
+  }, [adminView, albumStructureMode, collectionStructureMode, filteredCollections, selectedCollectionId])
 
   useEffect(() => {
     if (!selectedCollection) return
@@ -1628,6 +1649,10 @@ function AdminPage() {
     const nextOrder = albums.reduce((maxValue, album) => Math.max(maxValue, Number(album.sort_order || 0)), 0) + 1
     setAlbumForm({ name: '', slug: '', description: '', sort_order: String(nextOrder) })
     setAlbumStructureMode('create')
+    setCollectionStructureMode('edit')
+    setSelectedCollectionId(null)
+    setCurrentPageId(null)
+    resetStickerForm()
   }
 
   function handleStartCreateCollection() {
@@ -1641,6 +1666,10 @@ function AdminPage() {
       sort_order: String(nextOrder)
     })
     setCollectionStructureMode('create')
+    setAlbumStructureMode('edit')
+    setSelectedCollectionId(null)
+    setCurrentPageId(null)
+    resetStickerForm()
   }
 
   async function handleAssignCollectionAlbum() {
@@ -2032,8 +2061,8 @@ function AdminPage() {
         <div className="fig-admin-header">
           <div>
             <p className="fig-kicker">Gestao</p>
-            <h2>{selectedCollection?.name || selectedAlbum?.name || 'Selecione um album'}</h2>
-            <p>Organize a estrutura do album, o atendimento local e o mapeamento sem abrir tudo ao mesmo tempo.</p>
+            <h2>{adminTitle}</h2>
+            <p>{adminDescription}</p>
           </div>
           <div className="fig-hero-actions">
             <button type="button" className="fig-secondary-button" onClick={() => setToken('')}>
