@@ -189,6 +189,7 @@ class ServiceSettings(Base):
     pix_holder: Mapped[str | None] = mapped_column(String(150), nullable=True)
     donation_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     pickup_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    custom_prompt_template: Mapped[str | None] = mapped_column(Text, nullable=True)
     custom_base_homem_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     custom_base_mulher_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     custom_base_menino_path: Mapped[str | None] = mapped_column(String(255), nullable=True)

@@ -187,6 +187,10 @@ def ensure_runtime_schema() -> None:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_service_settings ADD COLUMN pickup_note TEXT"
                 )
+            if "custom_prompt_template" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_prompt_template TEXT"
+                )
             if "custom_base_homem_path" not in service_columns:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_base_homem_path VARCHAR(255)"
@@ -568,6 +572,7 @@ def update_admin_service_config(payload: ServiceConfigUpdate, db: Session = Depe
     service_settings.pix_holder = (payload.pix_holder or "").strip() or None
     service_settings.donation_message = (payload.donation_message or "").strip() or None
     service_settings.pickup_note = (payload.pickup_note or "").strip() or None
+    service_settings.custom_prompt_template = (payload.custom_prompt_template or "").strip() or None
     db.commit()
     db.refresh(service_settings)
     return service_settings_to_response(service_settings)

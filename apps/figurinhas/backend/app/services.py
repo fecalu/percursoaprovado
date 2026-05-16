@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from .auto_detect import detect_sticker_rectangles
 from .config import get_settings
-from .custom_stickers import generate_custom_sticker_render
+from .custom_stickers import DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE, generate_custom_sticker_render
 from .models import (
     Album,
     Collection,
@@ -287,6 +287,7 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
         pix_holder=settings.default_pix_holder or None,
         donation_message=settings.default_donation_message or None,
         pickup_note=settings.default_pickup_note or None,
+        custom_prompt_template=DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE,
     )
     db.add(settings_record)
     db.flush()
@@ -626,6 +627,7 @@ def upsert_generated_sticker(
         target_width_px=width_px,
         target_height_px=height_px,
         base_template_path=get_custom_base_file_path(service_settings, profile_type),
+        prompt_template=service_settings.custom_prompt_template,
     )
 
     upload_dir = settings.storage_root / "custom_uploads" / album.slug
@@ -1214,6 +1216,7 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
         "pix_holder": service_settings.pix_holder,
         "donation_message": service_settings.donation_message,
         "pickup_note": service_settings.pickup_note,
+        "custom_prompt_template": service_settings.custom_prompt_template or DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE,
         "custom_base_homem_path": service_settings.custom_base_homem_path,
         "custom_base_mulher_path": service_settings.custom_base_mulher_path,
         "custom_base_menino_path": service_settings.custom_base_menino_path,

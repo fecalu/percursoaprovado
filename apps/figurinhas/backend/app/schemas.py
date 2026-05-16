@@ -204,6 +204,7 @@ class ServiceConfigResponse(BaseModel):
     pix_holder: str | None
     donation_message: str | None
     pickup_note: str | None
+    custom_prompt_template: str | None = None
     custom_base_homem_path: str | None = None
     custom_base_mulher_path: str | None = None
     custom_base_menino_path: str | None = None
@@ -220,6 +221,7 @@ class ServiceConfigUpdate(BaseModel):
     pix_holder: str | None = Field(default=None, max_length=150)
     donation_message: str | None = Field(default=None, max_length=500)
     pickup_note: str | None = Field(default=None, max_length=500)
+    custom_prompt_template: str | None = Field(default=None, max_length=3000)
 
 
 class OrderQuoteRequest(BaseModel):

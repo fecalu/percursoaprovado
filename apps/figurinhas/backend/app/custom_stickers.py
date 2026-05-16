@@ -28,6 +28,15 @@ PROFILE_THEMES = {
     "MENINA": ("#7c2c49", "#ff7fa9", "#ffd8e6"),
 }
 
+DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE = (
+    "Use the uploaded photo as the main facial reference for {name}, a {profile_label_lower}. "
+    "Keep strong resemblance and real facial features, skin tone, hair and expression. "
+    "{base_hint}Keep the official sticker visual language, shirt mood, premium football-card feeling and clean waist-up framing. "
+    "Change only the athlete portrait so it matches the real person from the uploaded photo. "
+    "Do not add or change any text, logo, badge, frame, watermark, background layout elements, extra people, extra limbs, duplicated features or collage artifacts."
+    "{city_hint} Return a single portrait image only."
+)
+
 
 @dataclass
 class CustomStickerRender:
@@ -35,11 +44,17 @@ class CustomStickerRender:
     final_bytes: bytes
 
 
+class _SafePromptValues(dict):
+    def __missing__(self, key):  # pragma: no cover - defensive fallback
+        return ""
+
+
 def generate_custom_sticker_render(
     settings,
     *,
     uploaded_photo_bytes: bytes,
     base_template_path: Path | None = None,
+    prompt_template: str | None = None,
     name: str,
     profile_type: str,
     birth_date_text: str | None,
@@ -55,6 +70,7 @@ def generate_custom_sticker_render(
         settings,
         uploaded_photo=uploaded_photo,
         base_template=base_template,
+        prompt_template=prompt_template,
         name=name,
         profile_type=profile_type,
         city_or_team=city_or_team,
@@ -103,6 +119,7 @@ def _generate_portrait_with_fallback(
     *,
     uploaded_photo: Image.Image,
     base_template: Image.Image | None,
+    prompt_template: str | None,
     name: str,
     profile_type: str,
     city_or_team: str | None,
@@ -114,6 +131,7 @@ def _generate_portrait_with_fallback(
             settings,
             uploaded_photo=uploaded_photo,
             base_template=base_template,
+            prompt_template=prompt_template,
             name=name,
             profile_type=profile_type,
             city_or_team=city_or_team,
@@ -128,6 +146,7 @@ def _generate_portrait_with_gemini(
     *,
     uploaded_photo: Image.Image,
     base_template: Image.Image | None,
+    prompt_template: str | None,
     name: str,
     profile_type: str,
     city_or_team: str | None,
@@ -137,6 +156,7 @@ def _generate_portrait_with_gemini(
         working_image.thumbnail((1536, 1536))
         client = genai.Client(api_key=settings.gemini_api_key)
         prompt = _build_gemini_prompt(
+            prompt_template=prompt_template,
             name=name,
             profile_type=profile_type,
             city_or_team=city_or_team,
@@ -181,6 +201,7 @@ def _iter_gemini_response_parts(response) -> list:
 
 def _build_gemini_prompt(
     *,
+    prompt_template: str | None,
     name: str,
     profile_type: str,
     city_or_team: str | None,
@@ -195,13 +216,18 @@ def _build_gemini_prompt(
         if has_base_template
         else ""
     )
-    return (
-        f"Use the uploaded photo as the main facial reference and create a polished collectible football sticker portrait "
-        f"of a {profile_label.lower()} named {name}. Preserve facial resemblance, natural skin tone, hair, and key face "
-        f"features. Show a confident waist-up sports portrait with clean sportswear, premium lighting, and an editorial "
-        f"football-card look.{base_hint} Do not add any text, badge, logo, frame, watermark, extra people, extra limbs, "
-        f"duplicate features, hands covering the face, or any collage effect.{city_hint} Return a single portrait image only."
+    template = (prompt_template or "").strip() or DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE
+    values = _SafePromptValues(
+        {
+            "name": name,
+            "profile_label": profile_label,
+            "profile_label_lower": profile_label.lower(),
+            "city_or_team": city_or_team or "",
+            "city_hint": city_hint,
+            "base_hint": f"{base_hint} " if base_hint else "",
+        }
     )
+    return " ".join(template.format_map(values).split())
 
 
 def _build_stylized_fallback(

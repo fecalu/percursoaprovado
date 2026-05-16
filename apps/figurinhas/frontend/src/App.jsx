@@ -153,6 +153,7 @@ function serviceConfigToForm(data) {
     pix_holder: data.pix_holder || '',
     donation_message: data.donation_message || '',
     pickup_note: data.pickup_note || '',
+    custom_prompt_template: data.custom_prompt_template || '',
     custom_base_homem_path: data.custom_base_homem_path || '',
     custom_base_mulher_path: data.custom_base_mulher_path || '',
     custom_base_menino_path: data.custom_base_menino_path || '',
@@ -1698,6 +1699,7 @@ function AdminPage() {
     pix_holder: '',
     donation_message: '',
     pickup_note: '',
+    custom_prompt_template: '',
     custom_base_homem_path: '',
     custom_base_mulher_path: '',
     custom_base_menino_path: '',
@@ -2266,7 +2268,8 @@ function AdminPage() {
           pix_key: serviceForm.pix_key,
           pix_holder: serviceForm.pix_holder,
           donation_message: serviceForm.donation_message,
-          pickup_note: serviceForm.pickup_note
+          pickup_note: serviceForm.pickup_note,
+          custom_prompt_template: serviceForm.custom_prompt_template
         })
       })
       setMessage('Configuracoes de impressao atualizadas.')
@@ -3249,6 +3252,33 @@ function AdminPage() {
                   </article>
                 )
               })}
+            </div>
+          </section>
+
+          <section className="fig-form-card">
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Minha Figurinha</p>
+              <h3>Prompt da IA</h3>
+            </div>
+            <p className="fig-empty-note">
+              Esse texto orienta a Gemini na geracao do retrato. Se quiser ajustar, mantenha as variaveis abaixo para o
+              sistema continuar montando o prompt corretamente.
+            </p>
+            <label className="fig-field">
+              <span>Prompt atual</span>
+              <textarea
+                rows="8"
+                value={serviceForm.custom_prompt_template}
+                onChange={event => setServiceForm(current => ({ ...current, custom_prompt_template: event.target.value }))}
+              />
+            </label>
+            <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+              <div>
+                <strong>Variaveis disponiveis:</strong>
+                <span>
+                  {'{name}'}, {'{profile_label}'}, {'{profile_label_lower}'}, {'{city_or_team}'}, {'{city_hint}'}, {'{base_hint}'}
+                </span>
+              </div>
             </div>
           </section>
           </div>
