@@ -1739,16 +1739,6 @@ a {
       0 0 0 1px rgba(31, 122, 77, 0.08);
   }
 
-  .fig-mobile-search-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 0.55rem;
-  }
-
-  .fig-mobile-search-row--filters-only {
-    grid-template-columns: 1fr;
-  }
-
   .fig-mobile-search-field {
     display: block;
   }

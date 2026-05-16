@@ -1027,16 +1027,6 @@ function PublicPage() {
             </div>
           ) : null}
 
-          <div className="fig-mobile-search-row fig-mobile-search-row--filters-only">
-            <button
-              type="button"
-              className={`fig-secondary-button fig-mobile-filter-button${category ? ' is-active' : ''}`}
-              onClick={() => setMobileFilterOpen(true)}
-            >
-              {activeCategoryLabel}
-            </button>
-          </div>
-
           <div className="fig-mobile-summary-row">
             <span className="fig-mobile-summary-pill">
               <strong>{selectedIds.length}</strong>
