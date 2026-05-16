@@ -3261,8 +3261,9 @@ function AdminPage() {
               <h3>Prompt da IA</h3>
             </div>
             <p className="fig-empty-note">
-              Esse texto orienta a Gemini na geracao do retrato. Se quiser ajustar, mantenha as variaveis abaixo para o
-              sistema continuar montando o prompt corretamente.
+              Esse texto orienta a Gemini na composicao completa da figurinha usando a foto enviada e a base oficial do
+              perfil. Se quiser ajustar, mantenha as variaveis abaixo para o sistema continuar montando o prompt
+              corretamente.
             </p>
             <label className="fig-field">
               <span>Prompt atual</span>
@@ -3276,7 +3277,7 @@ function AdminPage() {
               <div>
                 <strong>Variaveis disponiveis:</strong>
                 <span>
-                  {'{name}'}, {'{profile_label}'}, {'{profile_label_lower}'}, {'{city_or_team}'}, {'{city_hint}'}, {'{base_hint}'}
+                  {'{name}'}, {'{profile_label}'}, {'{profile_label_lower}'}, {'{birth_date_text}'}, {'{height_text}'}, {'{weight_text}'}, {'{city_or_team}'}, {'{city_hint}'}, {'{base_hint}'}, {'{details_hint}'}
                 </span>
               </div>
             </div>

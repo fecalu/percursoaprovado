@@ -29,12 +29,11 @@ PROFILE_THEMES = {
 }
 
 DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE = (
-    "Use the uploaded photo as the main facial reference for {name}, a {profile_label_lower}. "
-    "Keep strong resemblance and real facial features, skin tone, hair and expression. "
-    "{base_hint}Keep the official sticker visual language, shirt mood, premium football-card feeling and clean waist-up framing. "
-    "Change only the athlete portrait so it matches the real person from the uploaded photo. "
-    "Do not add or change any text, logo, badge, frame, watermark, background layout elements, extra people, extra limbs, duplicated features or collage artifacts."
-    "{city_hint} Return a single portrait image only."
+    "Use the first image as the real photo reference for {name}, a {profile_label_lower}. "
+    "{base_hint}Preserve the person's real facial features, skin tone, hair, smile and identity. "
+    "The final result must look like one single authentic collectible football sticker, never like a pasted portrait, cutout or collage. "
+    "{details_hint}{city_hint}Do not redesign the base, do not remove borders, do not alter the official shirt, do not add extra people, extra hands, duplicated features, random logos, watermarks or collage artifacts. "
+    "Return one complete finished sticker image only."
 )
 
 
@@ -66,33 +65,57 @@ def generate_custom_sticker_render(
 ) -> CustomStickerRender:
     uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
     base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
-    portrait_image = _generate_portrait_with_fallback(
-        settings,
-        uploaded_photo=uploaded_photo,
-        base_template=base_template,
-        prompt_template=prompt_template,
-        name=name,
-        profile_type=profile_type,
-        city_or_team=city_or_team,
-        target_width_px=max(int(target_width_px * 0.86), 720),
-        target_height_px=max(int(target_height_px * 0.62), 960),
-    )
+    gemini_sticker_image = None
+    if base_template is not None and settings.gemini_api_key and genai is not None and genai_types is not None:
+        gemini_sticker_image = _generate_sticker_with_gemini(
+            settings,
+            uploaded_photo=uploaded_photo,
+            base_template=base_template,
+            prompt_template=prompt_template,
+            name=name,
+            profile_type=profile_type,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
+            city_or_team=city_or_team,
+        )
+        if gemini_sticker_image is None:
+            raise ValueError("Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente.")
+
+    if gemini_sticker_image is not None:
+        final_image = _resize_to_exact(gemini_sticker_image, (target_width_px, target_height_px))
+        portrait_image = final_image
+    else:
+        portrait_image = _generate_portrait_with_fallback(
+            settings,
+            uploaded_photo=uploaded_photo,
+            base_template=base_template,
+            prompt_template=prompt_template,
+            name=name,
+            profile_type=profile_type,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
+            city_or_team=city_or_team,
+            target_width_px=max(int(target_width_px * 0.86), 720),
+            target_height_px=max(int(target_height_px * 0.62), 960),
+        )
+        final_image = _compose_sticker_card(
+            portrait_image,
+            base_template=base_template,
+            name=name,
+            profile_type=profile_type,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
+            city_or_team=city_or_team,
+            width_px=target_width_px,
+            height_px=target_height_px,
+        )
 
     portrait_buffer = io.BytesIO()
     portrait_image.save(portrait_buffer, format="PNG", optimize=True)
 
-    final_image = _compose_sticker_card(
-        portrait_image,
-        base_template=base_template,
-        name=name,
-        profile_type=profile_type,
-        birth_date_text=birth_date_text,
-        height_text=height_text,
-        weight_text=weight_text,
-        city_or_team=city_or_team,
-        width_px=target_width_px,
-        height_px=target_height_px,
-    )
     final_buffer = io.BytesIO()
     final_image.save(final_buffer, format="PNG", optimize=True)
     return CustomStickerRender(
@@ -122,59 +145,52 @@ def _generate_portrait_with_fallback(
     prompt_template: str | None,
     name: str,
     profile_type: str,
+    birth_date_text: str | None,
+    height_text: str | None,
+    weight_text: str | None,
     city_or_team: str | None,
     target_width_px: int,
     target_height_px: int,
 ) -> Image.Image:
-    if settings.gemini_api_key and genai is not None and genai_types is not None:
-        generated = _generate_portrait_with_gemini(
-            settings,
-            uploaded_photo=uploaded_photo,
-            base_template=base_template,
-            prompt_template=prompt_template,
-            name=name,
-            profile_type=profile_type,
-            city_or_team=city_or_team,
-        )
-        if generated is not None:
-            return _fit_cover(generated, (target_width_px, target_height_px))
     return _build_stylized_fallback(uploaded_photo, profile_type, (target_width_px, target_height_px))
 
 
-def _generate_portrait_with_gemini(
+def _generate_sticker_with_gemini(
     settings,
     *,
     uploaded_photo: Image.Image,
-    base_template: Image.Image | None,
+    base_template: Image.Image,
     prompt_template: str | None,
     name: str,
     profile_type: str,
+    birth_date_text: str | None,
+    height_text: str | None,
+    weight_text: str | None,
     city_or_team: str | None,
 ) -> Image.Image | None:
     try:
         working_image = uploaded_photo.copy()
         working_image.thumbnail((1536, 1536))
+        base_reference = base_template.copy().convert("RGB")
+        base_reference.thumbnail((1536, 1536))
         client = genai.Client(api_key=settings.gemini_api_key)
         prompt = _build_gemini_prompt(
             prompt_template=prompt_template,
             name=name,
             profile_type=profile_type,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
             city_or_team=city_or_team,
-            has_base_template=base_template is not None,
+            has_base_template=True,
         )
-        contents = [prompt, working_image]
-        if base_template is not None:
-            base_reference = base_template.copy().convert("RGB")
-            base_reference.thumbnail((1536, 1536))
-            contents.append(base_reference)
         response = client.models.generate_content(
             model=settings.gemini_image_model,
-            contents=contents,
+            contents=[prompt, working_image, base_reference],
             config=genai_types.GenerateContentConfig(
                 response_modalities=["TEXT", "IMAGE"],
             ),
         )
-
         for part in _iter_gemini_response_parts(response):
             if getattr(part, "inline_data", None) is not None:
                 image = part.as_image()
@@ -204,16 +220,36 @@ def _build_gemini_prompt(
     prompt_template: str | None,
     name: str,
     profile_type: str,
+    birth_date_text: str | None,
+    height_text: str | None,
+    weight_text: str | None,
     city_or_team: str | None,
     has_base_template: bool,
 ) -> str:
     profile_label = PROFILE_LABELS.get(profile_type, "Pessoa")
-    city_hint = f" The background can subtly reference {city_or_team}." if city_or_team else ""
+    city_hint = f" If the sticker has a field for city or team, use exactly '{city_or_team}'." if city_or_team else ""
     base_hint = (
-        " Use the second image as the official sticker base and visual style reference. Keep the same shirt mood, "
-        "layout energy, and overall collectible look, but generate only the central athlete portrait layer for "
-        "placement in that template."
+        " Use the second image as the official finished sticker base. Keep the same frame, shirt, background, layout, "
+        "colors, badges, shadows and collectible card design, and replace only the person in that sticker with the "
+        "real person from the first image."
         if has_base_template
+        else ""
+    )
+    details_parts = []
+    details_parts.append(f"name {name}")
+    if birth_date_text:
+        details_parts.append(f"date {birth_date_text}")
+    if height_text:
+        details_parts.append(f"height {height_text}")
+    if weight_text:
+        details_parts.append(f"weight {weight_text}")
+    if city_or_team:
+        details_parts.append(f"city or team {city_or_team}")
+    details_hint = (
+        "If the sticker shows editable identity details, use these exact values in the correct fields: "
+        + ", ".join(details_parts)
+        + ". "
+        if details_parts
         else ""
     )
     template = (prompt_template or "").strip() or DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE
@@ -222,9 +258,13 @@ def _build_gemini_prompt(
             "name": name,
             "profile_label": profile_label,
             "profile_label_lower": profile_label.lower(),
+            "birth_date_text": birth_date_text or "",
+            "height_text": height_text or "",
+            "weight_text": weight_text or "",
             "city_or_team": city_or_team or "",
             "city_hint": city_hint,
             "base_hint": f"{base_hint} " if base_hint else "",
+            "details_hint": details_hint,
         }
     )
     return " ".join(template.format_map(values).split())
@@ -544,6 +584,10 @@ def _fit_cover(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
     left = max((scaled_width - target_width) // 2, 0)
     top = max((scaled_height - target_height) // 2, 0)
     return resized.crop((left, top, left + target_width, top + target_height))
+
+
+def _resize_to_exact(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
+    return image.copy().convert("RGB").resize(target_size, Image.Resampling.LANCZOS)
 
 
 def _vertical_gradient(size: tuple[int, int], start_hex: str, end_hex: str) -> Image.Image:
