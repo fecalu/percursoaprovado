@@ -260,6 +260,13 @@ a {
   font-weight: 700;
 }
 
+.fig-collection-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .fig-hero-meta-row {
   display: flex;
   flex-wrap: wrap;
@@ -1041,6 +1048,10 @@ a {
   margin-bottom: 1rem;
 }
 
+.fig-admin-panel-grid--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .fig-admin-section-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -1169,6 +1180,19 @@ a {
 .fig-admin-content .fig-form-card,
 .fig-admin-content .fig-page-panel {
   backdrop-filter: blur(18px);
+}
+
+.fig-admin-content .fig-form-card--focused {
+  border-color: rgba(31, 122, 77, 0.2);
+  box-shadow:
+    0 26px 56px rgba(17, 34, 53, 0.08),
+    0 0 0 1px rgba(31, 122, 77, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.fig-admin-content .fig-form-card--supporting {
+  background:
+    linear-gradient(180deg, rgba(250, 252, 255, 0.94), rgba(244, 248, 252, 0.9));
 }
 
 .fig-admin-empty-state {
