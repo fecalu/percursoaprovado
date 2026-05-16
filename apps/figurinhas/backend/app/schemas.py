@@ -11,6 +11,14 @@ class AlbumCreate(BaseModel):
     name: str = Field(min_length=2, max_length=150)
     slug: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=500)
+    sort_order: int = Field(default=0, ge=0, le=9999)
+
+
+class AlbumUpdate(BaseModel):
+    name: str = Field(min_length=2, max_length=150)
+    slug: str = Field(min_length=2, max_length=150)
+    description: str | None = Field(default=None, max_length=500)
+    sort_order: int = Field(default=0, ge=0, le=9999)
 
 
 class CollectionSummaryResponse(BaseModel):
@@ -19,6 +27,7 @@ class CollectionSummaryResponse(BaseModel):
     name: str
     slug: str
     description: str | None
+    sort_order: int
     status: CollectionStatus
     sticker_count: int
     page_count: int
@@ -29,6 +38,7 @@ class AlbumResponse(BaseModel):
     name: str
     slug: str
     description: str | None
+    sort_order: int
     created_at: datetime
     updated_at: datetime
     collection_count: int
@@ -41,6 +51,14 @@ class CollectionCreate(BaseModel):
     name: str = Field(min_length=2, max_length=150)
     slug: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=500)
+    sort_order: int = Field(default=0, ge=0, le=9999)
+
+
+class CollectionUpdate(BaseModel):
+    name: str = Field(min_length=2, max_length=150)
+    slug: str = Field(min_length=2, max_length=150)
+    description: str | None = Field(default=None, max_length=500)
+    sort_order: int = Field(default=0, ge=0, le=9999)
 
 
 class CollectionAlbumAssign(BaseModel):
@@ -55,6 +73,7 @@ class CollectionResponse(BaseModel):
     name: str
     slug: str
     description: str | None
+    sort_order: int
     status: CollectionStatus
     source_pdf_path: str | None
     created_at: datetime

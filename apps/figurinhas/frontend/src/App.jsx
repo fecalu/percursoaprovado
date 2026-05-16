@@ -999,9 +999,17 @@ function AdminPage() {
   const [savingCollection, setSavingCollection] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
-  const [albumForm, setAlbumForm] = useState({ name: '', slug: '', description: '' })
-  const [createForm, setCreateForm] = useState({ album_id: '', name: '', slug: '', description: '' })
+  const [albumForm, setAlbumForm] = useState({ name: '', slug: '', description: '', sort_order: '0' })
+  const [createForm, setCreateForm] = useState({ album_id: '', name: '', slug: '', description: '', sort_order: '0' })
+  const [selectedAlbumForm, setSelectedAlbumForm] = useState({ name: '', slug: '', description: '', sort_order: '0' })
+  const [selectedCollectionForm, setSelectedCollectionForm] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    sort_order: '0'
+  })
   const [savingAlbum, setSavingAlbum] = useState(false)
+  const [savingAlbumEdit, setSavingAlbumEdit] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [processingAuto, setProcessingAuto] = useState(false)
   const [editingStickerId, setEditingStickerId] = useState(null)
@@ -1040,6 +1048,7 @@ function AdminPage() {
     admin_notes: ''
   })
   const [savingOrder, setSavingOrder] = useState(false)
+  const [savingCollectionEdit, setSavingCollectionEdit] = useState(false)
 
   async function fetchCollections(activeCollectionId = selectedCollectionId) {
     if (!token) return
@@ -1201,10 +1210,53 @@ function AdminPage() {
   }, [selectedCollection])
 
   useEffect(() => {
+    if (!selectedAlbum) {
+      setSelectedAlbumForm({ name: '', slug: '', description: '', sort_order: '0' })
+      return
+    }
+    setSelectedAlbumForm({
+      name: selectedAlbum.name || '',
+      slug: selectedAlbum.slug || '',
+      description: selectedAlbum.description || '',
+      sort_order: String(selectedAlbum.sort_order ?? 0)
+    })
+  }, [selectedAlbum])
+
+  useEffect(() => {
+    if (!selectedCollection) {
+      setSelectedCollectionForm({ name: '', slug: '', description: '', sort_order: '0' })
+      return
+    }
+    setSelectedCollectionForm({
+      name: selectedCollection.name || '',
+      slug: selectedCollection.slug || '',
+      description: selectedCollection.description || '',
+      sort_order: String(selectedCollection.sort_order ?? 0)
+    })
+  }, [selectedCollection])
+
+  useEffect(() => {
     if (!selectedCollection && (adminView === 'collection' || adminView === 'mapping')) {
       setAdminView('structure')
     }
   }, [adminView, selectedCollection])
+
+  useEffect(() => {
+    if (albumForm.name || albumForm.slug || albumForm.description) return
+    const nextOrder = albums.reduce((maxValue, album) => Math.max(maxValue, Number(album.sort_order || 0)), 0) + 1
+    setAlbumForm(current => ({ ...current, sort_order: String(nextOrder) }))
+  }, [albums, albumForm.name, albumForm.slug, albumForm.description])
+
+  useEffect(() => {
+    if (createForm.name || createForm.slug || createForm.description) return
+    const nextOrder =
+      filteredCollections.reduce((maxValue, collection) => Math.max(maxValue, Number(collection.sort_order || 0)), 0) + 1
+    setCreateForm(current => ({
+      ...current,
+      album_id: String(selectedAlbumId || current.album_id || ''),
+      sort_order: String(nextOrder)
+    }))
+  }, [filteredCollections, selectedAlbumId, createForm.name, createForm.slug, createForm.description])
 
   function resetStickerForm() {
     setEditingStickerId(null)
@@ -1247,9 +1299,12 @@ function AdminPage() {
       const created = await apiFetch('/admin/albums', {
         method: 'POST',
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
-        body: JSON.stringify(albumForm)
+        body: JSON.stringify({
+          ...albumForm,
+          sort_order: Number(albumForm.sort_order || 0)
+        })
       })
-      setAlbumForm({ name: '', slug: '', description: '' })
+      setAlbumForm({ name: '', slug: '', description: '', sort_order: '0' })
       setMessage('Album criado.')
       await fetchAlbums(created.id)
     } catch (err) {
@@ -1268,9 +1323,12 @@ function AdminPage() {
       const created = await apiFetch('/admin/collections', {
         method: 'POST',
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
-        body: JSON.stringify(createForm)
+        body: JSON.stringify({
+          ...createForm,
+          sort_order: Number(createForm.sort_order || 0)
+        })
       })
-      setCreateForm(current => ({ ...current, name: '', slug: '', description: '' }))
+      setCreateForm(current => ({ ...current, name: '', slug: '', description: '', sort_order: '0' }))
       setMessage('Colecao criada.')
       setSelectedAlbumId(created.album_id || selectedAlbumId)
       await fetchCollections(created.id)
@@ -1278,6 +1336,54 @@ function AdminPage() {
       setError(err.message)
     } finally {
       setSavingCollection(false)
+    }
+  }
+
+  async function handleUpdateAlbum(event) {
+    event.preventDefault()
+    if (!selectedAlbumId) return
+    setSavingAlbumEdit(true)
+    setError('')
+    setMessage('')
+    try {
+      const updated = await apiFetch(`/admin/albums/${selectedAlbumId}`, {
+        method: 'PUT',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          ...selectedAlbumForm,
+          sort_order: Number(selectedAlbumForm.sort_order || 0)
+        })
+      })
+      setMessage('Album atualizado.')
+      await Promise.all([fetchAlbums(updated.id), fetchCollections(selectedCollectionId)])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingAlbumEdit(false)
+    }
+  }
+
+  async function handleUpdateCollection(event) {
+    event.preventDefault()
+    if (!selectedCollectionId) return
+    setSavingCollectionEdit(true)
+    setError('')
+    setMessage('')
+    try {
+      const updated = await apiFetch(`/admin/collections/${selectedCollectionId}`, {
+        method: 'PUT',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          ...selectedCollectionForm,
+          sort_order: Number(selectedCollectionForm.sort_order || 0)
+        })
+      })
+      setMessage('Colecao atualizada.')
+      await Promise.all([fetchAlbums(updated.album_id || selectedAlbumId), fetchCollections(updated.id)])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingCollectionEdit(false)
     }
   }
 
@@ -1602,7 +1708,7 @@ function AdminPage() {
             >
               <strong>{album.name}</strong>
               <span>
-                {album.collection_count} colecoes · {album.published_collection_count} publicadas
+                Ordem {album.sort_order} · {album.collection_count} colecoes · {album.published_collection_count} publicadas
               </span>
             </button>
           ))}
@@ -1627,7 +1733,8 @@ function AdminPage() {
             >
               <strong>{collection.name}</strong>
               <span>
-                {collection.status === 'PUBLICADA' ? 'Publicada' : 'Rascunho'} · {collection.sticker_count} figurinhas
+                Ordem {collection.sort_order} · {collection.status === 'PUBLICADA' ? 'Publicada' : 'Rascunho'} ·{' '}
+                {collection.sticker_count} figurinhas
               </span>
             </button>
           ))}
@@ -1712,6 +1819,16 @@ function AdminPage() {
                     placeholder="copa-2026"
                   />
                 </label>
+                <label className="fig-field">
+                  <span>Ordem na barra lateral</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={albumForm.sort_order}
+                    onChange={event => setAlbumForm(current => ({ ...current, sort_order: event.target.value }))}
+                    placeholder="0"
+                  />
+                </label>
                 <label className="fig-field fig-field--full">
                   <span>Descricao</span>
                   <textarea
@@ -1765,6 +1882,16 @@ function AdminPage() {
                     placeholder="brasil"
                   />
                 </label>
+                <label className="fig-field">
+                  <span>Ordem na barra lateral</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={createForm.sort_order}
+                    onChange={event => setCreateForm(current => ({ ...current, sort_order: event.target.value }))}
+                    placeholder="0"
+                  />
+                </label>
                 <label className="fig-field fig-field--full">
                   <span>Descricao</span>
                   <textarea
@@ -1780,6 +1907,120 @@ function AdminPage() {
                   {savingCollection ? 'Salvando...' : 'Criar colecao'}
                 </button>
               </div>
+            </form>
+
+            <form className="fig-form-card" onSubmit={handleUpdateAlbum}>
+              <div className="fig-panel-header">
+                <p className="fig-kicker">Album selecionado</p>
+                <h3>Editar dados e ordem</h3>
+              </div>
+              {selectedAlbum ? (
+                <>
+                  <div className="fig-form-grid">
+                    <label className="fig-field">
+                      <span>Nome</span>
+                      <input
+                        value={selectedAlbumForm.name}
+                        onChange={event => setSelectedAlbumForm(current => ({ ...current, name: event.target.value }))}
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Slug</span>
+                      <input
+                        value={selectedAlbumForm.slug}
+                        onChange={event => setSelectedAlbumForm(current => ({ ...current, slug: event.target.value }))}
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Ordem na barra lateral</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={selectedAlbumForm.sort_order}
+                        onChange={event =>
+                          setSelectedAlbumForm(current => ({ ...current, sort_order: event.target.value }))
+                        }
+                      />
+                    </label>
+                    <label className="fig-field fig-field--full">
+                      <span>Descricao</span>
+                      <textarea
+                        rows="3"
+                        value={selectedAlbumForm.description}
+                        onChange={event =>
+                          setSelectedAlbumForm(current => ({ ...current, description: event.target.value }))
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="fig-hero-actions">
+                    <button type="submit" className="fig-primary-button" disabled={savingAlbumEdit}>
+                      {savingAlbumEdit ? 'Salvando...' : 'Salvar album'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="fig-empty-note">Escolha um album na lateral para editar nome, slug e ordem.</p>
+              )}
+            </form>
+
+            <form className="fig-form-card" onSubmit={handleUpdateCollection}>
+              <div className="fig-panel-header">
+                <p className="fig-kicker">Colecao selecionada</p>
+                <h3>Corrigir nome e ordenar</h3>
+              </div>
+              {selectedCollection ? (
+                <>
+                  <div className="fig-form-grid">
+                    <label className="fig-field">
+                      <span>Nome</span>
+                      <input
+                        value={selectedCollectionForm.name}
+                        onChange={event =>
+                          setSelectedCollectionForm(current => ({ ...current, name: event.target.value }))
+                        }
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Slug</span>
+                      <input
+                        value={selectedCollectionForm.slug}
+                        onChange={event =>
+                          setSelectedCollectionForm(current => ({ ...current, slug: event.target.value }))
+                        }
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Ordem na barra lateral</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={selectedCollectionForm.sort_order}
+                        onChange={event =>
+                          setSelectedCollectionForm(current => ({ ...current, sort_order: event.target.value }))
+                        }
+                      />
+                    </label>
+                    <label className="fig-field fig-field--full">
+                      <span>Descricao</span>
+                      <textarea
+                        rows="3"
+                        value={selectedCollectionForm.description}
+                        onChange={event =>
+                          setSelectedCollectionForm(current => ({ ...current, description: event.target.value }))
+                        }
+                      />
+                    </label>
+                  </div>
+                  <div className="fig-hero-actions">
+                    <button type="submit" className="fig-primary-button" disabled={savingCollectionEdit}>
+                      {savingCollectionEdit ? 'Salvando...' : 'Salvar colecao'}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="fig-empty-note">Escolha uma colecao na lateral para editar nome, slug e ordem.</p>
+              )}
             </form>
           </section>
         ) : null}

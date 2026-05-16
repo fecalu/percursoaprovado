@@ -46,6 +46,7 @@ class Album(Base):
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     slug: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
@@ -67,6 +68,7 @@ class Collection(Base):
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     slug: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     status: Mapped[CollectionStatus] = mapped_column(
         Enum(CollectionStatus), default=CollectionStatus.RASCUNHO, nullable=False
     )

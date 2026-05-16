@@ -26,10 +26,12 @@ from .schemas import (
     AdminLoginRequest,
     AlbumCreate,
     AlbumResponse,
+    AlbumUpdate,
     AutoDetectResponse,
     CollectionAlbumAssign,
     CollectionCreate,
     CollectionResponse,
+    CollectionUpdate,
     OrderQuoteRequest,
     OrderQuoteResponse,
     ExportRequest,
@@ -47,11 +49,13 @@ from .schemas import (
 )
 from .services import (
     album_stats,
+    album_sort_key,
     album_to_response,
     auto_detect_collection_pages,
     build_export_pdf,
     build_order_quote,
     collection_stats,
+    collection_sort_key,
     collection_to_response,
     create_print_order,
     crop_sticker_image,
@@ -125,6 +129,22 @@ def ensure_runtime_schema() -> None:
             }
             if "album_id" not in collection_columns:
                 connection.exec_driver_sql("ALTER TABLE figurinhas_collections ADD COLUMN album_id INTEGER")
+            if "sort_order" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0"
+                )
+
+        albums_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_albums'"
+        ).fetchone()
+        if albums_table_exists:
+            album_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_albums)").fetchall()
+            }
+            if "sort_order" not in album_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_albums ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0"
+                )
 
         service_settings_table_exists = connection.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_service_settings'"
@@ -182,7 +202,7 @@ def selected_stickers_for_album_or_400(db: Session, album: Album, sticker_ids: l
             Sticker.active.is_(True),
             Sticker.id.in_(unique_ids),
         )
-        .order_by(Collection.name.asc(), Sticker.sort_order.asc(), Sticker.name.asc())
+        .order_by(Collection.sort_order.asc(), Collection.name.asc(), Sticker.sort_order.asc(), Sticker.name.asc())
     )
     stickers = db.execute(statement).scalars().all()
     if not stickers or len(stickers) != len(unique_ids):
@@ -213,7 +233,7 @@ def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
     albums = db.execute(
         select(Album)
         .options(selectinload(Album.collections).selectinload(Collection.album))
-        .order_by(Album.updated_at.desc(), Album.id.desc())
+        .order_by(Album.sort_order.asc(), Album.name.asc(), Album.id.asc())
     ).scalars().all()
 
     visible_albums: list[Album] = []
@@ -225,11 +245,15 @@ def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
         visible_albums.append(album)
         collection_ids.extend(collection.id for collection in published_collections)
 
+    visible_albums = sorted(visible_albums, key=album_sort_key)
     collection_stats_map = collection_stats(db, collection_ids)
     album_stats_map = album_stats(db, [album.id for album in visible_albums])
     responses: list[dict] = []
     for album in visible_albums:
-        published_collections = [collection for collection in album.collections if collection.status == CollectionStatus.PUBLICADA]
+        published_collections = sorted(
+            [collection for collection in album.collections if collection.status == CollectionStatus.PUBLICADA],
+            key=collection_sort_key,
+        )
         collection_payload = [
             collection_to_response(collection, collection_stats_map.get(collection.id, {})) for collection in published_collections
         ]
@@ -243,7 +267,7 @@ def list_public_collections(db: Session = Depends(get_db)) -> list[dict]:
         select(Collection)
         .options(selectinload(Collection.album))
         .where(Collection.status == CollectionStatus.PUBLICADA)
-        .order_by(Collection.updated_at.desc())
+        .order_by(Collection.sort_order.asc(), Collection.name.asc(), Collection.id.asc())
         .limit(settings.public_collection_limit)
     ).scalars().all()
     stats = collection_stats(db, [collection.id for collection in collections])
@@ -343,7 +367,9 @@ def download_export(export_id: int, db: Session = Depends(get_db)) -> FileRespon
 @app.get("/admin/collections", response_model=list[CollectionResponse], dependencies=[Depends(require_admin)])
 def list_admin_collections(db: Session = Depends(get_db)) -> list[dict]:
     collections = db.execute(
-        select(Collection).options(selectinload(Collection.album)).order_by(Collection.updated_at.desc(), Collection.id.desc())
+        select(Collection)
+        .options(selectinload(Collection.album))
+        .order_by(Collection.sort_order.asc(), Collection.name.asc(), Collection.id.asc())
     ).scalars().all()
     stats = collection_stats(db, [collection.id for collection in collections])
     return [collection_to_response(collection, stats.get(collection.id, {})) for collection in collections]
@@ -354,7 +380,7 @@ def list_admin_albums(db: Session = Depends(get_db)) -> list[dict]:
     albums = db.execute(
         select(Album)
         .options(selectinload(Album.collections).selectinload(Collection.album))
-        .order_by(Album.updated_at.desc(), Album.id.desc())
+        .order_by(Album.sort_order.asc(), Album.name.asc(), Album.id.asc())
     ).scalars().all()
     album_stats_map = album_stats(db, [album.id for album in albums])
     collection_stats_map = collection_stats(
@@ -365,7 +391,10 @@ def list_admin_albums(db: Session = Depends(get_db)) -> list[dict]:
         album_to_response(
             album,
             album_stats_map.get(album.id, {}),
-            [collection_to_response(collection, collection_stats_map.get(collection.id, {})) for collection in album.collections],
+            [
+                collection_to_response(collection, collection_stats_map.get(collection.id, {}))
+                for collection in sorted(album.collections, key=collection_sort_key)
+            ],
         )
         for album in albums
     ]
@@ -429,11 +458,39 @@ def download_admin_order_export(order_id: int, db: Session = Depends(get_db)) ->
 def create_album(payload: AlbumCreate, db: Session = Depends(get_db)) -> dict:
     slug = slugify(payload.slug)
     ensure_album_slug_unique(db, slug)
-    album = Album(name=payload.name.strip(), slug=slug, description=(payload.description or "").strip() or None)
+    album = Album(
+        name=payload.name.strip(),
+        slug=slug,
+        description=(payload.description or "").strip() or None,
+        sort_order=payload.sort_order,
+    )
     db.add(album)
     db.commit()
     db.refresh(album)
     return album_to_response(album, {"collections": 0, "published_collections": 0}, [])
+
+
+@app.put("/admin/albums/{album_id}", response_model=AlbumResponse, dependencies=[Depends(require_admin)])
+def update_album(album_id: int, payload: AlbumUpdate, db: Session = Depends(get_db)) -> dict:
+    album = load_album_or_fail(db, album_id)
+    slug = slugify(payload.slug)
+    ensure_album_slug_unique(db, slug, excluding_id=album.id)
+    album.name = payload.name.strip()
+    album.slug = slug
+    album.description = (payload.description or "").strip() or None
+    album.sort_order = payload.sort_order
+    db.commit()
+    db.refresh(album)
+    stats = album_stats(db, [album.id])
+    collection_stats_map = collection_stats(db, [collection.id for collection in album.collections])
+    return album_to_response(
+        album,
+        stats.get(album.id, {}),
+        [
+            collection_to_response(collection, collection_stats_map.get(collection.id, {}))
+            for collection in sorted(album.collections, key=collection_sort_key)
+        ],
+    )
 
 
 @app.post("/admin/collections", response_model=CollectionResponse, dependencies=[Depends(require_admin)])
@@ -446,8 +503,24 @@ def create_collection(payload: CollectionCreate, db: Session = Depends(get_db)) 
         name=payload.name.strip(),
         slug=slug,
         description=(payload.description or "").strip() or None,
+        sort_order=payload.sort_order,
     )
     db.add(collection)
+    db.commit()
+    db.refresh(collection)
+    stats = collection_stats(db, [collection.id])
+    return collection_to_response(collection, stats.get(collection.id, {}))
+
+
+@app.put("/admin/collections/{collection_id}", response_model=CollectionResponse, dependencies=[Depends(require_admin)])
+def update_collection(collection_id: int, payload: CollectionUpdate, db: Session = Depends(get_db)) -> dict:
+    collection = load_collection_or_fail(db, collection_id)
+    slug = slugify(payload.slug)
+    ensure_collection_slug_unique(db, slug, excluding_id=collection.id)
+    collection.name = payload.name.strip()
+    collection.slug = slug
+    collection.description = (payload.description or "").strip() or None
+    collection.sort_order = payload.sort_order
     db.commit()
     db.refresh(collection)
     stats = collection_stats(db, [collection.id])

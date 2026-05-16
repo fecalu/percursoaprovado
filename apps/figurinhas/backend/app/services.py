@@ -41,6 +41,14 @@ def slugify(value: str) -> str:
     return collapsed[:150] or "colecao"
 
 
+def album_sort_key(album: Album) -> tuple[int, str, int]:
+    return (album.sort_order, album.name.lower(), album.id)
+
+
+def collection_sort_key(collection: Collection) -> tuple[int, str, int]:
+    return (collection.sort_order, collection.name.lower(), collection.id)
+
+
 def ensure_collection_slug_unique(db: Session, slug: str, excluding_id: int | None = None) -> None:
     statement = select(Collection).where(Collection.slug == slug)
     if excluding_id is not None:
@@ -772,6 +780,7 @@ def collection_to_response(collection: Collection, stats: dict[str, int]) -> dic
         "name": collection.name,
         "slug": collection.slug,
         "description": collection.description,
+        "sort_order": collection.sort_order,
         "status": collection.status,
         "source_pdf_path": collection.source_pdf_path,
         "created_at": collection.created_at,
@@ -787,6 +796,7 @@ def album_to_response(album: Album, stats: dict[str, int], collections: list[dic
         "name": album.name,
         "slug": album.slug,
         "description": album.description,
+        "sort_order": album.sort_order,
         "created_at": album.created_at,
         "updated_at": album.updated_at,
         "collection_count": stats.get("collections", 0),
