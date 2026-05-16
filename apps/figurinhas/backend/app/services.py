@@ -558,7 +558,7 @@ def _mercadopago_client() -> MercadoPagoPixClient:
 def _mercadopago_payer_email(session_token: str, album: Album) -> str:
     safe_session = "".join(char for char in session_token.lower() if char.isalnum())[:24] or uuid.uuid4().hex[:12]
     safe_album = "".join(char for char in album.slug.lower() if char.isalnum())[:18] or "album"
-    return f"{safe_session}@{safe_album}.figurinhas.local"
+    return f"figurinhas+{safe_album}{safe_session}@percursoaprovado.com.br"
 
 
 def _map_unlock_status(mp_status: str | None, mp_status_detail: str | None) -> CustomStickerUnlockStatus:

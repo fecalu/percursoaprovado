@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from .config import get_settings
 from .database import Base, engine, get_db
+from .mercadopago import MercadoPagoError
 from .models import (
     Album,
     Collection,
@@ -525,6 +526,8 @@ def create_my_sticker_unlock(
             service_settings=service_settings,
         )
     except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    except MercadoPagoError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
     db.commit()
     db.refresh(unlock)

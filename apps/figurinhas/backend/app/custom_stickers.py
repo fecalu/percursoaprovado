@@ -60,6 +60,7 @@ def generate_custom_sticker_render(
     uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
     base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
     openai_sticker_image = None
+    ai_error_message = None
     if base_template is not None and settings.openai_api_key:
         try:
             openai_sticker_image = _generate_sticker_with_openai(
@@ -77,11 +78,11 @@ def generate_custom_sticker_render(
                 target_height_px=target_height_px,
             )
         except Exception as exc:
-            raise ValueError(_humanize_openai_error(exc)) from exc
+            ai_error_message = _humanize_openai_error(exc)
         if openai_sticker_image is None:
-            raise ValueError("Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente.")
+            ai_error_message = ai_error_message or "Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente."
     elif base_template is not None:
-        raise ValueError("Configure uma chave da OpenAI para gerar a figurinha com IA usando a base oficial.")
+        ai_error_message = "Configure uma chave da OpenAI para gerar a figurinha com IA usando a base oficial."
 
     if openai_sticker_image is not None:
         final_image = _resize_to_exact(openai_sticker_image, (target_width_px, target_height_px))
@@ -113,6 +114,8 @@ def generate_custom_sticker_render(
             width_px=target_width_px,
             height_px=target_height_px,
         )
+        if ai_error_message:
+            print(f"[figurinhas] Minha Figurinha usando fallback local: {ai_error_message}")
 
     portrait_buffer = io.BytesIO()
     portrait_image.save(portrait_buffer, format="PNG", optimize=True)
