@@ -10,3 +10,4 @@ pytesseract==0.3.13
 openai>=1.0.0,<2.0.0
 httpx==0.28.1
 rembg==2.0.67
+onnxruntime==1.23.2
