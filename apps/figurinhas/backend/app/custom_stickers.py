@@ -7,6 +7,10 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
 from openai import APIConnectionError, APIStatusError, AuthenticationError, OpenAI, RateLimitError
+try:
+    from rembg import remove as rembg_remove
+except Exception:  # pragma: no cover
+    rembg_remove = None
 
 
 PROFILE_LABELS = {
@@ -47,6 +51,10 @@ def generate_custom_sticker_render(
     *,
     uploaded_photo_bytes: bytes,
     base_template_path: Path | None = None,
+    composition_mode: str | None = None,
+    template_layers: list[dict] | None = None,
+    photo_slot: dict | None = None,
+    text_slots: list[dict] | None = None,
     prompt_template: str | None = None,
     name: str,
     profile_type: str,
@@ -59,9 +67,11 @@ def generate_custom_sticker_render(
 ) -> CustomStickerRender:
     uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
     base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
+    active_template_layers = [layer for layer in (template_layers or []) if layer.get("file_path") and layer.get("is_active", True)]
+    use_layer_composition = composition_mode == "LAYERS" and bool(active_template_layers) and bool(photo_slot)
     openai_sticker_image = None
     ai_error_message = None
-    if base_template is not None and settings.openai_api_key:
+    if not use_layer_composition and base_template is not None and settings.openai_api_key:
         try:
             openai_sticker_image = _generate_sticker_with_openai(
                 settings,
@@ -81,10 +91,25 @@ def generate_custom_sticker_render(
             ai_error_message = _humanize_openai_error(exc)
         if openai_sticker_image is None:
             ai_error_message = ai_error_message or "Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente."
-    elif base_template is not None:
+    elif not use_layer_composition and base_template is not None:
         ai_error_message = "Configure uma chave da OpenAI para gerar a figurinha com IA usando a base oficial."
 
-    if openai_sticker_image is not None:
+    if use_layer_composition:
+        portrait_image = _remove_photo_background(uploaded_photo)
+        final_image = _compose_sticker_card_from_layers(
+            portrait_image=portrait_image,
+            template_layers=active_template_layers,
+            photo_slot=photo_slot or {},
+            text_slots=text_slots or [],
+            name=name,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
+            city_or_team=city_or_team,
+            width_px=target_width_px,
+            height_px=target_height_px,
+        )
+    elif openai_sticker_image is not None:
         final_image = _resize_to_exact(openai_sticker_image, (target_width_px, target_height_px))
         portrait_image = final_image
     else:
@@ -157,6 +182,17 @@ def _generate_portrait_with_fallback(
     target_height_px: int,
 ) -> Image.Image:
     return _build_stylized_fallback(uploaded_photo, profile_type, (target_width_px, target_height_px))
+
+
+def _remove_photo_background(uploaded_photo: Image.Image) -> Image.Image:
+    if rembg_remove is None:
+        return uploaded_photo.convert("RGBA")
+
+    buffer = io.BytesIO()
+    uploaded_photo.convert("RGBA").save(buffer, format="PNG", optimize=True)
+    result_bytes = rembg_remove(buffer.getvalue())
+    with Image.open(io.BytesIO(result_bytes)) as raw_image:
+        return ImageOps.exif_transpose(raw_image).convert("RGBA")
 
 
 def _generate_sticker_with_openai(
@@ -619,6 +655,60 @@ def _compose_sticker_card_from_base(
     return canvas.convert("RGB")
 
 
+def _compose_sticker_card_from_layers(
+    *,
+    portrait_image: Image.Image,
+    template_layers: list[dict],
+    photo_slot: dict,
+    text_slots: list[dict],
+    name: str,
+    birth_date_text: str | None,
+    height_text: str | None,
+    weight_text: str | None,
+    city_or_team: str | None,
+    width_px: int,
+    height_px: int,
+) -> Image.Image:
+    canvas = Image.new("RGBA", (width_px, height_px), (0, 0, 0, 0))
+    sorted_layers = sorted(template_layers, key=lambda item: int(item.get("z_index", 0)))
+    background_layers = [layer for layer in sorted_layers if layer.get("layer_type") == "BACKGROUND"]
+    front_layers = [layer for layer in sorted_layers if layer.get("layer_type") != "BACKGROUND"]
+
+    for layer in background_layers:
+        layer_image = _open_template_layer(layer.get("file_path"), (width_px, height_px))
+        if layer_image is not None:
+            canvas.alpha_composite(layer_image)
+
+    _paste_portrait_into_slot(
+        canvas,
+        portrait_image=portrait_image,
+        photo_slot=photo_slot,
+        width_px=width_px,
+        height_px=height_px,
+    )
+
+    for layer in front_layers:
+        layer_image = _open_template_layer(layer.get("file_path"), (width_px, height_px))
+        if layer_image is not None:
+            canvas.alpha_composite(layer_image)
+
+    draw = ImageDraw.Draw(canvas)
+    _draw_template_text_slots(
+        draw,
+        text_slots=text_slots,
+        values={
+            "NAME": name.upper(),
+            "DATE": birth_date_text or "--",
+            "HEIGHT": height_text or "--",
+            "WEIGHT": weight_text or "--",
+            "CITY_OR_TEAM": city_or_team or "--",
+        },
+        width_px=width_px,
+        height_px=height_px,
+    )
+    return canvas.convert("RGB")
+
+
 def _fit_cover(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
     target_width, target_height = target_size
     if target_width <= 0 or target_height <= 0:
@@ -638,6 +728,67 @@ def _fit_cover(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
     left = max((scaled_width - target_width) // 2, 0)
     top = max((scaled_height - target_height) // 2, 0)
     return resized.crop((left, top, left + target_width, top + target_height))
+
+
+def _fit_cover_rgba(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
+    target_width, target_height = target_size
+    source = image.copy().convert("RGBA")
+    source_ratio = source.width / source.height if source.height else 1
+    target_ratio = target_width / target_height
+
+    if source_ratio > target_ratio:
+        scaled_height = target_height
+        scaled_width = int(round(target_height * source_ratio))
+    else:
+        scaled_width = target_width
+        scaled_height = int(round(target_width / source_ratio))
+
+    resized = source.resize((scaled_width, scaled_height), Image.Resampling.LANCZOS)
+    left = max((scaled_width - target_width) // 2, 0)
+    top = max((scaled_height - target_height) // 2, 0)
+    return resized.crop((left, top, left + target_width, top + target_height))
+
+
+def _fit_contain_rgba(image: Image.Image, target_size: tuple[int, int], *, scale: float = 1.0) -> Image.Image:
+    target_width, target_height = target_size
+    source = image.copy().convert("RGBA")
+    ratio = min(target_width / max(source.width, 1), target_height / max(source.height, 1))
+    ratio = max(ratio * scale, 0.01)
+    resized_width = max(1, int(round(source.width * ratio)))
+    resized_height = max(1, int(round(source.height * ratio)))
+    return source.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
+
+
+def _open_template_layer(file_path: str | None, target_size: tuple[int, int]) -> Image.Image | None:
+    if not file_path:
+        return None
+    absolute_path = Path(file_path)
+    if not absolute_path.exists():
+        return None
+    with Image.open(absolute_path) as raw_image:
+        return _fit_cover_rgba(ImageOps.exif_transpose(raw_image).convert("RGBA"), target_size)
+
+
+def _paste_portrait_into_slot(
+    canvas: Image.Image,
+    *,
+    portrait_image: Image.Image,
+    photo_slot: dict,
+    width_px: int,
+    height_px: int,
+) -> None:
+    slot_x = int(float(photo_slot.get("x", 0)) * width_px)
+    slot_y = int(float(photo_slot.get("y", 0)) * height_px)
+    slot_width = max(1, int(float(photo_slot.get("width", 1)) * width_px))
+    slot_height = max(1, int(float(photo_slot.get("height", 1)) * height_px))
+    scale = float(photo_slot.get("default_scale", 1))
+    anchor_x = float(photo_slot.get("anchor_x", 0.5))
+    anchor_y = float(photo_slot.get("anchor_y", 0.5))
+
+    fitted = _fit_contain_rgba(portrait_image, (slot_width, slot_height), scale=scale)
+    paste_x = slot_x + int((slot_width - fitted.width) * anchor_x)
+    paste_y = slot_y + int((slot_height - fitted.height) * anchor_y)
+    canvas.alpha_composite(fitted, (paste_x, paste_y))
 
 
 def _resize_to_exact(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
@@ -683,3 +834,59 @@ def _draw_text_with_shadow(
 ) -> None:
     draw.text((position[0] + shadow_offset[0], position[1] + shadow_offset[1]), text, fill=shadow_fill, font=font)
     draw.text(position, text, fill=fill, font=font)
+
+
+def _draw_template_text_slots(
+    draw: ImageDraw.ImageDraw,
+    *,
+    text_slots: list[dict],
+    values: dict[str, str],
+    width_px: int,
+    height_px: int,
+) -> None:
+    for slot in text_slots:
+        field_name = slot.get("field_name")
+        text_value = values.get(field_name or "", "--")
+        if not text_value:
+            continue
+
+        x = int(float(slot.get("x", 0)) * width_px)
+        y = int(float(slot.get("y", 0)) * height_px)
+        max_width = max(1, int(float(slot.get("width", 0.2)) * width_px))
+        font_size = max(8, int(float(slot.get("font_size", 12))))
+        font_weight = (slot.get("font_weight") or "").strip().lower()
+        color = (slot.get("color") or "#ffffff").strip() or "#ffffff"
+        align = (slot.get("text_align") or "left").strip().lower()
+        font = _load_font(font_size, bold=font_weight in {"600", "700", "800", "900", "bold", "semibold"})
+        text = _truncate_to_width(text_value, font, max_width)
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        draw_x = x
+        if align == "center":
+            draw_x = x + max((max_width - text_width) // 2, 0)
+        elif align == "right":
+            draw_x = x + max(max_width - text_width, 0)
+
+        _draw_text_with_shadow(
+            draw,
+            (draw_x, y),
+            text,
+            font=font,
+            fill=color,
+            shadow_fill=(0, 0, 0, 160),
+            shadow_offset=(0, max(height_px // 500, 1)),
+        )
+
+
+def _truncate_to_width(text: str, font: ImageFont.FreeTypeFont | ImageFont.ImageFont, max_width: int) -> str:
+    bbox = font.getbbox(text)
+    if bbox[2] - bbox[0] <= max_width:
+        return text
+    trimmed = text
+    while trimmed:
+        candidate = f"{trimmed}..."
+        bbox = font.getbbox(candidate)
+        if bbox[2] - bbox[0] <= max_width:
+            return candidate
+        trimmed = trimmed[:-1]
+    return text

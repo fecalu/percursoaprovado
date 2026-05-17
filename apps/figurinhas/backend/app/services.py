@@ -821,6 +821,53 @@ def upsert_generated_sticker(
         uploaded_photo_bytes=uploaded_photo_bytes,
         name=name.strip(),
         profile_type=profile_type.value,
+        composition_mode=(selected_template.composition_mode.value if selected_template else service_settings.custom_generation_mode.value),
+        template_layers=(
+            [
+                {
+                    "layer_type": layer.layer_type.value,
+                    "label": layer.label,
+                    "file_path": str((settings.storage_root / layer.file_path).resolve()) if layer.file_path else "",
+                    "z_index": layer.z_index,
+                    "is_active": layer.is_active,
+                }
+                for layer in selected_template.layers
+            ]
+            if selected_template
+            else None
+        ),
+        photo_slot=(
+            {
+                "x": selected_template.photo_slot.x,
+                "y": selected_template.photo_slot.y,
+                "width": selected_template.photo_slot.width,
+                "height": selected_template.photo_slot.height,
+                "default_scale": selected_template.photo_slot.default_scale,
+                "min_scale": selected_template.photo_slot.min_scale,
+                "max_scale": selected_template.photo_slot.max_scale,
+                "anchor_x": selected_template.photo_slot.anchor_x,
+                "anchor_y": selected_template.photo_slot.anchor_y,
+            }
+            if selected_template and selected_template.photo_slot
+            else None
+        ),
+        text_slots=(
+            [
+                {
+                    "field_name": slot.field_name.value,
+                    "x": slot.x,
+                    "y": slot.y,
+                    "width": slot.width,
+                    "font_size": slot.font_size,
+                    "font_weight": slot.font_weight,
+                    "text_align": slot.text_align,
+                    "color": slot.color,
+                }
+                for slot in selected_template.text_slots
+            ]
+            if selected_template
+            else None
+        ),
         birth_date_text=(birth_date_text or "").strip() or None,
         height_text=(height_text or "").strip() or None,
         weight_text=(weight_text or "").strip() or None,
