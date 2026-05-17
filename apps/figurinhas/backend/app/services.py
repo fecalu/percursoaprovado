@@ -32,6 +32,8 @@ from .models import (
     CustomStickerTemplatePhotoSlot,
     CustomStickerTemplateTextSlot,
     CustomTemplateCompositionMode,
+    CustomTemplateLayerType,
+    CustomPositionType,
     Export,
     Page,
     PrintOrder,
@@ -734,8 +736,11 @@ def upsert_generated_sticker(
     *,
     album: Album,
     session_token: str,
+    template_id: int | None,
     name: str,
     profile_type: CustomProfileType,
+    category_type: CustomCategoryType,
+    position_type: CustomPositionType,
     birth_date_text: str | None,
     height_text: str | None,
     weight_text: str | None,
@@ -748,6 +753,13 @@ def upsert_generated_sticker(
 
     service_settings = get_or_create_service_settings(db)
     template_sticker = resolve_generated_template_sticker(db, album)
+    selected_template = resolve_custom_template_for_generation(
+        db,
+        template_id=template_id,
+        profile_type=profile_type,
+        category_type=category_type,
+        position_type=position_type,
+    )
     collection, page = ensure_generated_collection_page(db, album, template_sticker)
     delete_generated_stickers_for_session(db, album.id, session_token)
 
@@ -774,7 +786,11 @@ def upsert_generated_sticker(
         city_or_team=(city_or_team or "").strip() or None,
         target_width_px=width_px,
         target_height_px=height_px,
-        base_template_path=get_custom_base_file_path(service_settings, profile_type),
+        base_template_path=resolve_template_preview_base_path(
+            service_settings,
+            template=selected_template,
+            profile_type=profile_type,
+        ),
         prompt_template=service_settings.custom_prompt_template,
     )
 
@@ -804,8 +820,12 @@ def upsert_generated_sticker(
         code=f"minha-figurinha-{asset_key}",
         category=StickerCategory.JOGADOR,
         source_type=StickerSourceType.GENERATED,
+        template=selected_template,
         session_token=session_token,
         profile_type=profile_type,
+        custom_category_type=category_type,
+        custom_position_type=position_type,
+        composition_mode_used=(selected_template.composition_mode if selected_template else service_settings.custom_generation_mode),
         birth_date_text=(birth_date_text or "").strip() or None,
         height_text=(height_text or "").strip() or None,
         weight_text=(weight_text or "").strip() or None,
@@ -1455,6 +1475,87 @@ def custom_template_to_detail_response(template: CustomStickerTemplate) -> dict:
             for slot in template.text_slots
         ],
     }
+
+
+def custom_template_to_public_option(template: CustomStickerTemplate) -> dict:
+    return {
+        "id": template.id,
+        "name": template.name,
+        "profile_type": template.profile_type,
+        "category_type": template.category_type,
+        "position_type": template.position_type,
+        "composition_mode": template.composition_mode,
+        "sort_order": template.sort_order,
+    }
+
+
+def load_active_custom_templates(db: Session) -> list[CustomStickerTemplate]:
+    return db.execute(
+        select(CustomStickerTemplate)
+        .where(CustomStickerTemplate.is_active.is_(True))
+        .order_by(
+            CustomStickerTemplate.sort_order.asc(),
+            CustomStickerTemplate.profile_type.asc(),
+            CustomStickerTemplate.position_type.asc(),
+            CustomStickerTemplate.id.asc(),
+        )
+    ).scalars().all()
+
+
+def resolve_custom_template_for_generation(
+    db: Session,
+    *,
+    template_id: int | None,
+    profile_type: CustomProfileType,
+    category_type: CustomCategoryType,
+    position_type: CustomPositionType,
+) -> CustomStickerTemplate | None:
+    statement = select(CustomStickerTemplate).options(
+        selectinload(CustomStickerTemplate.layers),
+        selectinload(CustomStickerTemplate.photo_slot),
+        selectinload(CustomStickerTemplate.text_slots),
+    )
+    if template_id:
+        statement = statement.where(CustomStickerTemplate.id == template_id, CustomStickerTemplate.is_active.is_(True))
+    else:
+        statement = statement.where(
+            CustomStickerTemplate.is_active.is_(True),
+            CustomStickerTemplate.profile_type == profile_type,
+            CustomStickerTemplate.category_type == category_type,
+            CustomStickerTemplate.position_type == position_type,
+        ).order_by(CustomStickerTemplate.sort_order.asc(), CustomStickerTemplate.id.asc())
+    return db.execute(statement).scalars().first()
+
+
+def resolve_template_preview_base_path(
+    service_settings: ServiceSettings,
+    *,
+    template: CustomStickerTemplate | None,
+    profile_type: CustomProfileType,
+) -> Path | None:
+    if template:
+        template_layers = sorted(
+            [layer for layer in template.layers if layer.is_active and layer.file_path],
+            key=lambda layer: layer.z_index,
+        )
+        for preferred_type in (
+            CustomTemplateLayerType.BACKGROUND,
+            CustomTemplateLayerType.FRAME,
+            CustomTemplateLayerType.OVERLAY,
+            CustomTemplateLayerType.INFO_PANEL,
+            CustomTemplateLayerType.PHOTO_FRONT,
+            CustomTemplateLayerType.SHINE,
+        ):
+            selected = next((layer for layer in template_layers if layer.layer_type == preferred_type), None)
+            if selected:
+                layer_path = settings.storage_root / selected.file_path
+                if layer_path.exists():
+                    return layer_path
+        if template_layers:
+            layer_path = settings.storage_root / template_layers[0].file_path
+            if layer_path.exists():
+                return layer_path
+    return get_custom_base_file_path(service_settings, profile_type)
 
 
 def custom_sticker_unlock_to_response(unlock: CustomStickerUnlock, service_settings: ServiceSettings | None = None) -> dict:

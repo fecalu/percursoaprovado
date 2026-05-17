@@ -170,9 +170,28 @@ function customProfileLabel(profile) {
   return customProfileOptions.find(option => option.value === profile)?.label || profile || 'Minha Figurinha'
 }
 
+function customPositionLabel(position) {
+  return customPositionTypeOptions.find(option => option.value === position)?.label || position || 'Posicao'
+}
+
 function customBasePathForProfile(config, profile) {
   if (!config || !profile) return ''
   return config[customBaseFieldByProfile[profile]] || ''
+}
+
+function createEmptyMyStickerForm() {
+  return {
+    name: '',
+    profile_type: 'HOMEM',
+    category_type: 'JOGADOR',
+    position_type: 'ATACANTE',
+    template_id: '',
+    birth_date_text: '',
+    height_text: '',
+    weight_text: '',
+    city_or_team: '',
+    photo: null
+  }
 }
 
 function createEmptyCustomTemplateForm() {
@@ -291,6 +310,7 @@ function PublicPage() {
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState('')
   const [stickers, setStickers] = useState([])
   const [customSticker, setCustomSticker] = useState(null)
+  const [customTemplateOptions, setCustomTemplateOptions] = useState([])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [selectedStickers, setSelectedStickers] = useState([])
@@ -317,15 +337,7 @@ function PublicPage() {
   const [pendingDownloadFileName, setPendingDownloadFileName] = useState('')
   const [pixCopied, setPixCopied] = useState(false)
   const [customUnlockCopied, setCustomUnlockCopied] = useState(false)
-  const [myStickerForm, setMyStickerForm] = useState({
-    name: '',
-    profile_type: 'HOMEM',
-    birth_date_text: '',
-    height_text: '',
-    weight_text: '',
-    city_or_team: '',
-    photo: null
-  })
+  const [myStickerForm, setMyStickerForm] = useState(createEmptyMyStickerForm)
   const [orderForm, setOrderForm] = useState({
     service_type: 'IMPRESSAO',
     customer_name: '',
@@ -414,6 +426,16 @@ function PublicPage() {
     () => customBasePathForProfile(serviceConfig, myStickerForm.profile_type),
     [serviceConfig, myStickerForm.profile_type]
   )
+  const currentTemplateOptions = useMemo(
+    () =>
+      customTemplateOptions.filter(
+        template =>
+          template.profile_type === myStickerForm.profile_type &&
+          template.category_type === (myStickerForm.category_type || 'JOGADOR') &&
+          template.position_type === (myStickerForm.position_type || 'ATACANTE')
+      ),
+    [customTemplateOptions, myStickerForm.profile_type, myStickerForm.category_type, myStickerForm.position_type]
+  )
 
   useEffect(() => {
     let ignore = false
@@ -421,14 +443,16 @@ function PublicPage() {
       setBusy(true)
       setError('')
       try {
-        const [collectionsData, serviceData] = await Promise.all([
+        const [collectionsData, serviceData, templateData] = await Promise.all([
           apiFetch('/albums'),
-          apiFetch('/service-config')
+          apiFetch('/service-config'),
+          apiFetch('/custom-templates')
         ])
         if (ignore) return
         setAlbums(collectionsData)
         setSelectedAlbumSlug(current => current || collectionsData[0]?.slug || '')
         setServiceConfig(serviceData)
+        setCustomTemplateOptions(templateData)
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -495,6 +519,21 @@ function PublicPage() {
         const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker?session_token=${encodeURIComponent(sessionToken)}`)
         if (ignore) return
         setCustomSticker(data)
+        if (data) {
+          setMyStickerForm(current => ({
+            ...current,
+            name: data.name || '',
+            profile_type: data.profile_type || 'HOMEM',
+            category_type: data.custom_category_type || 'JOGADOR',
+            position_type: data.custom_position_type || 'ATACANTE',
+            template_id: data.template_id ? String(data.template_id) : '',
+            birth_date_text: data.birth_date_text || '',
+            height_text: data.height_text || '',
+            weight_text: data.weight_text || '',
+            city_or_team: data.city_or_team || '',
+            photo: null
+          }))
+        }
       } catch (err) {
         if (!ignore) {
           setCustomSticker(null)
@@ -533,6 +572,26 @@ function PublicPage() {
       ignore = true
     }
   }, [selectedAlbumSlug, customSticker, serviceConfig?.custom_sticker_unlock_enabled, sessionToken])
+
+  useEffect(() => {
+    setMyStickerForm(current => {
+      const templateStillValid = current.template_id
+        ? currentTemplateOptions.some(template => String(template.id) === String(current.template_id))
+        : false
+      const nextTemplateId = templateStillValid
+        ? current.template_id
+        : currentTemplateOptions.length === 1
+          ? String(currentTemplateOptions[0].id)
+          : ''
+      if (nextTemplateId === current.template_id) {
+        return current
+      }
+      return {
+        ...current,
+        template_id: nextTemplateId
+      }
+    })
+  }, [currentTemplateOptions])
 
   useEffect(() => {
     if (!customUnlockModalOpen || customUnlockStep !== 'payment' || customUnlockData?.status !== 'PENDENTE') {
@@ -781,6 +840,11 @@ function PublicPage() {
       formData.append('session_token', sessionToken)
       formData.append('name', myStickerForm.name)
       formData.append('profile_type', myStickerForm.profile_type)
+      formData.append('category_type', myStickerForm.category_type || 'JOGADOR')
+      formData.append('position_type', myStickerForm.position_type || 'ATACANTE')
+      if (myStickerForm.template_id) {
+        formData.append('template_id', myStickerForm.template_id)
+      }
       formData.append('birth_date_text', myStickerForm.birth_date_text)
       formData.append('height_text', myStickerForm.height_text)
       formData.append('weight_text', myStickerForm.weight_text)
@@ -799,6 +863,9 @@ function PublicPage() {
       setMyStickerForm({
         name: data.name,
         profile_type: data.profile_type || 'HOMEM',
+        category_type: data.custom_category_type || 'JOGADOR',
+        position_type: data.custom_position_type || 'ATACANTE',
+        template_id: data.template_id ? String(data.template_id) : '',
         birth_date_text: data.birth_date_text || '',
         height_text: data.height_text || '',
         weight_text: data.weight_text || '',
@@ -1471,7 +1538,13 @@ function PublicPage() {
                   <span>Perfil da figurinha</span>
                   <select
                     value={myStickerForm.profile_type}
-                    onChange={event => setMyStickerForm(current => ({ ...current, profile_type: event.target.value }))}
+                    onChange={event =>
+                      setMyStickerForm(current => ({
+                        ...current,
+                        profile_type: event.target.value,
+                        template_id: ''
+                      }))
+                    }
                   >
                     {customProfileOptions.map(option => (
                       <option key={option.value} value={option.value}>
@@ -1480,6 +1553,41 @@ function PublicPage() {
                     ))}
                   </select>
                 </label>
+                <label className="fig-field">
+                  <span>Posicao em campo</span>
+                  <select
+                    value={myStickerForm.position_type}
+                    onChange={event =>
+                      setMyStickerForm(current => ({
+                        ...current,
+                        position_type: event.target.value,
+                        template_id: ''
+                      }))
+                    }
+                  >
+                    {customPositionTypeOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {currentTemplateOptions.length > 1 ? (
+                  <label className="fig-field fig-field--full">
+                    <span>Modelo da figurinha</span>
+                    <select
+                      value={myStickerForm.template_id}
+                      onChange={event => setMyStickerForm(current => ({ ...current, template_id: event.target.value }))}
+                    >
+                      <option value="">Escolha um modelo</option>
+                      {currentTemplateOptions.map(template => (
+                        <option key={template.id} value={String(template.id)}>
+                          {template.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
                 {currentCustomBasePreview ? (
                   <div className="fig-custom-base-inline">
                     <div className="fig-custom-base-inline-preview">
@@ -1559,7 +1667,9 @@ function PublicPage() {
                   <img src={apiFileUrl(customSticker.preview_path)} alt={customSticker.name} />
                   <div className="fig-custom-preview-body">
                     <strong>{customSticker.name}</strong>
-                    <span>Atual: {customProfileLabel(customSticker.profile_type)}</span>
+                    <span>
+                      Atual: {customProfileLabel(customSticker.profile_type)} • {customPositionLabel(customSticker.custom_position_type)}
+                    </span>
                     <small>
                       Recrie se quiser trocar foto ou dados.
                     </small>

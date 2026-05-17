@@ -265,6 +265,16 @@ class CustomTemplateSummaryResponse(BaseModel):
     updated_at: datetime
 
 
+class CustomTemplatePublicOption(BaseModel):
+    id: int
+    name: str
+    profile_type: CustomProfileType
+    category_type: CustomCategoryType
+    position_type: CustomPositionType
+    composition_mode: CustomTemplateCompositionMode
+    sort_order: int
+
+
 class CustomTemplateDetailResponse(BaseModel):
     id: int
     name: str

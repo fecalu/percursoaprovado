@@ -17,6 +17,8 @@ from .models import (
     Album,
     Collection,
     CollectionStatus,
+    CustomCategoryType,
+    CustomPositionType,
     CustomStickerTemplate,
     CustomStickerTemplateLayer,
     CustomStickerTemplatePhotoSlot,
@@ -43,6 +45,7 @@ from .schemas import (
     CollectionUpdate,
     CustomTemplateCreate,
     CustomTemplateDetailResponse,
+    CustomTemplatePublicOption,
     CustomTemplateSummaryResponse,
     CustomTemplateUpdate,
     CustomStickerUnlockRequest,
@@ -73,6 +76,7 @@ from .services import (
     collection_sort_key,
     collection_to_response,
     custom_template_to_detail_response,
+    custom_template_to_public_option,
     custom_template_to_summary_response,
     custom_sticker_unlock_to_response,
     create_print_order,
@@ -92,6 +96,7 @@ from .services import (
     load_collection_or_fail,
     load_generated_sticker_for_session,
     load_latest_custom_sticker_unlock,
+    load_active_custom_templates,
     load_print_order_or_fail,
     load_sticker_or_fail,
     page_to_response,
@@ -496,6 +501,12 @@ def list_public_stickers(
     return [sticker_to_response(sticker) for sticker in stickers]
 
 
+@app.get("/custom-templates", response_model=list[CustomTemplatePublicOption])
+def list_public_custom_templates(db: Session = Depends(get_db)) -> list[dict]:
+    templates = load_active_custom_templates(db)
+    return [custom_template_to_public_option(template) for template in templates]
+
+
 @app.get("/albums/{album_slug}/my-sticker", response_model=StickerResponse | None)
 def get_my_sticker(
     album_slug: str,
@@ -513,6 +524,9 @@ async def create_or_replace_my_sticker(
     session_token: str = Form(..., min_length=12, max_length=120),
     name: str = Form(..., min_length=2, max_length=150),
     profile_type: CustomProfileType = Form(...),
+    category_type: CustomCategoryType = Form(default=CustomCategoryType.JOGADOR),
+    position_type: CustomPositionType = Form(...),
+    template_id: int | None = Form(default=None),
     birth_date_text: str | None = Form(default=None, max_length=40),
     height_text: str | None = Form(default=None, max_length=40),
     weight_text: str | None = Form(default=None, max_length=40),
@@ -540,8 +554,11 @@ async def create_or_replace_my_sticker(
             db,
             album=album,
             session_token=session_token,
+            template_id=template_id,
             name=name,
             profile_type=profile_type,
+            category_type=category_type,
+            position_type=position_type,
             birth_date_text=birth_date_text,
             height_text=height_text,
             weight_text=weight_text,
