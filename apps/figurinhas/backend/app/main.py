@@ -82,6 +82,7 @@ from .services import (
     create_print_order,
     crop_sticker_image,
     delete_custom_base_image,
+    delete_custom_template_layer_image,
     delete_generated_stickers_for_session,
     ensure_album_slug_unique,
     ensure_default_album_assignments,
@@ -103,6 +104,7 @@ from .services import (
     print_order_to_response,
     refresh_sticker_ocr,
     save_custom_base_image,
+    save_custom_template_layer_image,
     save_pdf_and_render_pages,
     service_settings_to_response,
     slugify,
@@ -311,6 +313,13 @@ def load_custom_template_or_404(db: Session, template_id: int) -> CustomStickerT
     if not template:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template da Minha Figurinha nao encontrado.")
     return template
+
+
+def load_custom_template_layer_or_404(template: CustomStickerTemplate, layer_id: int) -> CustomStickerTemplateLayer:
+    layer = next((item for item in template.layers if item.id == layer_id), None)
+    if not layer:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Camada do template nao encontrada.")
+    return layer
 
 
 def apply_custom_template_payload(template: CustomStickerTemplate, payload: CustomTemplateCreate | CustomTemplateUpdate) -> None:
@@ -805,6 +814,57 @@ def get_admin_custom_template(template_id: int, db: Session = Depends(get_db)) -
 def update_admin_custom_template(template_id: int, payload: CustomTemplateUpdate, db: Session = Depends(get_db)) -> dict:
     template = load_custom_template_or_404(db, template_id)
     apply_custom_template_payload(template, payload)
+    db.commit()
+    template = load_custom_template_or_404(db, template_id)
+    return custom_template_to_detail_response(template)
+
+
+@app.post(
+    "/admin/custom-templates/{template_id}/layers/{layer_id}/file",
+    response_model=CustomTemplateDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+async def upload_admin_custom_template_layer_file(
+    template_id: int,
+    layer_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    template = load_custom_template_or_404(db, template_id)
+    layer = load_custom_template_layer_or_404(template, layer_id)
+    if not file.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem valida para a camada.")
+    if not (file.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem JPG, PNG ou WebP valida.")
+
+    upload_bytes = await file.read()
+    if not upload_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A imagem da camada enviada esta vazia.")
+    if len(upload_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A imagem da camada passou do limite de {settings.custom_upload_limit_mb} MB.",
+        )
+
+    try:
+        save_custom_template_layer_image(layer, upload_bytes=upload_bytes, original_name=file.filename)
+    except OSError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nao foi possivel ler a imagem da camada.") from err
+
+    db.commit()
+    template = load_custom_template_or_404(db, template_id)
+    return custom_template_to_detail_response(template)
+
+
+@app.delete(
+    "/admin/custom-templates/{template_id}/layers/{layer_id}/file",
+    response_model=CustomTemplateDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+def delete_admin_custom_template_layer_file(template_id: int, layer_id: int, db: Session = Depends(get_db)) -> dict:
+    template = load_custom_template_or_404(db, template_id)
+    layer = load_custom_template_layer_or_404(template, layer_id)
+    delete_custom_template_layer_image(layer)
     db.commit()
     template = load_custom_template_or_404(db, template_id)
     return custom_template_to_detail_response(template)

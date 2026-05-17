@@ -2216,6 +2216,8 @@ function AdminPage() {
   const [selectedCustomTemplateId, setSelectedCustomTemplateId] = useState(null)
   const [customTemplateForm, setCustomTemplateForm] = useState(createEmptyCustomTemplateForm)
   const [savingCustomTemplate, setSavingCustomTemplate] = useState(false)
+  const [uploadingTemplateLayerKey, setUploadingTemplateLayerKey] = useState('')
+  const [deletingTemplateLayerKey, setDeletingTemplateLayerKey] = useState('')
   const [uploadingBaseProfile, setUploadingBaseProfile] = useState('')
   const [deletingBaseProfile, setDeletingBaseProfile] = useState('')
   const [orders, setOrders] = useState([])
@@ -2660,6 +2662,13 @@ function AdminPage() {
     }))
   }
 
+  function removeCustomTemplateLayer(index) {
+    setCustomTemplateForm(current => ({
+      ...current,
+      layers: current.layers.filter((_, itemIndex) => itemIndex !== index)
+    }))
+  }
+
   function addCustomTemplateTextSlot() {
     setCustomTemplateForm(current => ({
       ...current,
@@ -2676,6 +2685,13 @@ function AdminPage() {
           color: ''
         }
       ]
+    }))
+  }
+
+  function removeCustomTemplateTextSlot(index) {
+    setCustomTemplateForm(current => ({
+      ...current,
+      text_slots: current.text_slots.filter((_, itemIndex) => itemIndex !== index)
     }))
   }
 
@@ -2739,6 +2755,133 @@ function AdminPage() {
       setError(err.message)
     } finally {
       setSavingCustomTemplate(false)
+    }
+  }
+
+  async function handleCustomTemplateLayerUpload(layer, file) {
+    if (!token || !selectedCustomTemplateId || !layer?.id || !file) return
+    const actionKey = `${selectedCustomTemplateId}:${layer.id}`
+    setUploadingTemplateLayerKey(actionKey)
+    setError('')
+    setMessage('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const data = await apiFetch(`/admin/custom-templates/${selectedCustomTemplateId}/layers/${layer.id}/file`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token),
+        body: formData
+      })
+      setCustomTemplateForm({
+        ...createEmptyCustomTemplateForm(),
+        name: data.name,
+        profile_type: data.profile_type,
+        category_type: data.category_type,
+        position_type: data.position_type,
+        composition_mode: data.composition_mode,
+        sort_order: String(data.sort_order ?? 0),
+        is_active: data.is_active,
+        layers: (data.layers || []).map(item => ({
+          id: item.id,
+          layer_type: item.layer_type,
+          label: item.label,
+          file_path: item.file_path || '',
+          z_index: String(item.z_index ?? 0),
+          is_active: item.is_active
+        })),
+        photo_slot: data.photo_slot
+          ? {
+              x: String(data.photo_slot.x ?? 0),
+              y: String(data.photo_slot.y ?? 0),
+              width: String(data.photo_slot.width ?? 1),
+              height: String(data.photo_slot.height ?? 1),
+              default_scale: String(data.photo_slot.default_scale ?? 1),
+              min_scale: String(data.photo_slot.min_scale ?? 0.7),
+              max_scale: String(data.photo_slot.max_scale ?? 1.5),
+              anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
+              anchor_y: String(data.photo_slot.anchor_y ?? 0.5)
+            }
+          : null,
+        text_slots: (data.text_slots || []).map(item => ({
+          id: item.id,
+          field_name: item.field_name,
+          x: String(item.x ?? 0),
+          y: String(item.y ?? 0),
+          width: String(item.width ?? 0),
+          font_size: String(item.font_size ?? 12),
+          font_weight: item.font_weight || '',
+          text_align: item.text_align || '',
+          color: item.color || ''
+        }))
+      })
+      await fetchCustomTemplates(selectedCustomTemplateId)
+      setMessage('Camada enviada.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploadingTemplateLayerKey('')
+    }
+  }
+
+  async function handleCustomTemplateLayerDelete(layer) {
+    if (!token || !selectedCustomTemplateId || !layer?.id || !layer.file_path) return
+    const actionKey = `${selectedCustomTemplateId}:${layer.id}`
+    setDeletingTemplateLayerKey(actionKey)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/custom-templates/${selectedCustomTemplateId}/layers/${layer.id}/file`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      setCustomTemplateForm({
+        ...createEmptyCustomTemplateForm(),
+        name: data.name,
+        profile_type: data.profile_type,
+        category_type: data.category_type,
+        position_type: data.position_type,
+        composition_mode: data.composition_mode,
+        sort_order: String(data.sort_order ?? 0),
+        is_active: data.is_active,
+        layers: (data.layers || []).map(item => ({
+          id: item.id,
+          layer_type: item.layer_type,
+          label: item.label,
+          file_path: item.file_path || '',
+          z_index: String(item.z_index ?? 0),
+          is_active: item.is_active
+        })),
+        photo_slot: data.photo_slot
+          ? {
+              x: String(data.photo_slot.x ?? 0),
+              y: String(data.photo_slot.y ?? 0),
+              width: String(data.photo_slot.width ?? 1),
+              height: String(data.photo_slot.height ?? 1),
+              default_scale: String(data.photo_slot.default_scale ?? 1),
+              min_scale: String(data.photo_slot.min_scale ?? 0.7),
+              max_scale: String(data.photo_slot.max_scale ?? 1.5),
+              anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
+              anchor_y: String(data.photo_slot.anchor_y ?? 0.5)
+            }
+          : null,
+        text_slots: (data.text_slots || []).map(item => ({
+          id: item.id,
+          field_name: item.field_name,
+          x: String(item.x ?? 0),
+          y: String(item.y ?? 0),
+          width: String(item.width ?? 0),
+          font_size: String(item.font_size ?? 12),
+          font_weight: item.font_weight || '',
+          text_align: item.text_align || '',
+          color: item.color || ''
+        }))
+      })
+      await fetchCustomTemplates(selectedCustomTemplateId)
+      setMessage('Camada removida.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingTemplateLayerKey('')
     }
   }
 
@@ -4130,6 +4273,19 @@ function AdminPage() {
                 <div className="fig-admin-stack">
                   {customTemplateForm.layers.map((layer, index) => (
                     <div key={`${layer.id || 'new'}-${index}`} className="fig-helper-strip fig-helper-strip--card">
+                      {layer.file_path ? (
+                        <div className="fig-custom-base-inline fig-custom-base-inline--layer">
+                          <div className="fig-custom-base-inline-preview">
+                            <img src={apiFileUrl(layer.file_path)} alt={layer.label || `Camada ${index + 1}`} />
+                          </div>
+                          <div className="fig-custom-base-inline-copy">
+                            <strong>{layer.label || 'Camada sem nome'}</strong>
+                            <span>
+                              {customTemplateLayerTypeOptions.find(option => option.value === layer.layer_type)?.label || layer.layer_type}
+                            </span>
+                          </div>
+                        </div>
+                      ) : null}
                       <div className="fig-form-grid">
                         <label className="fig-field">
                           <span>Tipo</span>
@@ -4169,6 +4325,7 @@ function AdminPage() {
                           <span>Arquivo</span>
                           <input
                             value={layer.file_path}
+                            readOnly={!!layer.id}
                             onChange={event =>
                               setCustomTemplateForm(current => ({
                                 ...current,
@@ -4211,6 +4368,38 @@ function AdminPage() {
                           />
                           <span>Ativa</span>
                         </label>
+                        <div className="fig-field fig-field--full">
+                          <span>Imagem da camada</span>
+                          <div className="fig-custom-base-card-actions">
+                            <label className="fig-secondary-button fig-file-button">
+                              {uploadingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}` ? 'Enviando...' : layer.file_path ? 'Trocar imagem' : 'Enviar imagem'}
+                              <input
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                disabled={!selectedCustomTemplateId || !layer.id || uploadingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
+                                onChange={event => {
+                                  const file = event.target.files?.[0]
+                                  handleCustomTemplateLayerUpload(layer, file)
+                                  event.target.value = ''
+                                }}
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="fig-inline-link"
+                              disabled={!layer.file_path || deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
+                              onClick={() => handleCustomTemplateLayerDelete(layer)}
+                            >
+                              {deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}` ? 'Removendo...' : 'Remover imagem'}
+                            </button>
+                            <button type="button" className="fig-inline-link" onClick={() => removeCustomTemplateLayer(index)}>
+                              Remover camada
+                            </button>
+                          </div>
+                          {!selectedCustomTemplateId || !layer.id ? (
+                            <small>Salve o template primeiro para enviar a imagem desta camada.</small>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -4355,6 +4544,11 @@ function AdminPage() {
                             placeholder="#ffffff"
                           />
                         </label>
+                        <div className="fig-field fig-field--full">
+                          <button type="button" className="fig-inline-link" onClick={() => removeCustomTemplateTextSlot(index)}>
+                            Remover slot de texto
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}

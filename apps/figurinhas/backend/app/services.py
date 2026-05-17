@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import fitz
-from PIL import Image
+from PIL import Image, ImageOps
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from sqlalchemy import func, select
@@ -366,6 +366,47 @@ def delete_custom_base_image(service_settings: ServiceSettings, profile_type: Cu
         if previous_path.exists():
             previous_path.unlink(missing_ok=True)
     setattr(service_settings, field_name, None)
+
+
+def save_custom_template_layer_image(
+    layer: CustomStickerTemplateLayer,
+    *,
+    upload_bytes: bytes,
+    original_name: str | None,
+) -> str:
+    extension = Path(original_name or "camada.png").suffix.lower() or ".png"
+    safe_extension = extension if extension in {".png", ".jpg", ".jpeg", ".webp"} else ".png"
+    target_dir = settings.storage_root / "custom_template_layers" / str(layer.template_id)
+    target_dir.mkdir(parents=True, exist_ok=True)
+    file_name = f"{layer.id}-{uuid.uuid4().hex[:8]}{safe_extension}"
+    file_path = target_dir / file_name
+
+    with Image.open(io.BytesIO(upload_bytes)) as raw_image:
+        image = ImageOps.exif_transpose(raw_image)
+        if safe_extension in {".jpg", ".jpeg"}:
+            image = image.convert("RGB")
+            image.save(file_path, quality=96)
+        else:
+            image.save(file_path)
+
+    previous_relative_path = layer.file_path
+    if previous_relative_path:
+        previous_path = settings.storage_root / previous_relative_path
+        if previous_path.exists():
+            previous_path.unlink(missing_ok=True)
+
+    relative_path = str(file_path.relative_to(settings.storage_root).as_posix())
+    layer.file_path = relative_path
+    return relative_path
+
+
+def delete_custom_template_layer_image(layer: CustomStickerTemplateLayer) -> None:
+    previous_relative_path = layer.file_path
+    if previous_relative_path:
+        previous_path = settings.storage_root / previous_relative_path
+        if previous_path.exists():
+            previous_path.unlink(missing_ok=True)
+    layer.file_path = None
 
 
 def delete_sticker_assets(sticker: Sticker) -> None:
