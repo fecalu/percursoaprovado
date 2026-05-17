@@ -23,9 +23,15 @@ from .models import (
     Album,
     Collection,
     CollectionStatus,
+    CustomCategoryType,
     CustomProfileType,
     CustomStickerUnlock,
     CustomStickerUnlockStatus,
+    CustomStickerTemplate,
+    CustomStickerTemplateLayer,
+    CustomStickerTemplatePhotoSlot,
+    CustomStickerTemplateTextSlot,
+    CustomTemplateCompositionMode,
     Export,
     Page,
     PrintOrder,
@@ -283,6 +289,7 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
         id=1,
         service_enabled=settings.default_service_enabled,
         donation_enabled=settings.default_donation_enabled,
+        custom_generation_mode=CustomTemplateCompositionMode.LAYERS,
         custom_sticker_unlock_enabled=settings.default_custom_sticker_unlock_enabled,
         custom_sticker_unlock_price_cents=settings.default_custom_sticker_unlock_price_cents,
         custom_sticker_unlock_message=settings.default_custom_sticker_unlock_message or None,
@@ -1318,15 +1325,22 @@ def sticker_to_response(sticker: Sticker) -> dict:
         "id": sticker.id,
         "collection_id": sticker.collection_id,
         "page_id": sticker.page_id,
+        "template_id": sticker.template_id,
         "name": sticker.name,
         "code": sticker.code,
         "category": sticker.category,
         "source_type": sticker.source_type,
         "profile_type": sticker.profile_type,
+        "custom_category_type": sticker.custom_category_type,
+        "custom_position_type": sticker.custom_position_type,
+        "composition_mode_used": sticker.composition_mode_used,
         "birth_date_text": sticker.birth_date_text,
         "height_text": sticker.height_text,
         "weight_text": sticker.weight_text,
         "city_or_team": sticker.city_or_team,
+        "photo_offset_x": sticker.photo_offset_x,
+        "photo_offset_y": sticker.photo_offset_y,
+        "photo_scale": sticker.photo_scale,
         "sort_order": sticker.sort_order,
         "x_ratio": sticker.x_ratio,
         "y_ratio": sticker.y_ratio,
@@ -1350,6 +1364,7 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
     return {
         "service_enabled": service_settings.service_enabled,
         "donation_enabled": service_settings.donation_enabled,
+        "custom_generation_mode": service_settings.custom_generation_mode,
         "custom_sticker_unlock_enabled": service_settings.custom_sticker_unlock_enabled,
         "custom_sticker_unlock_price_cents": service_settings.custom_sticker_unlock_price_cents,
         "custom_sticker_unlock_message": service_settings.custom_sticker_unlock_message,
@@ -1365,6 +1380,80 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
         "custom_base_mulher_path": service_settings.custom_base_mulher_path,
         "custom_base_menino_path": service_settings.custom_base_menino_path,
         "custom_base_menina_path": service_settings.custom_base_menina_path,
+    }
+
+
+def custom_template_to_summary_response(template: CustomStickerTemplate) -> dict:
+    return {
+        "id": template.id,
+        "name": template.name,
+        "profile_type": template.profile_type,
+        "category_type": template.category_type,
+        "position_type": template.position_type,
+        "composition_mode": template.composition_mode,
+        "sort_order": template.sort_order,
+        "is_active": template.is_active,
+        "layer_count": len(template.layers),
+        "has_photo_slot": template.photo_slot is not None,
+        "text_slot_count": len(template.text_slots),
+        "created_at": template.created_at,
+        "updated_at": template.updated_at,
+    }
+
+
+def custom_template_to_detail_response(template: CustomStickerTemplate) -> dict:
+    return {
+        "id": template.id,
+        "name": template.name,
+        "profile_type": template.profile_type,
+        "category_type": template.category_type,
+        "position_type": template.position_type,
+        "composition_mode": template.composition_mode,
+        "sort_order": template.sort_order,
+        "is_active": template.is_active,
+        "created_at": template.created_at,
+        "updated_at": template.updated_at,
+        "layers": [
+            {
+                "id": layer.id,
+                "layer_type": layer.layer_type,
+                "label": layer.label,
+                "file_path": layer.file_path,
+                "z_index": layer.z_index,
+                "is_active": layer.is_active,
+            }
+            for layer in template.layers
+        ],
+        "photo_slot": (
+            {
+                "id": template.photo_slot.id,
+                "x": template.photo_slot.x,
+                "y": template.photo_slot.y,
+                "width": template.photo_slot.width,
+                "height": template.photo_slot.height,
+                "default_scale": template.photo_slot.default_scale,
+                "min_scale": template.photo_slot.min_scale,
+                "max_scale": template.photo_slot.max_scale,
+                "anchor_x": template.photo_slot.anchor_x,
+                "anchor_y": template.photo_slot.anchor_y,
+            }
+            if template.photo_slot
+            else None
+        ),
+        "text_slots": [
+            {
+                "id": slot.id,
+                "field_name": slot.field_name,
+                "x": slot.x,
+                "y": slot.y,
+                "width": slot.width,
+                "font_size": slot.font_size,
+                "font_weight": slot.font_weight,
+                "text_align": slot.text_align,
+                "color": slot.color,
+            }
+            for slot in template.text_slots
+        ],
     }
 
 

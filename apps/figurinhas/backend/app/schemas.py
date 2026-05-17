@@ -6,7 +6,12 @@ from pydantic import BaseModel, Field, field_validator
 
 from .models import (
     CollectionStatus,
+    CustomCategoryType,
     CustomProfileType,
+    CustomPositionType,
+    CustomTemplateCompositionMode,
+    CustomTemplateLayerType,
+    CustomTemplateTextField,
     PrintOrderStatus,
     PrintServiceType,
     StickerCategory,
@@ -146,15 +151,22 @@ class StickerResponse(BaseModel):
     id: int
     collection_id: int
     page_id: int
+    template_id: int | None
     name: str
     code: str | None
     category: StickerCategory
     source_type: StickerSourceType
     profile_type: CustomProfileType | None
+    custom_category_type: CustomCategoryType | None
+    custom_position_type: CustomPositionType | None
+    composition_mode_used: CustomTemplateCompositionMode | None
     birth_date_text: str | None
     height_text: str | None
     weight_text: str | None
     city_or_team: str | None
+    photo_offset_x: float | None
+    photo_offset_y: float | None
+    photo_scale: float | None
     sort_order: int
     x_ratio: float
     y_ratio: float
@@ -171,6 +183,102 @@ class StickerResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     page_number: int
+
+
+class CustomTemplateLayerInput(BaseModel):
+    layer_type: CustomTemplateLayerType
+    label: str = Field(min_length=1, max_length=120)
+    file_path: str | None = Field(default=None, max_length=255)
+    z_index: int = Field(default=0, ge=0, le=999)
+    is_active: bool = True
+
+
+class CustomTemplatePhotoSlotInput(BaseModel):
+    x: float = Field(default=0, ge=0, le=1)
+    y: float = Field(default=0, ge=0, le=1)
+    width: float = Field(default=1, gt=0, le=1)
+    height: float = Field(default=1, gt=0, le=1)
+    default_scale: float = Field(default=1, gt=0, le=5)
+    min_scale: float = Field(default=0.7, gt=0, le=5)
+    max_scale: float = Field(default=1.5, gt=0, le=8)
+    anchor_x: float = Field(default=0.5, ge=0, le=1)
+    anchor_y: float = Field(default=0.5, ge=0, le=1)
+
+
+class CustomTemplateTextSlotInput(BaseModel):
+    field_name: CustomTemplateTextField
+    x: float = Field(default=0, ge=0, le=1)
+    y: float = Field(default=0, ge=0, le=1)
+    width: float = Field(default=0, ge=0, le=1)
+    font_size: float = Field(default=12, gt=0, le=200)
+    font_weight: str | None = Field(default=None, max_length=40)
+    text_align: str | None = Field(default=None, max_length=20)
+    color: str | None = Field(default=None, max_length=20)
+
+
+class CustomTemplateBase(BaseModel):
+    name: str = Field(min_length=2, max_length=150)
+    profile_type: CustomProfileType
+    category_type: CustomCategoryType = CustomCategoryType.JOGADOR
+    position_type: CustomPositionType
+    composition_mode: CustomTemplateCompositionMode = CustomTemplateCompositionMode.LAYERS
+    sort_order: int = Field(default=0, ge=0, le=9999)
+    is_active: bool = True
+    layers: list[CustomTemplateLayerInput] = Field(default_factory=list)
+    photo_slot: CustomTemplatePhotoSlotInput | None = None
+    text_slots: list[CustomTemplateTextSlotInput] = Field(default_factory=list)
+
+
+class CustomTemplateCreate(CustomTemplateBase):
+    pass
+
+
+class CustomTemplateUpdate(CustomTemplateBase):
+    pass
+
+
+class CustomTemplateLayerResponse(CustomTemplateLayerInput):
+    id: int
+
+
+class CustomTemplatePhotoSlotResponse(CustomTemplatePhotoSlotInput):
+    id: int
+
+
+class CustomTemplateTextSlotResponse(CustomTemplateTextSlotInput):
+    id: int
+
+
+class CustomTemplateSummaryResponse(BaseModel):
+    id: int
+    name: str
+    profile_type: CustomProfileType
+    category_type: CustomCategoryType
+    position_type: CustomPositionType
+    composition_mode: CustomTemplateCompositionMode
+    sort_order: int
+    is_active: bool
+    layer_count: int
+    has_photo_slot: bool
+    text_slot_count: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class CustomTemplateDetailResponse(BaseModel):
+    id: int
+    name: str
+    profile_type: CustomProfileType
+    category_type: CustomCategoryType
+    position_type: CustomPositionType
+    composition_mode: CustomTemplateCompositionMode
+    sort_order: int
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    layers: list[CustomTemplateLayerResponse] = Field(default_factory=list)
+    photo_slot: CustomTemplatePhotoSlotResponse | None = None
+    text_slots: list[CustomTemplateTextSlotResponse] = Field(default_factory=list)
 
 
 class PublishCollectionRequest(BaseModel):
@@ -197,6 +305,7 @@ class ExportResponse(BaseModel):
 class ServiceConfigResponse(BaseModel):
     service_enabled: bool
     donation_enabled: bool
+    custom_generation_mode: CustomTemplateCompositionMode
     custom_sticker_unlock_enabled: bool
     custom_sticker_unlock_price_cents: int
     custom_sticker_unlock_message: str | None
@@ -217,6 +326,7 @@ class ServiceConfigResponse(BaseModel):
 class ServiceConfigUpdate(BaseModel):
     service_enabled: bool = False
     donation_enabled: bool = False
+    custom_generation_mode: CustomTemplateCompositionMode = CustomTemplateCompositionMode.LAYERS
     custom_sticker_unlock_enabled: bool = False
     custom_sticker_unlock_price_cents: int = Field(default=500, ge=0, le=100000)
     custom_sticker_unlock_message: str | None = Field(default=None, max_length=500)

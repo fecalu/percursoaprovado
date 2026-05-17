@@ -43,6 +43,39 @@ const customBaseFieldByProfile = {
   MENINA: 'custom_base_menina_path'
 }
 
+const customGenerationModeOptions = [
+  { value: 'LAYERS', label: 'Composicao por camadas' },
+  { value: 'AI_OPTIONAL', label: 'IA opcional' }
+]
+
+const customCategoryTypeOptions = [
+  { value: 'JOGADOR', label: 'Jogador' }
+]
+
+const customPositionTypeOptions = [
+  { value: 'ATACANTE', label: 'Atacante' },
+  { value: 'MEIA', label: 'Meia' },
+  { value: 'ZAGUEIRO', label: 'Zagueiro' },
+  { value: 'GOLEIRO', label: 'Goleiro' }
+]
+
+const customTemplateLayerTypeOptions = [
+  { value: 'BACKGROUND', label: 'Fundo' },
+  { value: 'FRAME', label: 'Moldura' },
+  { value: 'PHOTO_FRONT', label: 'Camada frontal da foto' },
+  { value: 'INFO_PANEL', label: 'Faixa de informacoes' },
+  { value: 'OVERLAY', label: 'Overlay extra' },
+  { value: 'SHINE', label: 'Brilho/acabamento' }
+]
+
+const customTemplateTextFieldOptions = [
+  { value: 'NAME', label: 'Nome' },
+  { value: 'DATE', label: 'Data' },
+  { value: 'HEIGHT', label: 'Altura' },
+  { value: 'WEIGHT', label: 'Peso' },
+  { value: 'CITY_OR_TEAM', label: 'Cidade ou time' }
+]
+
 const STICKERS_PER_SHEET = 16
 
 function useAdminToken() {
@@ -142,10 +175,36 @@ function customBasePathForProfile(config, profile) {
   return config[customBaseFieldByProfile[profile]] || ''
 }
 
+function createEmptyCustomTemplateForm() {
+  return {
+    name: '',
+    profile_type: 'HOMEM',
+    category_type: 'JOGADOR',
+    position_type: 'ATACANTE',
+    composition_mode: 'LAYERS',
+    sort_order: '0',
+    is_active: true,
+    layers: [],
+    photo_slot: {
+      x: '0.12',
+      y: '0.08',
+      width: '0.76',
+      height: '0.62',
+      default_scale: '1',
+      min_scale: '0.7',
+      max_scale: '1.5',
+      anchor_x: '0.5',
+      anchor_y: '0.5'
+    },
+    text_slots: []
+  }
+}
+
 function serviceConfigToForm(data) {
   return {
     service_enabled: data.service_enabled,
     donation_enabled: data.donation_enabled,
+    custom_generation_mode: data.custom_generation_mode || 'LAYERS',
     custom_sticker_unlock_enabled: data.custom_sticker_unlock_enabled,
     custom_sticker_unlock_price: moneyInputFromCents(data.custom_sticker_unlock_price_cents),
     custom_sticker_unlock_message: data.custom_sticker_unlock_message || '',
@@ -2025,6 +2084,7 @@ function AdminPage() {
   const [serviceForm, setServiceForm] = useState({
     service_enabled: false,
     donation_enabled: false,
+    custom_generation_mode: 'LAYERS',
     custom_sticker_unlock_enabled: false,
     custom_sticker_unlock_price: '5.00',
     custom_sticker_unlock_message: '',
@@ -2042,6 +2102,10 @@ function AdminPage() {
     custom_base_menina_path: ''
   })
   const [savingService, setSavingService] = useState(false)
+  const [customTemplates, setCustomTemplates] = useState([])
+  const [selectedCustomTemplateId, setSelectedCustomTemplateId] = useState(null)
+  const [customTemplateForm, setCustomTemplateForm] = useState(createEmptyCustomTemplateForm)
+  const [savingCustomTemplate, setSavingCustomTemplate] = useState(false)
   const [uploadingBaseProfile, setUploadingBaseProfile] = useState('')
   const [deletingBaseProfile, setDeletingBaseProfile] = useState('')
   const [orders, setOrders] = useState([])
@@ -2117,6 +2181,19 @@ function AdminPage() {
     setServiceForm(serviceConfigToForm(data))
   }
 
+  async function fetchCustomTemplates(activeTemplateId = selectedCustomTemplateId) {
+    if (!token) return
+    const data = await apiFetch('/admin/custom-templates', {
+      headers: buildAdminHeaders(token)
+    })
+    setCustomTemplates(data)
+    const nextId = activeTemplateId || data[0]?.id || null
+    setSelectedCustomTemplateId(nextId)
+    if (!nextId) {
+      setCustomTemplateForm(createEmptyCustomTemplateForm())
+    }
+  }
+
   async function fetchOrders(activeOrderId = selectedOrderId) {
     if (!token) return
     const data = await apiFetch('/admin/orders', {
@@ -2132,7 +2209,7 @@ function AdminPage() {
     async function bootstrap() {
       setError('')
       try {
-        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchOrders()])
+        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchCustomTemplates(), fetchOrders()])
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -2144,6 +2221,73 @@ function AdminPage() {
       ignore = true
     }
   }, [token])
+
+  useEffect(() => {
+    if (!token || !selectedCustomTemplateId) {
+      if (!selectedCustomTemplateId) {
+        setCustomTemplateForm(createEmptyCustomTemplateForm())
+      }
+      return
+    }
+    let ignore = false
+    async function fetchTemplateDetail() {
+      try {
+        const data = await apiFetch(`/admin/custom-templates/${selectedCustomTemplateId}`, {
+          headers: buildAdminHeaders(token)
+        })
+        if (ignore) return
+        setCustomTemplateForm({
+          name: data.name || '',
+          profile_type: data.profile_type || 'HOMEM',
+          category_type: data.category_type || 'JOGADOR',
+          position_type: data.position_type || 'ATACANTE',
+          composition_mode: data.composition_mode || 'LAYERS',
+          sort_order: String(data.sort_order ?? 0),
+          is_active: Boolean(data.is_active),
+          layers: (data.layers || []).map(layer => ({
+            id: layer.id,
+            layer_type: layer.layer_type,
+            label: layer.label || '',
+            file_path: layer.file_path || '',
+            z_index: String(layer.z_index ?? 0),
+            is_active: Boolean(layer.is_active)
+          })),
+          photo_slot: data.photo_slot
+            ? {
+                x: String(data.photo_slot.x ?? 0),
+                y: String(data.photo_slot.y ?? 0),
+                width: String(data.photo_slot.width ?? 1),
+                height: String(data.photo_slot.height ?? 1),
+                default_scale: String(data.photo_slot.default_scale ?? 1),
+                min_scale: String(data.photo_slot.min_scale ?? 0.7),
+                max_scale: String(data.photo_slot.max_scale ?? 1.5),
+                anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
+                anchor_y: String(data.photo_slot.anchor_y ?? 0.5)
+              }
+            : null,
+          text_slots: (data.text_slots || []).map(slot => ({
+            id: slot.id,
+            field_name: slot.field_name,
+            x: String(slot.x ?? 0),
+            y: String(slot.y ?? 0),
+            width: String(slot.width ?? 0),
+            font_size: String(slot.font_size ?? 12),
+            font_weight: slot.font_weight || '',
+            text_align: slot.text_align || '',
+            color: slot.color || ''
+          }))
+        })
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      }
+    }
+    fetchTemplateDetail()
+    return () => {
+      ignore = true
+    }
+  }, [token, selectedCustomTemplateId])
 
   useEffect(() => {
     if (!token || !selectedCollectionId) {
@@ -2380,6 +2524,114 @@ function AdminPage() {
     setSelectedCollectionForm(current => ({ ...current, slug: buildSlug(current.name) }))
   }
 
+  function handleStartNewCustomTemplate() {
+    const nextOrder =
+      customTemplates.reduce((maxValue, template) => Math.max(maxValue, Number(template.sort_order || 0)), 0) + 1
+    setSelectedCustomTemplateId(null)
+    setCustomTemplateForm({
+      ...createEmptyCustomTemplateForm(),
+      sort_order: String(nextOrder)
+    })
+  }
+
+  function addCustomTemplateLayer() {
+    setCustomTemplateForm(current => ({
+      ...current,
+      layers: [
+        ...current.layers,
+        {
+          layer_type: 'BACKGROUND',
+          label: '',
+          file_path: '',
+          z_index: String(current.layers.length),
+          is_active: true
+        }
+      ]
+    }))
+  }
+
+  function addCustomTemplateTextSlot() {
+    setCustomTemplateForm(current => ({
+      ...current,
+      text_slots: [
+        ...current.text_slots,
+        {
+          field_name: 'NAME',
+          x: '0',
+          y: '0',
+          width: '0',
+          font_size: '12',
+          font_weight: '',
+          text_align: '',
+          color: ''
+        }
+      ]
+    }))
+  }
+
+  async function handleSaveCustomTemplate(event) {
+    event.preventDefault()
+    setSavingCustomTemplate(true)
+    setError('')
+    setMessage('')
+    try {
+      const payload = {
+        name: customTemplateForm.name,
+        profile_type: customTemplateForm.profile_type,
+        category_type: customTemplateForm.category_type,
+        position_type: customTemplateForm.position_type,
+        composition_mode: customTemplateForm.composition_mode,
+        sort_order: Number(customTemplateForm.sort_order || 0),
+        is_active: customTemplateForm.is_active,
+        layers: customTemplateForm.layers.map(layer => ({
+          layer_type: layer.layer_type,
+          label: layer.label,
+          file_path: layer.file_path || null,
+          z_index: Number(layer.z_index || 0),
+          is_active: layer.is_active
+        })),
+        photo_slot: customTemplateForm.photo_slot
+          ? {
+              x: Number(customTemplateForm.photo_slot.x || 0),
+              y: Number(customTemplateForm.photo_slot.y || 0),
+              width: Number(customTemplateForm.photo_slot.width || 0),
+              height: Number(customTemplateForm.photo_slot.height || 0),
+              default_scale: Number(customTemplateForm.photo_slot.default_scale || 1),
+              min_scale: Number(customTemplateForm.photo_slot.min_scale || 0.7),
+              max_scale: Number(customTemplateForm.photo_slot.max_scale || 1.5),
+              anchor_x: Number(customTemplateForm.photo_slot.anchor_x || 0.5),
+              anchor_y: Number(customTemplateForm.photo_slot.anchor_y || 0.5)
+            }
+          : null,
+        text_slots: customTemplateForm.text_slots.map(slot => ({
+          field_name: slot.field_name,
+          x: Number(slot.x || 0),
+          y: Number(slot.y || 0),
+          width: Number(slot.width || 0),
+          font_size: Number(slot.font_size || 12),
+          font_weight: slot.font_weight || null,
+          text_align: slot.text_align || null,
+          color: slot.color || null
+        }))
+      }
+      const data = await apiFetch(
+        selectedCustomTemplateId ? `/admin/custom-templates/${selectedCustomTemplateId}` : '/admin/custom-templates',
+        {
+          method: selectedCustomTemplateId ? 'PUT' : 'POST',
+          headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload)
+        }
+      )
+      setMessage(selectedCustomTemplateId ? 'Template atualizado.' : 'Template criado.')
+      await fetchCustomTemplates(data.id)
+      setSelectedCustomTemplateId(data.id)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingCustomTemplate(false)
+    }
+  }
+
   function resetStickerForm() {
     setEditingStickerId(null)
     setStickerForm({
@@ -2598,6 +2850,7 @@ function AdminPage() {
         body: JSON.stringify({
           service_enabled: serviceForm.service_enabled,
           donation_enabled: serviceForm.donation_enabled,
+          custom_generation_mode: serviceForm.custom_generation_mode,
           custom_sticker_unlock_enabled: serviceForm.custom_sticker_unlock_enabled,
           custom_sticker_unlock_price_cents: centsFromInput(serviceForm.custom_sticker_unlock_price),
           custom_sticker_unlock_message: serviceForm.custom_sticker_unlock_message,
@@ -3474,6 +3727,19 @@ function AdminPage() {
               </label>
 
               <div className="fig-form-grid">
+                <label className="fig-field">
+                  <span>Modo padrao da Minha Figurinha</span>
+                  <select
+                    value={serviceForm.custom_generation_mode}
+                    onChange={event => setServiceForm(current => ({ ...current, custom_generation_mode: event.target.value }))}
+                  >
+                    {customGenerationModeOptions.map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 <label className="fig-field fig-field--full">
                   <span>Mensagem do modal de apoio</span>
                   <textarea
@@ -3625,6 +3891,377 @@ function AdminPage() {
                   </article>
                 )
               })}
+            </div>
+          </section>
+
+          <section className="fig-form-card">
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Minha Figurinha</p>
+              <h3>Templates por perfil e posicao</h3>
+            </div>
+            <p className="fig-empty-note">
+              Aqui nasce a base da composicao por camadas. Nesta primeira fase voce ja consegue cadastrar a combinacao
+              de perfil, categoria, posicao, camadas, encaixe da foto e slots de texto.
+            </p>
+
+            <div className="fig-order-layout">
+              <div className="fig-order-list">
+                <button type="button" className="fig-order-list-item" onClick={handleStartNewCustomTemplate}>
+                  <strong>Novo template</strong>
+                  <span>Comece uma nova combinacao</span>
+                </button>
+                {customTemplates.map(template => (
+                  <button
+                    key={template.id}
+                    type="button"
+                    className={`fig-order-list-item${template.id === selectedCustomTemplateId ? ' is-active' : ''}`}
+                    onClick={() => setSelectedCustomTemplateId(template.id)}
+                  >
+                    <strong>{template.name}</strong>
+                    <span>
+                      {customProfileLabel(template.profile_type)} ·{' '}
+                      {customPositionTypeOptions.find(option => option.value === template.position_type)?.label || template.position_type}
+                    </span>
+                    <span>
+                      {template.is_active ? 'Ativo' : 'Inativo'} · {template.layer_count} camada(s)
+                    </span>
+                  </button>
+                ))}
+                {customTemplates.length === 0 ? (
+                  <p className="fig-empty-note">Nenhum template cadastrado ainda.</p>
+                ) : null}
+              </div>
+
+              <form className="fig-order-detail" onSubmit={handleSaveCustomTemplate}>
+                <div className="fig-form-grid">
+                  <label className="fig-field">
+                    <span>Nome interno</span>
+                    <input
+                      value={customTemplateForm.name}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, name: event.target.value }))}
+                      placeholder="Homem · Jogador · Atacante"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Perfil</span>
+                    <select
+                      value={customTemplateForm.profile_type}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, profile_type: event.target.value }))}
+                    >
+                      {customProfileOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fig-field">
+                    <span>Categoria</span>
+                    <select
+                      value={customTemplateForm.category_type}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, category_type: event.target.value }))}
+                    >
+                      {customCategoryTypeOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fig-field">
+                    <span>Posicao</span>
+                    <select
+                      value={customTemplateForm.position_type}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, position_type: event.target.value }))}
+                    >
+                      {customPositionTypeOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fig-field">
+                    <span>Modo</span>
+                    <select
+                      value={customTemplateForm.composition_mode}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, composition_mode: event.target.value }))}
+                    >
+                      {customGenerationModeOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fig-field">
+                    <span>Ordem</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={customTemplateForm.sort_order}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, sort_order: event.target.value }))}
+                    />
+                  </label>
+                  <label className="fig-checkbox fig-field--full">
+                    <input
+                      type="checkbox"
+                      checked={customTemplateForm.is_active}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, is_active: event.target.checked }))}
+                    />
+                    <span>Template ativo para o catalogo</span>
+                  </label>
+                </div>
+
+                <div className="fig-panel-header fig-panel-header--compact">
+                  <p className="fig-kicker">Camadas</p>
+                  <h3>Pilha visual</h3>
+                </div>
+                <div className="fig-admin-stack">
+                  {customTemplateForm.layers.map((layer, index) => (
+                    <div key={`${layer.id || 'new'}-${index}`} className="fig-helper-strip fig-helper-strip--card">
+                      <div className="fig-form-grid">
+                        <label className="fig-field">
+                          <span>Tipo</span>
+                          <select
+                            value={layer.layer_type}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                layers: current.layers.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, layer_type: event.target.value } : item
+                                )
+                              }))
+                            }
+                          >
+                            {customTemplateLayerTypeOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label className="fig-field">
+                          <span>Label</span>
+                          <input
+                            value={layer.label}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                layers: current.layers.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, label: event.target.value } : item
+                                )
+                              }))
+                            }
+                          />
+                        </label>
+                        <label className="fig-field">
+                          <span>Arquivo</span>
+                          <input
+                            value={layer.file_path}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                layers: current.layers.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, file_path: event.target.value } : item
+                                )
+                              }))
+                            }
+                            placeholder="storage/.../camada.png"
+                          />
+                        </label>
+                        <label className="fig-field">
+                          <span>Ordem Z</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={layer.z_index}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                layers: current.layers.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, z_index: event.target.value } : item
+                                )
+                              }))
+                            }
+                          />
+                        </label>
+                        <label className="fig-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={layer.is_active}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                layers: current.layers.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, is_active: event.target.checked } : item
+                                )
+                              }))
+                            }
+                          />
+                          <span>Ativa</span>
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                  <button type="button" className="fig-secondary-button" onClick={addCustomTemplateLayer}>
+                    Adicionar camada
+                  </button>
+                </div>
+
+                <div className="fig-panel-header fig-panel-header--compact">
+                  <p className="fig-kicker">Foto</p>
+                  <h3>Area segura da pessoa</h3>
+                </div>
+                <div className="fig-form-grid">
+                  {customTemplateForm.photo_slot ? (
+                    <>
+                      {[
+                        ['x', 'X'],
+                        ['y', 'Y'],
+                        ['width', 'Largura'],
+                        ['height', 'Altura'],
+                        ['default_scale', 'Escala padrao'],
+                        ['min_scale', 'Escala minima'],
+                        ['max_scale', 'Escala maxima'],
+                        ['anchor_x', 'Ancora X'],
+                        ['anchor_y', 'Ancora Y']
+                      ].map(([field, label]) => (
+                        <label key={field} className="fig-field">
+                          <span>{label}</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={customTemplateForm.photo_slot[field]}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                photo_slot: {
+                                  ...current.photo_slot,
+                                  [field]: event.target.value
+                                }
+                              }))
+                            }
+                          />
+                        </label>
+                      ))}
+                    </>
+                  ) : null}
+                </div>
+
+                <div className="fig-panel-header fig-panel-header--compact">
+                  <p className="fig-kicker">Textos</p>
+                  <h3>Slots variaveis</h3>
+                </div>
+                <div className="fig-admin-stack">
+                  {customTemplateForm.text_slots.map((slot, index) => (
+                    <div key={`${slot.id || 'new'}-${index}`} className="fig-helper-strip fig-helper-strip--card">
+                      <div className="fig-form-grid">
+                        <label className="fig-field">
+                          <span>Campo</span>
+                          <select
+                            value={slot.field_name}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                text_slots: current.text_slots.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, field_name: event.target.value } : item
+                                )
+                              }))
+                            }
+                          >
+                            {customTemplateTextFieldOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        {[
+                          ['x', 'X'],
+                          ['y', 'Y'],
+                          ['width', 'Largura'],
+                          ['font_size', 'Fonte']
+                        ].map(([field, label]) => (
+                          <label key={field} className="fig-field">
+                            <span>{label}</span>
+                            <input
+                              type="number"
+                              step="0.01"
+                              value={slot[field]}
+                              onChange={event =>
+                                setCustomTemplateForm(current => ({
+                                  ...current,
+                                  text_slots: current.text_slots.map((item, itemIndex) =>
+                                    itemIndex === index ? { ...item, [field]: event.target.value } : item
+                                  )
+                                }))
+                              }
+                            />
+                          </label>
+                        ))}
+                        <label className="fig-field">
+                          <span>Peso</span>
+                          <input
+                            value={slot.font_weight}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                text_slots: current.text_slots.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, font_weight: event.target.value } : item
+                                )
+                              }))
+                            }
+                            placeholder="700"
+                          />
+                        </label>
+                        <label className="fig-field">
+                          <span>Alinhamento</span>
+                          <input
+                            value={slot.text_align}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                text_slots: current.text_slots.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, text_align: event.target.value } : item
+                                )
+                              }))
+                            }
+                            placeholder="left / center"
+                          />
+                        </label>
+                        <label className="fig-field">
+                          <span>Cor</span>
+                          <input
+                            value={slot.color}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                text_slots: current.text_slots.map((item, itemIndex) =>
+                                  itemIndex === index ? { ...item, color: event.target.value } : item
+                                )
+                              }))
+                            }
+                            placeholder="#ffffff"
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
+                  <button type="button" className="fig-secondary-button" onClick={addCustomTemplateTextSlot}>
+                    Adicionar slot de texto
+                  </button>
+                </div>
+
+                <div className="fig-hero-actions">
+                  <button type="button" className="fig-secondary-button" onClick={handleStartNewCustomTemplate}>
+                    Novo template
+                  </button>
+                  <button type="submit" className="fig-primary-button" disabled={savingCustomTemplate}>
+                    {savingCustomTemplate ? 'Salvando...' : selectedCustomTemplateId ? 'Salvar template' : 'Criar template'}
+                  </button>
+                </div>
+              </form>
             </div>
           </section>
 

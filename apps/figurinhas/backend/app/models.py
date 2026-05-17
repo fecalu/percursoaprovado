@@ -51,6 +51,39 @@ class CustomProfileType(str, enum.Enum):
     MENINA = "MENINA"
 
 
+class CustomCategoryType(str, enum.Enum):
+    JOGADOR = "JOGADOR"
+
+
+class CustomPositionType(str, enum.Enum):
+    ATACANTE = "ATACANTE"
+    MEIA = "MEIA"
+    ZAGUEIRO = "ZAGUEIRO"
+    GOLEIRO = "GOLEIRO"
+
+
+class CustomTemplateCompositionMode(str, enum.Enum):
+    LAYERS = "LAYERS"
+    AI_OPTIONAL = "AI_OPTIONAL"
+
+
+class CustomTemplateLayerType(str, enum.Enum):
+    BACKGROUND = "BACKGROUND"
+    FRAME = "FRAME"
+    PHOTO_FRONT = "PHOTO_FRONT"
+    INFO_PANEL = "INFO_PANEL"
+    OVERLAY = "OVERLAY"
+    SHINE = "SHINE"
+
+
+class CustomTemplateTextField(str, enum.Enum):
+    NAME = "NAME"
+    DATE = "DATE"
+    HEIGHT = "HEIGHT"
+    WEIGHT = "WEIGHT"
+    CITY_OR_TEAM = "CITY_OR_TEAM"
+
+
 class CustomStickerUnlockStatus(str, enum.Enum):
     PENDENTE = "PENDENTE"
     PAGO = "PAGO"
@@ -139,14 +172,25 @@ class Sticker(Base):
     source_type: Mapped[StickerSourceType] = mapped_column(
         Enum(StickerSourceType), default=StickerSourceType.PDF, nullable=False
     )
+    template_id: Mapped[int | None] = mapped_column(
+        ForeignKey("figurinhas_custom_sticker_templates.id"), nullable=True, index=True
+    )
     session_token: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
     profile_type: Mapped[CustomProfileType | None] = mapped_column(Enum(CustomProfileType), nullable=True)
+    custom_category_type: Mapped[CustomCategoryType | None] = mapped_column(Enum(CustomCategoryType), nullable=True)
+    custom_position_type: Mapped[CustomPositionType | None] = mapped_column(Enum(CustomPositionType), nullable=True)
+    composition_mode_used: Mapped[CustomTemplateCompositionMode | None] = mapped_column(
+        Enum(CustomTemplateCompositionMode), nullable=True
+    )
     birth_date_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
     height_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
     weight_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
     city_or_team: Mapped[str | None] = mapped_column(String(150), nullable=True)
     uploaded_photo_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     generated_portrait_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    photo_offset_x: Mapped[float | None] = mapped_column(Float, nullable=True)
+    photo_offset_y: Mapped[float | None] = mapped_column(Float, nullable=True)
+    photo_scale: Mapped[float | None] = mapped_column(Float, nullable=True)
     export_width_pt: Mapped[float | None] = mapped_column(Float, nullable=True)
     export_height_pt: Mapped[float | None] = mapped_column(Float, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -169,6 +213,106 @@ class Sticker(Base):
 
     collection: Mapped[Collection] = relationship(back_populates="stickers")
     page: Mapped[Page] = relationship(back_populates="stickers")
+    template: Mapped["CustomStickerTemplate | None"] = relationship(back_populates="generated_stickers")
+
+
+class CustomStickerTemplate(Base):
+    __tablename__ = "figurinhas_custom_sticker_templates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    profile_type: Mapped[CustomProfileType] = mapped_column(Enum(CustomProfileType), nullable=False, index=True)
+    category_type: Mapped[CustomCategoryType] = mapped_column(
+        Enum(CustomCategoryType), default=CustomCategoryType.JOGADOR, nullable=False, index=True
+    )
+    position_type: Mapped[CustomPositionType] = mapped_column(Enum(CustomPositionType), nullable=False, index=True)
+    composition_mode: Mapped[CustomTemplateCompositionMode] = mapped_column(
+        Enum(CustomTemplateCompositionMode), default=CustomTemplateCompositionMode.LAYERS, nullable=False
+    )
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    layers: Mapped[list["CustomStickerTemplateLayer"]] = relationship(
+        back_populates="template", cascade="all, delete-orphan", order_by="CustomStickerTemplateLayer.z_index.asc()"
+    )
+    photo_slot: Mapped["CustomStickerTemplatePhotoSlot | None"] = relationship(
+        back_populates="template", cascade="all, delete-orphan", uselist=False
+    )
+    text_slots: Mapped[list["CustomStickerTemplateTextSlot"]] = relationship(
+        back_populates="template", cascade="all, delete-orphan", order_by="CustomStickerTemplateTextSlot.id.asc()"
+    )
+    generated_stickers: Mapped[list["Sticker"]] = relationship(back_populates="template")
+
+
+class CustomStickerTemplateLayer(Base):
+    __tablename__ = "figurinhas_custom_sticker_template_layers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    template_id: Mapped[int] = mapped_column(
+        ForeignKey("figurinhas_custom_sticker_templates.id"), nullable=False, index=True
+    )
+    layer_type: Mapped[CustomTemplateLayerType] = mapped_column(Enum(CustomTemplateLayerType), nullable=False)
+    label: Mapped[str] = mapped_column(String(120), nullable=False)
+    file_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    z_index: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    template: Mapped[CustomStickerTemplate] = relationship(back_populates="layers")
+
+
+class CustomStickerTemplatePhotoSlot(Base):
+    __tablename__ = "figurinhas_custom_sticker_template_photo_slots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    template_id: Mapped[int] = mapped_column(
+        ForeignKey("figurinhas_custom_sticker_templates.id"), nullable=False, unique=True, index=True
+    )
+    x: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    y: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    width: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    height: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    default_scale: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    min_scale: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
+    max_scale: Mapped[float] = mapped_column(Float, default=1.5, nullable=False)
+    anchor_x: Mapped[float] = mapped_column(Float, default=0.5, nullable=False)
+    anchor_y: Mapped[float] = mapped_column(Float, default=0.5, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    template: Mapped[CustomStickerTemplate] = relationship(back_populates="photo_slot")
+
+
+class CustomStickerTemplateTextSlot(Base):
+    __tablename__ = "figurinhas_custom_sticker_template_text_slots"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    template_id: Mapped[int] = mapped_column(
+        ForeignKey("figurinhas_custom_sticker_templates.id"), nullable=False, index=True
+    )
+    field_name: Mapped[CustomTemplateTextField] = mapped_column(Enum(CustomTemplateTextField), nullable=False)
+    x: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    y: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    width: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    font_size: Mapped[float] = mapped_column(Float, default=12.0, nullable=False)
+    font_weight: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    text_align: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    color: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    template: Mapped[CustomStickerTemplate] = relationship(back_populates="text_slots")
 
 
 class Export(Base):
@@ -201,6 +345,9 @@ class ServiceSettings(Base):
     custom_base_mulher_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     custom_base_menino_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
     custom_base_menina_path: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    custom_generation_mode: Mapped[CustomTemplateCompositionMode] = mapped_column(
+        Enum(CustomTemplateCompositionMode), default=CustomTemplateCompositionMode.LAYERS, nullable=False
+    )
     custom_sticker_unlock_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     custom_sticker_unlock_price_cents: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
     custom_sticker_unlock_message: Mapped[str | None] = mapped_column(Text, nullable=True)

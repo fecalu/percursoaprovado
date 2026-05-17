@@ -17,6 +17,10 @@ from .models import (
     Album,
     Collection,
     CollectionStatus,
+    CustomStickerTemplate,
+    CustomStickerTemplateLayer,
+    CustomStickerTemplatePhotoSlot,
+    CustomStickerTemplateTextSlot,
     CustomProfileType,
     CustomStickerUnlock,
     CustomStickerUnlockStatus,
@@ -37,6 +41,10 @@ from .schemas import (
     CollectionCreate,
     CollectionResponse,
     CollectionUpdate,
+    CustomTemplateCreate,
+    CustomTemplateDetailResponse,
+    CustomTemplateSummaryResponse,
+    CustomTemplateUpdate,
     CustomStickerUnlockRequest,
     CustomStickerUnlockResponse,
     OrderQuoteRequest,
@@ -64,6 +72,8 @@ from .services import (
     collection_stats,
     collection_sort_key,
     collection_to_response,
+    custom_template_to_detail_response,
+    custom_template_to_summary_response,
     custom_sticker_unlock_to_response,
     create_print_order,
     crop_sticker_image,
@@ -139,6 +149,13 @@ def ensure_runtime_schema() -> None:
             "height_text": "VARCHAR(40)",
             "weight_text": "VARCHAR(40)",
             "city_or_team": "VARCHAR(150)",
+            "template_id": "INTEGER",
+            "custom_category_type": "VARCHAR(20)",
+            "custom_position_type": "VARCHAR(20)",
+            "composition_mode_used": "VARCHAR(20)",
+            "photo_offset_x": "FLOAT",
+            "photo_offset_y": "FLOAT",
+            "photo_scale": "FLOAT",
             "uploaded_photo_path": "VARCHAR(255)",
             "generated_portrait_path": "VARCHAR(255)",
             "export_width_pt": "FLOAT",
@@ -219,6 +236,10 @@ def ensure_runtime_schema() -> None:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_base_menina_path VARCHAR(255)"
                 )
+            if "custom_generation_mode" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_generation_mode VARCHAR(20) NOT NULL DEFAULT 'LAYERS'"
+                )
             if "custom_sticker_unlock_enabled" not in service_columns:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_sticker_unlock_enabled BOOLEAN NOT NULL DEFAULT 0"
@@ -270,6 +291,73 @@ def startup() -> None:
 def require_admin(x_admin_token: str | None = Header(default=None, alias="X-Admin-Token")) -> None:
     if x_admin_token != settings.admin_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token administrativo invalido.")
+
+
+def load_custom_template_or_404(db: Session, template_id: int) -> CustomStickerTemplate:
+    template = db.execute(
+        select(CustomStickerTemplate)
+        .options(
+            selectinload(CustomStickerTemplate.layers),
+            selectinload(CustomStickerTemplate.photo_slot),
+            selectinload(CustomStickerTemplate.text_slots),
+        )
+        .where(CustomStickerTemplate.id == template_id)
+    ).scalar_one_or_none()
+    if not template:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template da Minha Figurinha nao encontrado.")
+    return template
+
+
+def apply_custom_template_payload(template: CustomStickerTemplate, payload: CustomTemplateCreate | CustomTemplateUpdate) -> None:
+    template.name = payload.name.strip()
+    template.profile_type = payload.profile_type
+    template.category_type = payload.category_type
+    template.position_type = payload.position_type
+    template.composition_mode = payload.composition_mode
+    template.sort_order = payload.sort_order
+    template.is_active = payload.is_active
+
+    template.layers.clear()
+    for layer in payload.layers:
+        template.layers.append(
+            CustomStickerTemplateLayer(
+                layer_type=layer.layer_type,
+                label=layer.label.strip(),
+                file_path=(layer.file_path or "").strip() or None,
+                z_index=layer.z_index,
+                is_active=layer.is_active,
+            )
+        )
+
+    if payload.photo_slot is None:
+        template.photo_slot = None
+    else:
+        template.photo_slot = CustomStickerTemplatePhotoSlot(
+            x=payload.photo_slot.x,
+            y=payload.photo_slot.y,
+            width=payload.photo_slot.width,
+            height=payload.photo_slot.height,
+            default_scale=payload.photo_slot.default_scale,
+            min_scale=payload.photo_slot.min_scale,
+            max_scale=payload.photo_slot.max_scale,
+            anchor_x=payload.photo_slot.anchor_x,
+            anchor_y=payload.photo_slot.anchor_y,
+        )
+
+    template.text_slots.clear()
+    for slot in payload.text_slots:
+        template.text_slots.append(
+            CustomStickerTemplateTextSlot(
+                field_name=slot.field_name,
+                x=slot.x,
+                y=slot.y,
+                width=slot.width,
+                font_size=slot.font_size,
+                font_weight=(slot.font_weight or "").strip() or None,
+                text_align=(slot.text_align or "").strip() or None,
+                color=(slot.color or "").strip() or None,
+            )
+        )
 
 
 def selected_stickers_for_album_or_400(
@@ -645,6 +733,66 @@ def list_admin_albums(db: Session = Depends(get_db)) -> list[dict]:
     ]
 
 
+@app.get(
+    "/admin/custom-templates",
+    response_model=list[CustomTemplateSummaryResponse],
+    dependencies=[Depends(require_admin)],
+)
+def list_admin_custom_templates(db: Session = Depends(get_db)) -> list[dict]:
+    templates = db.execute(
+        select(CustomStickerTemplate)
+        .options(
+            selectinload(CustomStickerTemplate.layers),
+            selectinload(CustomStickerTemplate.photo_slot),
+            selectinload(CustomStickerTemplate.text_slots),
+        )
+        .order_by(
+            CustomStickerTemplate.sort_order.asc(),
+            CustomStickerTemplate.profile_type.asc(),
+            CustomStickerTemplate.position_type.asc(),
+            CustomStickerTemplate.id.asc(),
+        )
+    ).scalars().all()
+    return [custom_template_to_summary_response(template) for template in templates]
+
+
+@app.post(
+    "/admin/custom-templates",
+    response_model=CustomTemplateDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+def create_admin_custom_template(payload: CustomTemplateCreate, db: Session = Depends(get_db)) -> dict:
+    template = CustomStickerTemplate()
+    apply_custom_template_payload(template, payload)
+    db.add(template)
+    db.commit()
+    template = load_custom_template_or_404(db, template.id)
+    return custom_template_to_detail_response(template)
+
+
+@app.get(
+    "/admin/custom-templates/{template_id}",
+    response_model=CustomTemplateDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+def get_admin_custom_template(template_id: int, db: Session = Depends(get_db)) -> dict:
+    template = load_custom_template_or_404(db, template_id)
+    return custom_template_to_detail_response(template)
+
+
+@app.put(
+    "/admin/custom-templates/{template_id}",
+    response_model=CustomTemplateDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+def update_admin_custom_template(template_id: int, payload: CustomTemplateUpdate, db: Session = Depends(get_db)) -> dict:
+    template = load_custom_template_or_404(db, template_id)
+    apply_custom_template_payload(template, payload)
+    db.commit()
+    template = load_custom_template_or_404(db, template_id)
+    return custom_template_to_detail_response(template)
+
+
 @app.get("/admin/service-config", response_model=ServiceConfigResponse, dependencies=[Depends(require_admin)])
 def get_admin_service_config(db: Session = Depends(get_db)) -> dict:
     service_settings = get_or_create_service_settings(db)
@@ -656,6 +804,7 @@ def update_admin_service_config(payload: ServiceConfigUpdate, db: Session = Depe
     service_settings = get_or_create_service_settings(db)
     service_settings.service_enabled = payload.service_enabled
     service_settings.donation_enabled = payload.donation_enabled
+    service_settings.custom_generation_mode = payload.custom_generation_mode
     service_settings.custom_sticker_unlock_enabled = payload.custom_sticker_unlock_enabled
     service_settings.custom_sticker_unlock_price_cents = payload.custom_sticker_unlock_price_cents
     service_settings.custom_sticker_unlock_message = (payload.custom_sticker_unlock_message or "").strip() or None
