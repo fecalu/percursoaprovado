@@ -64,6 +64,9 @@ def generate_custom_sticker_render(
     city_or_team: str | None,
     target_width_px: int,
     target_height_px: int,
+    photo_offset_x: float | None = None,
+    photo_offset_y: float | None = None,
+    photo_scale: float | None = None,
 ) -> CustomStickerRender:
     uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
     base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
@@ -108,6 +111,9 @@ def generate_custom_sticker_render(
             city_or_team=city_or_team,
             width_px=target_width_px,
             height_px=target_height_px,
+            photo_offset_x=photo_offset_x,
+            photo_offset_y=photo_offset_y,
+            photo_scale=photo_scale,
         )
     elif openai_sticker_image is not None:
         final_image = _resize_to_exact(openai_sticker_image, (target_width_px, target_height_px))
@@ -668,6 +674,9 @@ def _compose_sticker_card_from_layers(
     city_or_team: str | None,
     width_px: int,
     height_px: int,
+    photo_offset_x: float | None = None,
+    photo_offset_y: float | None = None,
+    photo_scale: float | None = None,
 ) -> Image.Image:
     canvas = Image.new("RGBA", (width_px, height_px), (0, 0, 0, 0))
     sorted_layers = sorted(template_layers, key=lambda item: int(item.get("z_index", 0)))
@@ -685,6 +694,9 @@ def _compose_sticker_card_from_layers(
         photo_slot=photo_slot,
         width_px=width_px,
         height_px=height_px,
+        photo_offset_x=photo_offset_x,
+        photo_offset_y=photo_offset_y,
+        photo_scale=photo_scale,
     )
 
     for layer in front_layers:
@@ -776,18 +788,27 @@ def _paste_portrait_into_slot(
     photo_slot: dict,
     width_px: int,
     height_px: int,
+    photo_offset_x: float | None = None,
+    photo_offset_y: float | None = None,
+    photo_scale: float | None = None,
 ) -> None:
     slot_x = int(float(photo_slot.get("x", 0)) * width_px)
     slot_y = int(float(photo_slot.get("y", 0)) * height_px)
     slot_width = max(1, int(float(photo_slot.get("width", 1)) * width_px))
     slot_height = max(1, int(float(photo_slot.get("height", 1)) * height_px))
-    scale = float(photo_slot.get("default_scale", 1))
+    base_scale = float(photo_slot.get("default_scale", 1))
+    min_scale = float(photo_slot.get("min_scale", 0.1))
+    max_scale = float(photo_slot.get("max_scale", 8))
+    requested_scale = float(photo_scale if photo_scale is not None else base_scale)
+    scale = max(min_scale, min(max_scale, requested_scale))
     anchor_x = float(photo_slot.get("anchor_x", 0.5))
     anchor_y = float(photo_slot.get("anchor_y", 0.5))
+    offset_x = float(photo_offset_x or 0)
+    offset_y = float(photo_offset_y or 0)
 
     fitted = _fit_contain_rgba(portrait_image, (slot_width, slot_height), scale=scale)
-    paste_x = slot_x + int((slot_width - fitted.width) * anchor_x)
-    paste_y = slot_y + int((slot_height - fitted.height) * anchor_y)
+    paste_x = slot_x + int((slot_width - fitted.width) * anchor_x) + int(round(offset_x * width_px))
+    paste_y = slot_y + int((slot_height - fitted.height) * anchor_y) + int(round(offset_y * height_px))
     canvas.alpha_composite(fitted, (paste_x, paste_y))
 
 

@@ -540,6 +540,9 @@ async def create_or_replace_my_sticker(
     height_text: str | None = Form(default=None, max_length=40),
     weight_text: str | None = Form(default=None, max_length=40),
     city_or_team: str | None = Form(default=None, max_length=150),
+    photo_offset_x: float | None = Form(default=0.0),
+    photo_offset_y: float | None = Form(default=0.0),
+    photo_scale: float | None = Form(default=1.0),
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -573,6 +576,9 @@ async def create_or_replace_my_sticker(
             weight_text=weight_text,
             city_or_team=city_or_team,
             uploaded_photo_bytes=uploaded_photo_bytes,
+            photo_offset_x=photo_offset_x,
+            photo_offset_y=photo_offset_y,
+            photo_scale=photo_scale,
         )
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err

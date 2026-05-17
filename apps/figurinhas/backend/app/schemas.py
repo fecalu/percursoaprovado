@@ -259,6 +259,7 @@ class CustomTemplateSummaryResponse(BaseModel):
     sort_order: int
     is_active: bool
     layer_count: int
+    preview_path: str | None = None
     has_photo_slot: bool
     text_slot_count: int
     created_at: datetime
@@ -272,6 +273,7 @@ class CustomTemplatePublicOption(BaseModel):
     category_type: CustomCategoryType
     position_type: CustomPositionType
     composition_mode: CustomTemplateCompositionMode
+    preview_path: str | None = None
     sort_order: int
 
 
@@ -284,6 +286,7 @@ class CustomTemplateDetailResponse(BaseModel):
     composition_mode: CustomTemplateCompositionMode
     sort_order: int
     is_active: bool
+    preview_path: str | None = None
     created_at: datetime
     updated_at: datetime
     layers: list[CustomTemplateLayerResponse] = Field(default_factory=list)

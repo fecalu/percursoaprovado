@@ -787,6 +787,9 @@ def upsert_generated_sticker(
     weight_text: str | None,
     city_or_team: str | None,
     uploaded_photo_bytes: bytes,
+    photo_offset_x: float | None = None,
+    photo_offset_y: float | None = None,
+    photo_scale: float | None = None,
 ) -> Sticker:
     session_token = session_token.strip()
     if not session_token:
@@ -874,6 +877,9 @@ def upsert_generated_sticker(
         city_or_team=(city_or_team or "").strip() or None,
         target_width_px=width_px,
         target_height_px=height_px,
+        photo_offset_x=photo_offset_x,
+        photo_offset_y=photo_offset_y,
+        photo_scale=photo_scale,
         base_template_path=resolve_template_preview_base_path(
             service_settings,
             template=selected_template,
@@ -920,6 +926,9 @@ def upsert_generated_sticker(
         city_or_team=(city_or_team or "").strip() or None,
         uploaded_photo_path=str(upload_path.relative_to(settings.storage_root).as_posix()),
         generated_portrait_path=str(portrait_path.relative_to(settings.storage_root).as_posix()),
+        photo_offset_x=photo_offset_x,
+        photo_offset_y=photo_offset_y,
+        photo_scale=photo_scale,
         export_width_pt=export_width_pt,
         export_height_pt=export_height_pt,
         sort_order=(current_max_order or 0) + 1,
@@ -1502,6 +1511,7 @@ def custom_template_to_summary_response(template: CustomStickerTemplate) -> dict
         "sort_order": template.sort_order,
         "is_active": template.is_active,
         "layer_count": len(template.layers),
+        "preview_path": custom_template_preview_path(template),
         "has_photo_slot": template.photo_slot is not None,
         "text_slot_count": len(template.text_slots),
         "created_at": template.created_at,
@@ -1519,6 +1529,7 @@ def custom_template_to_detail_response(template: CustomStickerTemplate) -> dict:
         "composition_mode": template.composition_mode,
         "sort_order": template.sort_order,
         "is_active": template.is_active,
+        "preview_path": custom_template_preview_path(template),
         "created_at": template.created_at,
         "updated_at": template.updated_at,
         "layers": [
@@ -1573,6 +1584,7 @@ def custom_template_to_public_option(template: CustomStickerTemplate) -> dict:
         "category_type": template.category_type,
         "position_type": template.position_type,
         "composition_mode": template.composition_mode,
+        "preview_path": custom_template_preview_path(template),
         "sort_order": template.sort_order,
     }
 
@@ -1622,28 +1634,31 @@ def resolve_template_preview_base_path(
     profile_type: CustomProfileType,
 ) -> Path | None:
     if template:
-        template_layers = sorted(
-            [layer for layer in template.layers if layer.is_active and layer.file_path],
-            key=lambda layer: layer.z_index,
-        )
-        for preferred_type in (
-            CustomTemplateLayerType.BACKGROUND,
-            CustomTemplateLayerType.FRAME,
-            CustomTemplateLayerType.OVERLAY,
-            CustomTemplateLayerType.INFO_PANEL,
-            CustomTemplateLayerType.PHOTO_FRONT,
-            CustomTemplateLayerType.SHINE,
-        ):
-            selected = next((layer for layer in template_layers if layer.layer_type == preferred_type), None)
-            if selected:
-                layer_path = settings.storage_root / selected.file_path
-                if layer_path.exists():
-                    return layer_path
-        if template_layers:
-            layer_path = settings.storage_root / template_layers[0].file_path
+        preview_path = custom_template_preview_path(template)
+        if preview_path:
+            layer_path = settings.storage_root / preview_path
             if layer_path.exists():
                 return layer_path
     return get_custom_base_file_path(service_settings, profile_type)
+
+
+def custom_template_preview_path(template: CustomStickerTemplate) -> str | None:
+    template_layers = sorted(
+        [layer for layer in template.layers if layer.is_active and layer.file_path],
+        key=lambda layer: layer.z_index,
+    )
+    for preferred_type in (
+        CustomTemplateLayerType.BACKGROUND,
+        CustomTemplateLayerType.FRAME,
+        CustomTemplateLayerType.OVERLAY,
+        CustomTemplateLayerType.INFO_PANEL,
+        CustomTemplateLayerType.PHOTO_FRONT,
+        CustomTemplateLayerType.SHINE,
+    ):
+        selected = next((layer for layer in template_layers if layer.layer_type == preferred_type), None)
+        if selected:
+            return selected.file_path
+    return template_layers[0].file_path if template_layers else None
 
 
 def custom_sticker_unlock_to_response(unlock: CustomStickerUnlock, service_settings: ServiceSettings | None = None) -> dict:

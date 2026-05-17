@@ -1114,6 +1114,38 @@ a {
   font-size: 0.8rem;
 }
 
+.fig-photo-adjust-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border-radius: 16px;
+  background: rgba(17, 34, 53, 0.04);
+  border: 1px solid rgba(17, 34, 53, 0.06);
+}
+
+.fig-range-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+}
+
+.fig-range-field span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #43556b;
+}
+
+.fig-range-field small {
+  color: #607286;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.fig-range-field input[type='range'] {
+  width: 100%;
+}
+
 .fig-service-notes p {
   margin: 0;
 }
@@ -1560,7 +1592,8 @@ a {
   .fig-order-layout,
   .fig-quote-grid,
   .fig-order-options,
-  .fig-custom-base-grid {
+  .fig-custom-base-grid,
+  .fig-photo-adjust-grid {
     grid-template-columns: 1fr;
   }
 

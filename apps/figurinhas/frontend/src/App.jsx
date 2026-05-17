@@ -186,6 +186,9 @@ function createEmptyMyStickerForm() {
     category_type: 'JOGADOR',
     position_type: 'ATACANTE',
     template_id: '',
+    photo_offset_x: '0',
+    photo_offset_y: '0',
+    photo_scale: '1',
     birth_date_text: '',
     height_text: '',
     weight_text: '',
@@ -423,8 +426,14 @@ function PublicPage() {
     [selectedStickers]
   )
   const currentCustomBasePreview = useMemo(
-    () => customBasePathForProfile(serviceConfig, myStickerForm.profile_type),
-    [serviceConfig, myStickerForm.profile_type]
+    () => {
+      const selectedTemplate =
+        currentTemplateOptions.find(template => String(template.id) === String(myStickerForm.template_id)) ||
+        currentTemplateOptions[0] ||
+        null
+      return selectedTemplate?.preview_path || customBasePathForProfile(serviceConfig, myStickerForm.profile_type)
+    },
+    [currentTemplateOptions, myStickerForm.profile_type, myStickerForm.template_id, serviceConfig]
   )
   const currentTemplateOptions = useMemo(
     () =>
@@ -527,6 +536,9 @@ function PublicPage() {
             category_type: data.custom_category_type || 'JOGADOR',
             position_type: data.custom_position_type || 'ATACANTE',
             template_id: data.template_id ? String(data.template_id) : '',
+            photo_offset_x: String(data.photo_offset_x ?? 0),
+            photo_offset_y: String(data.photo_offset_y ?? 0),
+            photo_scale: String(data.photo_scale ?? 1),
             birth_date_text: data.birth_date_text || '',
             height_text: data.height_text || '',
             weight_text: data.weight_text || '',
@@ -742,6 +754,12 @@ function PublicPage() {
     setMyStickerForm(current => ({
       name: customSticker?.name || current.name || '',
       profile_type: customSticker?.profile_type || current.profile_type || 'HOMEM',
+      category_type: customSticker?.custom_category_type || current.category_type || 'JOGADOR',
+      position_type: customSticker?.custom_position_type || current.position_type || 'ATACANTE',
+      template_id: customSticker?.template_id ? String(customSticker.template_id) : current.template_id || '',
+      photo_offset_x: String(customSticker?.photo_offset_x ?? current.photo_offset_x ?? 0),
+      photo_offset_y: String(customSticker?.photo_offset_y ?? current.photo_offset_y ?? 0),
+      photo_scale: String(customSticker?.photo_scale ?? current.photo_scale ?? 1),
       birth_date_text: customSticker?.birth_date_text || '',
       height_text: customSticker?.height_text || '',
       weight_text: customSticker?.weight_text || '',
@@ -849,6 +867,9 @@ function PublicPage() {
       formData.append('height_text', myStickerForm.height_text)
       formData.append('weight_text', myStickerForm.weight_text)
       formData.append('city_or_team', myStickerForm.city_or_team)
+      formData.append('photo_offset_x', myStickerForm.photo_offset_x || '0')
+      formData.append('photo_offset_y', myStickerForm.photo_offset_y || '0')
+      formData.append('photo_scale', myStickerForm.photo_scale || '1')
       formData.append('photo', myStickerForm.photo)
 
       const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker`, {
@@ -866,6 +887,9 @@ function PublicPage() {
         category_type: data.custom_category_type || 'JOGADOR',
         position_type: data.custom_position_type || 'ATACANTE',
         template_id: data.template_id ? String(data.template_id) : '',
+        photo_offset_x: String(data.photo_offset_x ?? 0),
+        photo_offset_y: String(data.photo_offset_y ?? 0),
+        photo_scale: String(data.photo_scale ?? 1),
         birth_date_text: data.birth_date_text || '',
         height_text: data.height_text || '',
         weight_text: data.weight_text || '',
@@ -1594,9 +1618,9 @@ function PublicPage() {
                       <img src={apiFileUrl(currentCustomBasePreview)} alt={`Base ${customProfileLabel(myStickerForm.profile_type)}`} />
                     </div>
                     <div className="fig-custom-base-inline-copy">
-                      <strong>Base oficial do perfil</strong>
+                      <strong>Modelo da figurinha</strong>
                       <span>
-                        A IA vai seguir esse estilo.
+                        O sistema vai usar esse template para montar sua figurinha.
                       </span>
                     </div>
                   </div>
@@ -1621,6 +1645,47 @@ function PublicPage() {
                     required
                   />
                 </label>
+                <div className="fig-field fig-field--full">
+                  <span>Ajuste da foto</span>
+                  <div className="fig-photo-adjust-grid">
+                    <label className="fig-range-field">
+                      <span>Esquerda / direita</span>
+                      <input
+                        type="range"
+                        min="-0.2"
+                        max="0.2"
+                        step="0.01"
+                        value={myStickerForm.photo_offset_x}
+                        onChange={event => setMyStickerForm(current => ({ ...current, photo_offset_x: event.target.value }))}
+                      />
+                      <small>{Number(myStickerForm.photo_offset_x || 0).toFixed(2)}</small>
+                    </label>
+                    <label className="fig-range-field">
+                      <span>Cima / baixo</span>
+                      <input
+                        type="range"
+                        min="-0.2"
+                        max="0.2"
+                        step="0.01"
+                        value={myStickerForm.photo_offset_y}
+                        onChange={event => setMyStickerForm(current => ({ ...current, photo_offset_y: event.target.value }))}
+                      />
+                      <small>{Number(myStickerForm.photo_offset_y || 0).toFixed(2)}</small>
+                    </label>
+                    <label className="fig-range-field">
+                      <span>Zoom</span>
+                      <input
+                        type="range"
+                        min="0.7"
+                        max="1.5"
+                        step="0.01"
+                        value={myStickerForm.photo_scale}
+                        onChange={event => setMyStickerForm(current => ({ ...current, photo_scale: event.target.value }))}
+                      />
+                      <small>{Number(myStickerForm.photo_scale || 1).toFixed(2)}x</small>
+                    </label>
+                  </div>
+                </div>
                 <label className="fig-field">
                   <span>Data</span>
                   <input
