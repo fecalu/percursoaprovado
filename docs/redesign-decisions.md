@@ -1,45 +1,48 @@
 # Redesign Decisions
 
 ## Objetivo
-Registrar decisões fechadas para evitar reabrir discussões já resolvidas sem necessidade.
+Registrar decisoes fechadas para evitar reabrir discussoes ja resolvidas sem necessidade.
 
 ## Produto
-- A plataforma é focada em `prova prática por local de prova`.
-- O produto não deve parecer um curso genérico.
-- O produto não deve parecer marketplace.
-- O produto deve transmitir clareza, segurança e preparo real.
+- A plataforma e focada em `prova pratica por local de prova`.
+- O produto nao deve parecer um curso generico.
+- O produto nao deve parecer marketplace.
+- O produto deve transmitir clareza, seguranca e preparo real.
 
 ## Fluxo do Aluno
 - A entrada principal do aluno passou a ser `/painel`.
-- A biblioteca continua existindo como área de estudo, não como homepage universal.
-- O perfil do aluno existe em `/perfil` como área simples de conta.
+- A biblioteca continua existindo como area de estudo, nao como homepage universal.
+- O perfil do aluno existe em `/perfil` como area simples de conta.
 
-## Direção da Home
-- A home precisa ser mais objetiva e menos poluída.
-- A ação principal deve ser `escolher o local`.
-- O hero não deve depender de imagem genérica para explicar o produto.
-- O diferencial do produto deve aparecer cedo: `preparação prática por local`.
+## Direcao da Home
+- A home precisa ser mais objetiva e menos poluida.
+- A acao principal deve ser `escolher o local`.
+- O hero nao deve depender de imagem generica para explicar o produto.
+- O diferencial do produto deve aparecer cedo: `preparacao pratica por local`.
 
-## Direção do Painel do Aluno
-- O painel não deve parecer dashboard corporativo.
-- O painel não deve depender de agenda, ofensiva ou métricas genéricas.
+## Direcao do Painel do Aluno
+- O painel nao deve parecer dashboard corporativo.
+- O painel nao deve depender de agenda, ofensiva ou metricas genericas.
 - O foco deve ser:
   - continuar estudando
   - biblioteca
   - meus acessos
   - meus pagamentos
 
-## Direção do Player
-- O vídeo é o protagonista.
-- Timeline e pontos de atenção são centrais.
-- Explicações devem apoiar o vídeo, não competir com ele.
+## Direcao do Player
+- O video e o protagonista.
+- Timeline e pontos de atencao sao centrais.
+- Explicacoes devem apoiar o video, nao competir com ele.
+- Duvidas contextuais devem existir como `duvidas por trecho`, nao como comentarios genericos.
+- A resposta oficial deve ter mais destaque que a conversa entre alunos.
+- Duvidas recorrentes podem virar novos pontos de atencao oficiais.
 
-## Direção do Admin
+## Direcao do Admin
 - O admin deve parecer ferramenta operacional.
-- Menos gráficos genéricos.
-- Mais organização, produtividade e clareza em desktop.
+- Menos graficos genericos.
+- Mais organizacao, produtividade e clareza em desktop.
 
-## Regra de Atualização
-Sempre que uma decisão estrutural for aprovada:
+## Regra de Atualizacao
+Sempre que uma decisao estrutural for aprovada:
 - registrar aqui
 - depois implementar

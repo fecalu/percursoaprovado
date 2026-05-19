@@ -9,7 +9,8 @@ from PIL import Image
 from .models import StickerCategory
 
 
-WHITE_THRESHOLD = 245
+BBOX_WHITE_THRESHOLD = 200
+CELL_WHITE_THRESHOLD = 245
 MIN_CELL_CONTENT_DENSITY = 0.12
 
 
@@ -59,8 +60,9 @@ def detect_sticker_rectangles(page_image_path: Path) -> PageDetectionResult:
         grayscale = np.array(image.convert("L"))
         page_width, page_height = image.size
 
-    content_mask = grayscale < WHITE_THRESHOLD
-    bbox = _content_bbox(content_mask)
+    bbox_mask = grayscale < BBOX_WHITE_THRESHOLD
+    density_mask = grayscale < CELL_WHITE_THRESHOLD
+    bbox = _content_bbox(bbox_mask)
     if bbox is None:
         return PageDetectionResult(
             status="skipped",
@@ -100,7 +102,7 @@ def detect_sticker_rectangles(page_image_path: Path) -> PageDetectionResult:
             inner_right = max(col_start, col_end - horizontal_padding)
             inner_top = min(row_end, row_start + vertical_padding)
             inner_bottom = max(row_start, row_end - vertical_padding)
-            cell_mask = content_mask[inner_top:inner_bottom, inner_left:inner_right]
+            cell_mask = density_mask[inner_top:inner_bottom, inner_left:inner_right]
             density = float(cell_mask.mean()) if cell_mask.size else 0.0
             if density < MIN_CELL_CONTENT_DENSITY:
                 continue

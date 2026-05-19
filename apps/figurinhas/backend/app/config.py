@@ -41,6 +41,14 @@ class Settings:
         "FIGURINHAS_CUSTOM_STICKER_UNLOCK_MESSAGE",
         "Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00.",
     )
+    default_custom_ai_unlock_enabled = os.getenv("FIGURINHAS_CUSTOM_AI_UNLOCK_ENABLED", "false").lower() == "true"
+    default_custom_ai_unlock_price_cents = int(
+        os.getenv("FIGURINHAS_CUSTOM_AI_UNLOCK_PRICE_CENTS", "500")
+    )
+    default_custom_ai_unlock_message = os.getenv(
+        "FIGURINHAS_CUSTOM_AI_UNLOCK_MESSAGE",
+        "A criacao com IA e um recurso premium. Pague primeiro para liberar a geracao da sua figurinha.",
+    )
     mercadopago_access_token = os.getenv("FIGURINHAS_MP_ACCESS_TOKEN") or os.getenv("MP_ACCESS_TOKEN", "")
     openai_api_key = os.getenv("FIGURINHAS_OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY", "")
     openai_image_model = os.getenv("FIGURINHAS_OPENAI_IMAGE_MODEL", "gpt-image-2")
@@ -57,6 +65,8 @@ def get_settings() -> Settings:
         "pages",
         "crops",
         "exports",
+        "source_documents",
+        "source_document_pages",
         "custom_uploads",
         "custom_portraits",
         "custom_stickers",

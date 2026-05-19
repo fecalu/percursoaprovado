@@ -3,17 +3,22 @@ from __future__ import annotations
 import io
 import json
 import shutil
+import tempfile
+import unicodedata
 import uuid
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
+from statistics import median
+from typing import Callable
 
 import fitz
 from PIL import Image, ImageOps
+from reportlab.lib.colors import HexColor
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, object_session, selectinload
 
 from .auto_detect import detect_sticker_rectangles
 from .config import get_settings
@@ -27,33 +32,94 @@ from .models import (
     CustomProfileType,
     CustomStickerUnlock,
     CustomStickerUnlockStatus,
+    CustomStickerUnlockType,
     CustomStickerTemplate,
     CustomStickerTemplateLayer,
     CustomStickerTemplatePhotoSlot,
     CustomStickerTemplateTextSlot,
+    CustomTemplateTextField,
     CustomTemplateCompositionMode,
     CustomTemplateLayerType,
     CustomPositionType,
     Export,
     Page,
+    PageLayoutTemplate,
+    PageLayoutTemplateBlock,
+    PageSelectionBlock,
     PrintOrder,
     PrintOrderStatus,
     PrintServiceType,
     ServiceSettings,
+    SourceDetectedSticker,
+    SourceDetectedStickerStatus,
+    SourceDocument,
+    SourceDocumentPage,
     Sticker,
     StickerCategory,
     StickerSourceType,
+    SourceDocumentStatus,
 )
 from .name_ocr import detect_sticker_name
 
 
 settings = get_settings()
 
+CUSTOM_TEMPLATE_IMPORT_RULES: list[dict] = [
+    {"keywords": ("fundo", "background", "bg", "base"), "layer_type": CustomTemplateLayerType.BACKGROUND, "label": "Fundo", "z_index": 0, "singleton": True},
+    {"keywords": ("moldura", "frame", "recorte"), "layer_type": CustomTemplateLayerType.FRAME, "label": "Moldura", "z_index": 20, "singleton": True},
+    {"keywords": ("camisa", "frontal", "frente", "shirt", "jersey", "uniforme"), "layer_type": CustomTemplateLayerType.PHOTO_FRONT, "label": "Camisa frontal", "z_index": 40, "singleton": True},
+    {"keywords": ("faixa", "painel", "panel", "info", "infos", "dados", "footer"), "layer_type": CustomTemplateLayerType.INFO_PANEL, "label": "Faixa inferior", "z_index": 60, "singleton": True},
+    {"keywords": ("brilho", "shine", "glow"), "layer_type": CustomTemplateLayerType.SHINE, "label": "Brilho", "z_index": 90, "singleton": True},
+    {"keywords": ("overlay", "sobreposicao"), "layer_type": CustomTemplateLayerType.OVERLAY, "label": "Overlay", "z_index": 70, "singleton": False},
+]
+CUSTOM_TEMPLATE_REQUIRED_LAYER_TYPES: set[CustomTemplateLayerType] = {
+    CustomTemplateLayerType.BACKGROUND,
+    CustomTemplateLayerType.INFO_PANEL,
+}
+CUSTOM_TEMPLATE_REQUIRED_FOREGROUND_LAYER_TYPES: set[CustomTemplateLayerType] = {
+    CustomTemplateLayerType.FRAME,
+    CustomTemplateLayerType.PHOTO_FRONT,
+    CustomTemplateLayerType.OVERLAY,
+    CustomTemplateLayerType.SHINE,
+}
+CUSTOM_TEMPLATE_LAYER_LABELS: dict[CustomTemplateLayerType, str] = {
+    CustomTemplateLayerType.BACKGROUND: "Fundo",
+    CustomTemplateLayerType.FRAME: "Moldura",
+    CustomTemplateLayerType.PHOTO_FRONT: "Camada frontal da foto",
+    CustomTemplateLayerType.INFO_PANEL: "Faixa de informacoes",
+    CustomTemplateLayerType.OVERLAY: "Overlay extra",
+    CustomTemplateLayerType.SHINE: "Brilho/acabamento",
+}
+
+
+def normalize_custom_profile_type(profile_type: CustomProfileType | None) -> CustomProfileType | None:
+    if profile_type in {CustomProfileType.MENINO, CustomProfileType.MENINA, CustomProfileType.CRIANCA}:
+        return CustomProfileType.CRIANCA
+    return profile_type
+
+
+def custom_profile_type_values_for_match(profile_type: CustomProfileType) -> tuple[CustomProfileType, ...]:
+    normalized = normalize_custom_profile_type(profile_type)
+    if normalized == CustomProfileType.CRIANCA:
+        return (CustomProfileType.CRIANCA, CustomProfileType.MENINO, CustomProfileType.MENINA)
+    return (normalized,)
+
+
+def photo_visibility_preset_for_template(template: CustomStickerTemplate) -> tuple[float, float, float, float]:
+    if template.position_type == CustomPositionType.GOLEIRO:
+        return (0.08, 0.0, 0.84, 0.76)
+    if normalize_custom_profile_type(template.profile_type) == CustomProfileType.CRIANCA:
+        return (0.09, 0.0, 0.82, 0.76)
+    if template.profile_type == CustomProfileType.MULHER:
+        return (0.09, 0.0, 0.82, 0.74)
+    return (0.08, 0.0, 0.84, 0.74)
+
 CUSTOM_BASE_FIELD_BY_PROFILE: dict[CustomProfileType, str] = {
     CustomProfileType.HOMEM: "custom_base_homem_path",
     CustomProfileType.MULHER: "custom_base_mulher_path",
+    CustomProfileType.CRIANCA: "custom_base_menino_path",
     CustomProfileType.MENINO: "custom_base_menino_path",
-    CustomProfileType.MENINA: "custom_base_menina_path",
+    CustomProfileType.MENINA: "custom_base_menino_path",
 }
 
 
@@ -61,6 +127,17 @@ def slugify(value: str) -> str:
     normalized = "".join(char.lower() if char.isalnum() else "-" for char in value.strip())
     collapsed = "-".join(part for part in normalized.split("-") if part)
     return collapsed[:150] or "colecao"
+
+
+def source_document_sort_key(document: SourceDocument) -> tuple[int, str, int]:
+    return (-document.created_at.timestamp(), document.title.lower(), document.id)
+
+
+def source_document_storage_slug(document: SourceDocument) -> str:
+    base = slugify(document.title) or "documento"
+    if document.id is None:
+        return base
+    return f"{base}-{document.id}"
 
 
 def album_sort_key(album: Album) -> tuple[int, str, int]:
@@ -184,9 +261,70 @@ def ensure_default_album_assignments(db: Session) -> None:
             order.album_name = order.collection.album.name if order.collection.album else None
 
 
+def ensure_default_custom_template_assignments(db: Session) -> None:
+    templates_without_album = db.execute(
+        select(CustomStickerTemplate)
+        .where(CustomStickerTemplate.album_id.is_(None))
+        .order_by(CustomStickerTemplate.created_at.asc(), CustomStickerTemplate.id.asc())
+    ).scalars().all()
+    if not templates_without_album:
+        return
+
+    default_album = db.execute(
+        select(Album).order_by(Album.sort_order.asc(), Album.created_at.asc(), Album.id.asc())
+    ).scalars().first()
+    if not default_album:
+        return
+
+    for template in templates_without_album:
+        template.album_id = default_album.id
+
+
+def _safe_session_token_fragment(session_token: str) -> str:
+    cleaned = "".join(character for character in (session_token or "") if character.isalnum() or character in {"-", "_"})
+    return cleaned[:80] or "sessao"
+
+
+def save_prepared_cutout_assets(
+    album: Album,
+    *,
+    session_token: str,
+    cutout_bytes: bytes,
+    portrait_bytes: bytes,
+) -> str:
+    safe_session = _safe_session_token_fragment(session_token)
+    base_dir = settings.storage_root / "custom_cutouts" / album.slug / safe_session
+    base_dir.mkdir(parents=True, exist_ok=True)
+    asset_token = uuid.uuid4().hex[:12]
+    (base_dir / f"{asset_token}-cutout.png").write_bytes(cutout_bytes)
+    (base_dir / f"{asset_token}-portrait.png").write_bytes(portrait_bytes)
+    return asset_token
+
+
+def load_prepared_portrait_bytes(album: Album, *, session_token: str, asset_token: str | None) -> bytes | None:
+    if not asset_token:
+        return None
+    safe_session = _safe_session_token_fragment(session_token)
+    asset_name = "".join(character for character in asset_token if character.isalnum() or character in {"-", "_"})
+    if not asset_name:
+        return None
+    portrait_path = settings.storage_root / "custom_cutouts" / album.slug / safe_session / f"{asset_name}-portrait.png"
+    if not portrait_path.exists():
+        return None
+    return portrait_path.read_bytes()
+
+
 def clear_collection_rendered_files(collection: Collection) -> None:
     for branch in ("pages", "crops", "exports"):
         target = settings.storage_root / branch / collection.slug
+        if target.exists():
+            shutil.rmtree(target, ignore_errors=True)
+
+
+def clear_source_document_rendered_files(document: SourceDocument) -> None:
+    document_slug = source_document_storage_slug(document)
+    for branch in ("source_documents", "source_document_pages", "source_detected"):
+        target = settings.storage_root / branch / document.album.slug / document_slug
         if target.exists():
             shutil.rmtree(target, ignore_errors=True)
 
@@ -204,20 +342,50 @@ def save_pdf_and_render_pages(collection: Collection, upload_name: str, upload_b
     collection.exports.clear()
     db.flush()
 
-    pages_dir = settings.storage_root / "pages" / collection.slug
+
+def save_source_document_and_render_pages(
+    document: SourceDocument,
+    upload_name: str,
+    upload_bytes: bytes,
+    db: Session,
+) -> None:
+    if document.id is None:
+        db.flush()
+    clear_source_document_rendered_files(document)
+    existing_detected = db.execute(
+        select(SourceDetectedSticker).where(SourceDetectedSticker.document_id == document.id)
+    ).scalars().all()
+    for detected_sticker in existing_detected:
+        delete_source_detected_sticker_record(db, detected_sticker)
+    document_slug = source_document_storage_slug(document)
+
+    pdf_dir = settings.storage_root / "source_documents" / document.album.slug / document_slug
+    pdf_dir.mkdir(parents=True, exist_ok=True)
+    upload_suffix = Path(upload_name).suffix.lower() or ".pdf"
+    pdf_path = pdf_dir / f"{document_slug}{upload_suffix}"
+    pdf_path.write_bytes(upload_bytes)
+
+    document.pdf_path = str(pdf_path.relative_to(settings.storage_root).as_posix())
+    document.pages.clear()
+    document.page_count = 0
+    document.status = SourceDocumentStatus.RASCUNHO
+    db.flush()
+
+    pages_dir = settings.storage_root / "source_document_pages" / document.album.slug / document_slug
     pages_dir.mkdir(parents=True, exist_ok=True)
 
-    with fitz.open(pdf_path) as document:
-        for page_index in range(document.page_count):
-            page = document.load_page(page_index)
+    with fitz.open(pdf_path) as source_pdf:
+        document.page_count = source_pdf.page_count
+        for page_index in range(source_pdf.page_count):
+            page = source_pdf.load_page(page_index)
             pixmap = page.get_pixmap(matrix=fitz.Matrix(settings.render_scale, settings.render_scale), alpha=False)
             image_path = pages_dir / f"page-{page_index + 1}.png"
             pixmap.save(image_path)
             with Image.open(image_path) as image:
                 width, height = image.size
             db.add(
-                Page(
-                    collection=collection,
+                SourceDocumentPage(
+                    document=document,
                     page_number=page_index + 1,
                     image_path=str(image_path.relative_to(settings.storage_root).as_posix()),
                     width=width,
@@ -295,6 +463,9 @@ def get_or_create_service_settings(db: Session) -> ServiceSettings:
         custom_sticker_unlock_enabled=settings.default_custom_sticker_unlock_enabled,
         custom_sticker_unlock_price_cents=settings.default_custom_sticker_unlock_price_cents,
         custom_sticker_unlock_message=settings.default_custom_sticker_unlock_message or None,
+        custom_ai_unlock_enabled=settings.default_custom_ai_unlock_enabled,
+        custom_ai_unlock_price_cents=settings.default_custom_ai_unlock_price_cents,
+        custom_ai_unlock_message=settings.default_custom_ai_unlock_message or None,
         pack_size=settings.default_pack_size,
         print_price_cents=settings.default_print_price_cents,
         pack_price_cents=settings.default_pack_price_cents,
@@ -317,9 +488,56 @@ def generated_sticker_for_selection(stickers: list[Sticker]) -> Sticker | None:
     return next((sticker for sticker in stickers if sticker.source_type == StickerSourceType.GENERATED), None)
 
 
+def generated_sticker_requires_manual_unlock(
+    sticker: Sticker | None,
+    service_settings: ServiceSettings,
+) -> bool:
+    if not sticker or sticker.source_type != StickerSourceType.GENERATED:
+        return False
+    return (
+        sticker.composition_mode_used != CustomTemplateCompositionMode.AI_OPTIONAL
+        and service_settings.custom_sticker_unlock_enabled
+    )
+
+
+def generated_sticker_has_export_access(
+    db: Session,
+    *,
+    album_id: int,
+    session_token: str,
+    sticker: Sticker | None,
+    service_settings: ServiceSettings,
+) -> bool:
+    if not sticker or sticker.source_type != StickerSourceType.GENERATED:
+        return True
+    if sticker.composition_mode_used == CustomTemplateCompositionMode.AI_OPTIONAL:
+        if not service_settings.custom_ai_unlock_enabled:
+            return True
+        return is_custom_sticker_unlocked(
+            db,
+            album_id=album_id,
+            session_token=session_token,
+            unlock_type=CustomStickerUnlockType.AI_CREATE,
+        )
+    if not service_settings.custom_sticker_unlock_enabled:
+        return True
+    return is_custom_sticker_unlocked(
+        db,
+        album_id=album_id,
+        session_token=session_token,
+        unlock_type=CustomStickerUnlockType.MANUAL_PDF,
+    )
+
+
 def get_custom_base_relative_path(service_settings: ServiceSettings, profile_type: CustomProfileType) -> str | None:
-    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[profile_type]
-    return getattr(service_settings, field_name, None)
+    normalized = normalize_custom_profile_type(profile_type)
+    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[normalized]
+    relative_path = getattr(service_settings, field_name, None)
+    if relative_path:
+        return relative_path
+    if normalized == CustomProfileType.CRIANCA:
+        return service_settings.custom_base_menina_path
+    return None
 
 
 def get_custom_base_file_path(service_settings: ServiceSettings, profile_type: CustomProfileType) -> Path | None:
@@ -337,16 +555,17 @@ def save_custom_base_image(
     upload_bytes: bytes,
     original_name: str,
 ) -> str:
+    normalized = normalize_custom_profile_type(profile_type)
     with Image.open(io.BytesIO(upload_bytes)) as raw_image:
         image = raw_image.convert("RGBA")
 
     target_dir = settings.storage_root / "custom_bases"
     target_dir.mkdir(parents=True, exist_ok=True)
-    file_name = f"{profile_type.value.lower()}-{uuid.uuid4().hex[:10]}.png"
+    file_name = f"{normalized.value.lower()}-{uuid.uuid4().hex[:10]}.png"
     file_path = target_dir / file_name
     image.save(file_path, format="PNG", optimize=True)
 
-    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[profile_type]
+    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[normalized]
     previous_relative_path = getattr(service_settings, field_name, None)
     if previous_relative_path:
         previous_path = settings.storage_root / previous_relative_path
@@ -355,17 +574,30 @@ def save_custom_base_image(
 
     relative_path = str(file_path.relative_to(settings.storage_root).as_posix())
     setattr(service_settings, field_name, relative_path)
+    if normalized == CustomProfileType.CRIANCA:
+        legacy_relative_path = service_settings.custom_base_menina_path
+        if legacy_relative_path and legacy_relative_path != relative_path:
+            legacy_path = settings.storage_root / legacy_relative_path
+            if legacy_path.exists():
+                legacy_path.unlink(missing_ok=True)
+        service_settings.custom_base_menina_path = None
     return relative_path
 
 
 def delete_custom_base_image(service_settings: ServiceSettings, profile_type: CustomProfileType) -> None:
-    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[profile_type]
+    normalized = normalize_custom_profile_type(profile_type)
+    field_name = CUSTOM_BASE_FIELD_BY_PROFILE[normalized]
     previous_relative_path = getattr(service_settings, field_name, None)
     if previous_relative_path:
         previous_path = settings.storage_root / previous_relative_path
         if previous_path.exists():
             previous_path.unlink(missing_ok=True)
     setattr(service_settings, field_name, None)
+    if normalized == CustomProfileType.CRIANCA and service_settings.custom_base_menina_path:
+        previous_path = settings.storage_root / service_settings.custom_base_menina_path
+        if previous_path.exists():
+            previous_path.unlink(missing_ok=True)
+        service_settings.custom_base_menina_path = None
 
 
 def save_custom_template_layer_image(
@@ -409,6 +641,274 @@ def delete_custom_template_layer_image(layer: CustomStickerTemplateLayer) -> Non
     layer.file_path = None
 
 
+def normalize_template_asset_name(file_name: str) -> str:
+    normalized = unicodedata.normalize("NFD", file_name or "")
+    normalized = "".join(char for char in normalized if unicodedata.category(char) != "Mn")
+    return normalized.lower()
+
+
+def infer_custom_template_layer_definition(file_name: str) -> dict:
+    normalized = normalize_template_asset_name(Path(file_name).stem)
+    for rule in CUSTOM_TEMPLATE_IMPORT_RULES:
+        if any(keyword in normalized for keyword in rule["keywords"]):
+            return rule
+    return {
+        "layer_type": CustomTemplateLayerType.OVERLAY,
+        "label": "Overlay",
+        "z_index": 70,
+        "singleton": False,
+    }
+
+
+def default_photo_slot_for_template(template: CustomStickerTemplate) -> CustomStickerTemplatePhotoSlot:
+    visible_x, visible_y, visible_width, visible_height = photo_visibility_preset_for_template(template)
+    if template.position_type == CustomPositionType.GOLEIRO:
+        return CustomStickerTemplatePhotoSlot(
+            x=0.1,
+            y=0.05,
+            width=0.8,
+            height=0.65,
+            default_scale=1.0,
+            min_scale=0.7,
+            max_scale=1.55,
+            portrait_z_index=50,
+            anchor_x=0.5,
+            anchor_y=0.52,
+            visible_x=visible_x,
+            visible_y=visible_y,
+            visible_width=visible_width,
+            visible_height=visible_height,
+        )
+    return CustomStickerTemplatePhotoSlot(
+        x=0.1,
+        y=0.05,
+        width=0.8,
+        height=0.63,
+        default_scale=1.0,
+        min_scale=0.7,
+        max_scale=1.5,
+        portrait_z_index=50,
+        anchor_x=0.5,
+        anchor_y=0.52,
+        visible_x=visible_x,
+        visible_y=visible_y,
+        visible_width=visible_width,
+        visible_height=visible_height,
+    )
+
+
+def resolve_effective_portrait_z_index(template: CustomStickerTemplate | None) -> int:
+    if template is None or template.photo_slot is None:
+        return 50
+
+    configured = int(template.photo_slot.portrait_z_index or 50)
+    active_layers = [layer for layer in template.layers if layer.is_active and layer.file_path]
+    frame_layers = [layer for layer in active_layers if layer.layer_type == CustomTemplateLayerType.FRAME]
+    front_layers = [layer for layer in active_layers if layer.layer_type == CustomTemplateLayerType.PHOTO_FRONT]
+
+    if not frame_layers or not front_layers:
+        return configured
+
+    max_frame_z = max(int(layer.z_index or 0) for layer in frame_layers)
+    min_front_z = min(int(layer.z_index or 0) for layer in front_layers)
+
+    if configured <= max_frame_z < min_front_z:
+        gap = max(1, min_front_z - max_frame_z)
+        return max_frame_z + max(1, gap // 2)
+
+    return configured
+
+
+def default_text_slots_for_template() -> list[CustomStickerTemplateTextSlot]:
+    return [
+        CustomStickerTemplateTextSlot(field_name=CustomTemplateTextField.NAME, x=0.10, y=0.802, width=0.70, font_size=20, font_weight="700", text_align="center", color="#ffffff"),
+        CustomStickerTemplateTextSlot(field_name=CustomTemplateTextField.DATE, x=0.213, y=0.846, width=0.18, font_size=15, font_weight="700", text_align="center", color="#ffffff"),
+        CustomStickerTemplateTextSlot(field_name=CustomTemplateTextField.HEIGHT, x=0.402, y=0.846, width=0.13, font_size=15, font_weight="700", text_align="center", color="#ffffff"),
+        CustomStickerTemplateTextSlot(field_name=CustomTemplateTextField.WEIGHT, x=0.529, y=0.846, width=0.12, font_size=15, font_weight="700", text_align="center", color="#ffffff"),
+        CustomStickerTemplateTextSlot(field_name=CustomTemplateTextField.CITY_OR_TEAM, x=0.105, y=0.905, width=0.62, font_size=15, font_weight="700", text_align="center", color="#ffffff"),
+    ]
+
+
+LEGACY_DEFAULT_TEXT_SLOT_SIGNATURES = [
+{
+    CustomTemplateTextField.NAME: {"x": 0.10, "y": 0.745, "width": 0.55, "font_size": 46.0, "text_align": "left", "color": "#ffffff"},
+    CustomTemplateTextField.DATE: {"x": 0.11, "y": 0.83, "width": 0.22, "font_size": 16.0, "text_align": "left", "color": "#243047"},
+    CustomTemplateTextField.HEIGHT: {"x": 0.52, "y": 0.83, "width": 0.16, "font_size": 16.0, "text_align": "left", "color": "#243047"},
+    CustomTemplateTextField.WEIGHT: {"x": 0.11, "y": 0.92, "width": 0.18, "font_size": 16.0, "text_align": "left", "color": "#243047"},
+    CustomTemplateTextField.CITY_OR_TEAM: {"x": 0.52, "y": 0.92, "width": 0.28, "font_size": 16.0, "text_align": "left", "color": "#243047"},
+},
+{
+    CustomTemplateTextField.NAME: {"x": 0.10, "y": 0.735, "width": 0.68, "font_size": 38.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.DATE: {"x": 0.12, "y": 0.802, "width": 0.25, "font_size": 18.0, "text_align": "right", "color": "#ffffff"},
+    CustomTemplateTextField.HEIGHT: {"x": 0.39, "y": 0.802, "width": 0.18, "font_size": 18.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.WEIGHT: {"x": 0.58, "y": 0.802, "width": 0.16, "font_size": 18.0, "text_align": "left", "color": "#ffffff"},
+    CustomTemplateTextField.CITY_OR_TEAM: {"x": 0.13, "y": 0.888, "width": 0.63, "font_size": 18.0, "text_align": "center", "color": "#ffffff"},
+},
+{
+    CustomTemplateTextField.NAME: {"x": 0.10, "y": 0.739, "width": 0.68, "font_size": 26.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.DATE: {"x": 0.14, "y": 0.804, "width": 0.18, "font_size": 14.0, "text_align": "right", "color": "#ffffff"},
+    CustomTemplateTextField.HEIGHT: {"x": 0.36, "y": 0.804, "width": 0.18, "font_size": 14.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.WEIGHT: {"x": 0.54, "y": 0.804, "width": 0.14, "font_size": 14.0, "text_align": "left", "color": "#ffffff"},
+    CustomTemplateTextField.CITY_OR_TEAM: {"x": 0.14, "y": 0.888, "width": 0.62, "font_size": 14.0, "text_align": "center", "color": "#ffffff"},
+},
+{
+    CustomTemplateTextField.NAME: {"x": 0.10, "y": 0.809, "width": 0.70, "font_size": 15.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.DATE: {"x": 0.213, "y": 0.842, "width": 0.18, "font_size": 9.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.HEIGHT: {"x": 0.402, "y": 0.842, "width": 0.13, "font_size": 9.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.WEIGHT: {"x": 0.529, "y": 0.842, "width": 0.12, "font_size": 9.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.CITY_OR_TEAM: {"x": 0.105, "y": 0.899, "width": 0.62, "font_size": 9.0, "text_align": "center", "color": "#ffffff"},
+},
+{
+    CustomTemplateTextField.NAME: {"x": 0.10, "y": 0.806, "width": 0.70, "font_size": 20.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.DATE: {"x": 0.213, "y": 0.840, "width": 0.18, "font_size": 15.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.HEIGHT: {"x": 0.402, "y": 0.840, "width": 0.13, "font_size": 15.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.WEIGHT: {"x": 0.529, "y": 0.840, "width": 0.12, "font_size": 15.0, "text_align": "center", "color": "#ffffff"},
+    CustomTemplateTextField.CITY_OR_TEAM: {"x": 0.105, "y": 0.896, "width": 0.62, "font_size": 15.0, "text_align": "center", "color": "#ffffff"},
+},
+]
+
+
+def _is_legacy_default_text_slot(slot: CustomStickerTemplateTextSlot) -> bool:
+    for signature_map in LEGACY_DEFAULT_TEXT_SLOT_SIGNATURES:
+        signature = signature_map.get(slot.field_name)
+        if signature is None:
+            continue
+        if (
+            round(float(slot.x), 3) == round(signature["x"], 3)
+            and round(float(slot.y), 3) == round(signature["y"], 3)
+            and round(float(slot.width), 3) == round(signature["width"], 3)
+            and round(float(slot.font_size), 1) == round(signature["font_size"], 1)
+            and (slot.text_align or "").strip().lower() == signature["text_align"]
+            and (slot.color or "").strip().lower() == signature["color"]
+        ):
+            return True
+    return False
+
+
+def normalize_template_text_slots(template: CustomStickerTemplate) -> None:
+    if len(template.text_slots) != 5:
+        return
+    if not all(_is_legacy_default_text_slot(slot) for slot in template.text_slots):
+        return
+
+    defaults = {slot.field_name: slot for slot in default_text_slots_for_template()}
+    for slot in template.text_slots:
+        default_slot = defaults.get(slot.field_name)
+        if default_slot is None:
+            continue
+        slot.x = default_slot.x
+        slot.y = default_slot.y
+        slot.width = default_slot.width
+        slot.font_size = default_slot.font_size
+        slot.font_weight = default_slot.font_weight
+        slot.text_align = default_slot.text_align
+        slot.color = default_slot.color
+
+
+def normalize_legacy_custom_template_text_layouts(db: Session) -> int:
+    templates = db.execute(
+        select(CustomStickerTemplate)
+        .options(selectinload(CustomStickerTemplate.text_slots))
+        .order_by(CustomStickerTemplate.id.asc())
+    ).scalars().all()
+
+    normalized_count = 0
+    for template in templates:
+        if len(template.text_slots) != 5:
+            continue
+        if not all(_is_legacy_default_text_slot(slot) for slot in template.text_slots):
+            continue
+        normalize_template_text_slots(template)
+        normalized_count += 1
+    return normalized_count
+
+
+def normalize_legacy_custom_template_photo_visibility(db: Session) -> int:
+    templates = db.execute(
+        select(CustomStickerTemplate)
+        .options(selectinload(CustomStickerTemplate.photo_slot))
+        .order_by(CustomStickerTemplate.id.asc())
+    ).scalars().all()
+
+    normalized_count = 0
+    for template in templates:
+        if template.photo_slot is None:
+            continue
+        slot = template.photo_slot
+        if not (
+            abs((slot.visible_x or 0.0) - 0.0) < 1e-6
+            and abs((slot.visible_y or 0.0) - 0.0) < 1e-6
+            and abs((slot.visible_width or 1.0) - 1.0) < 1e-6
+            and abs((slot.visible_height or 0.9) - 0.9) < 1e-6
+        ):
+            continue
+        visible_x, visible_y, visible_width, visible_height = photo_visibility_preset_for_template(template)
+        slot.visible_x = visible_x
+        slot.visible_y = visible_y
+        slot.visible_width = visible_width
+        slot.visible_height = visible_height
+        normalized_count += 1
+    return normalized_count
+
+
+def import_custom_template_layers(
+    template: CustomStickerTemplate,
+    *,
+    files: list[tuple[str, bytes]],
+) -> None:
+    session = object_session(template)
+    existing_layers_by_type: dict[CustomTemplateLayerType, list[CustomStickerTemplateLayer]] = defaultdict(list)
+    for layer in template.layers:
+        existing_layers_by_type[layer.layer_type].append(layer)
+
+    overlay_count = len(existing_layers_by_type.get(CustomTemplateLayerType.OVERLAY, []))
+
+    for original_name, upload_bytes in files:
+        rule = infer_custom_template_layer_definition(original_name)
+        layer_type: CustomTemplateLayerType = rule["layer_type"]
+        label = rule["label"]
+        z_index = rule["z_index"]
+        singleton = bool(rule["singleton"])
+
+        target_layer: CustomStickerTemplateLayer | None = None
+        if singleton and existing_layers_by_type.get(layer_type):
+            target_layer = existing_layers_by_type[layer_type][0]
+            duplicate_layers = existing_layers_by_type[layer_type][1:]
+            if duplicate_layers:
+                for duplicate_layer in duplicate_layers:
+                    delete_custom_template_layer_image(duplicate_layer)
+                    if duplicate_layer in template.layers:
+                        template.layers.remove(duplicate_layer)
+                    if session is not None and duplicate_layer.id is not None:
+                        session.delete(duplicate_layer)
+                existing_layers_by_type[layer_type] = [target_layer]
+        if target_layer is None:
+            target_layer = CustomStickerTemplateLayer(
+                layer_type=layer_type,
+                label=label if singleton else f"{label} {overlay_count + 1}" if layer_type == CustomTemplateLayerType.OVERLAY else label,
+                z_index=z_index if layer_type != CustomTemplateLayerType.OVERLAY else z_index + overlay_count,
+                is_active=True,
+            )
+            template.layers.append(target_layer)
+            existing_layers_by_type[layer_type].append(target_layer)
+            if layer_type == CustomTemplateLayerType.OVERLAY:
+                overlay_count += 1
+        else:
+            target_layer.layer_type = layer_type
+            target_layer.label = label if layer_type != CustomTemplateLayerType.OVERLAY else target_layer.label or label
+            target_layer.z_index = z_index
+            target_layer.is_active = True
+
+        if session is not None and (target_layer.id is None or target_layer.template_id is None):
+            session.flush()
+        save_custom_template_layer_image(target_layer, upload_bytes=upload_bytes, original_name=original_name)
+
+    if template.photo_slot is None:
+        template.photo_slot = default_photo_slot_for_template(template)
+    if not template.text_slots:
+        template.text_slots.extend(default_text_slots_for_template())
+
+
 def delete_sticker_assets(sticker: Sticker) -> None:
     for relative_path in {
         sticker.crop_path,
@@ -426,6 +926,129 @@ def delete_sticker_assets(sticker: Sticker) -> None:
 def delete_sticker_record(db: Session, sticker: Sticker) -> None:
     delete_sticker_assets(sticker)
     db.delete(sticker)
+
+
+def delete_source_detected_sticker_assets(detected_sticker: SourceDetectedSticker) -> None:
+    for relative_path in {detected_sticker.crop_path, detected_sticker.preview_path}:
+        if not relative_path:
+            continue
+        file_path = settings.storage_root / relative_path
+        if file_path.exists():
+            file_path.unlink(missing_ok=True)
+
+
+def delete_source_detected_sticker_record(db: Session, detected_sticker: SourceDetectedSticker) -> None:
+    delete_source_detected_sticker_assets(detected_sticker)
+    db.delete(detected_sticker)
+
+
+def _delete_relative_storage_file(relative_path: str | None) -> None:
+    if not relative_path:
+        return
+    file_path = settings.storage_root / relative_path
+    if file_path.exists() and file_path.is_file():
+        file_path.unlink(missing_ok=True)
+
+
+def _delete_storage_dir(path: Path) -> None:
+    if path.exists():
+        shutil.rmtree(path, ignore_errors=True)
+
+
+def delete_source_document_record(db: Session, document: SourceDocument) -> None:
+    hydrated_document = (
+        db.execute(
+            select(SourceDocument)
+            .options(
+                selectinload(SourceDocument.album),
+                selectinload(SourceDocument.pages).selectinload(SourceDocumentPage.blocks),
+                selectinload(SourceDocument.detected_stickers),
+            )
+            .where(SourceDocument.id == document.id)
+        )
+        .scalar_one()
+    )
+
+    _delete_relative_storage_file(hydrated_document.pdf_path)
+    for page in hydrated_document.pages:
+        _delete_relative_storage_file(page.image_path)
+    for detected_sticker in hydrated_document.detected_stickers:
+        delete_source_detected_sticker_assets(detected_sticker)
+    clear_source_document_rendered_files(hydrated_document)
+    db.delete(hydrated_document)
+
+
+def delete_album_record(db: Session, album: Album) -> None:
+    hydrated_album = (
+        db.execute(
+            select(Album)
+            .options(
+                selectinload(Album.collections).selectinload(Collection.pages),
+                selectinload(Album.collections).selectinload(Collection.stickers),
+                selectinload(Album.collections).selectinload(Collection.exports),
+                selectinload(Album.collections).selectinload(Collection.print_orders),
+                selectinload(Album.custom_templates).selectinload(CustomStickerTemplate.layers),
+                selectinload(Album.source_documents).selectinload(SourceDocument.pages),
+                selectinload(Album.source_documents).selectinload(SourceDocument.detected_stickers),
+                selectinload(Album.print_orders),
+            )
+            .where(Album.id == album.id)
+        )
+        .scalar_one()
+    )
+
+    order_ids_handled: set[int] = set()
+    for order in hydrated_album.print_orders:
+        _delete_relative_storage_file(order.export_file_path)
+        order_ids_handled.add(order.id)
+        db.delete(order)
+
+    for collection in hydrated_album.collections:
+        _delete_relative_storage_file(collection.source_pdf_path)
+        for export_record in collection.exports:
+            _delete_relative_storage_file(export_record.file_path)
+        for page in collection.pages:
+            _delete_relative_storage_file(page.image_path)
+        for sticker in collection.stickers:
+            delete_sticker_assets(sticker)
+        for order in collection.print_orders:
+            if order.id in order_ids_handled:
+                continue
+            _delete_relative_storage_file(order.export_file_path)
+            order_ids_handled.add(order.id)
+            db.delete(order)
+        clear_collection_rendered_files(collection)
+        _delete_storage_dir(settings.storage_root / "originals" / collection.slug)
+
+    for template in hydrated_album.custom_templates:
+        generated_stickers = db.execute(select(Sticker).where(Sticker.template_id == template.id)).scalars().all()
+        for sticker in generated_stickers:
+            sticker.template_id = None
+        for layer in list(template.layers):
+            delete_custom_template_layer_image(layer)
+        _delete_storage_dir(settings.storage_root / "custom_template_layers" / str(template.id))
+        db.delete(template)
+
+    for document in hydrated_album.source_documents:
+        _delete_relative_storage_file(document.pdf_path)
+        for page in document.pages:
+            _delete_relative_storage_file(page.image_path)
+        for detected_sticker in document.detected_stickers:
+            delete_source_detected_sticker_assets(detected_sticker)
+        clear_source_document_rendered_files(document)
+        db.delete(document)
+
+    unlocks = db.execute(
+        select(CustomStickerUnlock).where(CustomStickerUnlock.album_id == hydrated_album.id)
+    ).scalars().all()
+    for unlock in unlocks:
+        db.delete(unlock)
+
+    _delete_storage_dir(settings.storage_root / "exports" / hydrated_album.slug)
+    _delete_storage_dir(settings.storage_root / "custom_stickers" / hydrated_album.slug)
+    _delete_storage_dir(settings.storage_root / "custom_cutouts" / hydrated_album.slug)
+
+    db.delete(hydrated_album)
 
 
 def auto_detect_collection_pages(
@@ -529,6 +1152,580 @@ def auto_detect_collection_pages(
     }
 
 
+def crop_source_detected_sticker_image(
+    detected_sticker: SourceDetectedSticker,
+    *,
+    page_image: Image.Image,
+    document_slug: str,
+) -> None:
+    width, height = page_image.size
+    left = max(0, int(round(detected_sticker.x_ratio * width)))
+    top = max(0, int(round(detected_sticker.y_ratio * height)))
+    right = min(width, int(round((detected_sticker.x_ratio + detected_sticker.width_ratio) * width)))
+    bottom = min(height, int(round((detected_sticker.y_ratio + detected_sticker.height_ratio) * height)))
+    if right <= left or bottom <= top:
+        raise ValueError("Area de recorte detectada invalida.")
+
+    crop = page_image.crop((left, top, right, bottom))
+    detected_dir = settings.storage_root / "source_detected" / document_slug
+    detected_dir.mkdir(parents=True, exist_ok=True)
+    file_name = f"detected-{detected_sticker.id}.png"
+    crop_path = detected_dir / file_name
+    crop.save(crop_path, optimize=True)
+    relative = str(crop_path.relative_to(settings.storage_root).as_posix())
+    detected_sticker.crop_path = relative
+    detected_sticker.preview_path = relative
+
+
+def auto_detect_source_document_stickers(
+    db: Session,
+    document: SourceDocument,
+    *,
+    replace_existing: bool = True,
+) -> dict:
+    current_document = load_source_document_or_fail(db, document.id)
+    document_slug = source_document_storage_slug(current_document)
+    results: list[dict] = []
+    total_detected = 0
+    total_replaced = 0
+
+    for source_page in current_document.pages:
+        existing_detected = db.execute(
+            select(SourceDetectedSticker)
+            .where(
+                SourceDetectedSticker.page_id == source_page.id,
+                SourceDetectedSticker.status != SourceDetectedStickerStatus.ATRIBUIDA,
+            )
+            .order_by(SourceDetectedSticker.id.asc())
+        ).scalars().all()
+        replaced_count = len(existing_detected) if replace_existing else 0
+
+        detection = detect_sticker_rectangles(settings.storage_root / source_page.image_path)
+        if detection.status != "detected":
+            results.append(
+                {
+                    "page_id": source_page.id,
+                    "page_number": source_page.page_number,
+                    "status": detection.status,
+                    "template": detection.template,
+                    "reason": detection.reason,
+                    "detected_count": 0,
+                    "replaced_count": 0 if detection.status != "detected" else replaced_count,
+                }
+            )
+            continue
+
+        if replace_existing:
+            for detected_sticker in existing_detected:
+                delete_source_detected_sticker_record(db, detected_sticker)
+            db.flush()
+
+        page_image_path = settings.storage_root / source_page.image_path
+        if not page_image_path.exists():
+            raise FileNotFoundError("Imagem da pagina do documento fonte nao encontrada.")
+
+        created_detected: list[SourceDetectedSticker] = []
+        with Image.open(page_image_path) as page_image:
+            for rectangle in detection.rectangles:
+                detected_sticker = SourceDetectedSticker(
+                    document_id=current_document.id,
+                    page_id=source_page.id,
+                    status=SourceDetectedStickerStatus.PENDENTE,
+                    category=rectangle.category,
+                    x_ratio=rectangle.x_ratio,
+                    y_ratio=rectangle.y_ratio,
+                    width_ratio=rectangle.width_ratio,
+                    height_ratio=rectangle.height_ratio,
+                    preview_path="",
+                    crop_path="",
+                )
+                db.add(detected_sticker)
+                created_detected.append(detected_sticker)
+
+            if created_detected:
+                db.flush()
+                for detected_sticker in created_detected:
+                    crop_source_detected_sticker_image(
+                        detected_sticker,
+                        page_image=page_image,
+                        document_slug=document_slug,
+                    )
+
+        detected_count = len(created_detected)
+        total_detected += detected_count
+        total_replaced += replaced_count
+        results.append(
+            {
+                "page_id": source_page.id,
+                "page_number": source_page.page_number,
+                "status": detection.status,
+                "template": detection.template,
+                "reason": detection.reason,
+                "detected_count": detected_count,
+                "replaced_count": replaced_count,
+            }
+        )
+
+    current_document.status = (
+        SourceDocumentStatus.EM_REVISAO if total_detected or current_document.detected_stickers else SourceDocumentStatus.RASCUNHO
+    )
+    db.flush()
+    return {
+        "detected_count": total_detected,
+        "replaced_count": total_replaced,
+        "page_results": results,
+    }
+
+
+def ensure_collection_page_for_source_document_page(
+    db: Session,
+    *,
+    collection: Collection,
+    source_page: SourceDocumentPage,
+) -> Page:
+    page = db.execute(
+        select(Page).where(
+            Page.collection_id == collection.id,
+            Page.image_path == source_page.image_path,
+        )
+    ).scalar_one_or_none()
+    if page:
+        page.width = source_page.width
+        page.height = source_page.height
+        db.flush()
+        return page
+
+    next_page_number = (
+        db.execute(select(func.max(Page.page_number)).where(Page.collection_id == collection.id)).scalar_one() or 0
+    ) + 1
+    page = Page(
+        collection=collection,
+        page_number=next_page_number,
+        image_path=source_page.image_path,
+        width=source_page.width,
+        height=source_page.height,
+    )
+    db.add(page)
+    db.flush()
+    return page
+
+
+def assign_source_detected_stickers(
+    db: Session,
+    document: SourceDocument,
+    *,
+    collection: Collection,
+    detected_sticker_ids: list[int],
+) -> dict:
+    current_document = load_source_document_or_fail(db, document.id)
+    if collection.album_id != current_document.album_id:
+        raise ValueError("Escolha uma selecao do mesmo album desse documento fonte.")
+
+    detected_stickers = db.execute(
+        select(SourceDetectedSticker)
+        .options(
+            selectinload(SourceDetectedSticker.page).selectinload(SourceDocumentPage.document).selectinload(SourceDocument.album),
+            selectinload(SourceDetectedSticker.assigned_collection),
+        )
+        .where(
+            SourceDetectedSticker.document_id == current_document.id,
+            SourceDetectedSticker.id.in_(detected_sticker_ids),
+        )
+        .order_by(SourceDetectedSticker.page_id.asc(), SourceDetectedSticker.id.asc())
+    ).scalars().all()
+
+    if not detected_stickers:
+        raise ValueError("Nenhuma figurinha detectada valida foi selecionada.")
+
+    target_pages_by_source_page_id: dict[int, Page] = {}
+    page_images: dict[int, Image.Image] = {}
+    affected_count = 0
+    current_max_order = (
+        db.execute(select(func.max(Sticker.sort_order)).where(Sticker.collection_id == collection.id)).scalar_one() or 0
+    )
+    next_sort_order = current_max_order + 1
+
+    try:
+        for detected_sticker in detected_stickers:
+            if detected_sticker.status != SourceDetectedStickerStatus.PENDENTE:
+                continue
+            source_page = detected_sticker.page
+            if source_page is None:
+                continue
+            if source_page.id not in target_pages_by_source_page_id:
+                target_pages_by_source_page_id[source_page.id] = ensure_collection_page_for_source_document_page(
+                    db,
+                    collection=collection,
+                    source_page=source_page,
+                )
+            target_page = target_pages_by_source_page_id[source_page.id]
+            sticker_name = (
+                detected_sticker.ocr_name_suggested
+                or f"{collection.name} {source_page.page_number:02d}-{affected_count + 1:02d}"
+            )
+            sticker = Sticker(
+                collection=collection,
+                page=target_page,
+                source_document_id=current_document.id,
+                source_document_page_id=source_page.id,
+                source_block_id=None,
+                name=sticker_name[:150],
+                code=f"doc-{current_document.id}-d{detected_sticker.id}",
+                category=detected_sticker.category,
+                source_type=StickerSourceType.PDF,
+                sort_order=next_sort_order,
+                x_ratio=detected_sticker.x_ratio,
+                y_ratio=detected_sticker.y_ratio,
+                width_ratio=detected_sticker.width_ratio,
+                height_ratio=detected_sticker.height_ratio,
+                active=True,
+                detected_automatically=True,
+                preview_path="",
+                crop_path="",
+                ocr_name_raw=detected_sticker.ocr_name_raw,
+                ocr_name_suggested=detected_sticker.ocr_name_suggested,
+                ocr_confidence=detected_sticker.ocr_confidence,
+                ocr_processed_at=detected_sticker.ocr_processed_at,
+            )
+            next_sort_order += 1
+            db.add(sticker)
+            db.flush()
+
+            if source_page.id not in page_images:
+                page_image_path = settings.storage_root / source_page.image_path
+                if not page_image_path.exists():
+                    raise FileNotFoundError("Imagem da pagina do documento fonte nao encontrada.")
+                page_images[source_page.id] = Image.open(page_image_path)
+            crop_sticker_image(sticker, page_image=page_images[source_page.id])
+            if not detected_sticker.ocr_processed_at:
+                refresh_sticker_ocr(sticker, update_name=True)
+
+            detected_sticker.status = SourceDetectedStickerStatus.ATRIBUIDA
+            detected_sticker.assigned_collection_id = collection.id
+            affected_count += 1
+    finally:
+        for image in page_images.values():
+            image.close()
+
+    current_document.status = SourceDocumentStatus.EM_REVISAO
+    db.flush()
+    return {
+        "document_id": current_document.id,
+        "affected_count": affected_count,
+        "collection_id": collection.id,
+        "collection_name": collection.name,
+    }
+
+
+def discard_source_detected_stickers(
+    db: Session,
+    document: SourceDocument,
+    *,
+    detected_sticker_ids: list[int],
+) -> dict:
+    detected_stickers = db.execute(
+        select(SourceDetectedSticker).where(
+            SourceDetectedSticker.document_id == document.id,
+            SourceDetectedSticker.id.in_(detected_sticker_ids),
+            SourceDetectedSticker.status == SourceDetectedStickerStatus.PENDENTE,
+        )
+    ).scalars().all()
+    if not detected_stickers:
+        raise ValueError("Nenhuma figurinha detectada pendente foi selecionada.")
+
+    for detected_sticker in detected_stickers:
+        detected_sticker.status = SourceDetectedStickerStatus.DESCARTADA
+    db.flush()
+    return {
+        "document_id": document.id,
+        "affected_count": len(detected_stickers),
+        "collection_id": None,
+        "collection_name": None,
+    }
+
+
+def auto_detect_source_block_stickers(
+    db: Session,
+    block: PageSelectionBlock,
+    *,
+    replace_existing: bool = True,
+) -> dict:
+    source_page = block.page
+    collection = block.collection
+    if source_page is None or collection is None:
+        raise ValueError("Esse bloco precisa estar vinculado a uma pagina e a uma selecao.")
+
+    if source_page.document.album_id != collection.album_id:
+        raise ValueError("O bloco e a selecao precisam pertencer ao mesmo album.")
+
+    target_page = ensure_collection_page_for_source_document_page(
+        db,
+        collection=collection,
+        source_page=source_page,
+    )
+
+    existing_stickers = db.execute(
+        select(Sticker)
+        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+        .where(Sticker.source_block_id == block.id)
+        .order_by(Sticker.sort_order.asc(), Sticker.id.asc())
+    ).scalars().all()
+    replaced_count = len(existing_stickers) if replace_existing else 0
+
+    if replace_existing:
+        for sticker in existing_stickers:
+            delete_sticker_record(db, sticker)
+        db.flush()
+
+    page_image_path = settings.storage_root / source_page.image_path
+    if not page_image_path.exists():
+        raise FileNotFoundError("Imagem da pagina do documento fonte nao encontrada.")
+
+    with Image.open(page_image_path) as source_image:
+        page_width, page_height = source_image.size
+        left = max(0, int(round(block.x * page_width)))
+        top = max(0, int(round(block.y * page_height)))
+        right = min(page_width, int(round((block.x + block.width) * page_width)))
+        bottom = min(page_height, int(round((block.y + block.height) * page_height)))
+        if right <= left or bottom <= top:
+            raise ValueError("A area do bloco e invalida para deteccao.")
+
+        block_crop = source_image.crop((left, top, right, bottom))
+
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_path = Path(temp_file.name)
+        try:
+            block_crop.save(temp_path, optimize=True)
+            detection = detect_sticker_rectangles(temp_path)
+        finally:
+            temp_path.unlink(missing_ok=True)
+
+        if detection.status != "detected":
+            return {
+                "block_id": block.id,
+                "page_id": source_page.id,
+                "page_number": source_page.page_number,
+                "collection_id": collection.id,
+                "collection_name": collection.name,
+                "status": detection.status,
+                "template": detection.template,
+                "reason": detection.reason,
+                "detected_count": 0,
+                "replaced_count": replaced_count,
+            }
+
+        current_max_order = db.execute(
+            select(func.max(Sticker.sort_order)).where(Sticker.collection_id == collection.id)
+        ).scalar_one()
+        next_sort_order = (current_max_order or 0) + 1
+        created_stickers: list[Sticker] = []
+
+        for index, rectangle in enumerate(detection.rectangles, start=1):
+            global_x = round(block.x + (rectangle.x_ratio * block.width), 6)
+            global_y = round(block.y + (rectangle.y_ratio * block.height), 6)
+            global_width = round(rectangle.width_ratio * block.width, 6)
+            global_height = round(rectangle.height_ratio * block.height, 6)
+            validate_sticker_bounds(global_x, global_y, global_width, global_height)
+
+            sticker = Sticker(
+                collection=collection,
+                page=target_page,
+                source_document_id=source_page.document_id,
+                source_document_page_id=source_page.id,
+                source_block_id=block.id,
+                name=f"{collection.name} {source_page.page_number:02d}-{index:02d}",
+                code=f"bloco-{block.id}-p{source_page.page_number:02d}-{index:02d}",
+                category=rectangle.category,
+                source_type=StickerSourceType.PDF,
+                sort_order=next_sort_order,
+                x_ratio=global_x,
+                y_ratio=global_y,
+                width_ratio=global_width,
+                height_ratio=global_height,
+                active=True,
+                detected_automatically=True,
+                preview_path="",
+                crop_path="",
+            )
+            next_sort_order += 1
+            db.add(sticker)
+            created_stickers.append(sticker)
+
+        if created_stickers:
+            db.flush()
+            for sticker in created_stickers:
+                crop_sticker_image(sticker, page_image=source_image)
+            for sticker in created_stickers:
+                refresh_sticker_ocr(sticker, update_name=True)
+
+    return {
+        "block_id": block.id,
+        "page_id": source_page.id,
+        "page_number": source_page.page_number,
+        "collection_id": collection.id,
+        "collection_name": collection.name,
+        "status": detection.status,
+        "template": detection.template,
+        "reason": detection.reason,
+        "detected_count": len(detection.rectangles),
+        "replaced_count": replaced_count,
+    }
+
+
+def duplicate_blocks_from_previous_source_page(
+    db: Session,
+    page: SourceDocumentPage,
+    *,
+    replace_existing: bool = True,
+) -> SourceDocumentPage:
+    previous_page = db.execute(
+        select(SourceDocumentPage)
+        .options(
+            selectinload(SourceDocumentPage.blocks).selectinload(PageSelectionBlock.collection),
+        )
+        .where(
+            SourceDocumentPage.document_id == page.document_id,
+            SourceDocumentPage.page_number == page.page_number - 1,
+        )
+    ).scalar_one_or_none()
+    if previous_page is None:
+        raise ValueError("Nao existe pagina anterior nesse documento fonte.")
+    if not previous_page.blocks:
+        raise ValueError("A pagina anterior ainda nao tem blocos para duplicar.")
+
+    current_page = load_source_document_page_or_fail(db, page.id)
+
+    if replace_existing:
+        existing_blocks = list(current_page.blocks)
+        for block in existing_blocks:
+            for sticker in list(block.source_stickers):
+                delete_sticker_record(db, sticker)
+            db.delete(block)
+        db.flush()
+
+    for source_block in previous_page.blocks:
+        duplicated = PageSelectionBlock(
+            page_id=current_page.id,
+            collection_id=source_block.collection_id,
+            label=source_block.label,
+            x=source_block.x,
+            y=source_block.y,
+            width=source_block.width,
+            height=source_block.height,
+            sort_order=source_block.sort_order,
+        )
+        db.add(duplicated)
+    db.flush()
+    return load_source_document_page_or_fail(db, current_page.id)
+
+
+def duplicate_page_selection_block(
+    db: Session,
+    block: PageSelectionBlock,
+    *,
+    offset_ratio: float = 0.015,
+) -> PageSelectionBlock:
+    max_sort_order = (
+        db.execute(
+            select(func.max(PageSelectionBlock.sort_order)).where(PageSelectionBlock.page_id == block.page_id)
+        ).scalar_one()
+        or 0
+    )
+    max_x = max(0.0, 1.0 - block.width)
+    max_y = max(0.0, 1.0 - block.height)
+    duplicated = PageSelectionBlock(
+        page_id=block.page_id,
+        collection_id=block.collection_id,
+        label=block.label,
+        x=round(min(max_x, block.x + offset_ratio), 6),
+        y=round(min(max_y, block.y + offset_ratio), 6),
+        width=block.width,
+        height=block.height,
+        sort_order=max_sort_order + 1,
+    )
+    db.add(duplicated)
+    db.flush()
+    return load_page_selection_block_or_fail(db, duplicated.id)
+
+
+def create_page_layout_template_from_source_page(
+    db: Session,
+    page: SourceDocumentPage,
+    *,
+    name: str,
+) -> PageLayoutTemplate:
+    current_page = load_source_document_page_or_fail(db, page.id)
+    if not current_page.blocks:
+        raise ValueError("Essa pagina ainda nao tem blocos para salvar como layout mestre.")
+
+    normalized_name = name.strip()
+    if len(normalized_name) < 2:
+        raise ValueError("Informe um nome para o layout mestre.")
+
+    template = PageLayoutTemplate(
+        album_id=current_page.document.album_id,
+        name=normalized_name[:150],
+    )
+    db.add(template)
+    db.flush()
+
+    for block in current_page.blocks:
+        db.add(
+            PageLayoutTemplateBlock(
+                template_id=template.id,
+                collection_id=block.collection_id,
+                label=block.label,
+                x=block.x,
+                y=block.y,
+                width=block.width,
+                height=block.height,
+                sort_order=block.sort_order,
+            )
+        )
+    db.flush()
+    return load_page_layout_template_or_fail(db, template.id)
+
+
+def apply_page_layout_template_to_source_page(
+    db: Session,
+    template: PageLayoutTemplate,
+    page: SourceDocumentPage,
+    *,
+    replace_existing: bool = True,
+) -> SourceDocumentPage:
+    current_page = load_source_document_page_or_fail(db, page.id)
+    current_template = load_page_layout_template_or_fail(db, template.id)
+
+    if current_template.album_id != current_page.document.album_id:
+        raise ValueError("Esse layout mestre pertence a outro album.")
+    if not current_template.blocks:
+        raise ValueError("Esse layout mestre ainda nao tem blocos salvos.")
+
+    if replace_existing:
+        existing_blocks = list(current_page.blocks)
+        for block in existing_blocks:
+            for sticker in list(block.source_stickers):
+                delete_sticker_record(db, sticker)
+            db.delete(block)
+        db.flush()
+
+    for template_block in current_template.blocks:
+        db.add(
+            PageSelectionBlock(
+                page_id=current_page.id,
+                collection_id=template_block.collection_id,
+                label=template_block.label,
+                x=template_block.x,
+                y=template_block.y,
+                width=template_block.width,
+                height=template_block.height,
+                sort_order=template_block.sort_order,
+            )
+        )
+    db.flush()
+    return load_source_document_page_or_fail(db, current_page.id)
+
+
 def load_generated_sticker_for_session(db: Session, album_id: int, session_token: str) -> Sticker | None:
     if not session_token.strip():
         return None
@@ -573,6 +1770,7 @@ def load_latest_custom_sticker_unlock(
     *,
     album_id: int,
     session_token: str,
+    unlock_type: CustomStickerUnlockType = CustomStickerUnlockType.MANUAL_PDF,
 ) -> CustomStickerUnlock | None:
     normalized = session_token.strip()
     if not normalized:
@@ -583,6 +1781,7 @@ def load_latest_custom_sticker_unlock(
             .where(
                 CustomStickerUnlock.album_id == album_id,
                 CustomStickerUnlock.session_token == normalized,
+                CustomStickerUnlock.unlock_type == unlock_type,
             )
             .order_by(CustomStickerUnlock.updated_at.desc(), CustomStickerUnlock.id.desc())
         )
@@ -596,9 +1795,32 @@ def is_custom_sticker_unlocked(
     *,
     album_id: int,
     session_token: str,
+    unlock_type: CustomStickerUnlockType = CustomStickerUnlockType.MANUAL_PDF,
 ) -> bool:
-    unlock = load_latest_custom_sticker_unlock(db, album_id=album_id, session_token=session_token)
+    unlock = load_latest_custom_sticker_unlock(
+        db,
+        album_id=album_id,
+        session_token=session_token,
+        unlock_type=unlock_type,
+    )
     return bool(unlock and unlock.status == CustomStickerUnlockStatus.PAGO)
+
+
+def _custom_sticker_unlock_settings(
+    service_settings: ServiceSettings,
+    unlock_type: CustomStickerUnlockType,
+) -> tuple[bool, int, str | None]:
+    if unlock_type == CustomStickerUnlockType.AI_CREATE:
+        return (
+            service_settings.custom_ai_unlock_enabled,
+            service_settings.custom_ai_unlock_price_cents,
+            service_settings.custom_ai_unlock_message,
+        )
+    return (
+        service_settings.custom_sticker_unlock_enabled,
+        service_settings.custom_sticker_unlock_price_cents,
+        service_settings.custom_sticker_unlock_message,
+    )
 
 
 def _mercadopago_client() -> MercadoPagoPixClient:
@@ -643,23 +1865,36 @@ def get_or_create_custom_sticker_unlock(
     db: Session,
     *,
     album: Album,
-    sticker: Sticker,
+    sticker: Sticker | None,
     session_token: str,
     service_settings: ServiceSettings,
+    unlock_type: CustomStickerUnlockType = CustomStickerUnlockType.MANUAL_PDF,
 ) -> CustomStickerUnlock:
     normalized_session = session_token.strip()
     if not normalized_session:
         raise ValueError("Sessao invalida para liberar a Minha Figurinha.")
-    if sticker.source_type != StickerSourceType.GENERATED:
-        raise ValueError("A liberacao paga so vale para a Minha Figurinha.")
-    if sticker.session_token != normalized_session:
-        raise ValueError("Essa Minha Figurinha nao pertence a esta sessao.")
-    if not service_settings.custom_sticker_unlock_enabled:
+    if sticker is not None:
+        if sticker.source_type != StickerSourceType.GENERATED:
+            raise ValueError("A liberacao paga so vale para a Minha Figurinha.")
+        if sticker.session_token != normalized_session:
+            raise ValueError("Essa Minha Figurinha nao pertence a esta sessao.")
+
+    enabled, amount_cents, _ = _custom_sticker_unlock_settings(service_settings, unlock_type)
+    if not enabled:
+        if unlock_type == CustomStickerUnlockType.AI_CREATE:
+            raise ValueError("A cobranca antes da criacao com IA nao esta ativa no momento.")
         raise ValueError("A cobranca da Minha Figurinha nao esta ativa no momento.")
-    if service_settings.custom_sticker_unlock_price_cents <= 0:
+    if amount_cents <= 0:
+        if unlock_type == CustomStickerUnlockType.AI_CREATE:
+            raise ValueError("Configure o valor da criacao com IA antes de cobrar.")
         raise ValueError("Configure o valor da liberacao da Minha Figurinha antes de cobrar.")
 
-    current = load_latest_custom_sticker_unlock(db, album_id=album.id, session_token=normalized_session)
+    current = load_latest_custom_sticker_unlock(
+        db,
+        album_id=album.id,
+        session_token=normalized_session,
+        unlock_type=unlock_type,
+    )
     if current and current.status == CustomStickerUnlockStatus.PENDENTE:
         current = sync_custom_sticker_unlock_status(current)
         if current.status == CustomStickerUnlockStatus.PENDENTE:
@@ -668,17 +1903,24 @@ def get_or_create_custom_sticker_unlock(
         return current
 
     payment = _mercadopago_client().create_pix_payment(
-        amount_cents=service_settings.custom_sticker_unlock_price_cents,
-        description=f"Liberacao da Minha Figurinha - {album.name}",
+        amount_cents=amount_cents,
+        description=(
+            f"Criacao com IA - {album.name}"
+            if unlock_type == CustomStickerUnlockType.AI_CREATE
+            else f"Liberacao da Minha Figurinha - {album.name}"
+        ),
         payer_email=_mercadopago_payer_email(normalized_session, album),
-        external_reference=f"fig-{album.slug}-{normalized_session[:24]}-{uuid.uuid4().hex[:8]}",
+        external_reference=(
+            f"fig-{unlock_type.value.lower()}-{album.slug}-{normalized_session[:24]}-{uuid.uuid4().hex[:8]}"
+        ),
     )
 
     unlock = CustomStickerUnlock(
         album_id=album.id,
-        sticker_id=sticker.id,
+        sticker_id=sticker.id if sticker is not None else None,
         session_token=normalized_session,
-        amount_cents=service_settings.custom_sticker_unlock_price_cents,
+        unlock_type=unlock_type,
+        amount_cents=amount_cents,
         status=_map_unlock_status(payment.status, payment.status_detail),
         mp_payment_id=payment.payment_id or None,
         mp_external_reference=payment.external_reference or None,
@@ -778,6 +2020,7 @@ def upsert_generated_sticker(
     album: Album,
     session_token: str,
     template_id: int | None,
+    requested_composition_mode: CustomTemplateCompositionMode | None,
     name: str,
     profile_type: CustomProfileType,
     category_type: CustomCategoryType,
@@ -787,23 +2030,72 @@ def upsert_generated_sticker(
     weight_text: str | None,
     city_or_team: str | None,
     uploaded_photo_bytes: bytes,
+    prepared_portrait_bytes: bytes | None = None,
     photo_offset_x: float | None = None,
     photo_offset_y: float | None = None,
     photo_scale: float | None = None,
+    photo_rotation: float | None = None,
+    progress_callback: Callable[[int, str], None] | None = None,
 ) -> Sticker:
+    def report(progress: int, message: str) -> None:
+        if progress_callback:
+            progress_callback(progress, message)
+
     session_token = session_token.strip()
     if not session_token:
         raise ValueError("Sessao invalida para criar a figurinha personalizada.")
+    profile_type = normalize_custom_profile_type(profile_type)
 
+    report(8, "Validando o modelo...")
     service_settings = get_or_create_service_settings(db)
     template_sticker = resolve_generated_template_sticker(db, album)
     selected_template = resolve_custom_template_for_generation(
         db,
+        album_id=album.id,
         template_id=template_id,
         profile_type=profile_type,
         category_type=category_type,
         position_type=position_type,
     )
+    if template_id and selected_template is None:
+        raise ValueError("O modelo escolhido nao pertence a esse album, perfil ou posicao.")
+    if (
+        requested_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
+        and service_settings.custom_generation_mode != CustomTemplateCompositionMode.AI_OPTIONAL
+    ):
+        raise ValueError("A criacao por IA nao esta ativa no momento.")
+
+    resolved_composition_mode = (
+        requested_composition_mode
+        or (selected_template.composition_mode if selected_template else service_settings.custom_generation_mode)
+    )
+    if (
+        resolved_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
+        and service_settings.custom_ai_unlock_enabled
+        and not is_custom_sticker_unlocked(
+            db,
+            album_id=album.id,
+            session_token=session_token,
+            unlock_type=CustomStickerUnlockType.AI_CREATE,
+        )
+    ):
+        raise ValueError("Pague para liberar a criacao com IA antes de continuar.")
+    if resolved_composition_mode == CustomTemplateCompositionMode.LAYERS:
+        if not custom_template_supports_layer_composition(selected_template):
+            if template_id:
+                raise ValueError("O modelo selecionado ainda nao esta pronto para montagem manual.")
+            selected_template = resolve_custom_template_for_generation(
+                db,
+                album_id=album.id,
+                template_id=None,
+                profile_type=profile_type,
+                category_type=category_type,
+                position_type=position_type,
+                require_layer_ready=True,
+            )
+        if not custom_template_supports_layer_composition(selected_template):
+            raise ValueError("Ainda nao ha um modelo manual pronto para esse perfil e posicao.")
+    report(22, "Preparando o modelo...")
     collection, page = ensure_generated_collection_page(db, album, template_sticker)
     delete_generated_stickers_for_session(db, album.id, session_token)
 
@@ -822,9 +2114,10 @@ def upsert_generated_sticker(
     render = generate_custom_sticker_render(
         settings,
         uploaded_photo_bytes=uploaded_photo_bytes,
+        prepared_portrait_bytes=prepared_portrait_bytes,
         name=name.strip(),
         profile_type=profile_type.value,
-        composition_mode=(selected_template.composition_mode.value if selected_template else service_settings.custom_generation_mode.value),
+        composition_mode=resolved_composition_mode.value,
         template_layers=(
             [
                 {
@@ -848,8 +2141,13 @@ def upsert_generated_sticker(
                 "default_scale": selected_template.photo_slot.default_scale,
                 "min_scale": selected_template.photo_slot.min_scale,
                 "max_scale": selected_template.photo_slot.max_scale,
+                "portrait_z_index": resolve_effective_portrait_z_index(selected_template),
                 "anchor_x": selected_template.photo_slot.anchor_x,
                 "anchor_y": selected_template.photo_slot.anchor_y,
+                "visible_x": selected_template.photo_slot.visible_x,
+                "visible_y": selected_template.photo_slot.visible_y,
+                "visible_width": selected_template.photo_slot.visible_width,
+                "visible_height": selected_template.photo_slot.visible_height,
             }
             if selected_template and selected_template.photo_slot
             else None
@@ -880,12 +2178,14 @@ def upsert_generated_sticker(
         photo_offset_x=photo_offset_x,
         photo_offset_y=photo_offset_y,
         photo_scale=photo_scale,
+        photo_rotation=photo_rotation,
         base_template_path=resolve_template_preview_base_path(
             service_settings,
             template=selected_template,
             profile_type=profile_type,
         ),
         prompt_template=service_settings.custom_prompt_template,
+        progress_callback=progress_callback,
     )
 
     upload_dir = settings.storage_root / "custom_uploads" / album.slug
@@ -899,6 +2199,7 @@ def upsert_generated_sticker(
     upload_path = upload_dir / f"{asset_key}-upload.png"
     portrait_path = portrait_dir / f"{asset_key}-portrait.png"
     sticker_path = sticker_dir / f"{asset_key}-sticker.png"
+    report(96, "Salvando no album...")
     upload_path.write_bytes(uploaded_photo_bytes)
     portrait_path.write_bytes(render.portrait_bytes)
     sticker_path.write_bytes(render.final_bytes)
@@ -919,7 +2220,7 @@ def upsert_generated_sticker(
         profile_type=profile_type,
         custom_category_type=category_type,
         custom_position_type=position_type,
-        composition_mode_used=(selected_template.composition_mode if selected_template else service_settings.custom_generation_mode),
+        composition_mode_used=resolved_composition_mode,
         birth_date_text=(birth_date_text or "").strip() or None,
         height_text=(height_text or "").strip() or None,
         weight_text=(weight_text or "").strip() or None,
@@ -929,6 +2230,7 @@ def upsert_generated_sticker(
         photo_offset_x=photo_offset_x,
         photo_offset_y=photo_offset_y,
         photo_scale=photo_scale,
+        photo_rotation=photo_rotation,
         export_width_pt=export_width_pt,
         export_height_pt=export_height_pt,
         sort_order=(current_max_order or 0) + 1,
@@ -969,7 +2271,7 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
 
     source_pdf_paths: dict[int, Path] = {}
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]] = {}
-    template_layouts: dict[tuple[float, float], dict] = {}
+    template_layouts: dict[tuple[float, float], dict] = _build_source_document_export_layouts(album, db)
 
     def resolve_page_sizes(collection: Collection) -> dict[int, tuple[float, float]]:
         if collection.source_pdf_path:
@@ -985,8 +2287,9 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
                     )
                     for page_index in range(document.page_count)
                 }
+        rendered_page = any((page.image_path or "").startswith("source_document_pages/") for page in collection.pages)
         return {
-            page.page_number: (float(page.width), float(page.height))
+            page.page_number: _page_dimensions_for_export(page.width, page.height, rendered_page=rendered_page)
             for page in collection.pages
         }
 
@@ -994,9 +2297,6 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
         if collection.album_id != album.id:
             raise ValueError("Nao e possivel misturar figurinhas de albuns diferentes.")
         page_sizes_by_collection[collection.id] = resolve_page_sizes(collection)
-
-    if not template_collections:
-        raise ValueError("Nao existe uma selecao publicada para servir de base de exportacao nesse album.")
 
     for collection in template_collections:
         page_sizes = resolve_page_sizes(collection)
@@ -1018,7 +2318,11 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
         raise ValueError("Nao foi encontrada uma grade valida de exportacao para esse album.")
 
     for sticker in stickers:
-        if sticker.source_type == StickerSourceType.PDF and sticker.collection_id not in source_pdf_paths:
+        if sticker.source_type != StickerSourceType.PDF:
+            continue
+        if _sticker_asset_path_for_export(sticker):
+            continue
+        if sticker.collection_id not in source_pdf_paths:
             raise ValueError(f"A colecao {sticker.collection.name} nao possui PDF de origem para exportacao.")
 
     selected_groups: dict[tuple[float, float], list[Sticker]] = defaultdict(list)
@@ -1064,7 +2368,18 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
     }
 
 
-def build_export_pdf(album: Album, stickers: list[Sticker], db: Session, plan: dict | None = None) -> Export:
+def build_export_pdf(
+    album: Album,
+    stickers: list[Sticker],
+    db: Session,
+    plan: dict | None = None,
+    progress_callback: Callable[[int, str], None] | None = None,
+) -> Export:
+    def report(progress: int, message: str) -> None:
+        if progress_callback:
+            progress_callback(progress, message)
+
+    report(8, "Separando suas figurinhas...")
     export_dir = settings.storage_root / "exports" / album.slug
     export_dir.mkdir(parents=True, exist_ok=True)
     export_key = f"{datetime.utcnow():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
@@ -1081,7 +2396,12 @@ def build_export_pdf(album: Album, stickers: list[Sticker], db: Session, plan: d
         pdf.setTitle(f"{album.name} - figurinhas selecionadas")
 
         is_first_page = True
-        for batch in batches:
+        total_batches = max(len(batches), 1)
+        for batch_index, batch in enumerate(batches, start=1):
+            report(
+                20 + int(((batch_index - 1) / total_batches) * 58),
+                f"Montando pagina {batch_index} de {total_batches}...",
+            )
             page_width, page_height = batch["page_size"]
             if not is_first_page:
                 pdf.showPage()
@@ -1096,23 +2416,33 @@ def build_export_pdf(album: Album, stickers: list[Sticker], db: Session, plan: d
                 )
                 x_position = slot["x_pt"]
                 y_position = page_height - slot["y_pt"] - slot["height_pt"]
+                bleed_x = min(0.6, slot["width_pt"] * 0.01)
+                bleed_y = min(0.6, slot["height_pt"] * 0.01)
+                clip_path = pdf.beginPath()
+                clip_path.rect(x_position, y_position, slot["width_pt"], slot["height_pt"])
+                pdf.saveState()
+                pdf.clipPath(clip_path, stroke=0, fill=0)
                 pdf.drawImage(
                     ImageReader(io.BytesIO(image_bytes)),
-                    x_position,
-                    y_position,
-                    width=slot["width_pt"],
-                    height=slot["height_pt"],
+                    x_position - bleed_x,
+                    y_position - bleed_y,
+                    width=slot["width_pt"] + (bleed_x * 2),
+                    height=slot["height_pt"] + (bleed_y * 2),
                     preserveAspectRatio=False,
                     mask="auto",
                 )
+                pdf.restoreState()
 
+            _draw_export_cut_reference_lines(pdf, batch["placements"], page_height)
             is_first_page = False
 
+        report(88, "Gerando o PDF...")
         pdf.save()
     finally:
         for document in documents.values():
             document.close()
 
+    report(98, "Finalizando download...")
     primary_collection = next((sticker.collection for sticker in stickers if not sticker.collection.is_system), stickers[0].collection)
     export_record = Export(
         collection=primary_collection,
@@ -1122,6 +2452,66 @@ def build_export_pdf(album: Album, stickers: list[Sticker], db: Session, plan: d
     db.add(export_record)
     db.flush()
     return export_record
+
+
+def _sticker_asset_path_for_export(sticker: Sticker) -> Path | None:
+    for relative_path in (sticker.crop_path, sticker.preview_path):
+        if not relative_path:
+            continue
+        candidate = settings.storage_root / relative_path
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def _draw_export_cut_reference_lines(pdf: canvas.Canvas, placements: list[tuple[dict, Sticker]], page_height: float) -> None:
+    if not placements:
+        return
+
+    slots = [slot for slot, _ in placements]
+    widths = [slot["width_pt"] for slot in slots]
+    heights = [slot["height_pt"] for slot in slots]
+    median_width = float(median(widths))
+    median_height = float(median(heights))
+    tolerance_x = max(0.5, median_width * 0.02)
+    tolerance_y = max(0.5, median_height * 0.02)
+
+    x_edges = _cluster_slot_axis(
+        [slot["x_pt"] for slot in slots] + [slot["x_pt"] + slot["width_pt"] for slot in slots],
+        tolerance_x,
+    )
+    y_edges = _cluster_slot_axis(
+        [slot["y_pt"] for slot in slots] + [slot["y_pt"] + slot["height_pt"] for slot in slots],
+        tolerance_y,
+    )
+    if len(x_edges) < 2 or len(y_edges) < 2:
+        return
+
+    left_edge = min(x_edges)
+    right_edge = max(x_edges)
+    top_edge = min(y_edges)
+    bottom_edge = max(y_edges)
+
+    pdf.saveState()
+    pdf.setStrokeColor(HexColor("#34373a"))
+    try:
+        pdf.setStrokeAlpha(0.6)
+    except AttributeError:
+        pass
+    pdf.setLineWidth(0.5)
+    pdf.setLineJoin(1)
+    pdf.setLineCap(1)
+
+    vertical_start = page_height - bottom_edge
+    vertical_end = page_height - top_edge
+    for x_edge in x_edges:
+        pdf.line(x_edge, vertical_start, x_edge, vertical_end)
+
+    for y_edge in y_edges:
+        canvas_y = page_height - y_edge
+        pdf.line(left_edge, canvas_y, right_edge, canvas_y)
+
+    pdf.restoreState()
 
 
 def build_order_quote(album: Album, stickers: list[Sticker], db: Session, service_settings: ServiceSettings) -> dict:
@@ -1156,6 +2546,91 @@ def build_order_quote(album: Album, stickers: list[Sticker], db: Session, servic
         "pix_holder": service_settings.pix_holder,
         "pickup_note": service_settings.pickup_note,
     }
+
+
+def _page_dimensions_for_export(width: float, height: float, *, rendered_page: bool) -> tuple[float, float]:
+    if rendered_page:
+        return float(width) / settings.render_scale, float(height) / settings.render_scale
+    return float(width), float(height)
+
+
+def _source_document_page_dimensions_for_export(page: SourceDocumentPage) -> tuple[float, float]:
+    return _page_dimensions_for_export(page.width, page.height, rendered_page=True)
+
+
+def _source_detected_sticker_box_points(
+    detected_sticker: SourceDetectedSticker,
+    page: SourceDocumentPage,
+) -> tuple[float, float, float, float]:
+    page_width, page_height = _source_document_page_dimensions_for_export(page)
+    return (
+        page_width * detected_sticker.x_ratio,
+        page_height * detected_sticker.y_ratio,
+        page_width * detected_sticker.width_ratio,
+        page_height * detected_sticker.height_ratio,
+    )
+
+
+def _source_detected_sticker_size_key(
+    detected_sticker: SourceDetectedSticker,
+    page: SourceDocumentPage,
+) -> tuple[float, float]:
+    _, _, width_pt, height_pt = _source_detected_sticker_box_points(detected_sticker, page)
+    return round(width_pt), round(height_pt)
+
+
+def _cluster_slot_axis(values: list[float], tolerance: float) -> list[float]:
+    if not values:
+        return []
+
+    sorted_values = sorted(values)
+    clusters: list[list[float]] = [[sorted_values[0]]]
+    for value in sorted_values[1:]:
+        current_cluster = clusters[-1]
+        current_center = median(current_cluster)
+        if abs(value - current_center) <= tolerance:
+            current_cluster.append(value)
+        else:
+            clusters.append([value])
+
+    return [float(median(cluster)) for cluster in clusters]
+
+
+def _normalize_export_slots(slots: list[dict]) -> list[dict]:
+    if len(slots) < 4:
+        return slots
+
+    widths = [slot["width_pt"] for slot in slots]
+    heights = [slot["height_pt"] for slot in slots]
+    median_width = float(median(widths))
+    median_height = float(median(heights))
+    tolerance_x = max(0.75, median_width * 0.18)
+    tolerance_y = max(0.75, median_height * 0.18)
+    x_clusters = _cluster_slot_axis([slot["x_pt"] for slot in slots], tolerance_x)
+    y_clusters = _cluster_slot_axis([slot["y_pt"] for slot in slots], tolerance_y)
+    if not x_clusters or not y_clusters:
+        return slots
+
+    x_origin = min(x_clusters)
+    y_origin = min(y_clusters)
+    normalized_x_clusters = [x_origin + (index * median_width) for index in range(len(x_clusters))]
+    normalized_y_clusters = [y_origin + (index * median_height) for index in range(len(y_clusters))]
+
+    normalized_slots = []
+    for slot in slots:
+        x_index = min(range(len(x_clusters)), key=lambda current: abs(x_clusters[current] - slot["x_pt"]))
+        y_index = min(range(len(y_clusters)), key=lambda current: abs(y_clusters[current] - slot["y_pt"]))
+        snapped_x = normalized_x_clusters[x_index]
+        snapped_y = normalized_y_clusters[y_index]
+        normalized_slots.append(
+            {
+                "x_pt": round(snapped_x, 3),
+                "y_pt": round(snapped_y, 3),
+                "width_pt": round(median_width, 3),
+                "height_pt": round(median_height, 3),
+            }
+        )
+    return normalized_slots
 
 
 def create_print_order(
@@ -1265,6 +2740,70 @@ def _sticker_size_key(
     return round(width_pt), round(height_pt)
 
 
+def _build_source_document_export_layouts(album: Album, db: Session) -> dict[tuple[float, float], dict]:
+    pages = db.execute(
+        select(SourceDocumentPage)
+        .join(SourceDocument, SourceDocumentPage.document_id == SourceDocument.id)
+        .options(selectinload(SourceDocumentPage.detected_stickers))
+        .where(SourceDocument.album_id == album.id)
+    ).scalars().all()
+
+    by_size: dict[tuple[float, float], list[tuple[SourceDocumentPage, SourceDetectedSticker]]] = defaultdict(list)
+    for page in pages:
+        valid_detected = [
+            detected
+            for detected in page.detected_stickers
+            if detected.status != SourceDetectedStickerStatus.DESCARTADA
+        ]
+        for detected in valid_detected:
+            by_size[_source_detected_sticker_size_key(detected, page)].append((page, detected))
+
+    templates: dict[tuple[float, float], dict] = {}
+    for size_key, entries in by_size.items():
+        by_page: dict[int, list[SourceDetectedSticker]] = defaultdict(list)
+        pages_by_id: dict[int, SourceDocumentPage] = {}
+        for page, detected in entries:
+            by_page[page.id].append(detected)
+            pages_by_id[page.id] = page
+
+        template_page_id, template_group = max(
+            by_page.items(),
+            key=lambda item: (
+                len(item[1]),
+                -pages_by_id[item[0]].page_number,
+                -pages_by_id[item[0]].id,
+            ),
+        )
+        template_page = pages_by_id[template_page_id]
+        page_width, page_height = _source_document_page_dimensions_for_export(template_page)
+        slots = []
+        for detected in sorted(
+            template_group,
+            key=lambda current: (
+                round(current.y_ratio, 6),
+                round(current.x_ratio, 6),
+                current.id,
+            ),
+        ):
+            x_pt, y_pt, width_pt, height_pt = _source_detected_sticker_box_points(detected, template_page)
+            slots.append(
+                {
+                    "x_pt": x_pt,
+                    "y_pt": y_pt,
+                    "width_pt": width_pt,
+                    "height_pt": height_pt,
+                }
+            )
+
+        templates[size_key] = {
+            "page_size": (page_width, page_height),
+            "page_number": template_page.page_number,
+            "slots": _normalize_export_slots(slots),
+        }
+
+    return templates
+
+
 def _build_template_export_layouts(
     stickers: list[Sticker],
     page_sizes: dict[int, tuple[float, float]],
@@ -1308,7 +2847,7 @@ def _build_template_export_layouts(
         templates[size_key] = {
             "page_size": (page_width, page_height),
             "page_number": template_page_number,
-            "slots": slots,
+            "slots": _normalize_export_slots(slots),
         }
 
     return templates
@@ -1320,10 +2859,10 @@ def _render_sticker_export_image(
     sticker: Sticker,
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]],
 ) -> bytes:
-    if sticker.source_type == StickerSourceType.GENERATED:
-        sticker_file = settings.storage_root / sticker.crop_path
-        if not sticker_file.exists():
-            raise FileNotFoundError(f"Arquivo da figurinha personalizada {sticker.name} nao encontrado.")
+    sticker_file = _sticker_asset_path_for_export(sticker)
+    if sticker.source_type == StickerSourceType.GENERATED or sticker_file is not None:
+        if not sticker_file:
+            raise FileNotFoundError(f"Arquivo da figurinha {sticker.name} nao encontrado.")
         return sticker_file.read_bytes()
 
     document = documents.get(sticker.collection_id)
@@ -1372,6 +2911,81 @@ def load_album_by_slug_or_fail(db: Session, slug: str) -> Album:
     if not album:
         raise LookupError("Album nao encontrado.")
     return album
+
+
+def load_source_document_or_fail(db: Session, document_id: int) -> SourceDocument:
+    document = db.execute(
+        select(SourceDocument)
+        .options(
+            selectinload(SourceDocument.album),
+            selectinload(SourceDocument.pages).selectinload(SourceDocumentPage.blocks).selectinload(PageSelectionBlock.collection),
+            selectinload(SourceDocument.pages).selectinload(SourceDocumentPage.detected_stickers).selectinload(SourceDetectedSticker.assigned_collection),
+            selectinload(SourceDocument.detected_stickers).selectinload(SourceDetectedSticker.assigned_collection),
+        )
+        .where(SourceDocument.id == document_id)
+    ).scalar_one_or_none()
+    if not document:
+        raise LookupError("Documento fonte nao encontrado.")
+    return document
+
+
+def load_source_document_page_or_fail(db: Session, page_id: int) -> SourceDocumentPage:
+    page = db.execute(
+        select(SourceDocumentPage)
+        .options(
+            selectinload(SourceDocumentPage.document).selectinload(SourceDocument.album),
+            selectinload(SourceDocumentPage.blocks).selectinload(PageSelectionBlock.collection),
+            selectinload(SourceDocumentPage.blocks).selectinload(PageSelectionBlock.source_stickers),
+            selectinload(SourceDocumentPage.detected_stickers).selectinload(SourceDetectedSticker.assigned_collection),
+        )
+        .where(SourceDocumentPage.id == page_id)
+    ).scalar_one_or_none()
+    if not page:
+        raise LookupError("Pagina do documento fonte nao encontrada.")
+    return page
+
+
+def load_source_detected_sticker_or_fail(db: Session, detected_sticker_id: int) -> SourceDetectedSticker:
+    detected_sticker = db.execute(
+        select(SourceDetectedSticker)
+        .options(
+            selectinload(SourceDetectedSticker.document).selectinload(SourceDocument.album),
+            selectinload(SourceDetectedSticker.page),
+            selectinload(SourceDetectedSticker.assigned_collection),
+        )
+        .where(SourceDetectedSticker.id == detected_sticker_id)
+    ).scalar_one_or_none()
+    if not detected_sticker:
+        raise LookupError("Figurinha detectada nao encontrada.")
+    return detected_sticker
+
+
+def load_page_layout_template_or_fail(db: Session, template_id: int) -> PageLayoutTemplate:
+    template = db.execute(
+        select(PageLayoutTemplate)
+        .options(
+            selectinload(PageLayoutTemplate.album),
+            selectinload(PageLayoutTemplate.blocks).selectinload(PageLayoutTemplateBlock.collection),
+        )
+        .where(PageLayoutTemplate.id == template_id)
+    ).scalar_one_or_none()
+    if not template:
+        raise LookupError("Layout mestre nao encontrado.")
+    return template
+
+
+def load_page_selection_block_or_fail(db: Session, block_id: int) -> PageSelectionBlock:
+    block = db.execute(
+        select(PageSelectionBlock)
+        .options(
+            selectinload(PageSelectionBlock.page).selectinload(SourceDocumentPage.document).selectinload(SourceDocument.album),
+            selectinload(PageSelectionBlock.collection),
+        )
+        .where(PageSelectionBlock.id == block_id)
+    ).scalar_one_or_none()
+    if not block:
+        raise LookupError("Bloco da selecao nao encontrado.")
+    return block
 
 
 def load_sticker_or_fail(db: Session, sticker_id: int) -> Sticker:
@@ -1437,17 +3051,144 @@ def page_to_response(page: Page) -> dict:
     }
 
 
+def page_selection_block_to_response(block: PageSelectionBlock) -> dict:
+    return {
+        "id": block.id,
+        "page_id": block.page_id,
+        "collection_id": block.collection_id,
+        "collection_name": block.collection.name if block.collection else None,
+        "label": block.label,
+        "x": block.x,
+        "y": block.y,
+        "width": block.width,
+        "height": block.height,
+        "sort_order": block.sort_order,
+        "created_at": block.created_at,
+        "updated_at": block.updated_at,
+    }
+
+
+def source_detected_status_counts(
+    detected_stickers: list[SourceDetectedSticker],
+) -> dict[SourceDetectedStickerStatus, int]:
+    counts: dict[SourceDetectedStickerStatus, int] = defaultdict(int)
+    for detected_sticker in detected_stickers:
+        counts[detected_sticker.status] += 1
+    return counts
+
+
+def source_detected_sticker_to_response(detected_sticker: SourceDetectedSticker) -> dict:
+    return {
+        "id": detected_sticker.id,
+        "document_id": detected_sticker.document_id,
+        "page_id": detected_sticker.page_id,
+        "assigned_collection_id": detected_sticker.assigned_collection_id,
+        "assigned_collection_name": detected_sticker.assigned_collection.name if detected_sticker.assigned_collection else None,
+        "status": detected_sticker.status,
+        "category": detected_sticker.category,
+        "x_ratio": detected_sticker.x_ratio,
+        "y_ratio": detected_sticker.y_ratio,
+        "width_ratio": detected_sticker.width_ratio,
+        "height_ratio": detected_sticker.height_ratio,
+        "preview_path": detected_sticker.preview_path,
+        "crop_path": detected_sticker.crop_path,
+        "ocr_name_raw": detected_sticker.ocr_name_raw,
+        "ocr_name_suggested": detected_sticker.ocr_name_suggested,
+        "ocr_confidence": detected_sticker.ocr_confidence,
+        "ocr_processed_at": detected_sticker.ocr_processed_at,
+        "created_at": detected_sticker.created_at,
+        "updated_at": detected_sticker.updated_at,
+    }
+
+
+def source_document_page_to_response(page: SourceDocumentPage) -> dict:
+    counts = source_detected_status_counts(page.detected_stickers)
+    return {
+        "id": page.id,
+        "document_id": page.document_id,
+        "page_number": page.page_number,
+        "image_path": page.image_path,
+        "width": page.width,
+        "height": page.height,
+        "detected_count": len(page.detected_stickers),
+        "pending_detected_count": counts.get(SourceDetectedStickerStatus.PENDENTE, 0),
+        "assigned_detected_count": counts.get(SourceDetectedStickerStatus.ATRIBUIDA, 0),
+        "discarded_detected_count": counts.get(SourceDetectedStickerStatus.DESCARTADA, 0),
+        "blocks": [page_selection_block_to_response(block) for block in page.blocks],
+    }
+
+
+def page_layout_template_block_to_response(block: PageLayoutTemplateBlock) -> dict:
+    return {
+        "id": block.id,
+        "template_id": block.template_id,
+        "collection_id": block.collection_id,
+        "collection_name": block.collection.name if block.collection else None,
+        "label": block.label,
+        "x": block.x,
+        "y": block.y,
+        "width": block.width,
+        "height": block.height,
+        "sort_order": block.sort_order,
+        "created_at": block.created_at,
+        "updated_at": block.updated_at,
+    }
+
+
+def page_layout_template_to_response(template: PageLayoutTemplate) -> dict:
+    return {
+        "id": template.id,
+        "album_id": template.album_id,
+        "album_name": template.album.name if template.album else None,
+        "name": template.name,
+        "block_count": len(template.blocks),
+        "created_at": template.created_at,
+        "updated_at": template.updated_at,
+        "blocks": [page_layout_template_block_to_response(block) for block in template.blocks],
+    }
+
+
+def source_document_to_summary_response(document: SourceDocument) -> dict:
+    counts = source_detected_status_counts(document.detected_stickers)
+    return {
+        "id": document.id,
+        "album_id": document.album_id,
+        "album_name": document.album.name if document.album else None,
+        "album_slug": document.album.slug if document.album else None,
+        "title": document.title,
+        "pdf_path": document.pdf_path,
+        "page_count": document.page_count,
+        "status": document.status,
+        "block_count": sum(len(page.blocks) for page in document.pages),
+        "detected_count": len(document.detected_stickers),
+        "pending_detected_count": counts.get(SourceDetectedStickerStatus.PENDENTE, 0),
+        "assigned_detected_count": counts.get(SourceDetectedStickerStatus.ATRIBUIDA, 0),
+        "discarded_detected_count": counts.get(SourceDetectedStickerStatus.DESCARTADA, 0),
+        "created_at": document.created_at,
+        "updated_at": document.updated_at,
+    }
+
+
+def source_document_to_detail_response(document: SourceDocument) -> dict:
+    payload = source_document_to_summary_response(document)
+    payload["pages"] = [source_document_page_to_response(page) for page in document.pages]
+    return payload
+
+
 def sticker_to_response(sticker: Sticker) -> dict:
     return {
         "id": sticker.id,
         "collection_id": sticker.collection_id,
         "page_id": sticker.page_id,
         "template_id": sticker.template_id,
+        "source_document_id": sticker.source_document_id,
+        "source_document_page_id": sticker.source_document_page_id,
+        "source_block_id": sticker.source_block_id,
         "name": sticker.name,
         "code": sticker.code,
         "category": sticker.category,
         "source_type": sticker.source_type,
-        "profile_type": sticker.profile_type,
+        "profile_type": normalize_custom_profile_type(sticker.profile_type),
         "custom_category_type": sticker.custom_category_type,
         "custom_position_type": sticker.custom_position_type,
         "composition_mode_used": sticker.composition_mode_used,
@@ -1458,6 +3199,7 @@ def sticker_to_response(sticker: Sticker) -> dict:
         "photo_offset_x": sticker.photo_offset_x,
         "photo_offset_y": sticker.photo_offset_y,
         "photo_scale": sticker.photo_scale,
+        "photo_rotation": sticker.photo_rotation,
         "sort_order": sticker.sort_order,
         "x_ratio": sticker.x_ratio,
         "y_ratio": sticker.y_ratio,
@@ -1485,6 +3227,9 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
         "custom_sticker_unlock_enabled": service_settings.custom_sticker_unlock_enabled,
         "custom_sticker_unlock_price_cents": service_settings.custom_sticker_unlock_price_cents,
         "custom_sticker_unlock_message": service_settings.custom_sticker_unlock_message,
+        "custom_ai_unlock_enabled": service_settings.custom_ai_unlock_enabled,
+        "custom_ai_unlock_price_cents": service_settings.custom_ai_unlock_price_cents,
+        "custom_ai_unlock_message": service_settings.custom_ai_unlock_message,
         "pack_size": service_settings.pack_size,
         "print_price_cents": service_settings.print_price_cents,
         "pack_price_cents": service_settings.pack_price_cents,
@@ -1495,24 +3240,127 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
         "custom_prompt_template": service_settings.custom_prompt_template or DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE,
         "custom_base_homem_path": service_settings.custom_base_homem_path,
         "custom_base_mulher_path": service_settings.custom_base_mulher_path,
+        "custom_base_crianca_path": (
+            service_settings.custom_base_menino_path or service_settings.custom_base_menina_path
+        ),
         "custom_base_menino_path": service_settings.custom_base_menino_path,
         "custom_base_menina_path": service_settings.custom_base_menina_path,
     }
 
 
+def custom_template_layer_inventory(template: CustomStickerTemplate | None) -> dict[CustomTemplateLayerType, int]:
+    counts: dict[CustomTemplateLayerType, int] = defaultdict(int)
+    if template is None:
+        return counts
+    for layer in template.layers:
+        if layer.is_active and layer.file_path:
+            counts[layer.layer_type] += 1
+    return counts
+
+
+def custom_template_manual_status(template: CustomStickerTemplate | None) -> dict:
+    inventory = custom_template_layer_inventory(template)
+    foreground_count = sum(inventory.get(layer_type, 0) for layer_type in CUSTOM_TEMPLATE_REQUIRED_FOREGROUND_LAYER_TYPES)
+    text_slot_count = len(template.text_slots) if template else 0
+    has_photo_slot = template is not None and template.photo_slot is not None
+
+    checks = [
+        {
+            "key": "photo_slot",
+            "label": "Area da foto",
+            "ready": has_photo_slot,
+            "detail": (
+                "A foto vai encaixar no espaco configurado do modelo."
+                if has_photo_slot
+                else "Defina onde a foto recortada entra no modelo."
+            ),
+        },
+        {
+            "key": "background",
+            "label": "Fundo",
+            "ready": inventory.get(CustomTemplateLayerType.BACKGROUND, 0) > 0,
+            "detail": (
+                f"{inventory.get(CustomTemplateLayerType.BACKGROUND, 0)} camada(s) de fundo encontrada(s)."
+                if inventory.get(CustomTemplateLayerType.BACKGROUND, 0) > 0
+                else "Importe uma imagem de fundo para o modelo."
+            ),
+        },
+        {
+            "key": "info_panel",
+            "label": "Faixa de informacoes",
+            "ready": inventory.get(CustomTemplateLayerType.INFO_PANEL, 0) > 0,
+            "detail": (
+                f"{inventory.get(CustomTemplateLayerType.INFO_PANEL, 0)} faixa(s) de informacoes encontrada(s)."
+                if inventory.get(CustomTemplateLayerType.INFO_PANEL, 0) > 0
+                else "Importe a faixa onde ficam nome, data, altura, peso e cidade/time."
+            ),
+        },
+        {
+            "key": "foreground",
+            "label": "Moldura ou camada frontal",
+            "ready": foreground_count > 0,
+            "detail": (
+                f"{foreground_count} camada(s) frontal(is) pronta(s)."
+                if foreground_count > 0
+                else "Importe pelo menos uma moldura, camisa frontal, overlay ou brilho."
+            ),
+        },
+        {
+            "key": "text_slots",
+            "label": "Campos de texto",
+            "ready": text_slot_count > 0,
+            "detail": (
+                f"{text_slot_count} slot(s) de texto configurado(s)."
+                if text_slot_count > 0
+                else "Adicione ao menos um slot de texto para os dados da figurinha."
+            ),
+        },
+    ]
+
+    missing_labels = [check["label"] for check in checks if not check["ready"]]
+    layer_inventory = [
+        {
+            "layer_type": layer_type,
+            "label": CUSTOM_TEMPLATE_LAYER_LABELS[layer_type],
+            "count": inventory.get(layer_type, 0),
+        }
+        for layer_type in (
+            CustomTemplateLayerType.BACKGROUND,
+            CustomTemplateLayerType.FRAME,
+            CustomTemplateLayerType.PHOTO_FRONT,
+            CustomTemplateLayerType.INFO_PANEL,
+            CustomTemplateLayerType.OVERLAY,
+            CustomTemplateLayerType.SHINE,
+        )
+    ]
+
+    return {
+        "ready": not missing_labels,
+        "missing_count": len(missing_labels),
+        "missing_labels": missing_labels,
+        "checks": checks,
+        "layer_inventory": layer_inventory,
+    }
+
+
 def custom_template_to_summary_response(template: CustomStickerTemplate) -> dict:
+    manual_status = custom_template_manual_status(template)
+    manual_ready = manual_status["ready"]
     return {
         "id": template.id,
+        "album_id": template.album_id,
         "name": template.name,
-        "profile_type": template.profile_type,
+        "profile_type": normalize_custom_profile_type(template.profile_type),
         "category_type": template.category_type,
         "position_type": template.position_type,
         "composition_mode": template.composition_mode,
         "sort_order": template.sort_order,
         "is_active": template.is_active,
-        "layer_count": len(template.layers),
+        "layer_count": len([layer for layer in template.layers if layer.is_active and layer.file_path]),
         "preview_path": custom_template_preview_path(template),
         "has_photo_slot": template.photo_slot is not None,
+        "manual_ready": manual_ready,
+        "manual_status": manual_status,
         "text_slot_count": len(template.text_slots),
         "created_at": template.created_at,
         "updated_at": template.updated_at,
@@ -1520,16 +3368,21 @@ def custom_template_to_summary_response(template: CustomStickerTemplate) -> dict
 
 
 def custom_template_to_detail_response(template: CustomStickerTemplate) -> dict:
+    manual_status = custom_template_manual_status(template)
+    manual_ready = manual_status["ready"]
     return {
         "id": template.id,
+        "album_id": template.album_id,
         "name": template.name,
-        "profile_type": template.profile_type,
+        "profile_type": normalize_custom_profile_type(template.profile_type),
         "category_type": template.category_type,
         "position_type": template.position_type,
         "composition_mode": template.composition_mode,
         "sort_order": template.sort_order,
         "is_active": template.is_active,
         "preview_path": custom_template_preview_path(template),
+        "manual_ready": manual_ready,
+        "manual_status": manual_status,
         "created_at": template.created_at,
         "updated_at": template.updated_at,
         "layers": [
@@ -1553,8 +3406,13 @@ def custom_template_to_detail_response(template: CustomStickerTemplate) -> dict:
                 "default_scale": template.photo_slot.default_scale,
                 "min_scale": template.photo_slot.min_scale,
                 "max_scale": template.photo_slot.max_scale,
+                "portrait_z_index": resolve_effective_portrait_z_index(template),
                 "anchor_x": template.photo_slot.anchor_x,
                 "anchor_y": template.photo_slot.anchor_y,
+                "visible_x": template.photo_slot.visible_x,
+                "visible_y": template.photo_slot.visible_y,
+                "visible_width": template.photo_slot.visible_width,
+                "visible_height": template.photo_slot.visible_height,
             }
             if template.photo_slot
             else None
@@ -1577,21 +3435,79 @@ def custom_template_to_detail_response(template: CustomStickerTemplate) -> dict:
 
 
 def custom_template_to_public_option(template: CustomStickerTemplate) -> dict:
+    manual_status = custom_template_manual_status(template)
+    manual_ready = manual_status["ready"]
     return {
         "id": template.id,
+        "album_id": template.album_id,
         "name": template.name,
-        "profile_type": template.profile_type,
+        "profile_type": normalize_custom_profile_type(template.profile_type),
         "category_type": template.category_type,
         "position_type": template.position_type,
         "composition_mode": template.composition_mode,
         "preview_path": custom_template_preview_path(template),
         "sort_order": template.sort_order,
+        "layer_count": len([layer for layer in template.layers if layer.is_active and layer.file_path]),
+        "has_photo_slot": template.photo_slot is not None,
+        "manual_ready": manual_ready,
+        "manual_status": manual_status,
+        "layers": [
+            {
+                "id": layer.id,
+                "layer_type": layer.layer_type,
+                "label": layer.label,
+                "file_path": layer.file_path,
+                "z_index": layer.z_index,
+                "is_active": layer.is_active,
+            }
+            for layer in template.layers
+        ],
+        "photo_slot": (
+            {
+                "id": template.photo_slot.id,
+                "x": template.photo_slot.x,
+                "y": template.photo_slot.y,
+                "width": template.photo_slot.width,
+                "height": template.photo_slot.height,
+                "default_scale": template.photo_slot.default_scale,
+                "min_scale": template.photo_slot.min_scale,
+                "max_scale": template.photo_slot.max_scale,
+                "portrait_z_index": resolve_effective_portrait_z_index(template),
+                "anchor_x": template.photo_slot.anchor_x,
+                "anchor_y": template.photo_slot.anchor_y,
+                "visible_x": template.photo_slot.visible_x,
+                "visible_y": template.photo_slot.visible_y,
+                "visible_width": template.photo_slot.visible_width,
+                "visible_height": template.photo_slot.visible_height,
+            }
+            if template.photo_slot
+            else None
+        ),
+        "text_slots": [
+            {
+                "id": slot.id,
+                "field_name": slot.field_name,
+                "x": slot.x,
+                "y": slot.y,
+                "width": slot.width,
+                "font_size": slot.font_size,
+                "font_weight": slot.font_weight,
+                "text_align": slot.text_align,
+                "color": slot.color,
+            }
+            for slot in template.text_slots
+        ],
     }
 
 
-def load_active_custom_templates(db: Session) -> list[CustomStickerTemplate]:
-    return db.execute(
+def load_active_custom_templates(db: Session, *, album_id: int | None = None) -> list[CustomStickerTemplate]:
+    statement = (
         select(CustomStickerTemplate)
+        .options(
+            selectinload(CustomStickerTemplate.layers),
+            selectinload(CustomStickerTemplate.photo_slot),
+            selectinload(CustomStickerTemplate.text_slots),
+        )
         .where(CustomStickerTemplate.is_active.is_(True))
         .order_by(
             CustomStickerTemplate.sort_order.asc(),
@@ -1599,32 +3515,53 @@ def load_active_custom_templates(db: Session) -> list[CustomStickerTemplate]:
             CustomStickerTemplate.position_type.asc(),
             CustomStickerTemplate.id.asc(),
         )
-    ).scalars().all()
+    )
+    if album_id is not None:
+        statement = statement.where(CustomStickerTemplate.album_id == album_id)
+    return db.execute(statement).scalars().all()
 
 
 def resolve_custom_template_for_generation(
     db: Session,
     *,
+    album_id: int,
     template_id: int | None,
     profile_type: CustomProfileType,
     category_type: CustomCategoryType,
     position_type: CustomPositionType,
+    require_layer_ready: bool = False,
 ) -> CustomStickerTemplate | None:
+    profile_values = custom_profile_type_values_for_match(profile_type)
     statement = select(CustomStickerTemplate).options(
         selectinload(CustomStickerTemplate.layers),
         selectinload(CustomStickerTemplate.photo_slot),
         selectinload(CustomStickerTemplate.text_slots),
     )
     if template_id:
-        statement = statement.where(CustomStickerTemplate.id == template_id, CustomStickerTemplate.is_active.is_(True))
+        statement = statement.where(
+            CustomStickerTemplate.id == template_id,
+            CustomStickerTemplate.album_id == album_id,
+            CustomStickerTemplate.is_active.is_(True),
+            CustomStickerTemplate.profile_type.in_(profile_values),
+            CustomStickerTemplate.category_type == category_type,
+            CustomStickerTemplate.position_type == position_type,
+        )
     else:
         statement = statement.where(
             CustomStickerTemplate.is_active.is_(True),
-            CustomStickerTemplate.profile_type == profile_type,
+            CustomStickerTemplate.album_id == album_id,
+            CustomStickerTemplate.profile_type.in_(profile_values),
             CustomStickerTemplate.category_type == category_type,
             CustomStickerTemplate.position_type == position_type,
         ).order_by(CustomStickerTemplate.sort_order.asc(), CustomStickerTemplate.id.asc())
-    return db.execute(statement).scalars().first()
+    templates = db.execute(statement).scalars().all()
+    if not require_layer_ready:
+        return templates[0] if templates else None
+    return next((template for template in templates if custom_template_supports_layer_composition(template)), None)
+
+
+def custom_template_supports_layer_composition(template: CustomStickerTemplate | None) -> bool:
+    return custom_template_manual_status(template)["ready"]
 
 
 def resolve_template_preview_base_path(
@@ -1663,12 +3600,13 @@ def custom_template_preview_path(template: CustomStickerTemplate) -> str | None:
 
 def custom_sticker_unlock_to_response(unlock: CustomStickerUnlock, service_settings: ServiceSettings | None = None) -> dict:
     payment_required = True
-    if service_settings and not service_settings.custom_sticker_unlock_enabled:
+    if service_settings and not _custom_sticker_unlock_settings(service_settings, unlock.unlock_type)[0]:
         payment_required = False
     return {
         "id": unlock.id,
         "album_id": unlock.album_id,
         "sticker_id": unlock.sticker_id,
+        "unlock_type": unlock.unlock_type,
         "status": unlock.status.value,
         "amount_cents": unlock.amount_cents,
         "payment_required": payment_required,

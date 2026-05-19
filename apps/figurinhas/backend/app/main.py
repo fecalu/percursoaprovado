@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Response, UploadFile, status
@@ -11,7 +12,8 @@ from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import Session, selectinload
 
 from .config import get_settings
-from .database import Base, engine, get_db
+from .custom_stickers import build_manual_cutout_assets
+from .database import Base, SessionLocal, engine, get_db
 from .mercadopago import MercadoPagoError
 from .models import (
     Album,
@@ -23,12 +25,20 @@ from .models import (
     CustomStickerTemplateLayer,
     CustomStickerTemplatePhotoSlot,
     CustomStickerTemplateTextSlot,
+    CustomTemplateCompositionMode,
+    CustomTemplateLayerType,
     CustomProfileType,
     CustomStickerUnlock,
     CustomStickerUnlockStatus,
+    CustomStickerUnlockType,
     Page,
+    PageLayoutTemplate,
+    PageLayoutTemplateBlock,
+    PageSelectionBlock,
     PrintOrder,
     PrintOrderStatus,
+    SourceDocument,
+    SourceDocumentPage,
     Sticker,
     StickerCategory,
     StickerSourceType,
@@ -39,6 +49,7 @@ from .schemas import (
     AlbumResponse,
     AlbumUpdate,
     AutoDetectResponse,
+    BlockDetectResponse,
     CollectionAlbumAssign,
     CollectionCreate,
     CollectionResponse,
@@ -50,11 +61,25 @@ from .schemas import (
     CustomTemplateUpdate,
     CustomStickerUnlockRequest,
     CustomStickerUnlockResponse,
+    MyStickerCutoutResponse,
     OrderQuoteRequest,
     OrderQuoteResponse,
     ExportRequest,
     ExportResponse,
+    PageLayoutTemplateCreate,
+    PageLayoutTemplateResponse,
+    PageSelectionBlockResponse,
+    PageSelectionBlockCreate,
+    PageSelectionBlockUpdate,
+    PublicProgressJobResponse,
     PageResponse,
+    SourceDetectedStickerBulkActionRequest,
+    SourceDetectedStickerBulkActionResponse,
+    SourceDetectedStickerAssignRequest,
+    SourceDetectedStickerResponse,
+    SourceDocumentDetailResponse,
+    SourceDocumentPageResponse,
+    SourceDocumentSummaryResponse,
     PrintOrderCreate,
     PrintOrderResponse,
     PrintOrderUpdate,
@@ -69,27 +94,40 @@ from .services import (
     album_stats,
     album_sort_key,
     album_to_response,
+    apply_page_layout_template_to_source_page,
     auto_detect_collection_pages,
+    auto_detect_source_document_stickers,
+    auto_detect_source_block_stickers,
     build_export_pdf,
     build_order_quote,
     collection_stats,
     collection_sort_key,
     collection_to_response,
+    create_page_layout_template_from_source_page,
     custom_template_to_detail_response,
     custom_template_to_public_option,
     custom_template_to_summary_response,
     custom_sticker_unlock_to_response,
     create_print_order,
     crop_sticker_image,
+    discard_source_detected_stickers,
+    duplicate_page_selection_block,
+    duplicate_blocks_from_previous_source_page,
+    delete_source_document_record,
     delete_custom_base_image,
+    delete_album_record,
     delete_custom_template_layer_image,
     delete_generated_stickers_for_session,
     ensure_album_slug_unique,
     ensure_default_album_assignments,
+    ensure_default_custom_template_assignments,
     generated_sticker_for_selection,
     get_or_create_service_settings,
     get_or_create_custom_sticker_unlock,
+    generated_sticker_has_export_access,
+    generated_sticker_requires_manual_unlock,
     has_generated_sticker,
+    import_custom_template_layers,
     ensure_collection_slug_unique,
     load_album_by_slug_or_fail,
     load_album_or_fail,
@@ -98,22 +136,41 @@ from .services import (
     load_generated_sticker_for_session,
     load_latest_custom_sticker_unlock,
     load_active_custom_templates,
+    load_page_layout_template_or_fail,
+    load_page_selection_block_or_fail,
     load_print_order_or_fail,
+    load_source_detected_sticker_or_fail,
+    load_source_document_page_or_fail,
+    load_source_document_or_fail,
     load_sticker_or_fail,
+    load_prepared_portrait_bytes,
     page_to_response,
+    page_layout_template_to_response,
+    source_document_page_to_response,
+    source_detected_sticker_to_response,
+    source_document_to_detail_response,
+    source_document_to_summary_response,
     print_order_to_response,
     refresh_sticker_ocr,
+    save_prepared_cutout_assets,
     save_custom_base_image,
     save_custom_template_layer_image,
     save_pdf_and_render_pages,
+    save_source_document_and_render_pages,
     service_settings_to_response,
     slugify,
     sync_custom_sticker_unlock_status,
     sticker_to_response,
+    normalize_legacy_custom_template_photo_visibility,
+    normalize_legacy_custom_template_text_layouts,
+    normalize_custom_profile_type,
+    normalize_template_text_slots,
+    assign_source_detected_stickers,
     upsert_generated_sticker,
     validate_sticker_bounds,
     is_custom_sticker_unlocked,
 )
+from .progress_jobs import public_progress_jobs
 
 
 settings = get_settings()
@@ -127,6 +184,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.mount("/files", StaticFiles(directory=str(settings.storage_root)), name="files")
+
+
+def _job_response(job) -> dict:
+    return {
+        "job_id": job.id,
+        "job_type": job.job_type,
+        "status": job.status,
+        "title": job.title,
+        "subtitle": job.subtitle,
+        "steps": list(job.steps),
+        "step_index": job.step_index,
+        "progress": job.progress,
+        "message": job.message,
+        "result": job.result,
+        "error": job.error,
+    }
+
+
+def _start_public_job(
+    *,
+    job_type: str,
+    session_token: str,
+    album_slug: str | None,
+    title: str,
+    subtitle: str | None,
+    steps: list[str],
+):
+    return public_progress_jobs.create(
+        job_type=job_type,
+        session_token=session_token,
+        album_slug=album_slug,
+        title=title,
+        subtitle=subtitle,
+        steps=steps,
+    )
+
+
+def _build_job_reporter(job_id: str, steps: list[str]):
+    def report(progress: int, message: str) -> None:
+        try:
+            step_index = steps.index(message)
+        except ValueError:
+            step_index = None
+        public_progress_jobs.update(
+            job_id,
+            status="PROCESSANDO",
+            progress=progress,
+            step_index=step_index,
+            message=message,
+        )
+
+    return report
 
 
 def ensure_runtime_schema() -> None:
@@ -160,9 +269,13 @@ def ensure_runtime_schema() -> None:
             "custom_category_type": "VARCHAR(20)",
             "custom_position_type": "VARCHAR(20)",
             "composition_mode_used": "VARCHAR(20)",
+            "source_document_id": "INTEGER",
+            "source_document_page_id": "INTEGER",
+            "source_block_id": "INTEGER",
             "photo_offset_x": "FLOAT",
             "photo_offset_y": "FLOAT",
             "photo_scale": "FLOAT",
+            "photo_rotation": "FLOAT",
             "uploaded_photo_path": "VARCHAR(255)",
             "generated_portrait_path": "VARCHAR(255)",
             "export_width_pt": "FLOAT",
@@ -173,6 +286,9 @@ def ensure_runtime_schema() -> None:
             if column_name in existing_columns:
                 continue
             connection.exec_driver_sql(f"ALTER TABLE figurinhas_stickers ADD COLUMN {column_name} {definition}")
+        connection.exec_driver_sql(
+            "UPDATE figurinhas_stickers SET profile_type = 'CRIANCA' WHERE profile_type IN ('MENINO', 'MENINA')"
+        )
 
         collections_table_exists = connection.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_collections'"
@@ -259,6 +375,25 @@ def ensure_runtime_schema() -> None:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_sticker_unlock_message TEXT"
                 )
+            if "custom_ai_unlock_enabled" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_ai_unlock_enabled BOOLEAN NOT NULL DEFAULT 0"
+                )
+            if "custom_ai_unlock_price_cents" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_ai_unlock_price_cents INTEGER NOT NULL DEFAULT 500"
+                )
+            if "custom_ai_unlock_message" not in service_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_service_settings ADD COLUMN custom_ai_unlock_message TEXT"
+                )
+            connection.exec_driver_sql(
+                """
+                UPDATE figurinhas_service_settings
+                SET custom_base_menino_path = COALESCE(custom_base_menino_path, custom_base_menina_path),
+                    custom_base_menina_path = NULL
+                """
+            )
 
         print_orders_table_exists = connection.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_print_orders'"
@@ -276,12 +411,169 @@ def ensure_runtime_schema() -> None:
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_custom_sticker_unlocks'"
         ).fetchone()
         if unlocks_table_exists:
-            unlock_columns = {
-                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_custom_sticker_unlocks)").fetchall()
-            }
-            if "paid_at" not in unlock_columns:
+            unlock_info = connection.exec_driver_sql(
+                "PRAGMA table_info(figurinhas_custom_sticker_unlocks)"
+            ).fetchall()
+            unlock_columns = {row[1] for row in unlock_info}
+            sticker_id_notnull = any(row[1] == "sticker_id" and row[3] == 1 for row in unlock_info)
+            needs_unlock_table_rebuild = "unlock_type" not in unlock_columns or sticker_id_notnull
+            if needs_unlock_table_rebuild:
+                paid_at_select = "paid_at" if "paid_at" in unlock_columns else "NULL"
+                connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
                 connection.exec_driver_sql(
-                    "ALTER TABLE figurinhas_custom_sticker_unlocks ADD COLUMN paid_at DATETIME"
+                    "ALTER TABLE figurinhas_custom_sticker_unlocks RENAME TO figurinhas_custom_sticker_unlocks_legacy"
+                )
+                connection.exec_driver_sql(
+                    """
+                    CREATE TABLE figurinhas_custom_sticker_unlocks (
+                        id INTEGER NOT NULL PRIMARY KEY,
+                        album_id INTEGER NOT NULL,
+                        sticker_id INTEGER,
+                        session_token VARCHAR(120) NOT NULL,
+                        unlock_type VARCHAR(20) NOT NULL DEFAULT 'MANUAL_PDF',
+                        amount_cents INTEGER NOT NULL,
+                        status VARCHAR(20) NOT NULL,
+                        mp_payment_id VARCHAR(80),
+                        mp_external_reference VARCHAR(120),
+                        mp_status VARCHAR(50),
+                        mp_status_detail VARCHAR(120),
+                        qr_code_base64 TEXT,
+                        qr_code TEXT,
+                        ticket_url TEXT,
+                        expires_at DATETIME,
+                        paid_at DATETIME,
+                        created_at DATETIME NOT NULL,
+                        updated_at DATETIME NOT NULL,
+                        FOREIGN KEY(album_id) REFERENCES figurinhas_albums (id),
+                        FOREIGN KEY(sticker_id) REFERENCES figurinhas_stickers (id)
+                    )
+                    """
+                )
+                connection.exec_driver_sql(
+                    f"""
+                    INSERT INTO figurinhas_custom_sticker_unlocks (
+                        id,
+                        album_id,
+                        sticker_id,
+                        session_token,
+                        unlock_type,
+                        amount_cents,
+                        status,
+                        mp_payment_id,
+                        mp_external_reference,
+                        mp_status,
+                        mp_status_detail,
+                        qr_code_base64,
+                        qr_code,
+                        ticket_url,
+                        expires_at,
+                        paid_at,
+                        created_at,
+                        updated_at
+                    )
+                    SELECT
+                        id,
+                        album_id,
+                        sticker_id,
+                        session_token,
+                        'MANUAL_PDF',
+                        amount_cents,
+                        status,
+                        mp_payment_id,
+                        mp_external_reference,
+                        mp_status,
+                        mp_status_detail,
+                        qr_code_base64,
+                        qr_code,
+                        ticket_url,
+                        expires_at,
+                        {paid_at_select},
+                        created_at,
+                        updated_at
+                    FROM figurinhas_custom_sticker_unlocks_legacy
+                    """
+                )
+                connection.exec_driver_sql("DROP TABLE figurinhas_custom_sticker_unlocks_legacy")
+                connection.exec_driver_sql(
+                    "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_album_id ON figurinhas_custom_sticker_unlocks (album_id)"
+                )
+                connection.exec_driver_sql(
+                    "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_sticker_id ON figurinhas_custom_sticker_unlocks (sticker_id)"
+                )
+                connection.exec_driver_sql(
+                    "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_session_token ON figurinhas_custom_sticker_unlocks (session_token)"
+                )
+                connection.exec_driver_sql(
+                    "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_unlock_type ON figurinhas_custom_sticker_unlocks (unlock_type)"
+                )
+                connection.exec_driver_sql(
+                    "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_mp_payment_id ON figurinhas_custom_sticker_unlocks (mp_payment_id)"
+                )
+                connection.exec_driver_sql(
+                    "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_mp_external_reference ON figurinhas_custom_sticker_unlocks (mp_external_reference)"
+                )
+                connection.exec_driver_sql("PRAGMA foreign_keys=ON")
+            else:
+                if "paid_at" not in unlock_columns:
+                    connection.exec_driver_sql(
+                        "ALTER TABLE figurinhas_custom_sticker_unlocks ADD COLUMN paid_at DATETIME"
+                    )
+                if "unlock_type" not in unlock_columns:
+                    connection.exec_driver_sql(
+                        "ALTER TABLE figurinhas_custom_sticker_unlocks ADD COLUMN unlock_type VARCHAR(20) NOT NULL DEFAULT 'MANUAL_PDF'"
+                    )
+
+        custom_templates_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_custom_sticker_templates'"
+        ).fetchone()
+        if custom_templates_table_exists:
+            template_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_custom_sticker_templates)").fetchall()
+            }
+            if "album_id" not in template_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_custom_sticker_templates ADD COLUMN album_id INTEGER"
+                )
+            connection.exec_driver_sql(
+                "UPDATE figurinhas_custom_sticker_templates SET profile_type = 'CRIANCA' WHERE profile_type IN ('MENINO', 'MENINA')"
+            )
+            connection.exec_driver_sql(
+                """
+                UPDATE figurinhas_custom_sticker_templates
+                SET name = REPLACE(REPLACE(name, 'Menino', 'Crianca'), 'Menina', 'Crianca')
+                WHERE name LIKE '%Menino%' OR name LIKE '%Menina%'
+                """
+            )
+
+        custom_template_photo_slots_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_custom_sticker_template_photo_slots'"
+        ).fetchone()
+        if custom_template_photo_slots_table_exists:
+            photo_slot_columns = {
+                row[1]
+                for row in connection.exec_driver_sql(
+                    "PRAGMA table_info(figurinhas_custom_sticker_template_photo_slots)"
+                ).fetchall()
+            }
+            if "portrait_z_index" not in photo_slot_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_custom_sticker_template_photo_slots ADD COLUMN portrait_z_index INTEGER NOT NULL DEFAULT 30"
+                )
+            if "visible_x" not in photo_slot_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_custom_sticker_template_photo_slots ADD COLUMN visible_x FLOAT NOT NULL DEFAULT 0"
+                )
+            if "visible_y" not in photo_slot_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_custom_sticker_template_photo_slots ADD COLUMN visible_y FLOAT NOT NULL DEFAULT 0"
+                )
+            if "visible_width" not in photo_slot_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_custom_sticker_template_photo_slots ADD COLUMN visible_width FLOAT NOT NULL DEFAULT 1"
+                )
+            if "visible_height" not in photo_slot_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_custom_sticker_template_photo_slots ADD COLUMN visible_height FLOAT NOT NULL DEFAULT 0.9"
                 )
 
 
@@ -291,6 +583,9 @@ def startup() -> None:
     ensure_runtime_schema()
     with OrmSession(engine) as db:
         ensure_default_album_assignments(db)
+        ensure_default_custom_template_assignments(db)
+        normalize_legacy_custom_template_text_layouts(db)
+        normalize_legacy_custom_template_photo_visibility(db)
         get_or_create_service_settings(db)
         db.commit()
 
@@ -323,8 +618,9 @@ def load_custom_template_layer_or_404(template: CustomStickerTemplate, layer_id:
 
 
 def apply_custom_template_payload(template: CustomStickerTemplate, payload: CustomTemplateCreate | CustomTemplateUpdate) -> None:
+    template.album_id = payload.album_id
     template.name = payload.name.strip()
-    template.profile_type = payload.profile_type
+    template.profile_type = normalize_custom_profile_type(payload.profile_type)
     template.category_type = payload.category_type
     template.position_type = payload.position_type
     template.composition_mode = payload.composition_mode
@@ -332,7 +628,12 @@ def apply_custom_template_payload(template: CustomStickerTemplate, payload: Cust
     template.is_active = payload.is_active
 
     template.layers.clear()
+    seen_singleton_types: set[CustomTemplateLayerType] = set()
     for layer in payload.layers:
+        if layer.layer_type != CustomTemplateLayerType.OVERLAY:
+            if layer.layer_type in seen_singleton_types:
+                continue
+            seen_singleton_types.add(layer.layer_type)
         template.layers.append(
             CustomStickerTemplateLayer(
                 layer_type=layer.layer_type,
@@ -354,8 +655,13 @@ def apply_custom_template_payload(template: CustomStickerTemplate, payload: Cust
             default_scale=payload.photo_slot.default_scale,
             min_scale=payload.photo_slot.min_scale,
             max_scale=payload.photo_slot.max_scale,
+            portrait_z_index=payload.photo_slot.portrait_z_index,
             anchor_x=payload.photo_slot.anchor_x,
             anchor_y=payload.photo_slot.anchor_y,
+            visible_x=payload.photo_slot.visible_x,
+            visible_y=payload.photo_slot.visible_y,
+            visible_width=payload.photo_slot.visible_width,
+            visible_height=payload.photo_slot.visible_height,
         )
 
     template.text_slots.clear()
@@ -372,6 +678,7 @@ def apply_custom_template_payload(template: CustomStickerTemplate, payload: Cust
                 color=(slot.color or "").strip() or None,
             )
         )
+    normalize_template_text_slots(template)
 
 
 def selected_stickers_for_album_or_400(
@@ -511,9 +818,24 @@ def list_public_stickers(
 
 
 @app.get("/custom-templates", response_model=list[CustomTemplatePublicOption])
-def list_public_custom_templates(db: Session = Depends(get_db)) -> list[dict]:
-    templates = load_active_custom_templates(db)
+def list_public_custom_templates(
+    album_slug: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    album_id = load_album_by_slug_or_fail(db, album_slug).id if album_slug else None
+    templates = load_active_custom_templates(db, album_id=album_id)
     return [custom_template_to_public_option(template) for template in templates]
+
+
+@app.get("/public-jobs/{job_id}", response_model=PublicProgressJobResponse)
+def get_public_job_status(
+    job_id: str,
+    session_token: str = Query(..., min_length=12, max_length=120),
+) -> dict:
+    job = public_progress_jobs.get(job_id, session_token=session_token)
+    if not job:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Processo nao encontrado para essa sessao.")
+    return _job_response(job)
 
 
 @app.get("/albums/{album_slug}/my-sticker", response_model=StickerResponse | None)
@@ -527,6 +849,208 @@ def get_my_sticker(
     return sticker_to_response(sticker) if sticker else None
 
 
+@app.post("/albums/{album_slug}/my-sticker-cutout-jobs", response_model=PublicProgressJobResponse)
+async def create_my_sticker_cutout_job(
+    album_slug: str,
+    session_token: str = Form(..., min_length=12, max_length=120),
+    photo: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    album = load_album_by_slug_or_fail(db, album_slug)
+    if not photo.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para remover o fundo.")
+    if not (photo.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem JPG ou PNG valida.")
+
+    uploaded_photo_bytes = await photo.read()
+    if not uploaded_photo_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A foto enviada esta vazia.")
+    if len(uploaded_photo_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A foto enviada passou do limite de {settings.custom_upload_limit_mb} MB.",
+        )
+
+    steps = [
+        "Recebendo a foto...",
+        "Removendo fundo...",
+        "Preparando o retrato...",
+        "Gerando o preview...",
+        "Finalizando o encaixe...",
+    ]
+    job = _start_public_job(
+        job_type="MANUAL_CUTOUT",
+        session_token=session_token,
+        album_slug=album_slug,
+        title="Preparando encaixe na figurinha",
+        subtitle="Vamos remover o fundo e deixar sua foto pronta para ajuste.",
+        steps=steps,
+    )
+
+    def worker() -> None:
+        reporter = _build_job_reporter(job.id, steps)
+        try:
+            cutout_assets = build_manual_cutout_assets(uploaded_photo_bytes, progress_callback=reporter)
+            asset_token = save_prepared_cutout_assets(
+                album,
+                session_token=session_token,
+                cutout_bytes=cutout_assets.cutout_bytes,
+                portrait_bytes=cutout_assets.portrait_bytes,
+            )
+            public_progress_jobs.update(
+                job.id,
+                status="CONCLUIDO",
+                progress=100,
+                step_index=len(steps) - 1,
+                message="Tudo pronto. Agora ajuste sua foto.",
+                result={
+                    "image_data_url": f"data:{cutout_assets.preview_mime_type};base64,{base64.b64encode(cutout_assets.portrait_preview_bytes).decode('ascii')}",
+                    "portrait_image_data_url": f"data:{cutout_assets.preview_mime_type};base64,{base64.b64encode(cutout_assets.portrait_preview_bytes).decode('ascii')}",
+                    "cutout_image_data_url": f"data:{cutout_assets.preview_mime_type};base64,{base64.b64encode(cutout_assets.cutout_preview_bytes).decode('ascii')}",
+                    "asset_token": asset_token,
+                },
+            )
+        except Exception as err:
+            public_progress_jobs.update(
+                job.id,
+                status="FALHOU",
+                error="Nao foi possivel remover o fundo da foto para a montagem manual.",
+                message=str(err),
+            )
+
+    public_progress_jobs.run(job.id, worker)
+    return _job_response(job)
+
+
+@app.post("/albums/{album_slug}/my-sticker-jobs", response_model=PublicProgressJobResponse)
+async def create_or_replace_my_sticker_job(
+    album_slug: str,
+    session_token: str = Form(..., min_length=12, max_length=120),
+    name: str = Form(..., min_length=2, max_length=150),
+    profile_type: CustomProfileType = Form(...),
+    category_type: CustomCategoryType = Form(default=CustomCategoryType.JOGADOR),
+    position_type: CustomPositionType = Form(...),
+    template_id: int | None = Form(default=None),
+    requested_composition_mode: CustomTemplateCompositionMode | None = Form(default=None),
+    birth_date_text: str | None = Form(default=None, max_length=40),
+    height_text: str | None = Form(default=None, max_length=40),
+    weight_text: str | None = Form(default=None, max_length=40),
+    city_or_team: str | None = Form(default=None, max_length=150),
+    prepared_cutout_token: str | None = Form(default=None, max_length=120),
+    photo_offset_x: float | None = Form(default=0.0),
+    photo_offset_y: float | None = Form(default=0.0),
+    photo_scale: float | None = Form(default=1.0),
+    photo_rotation: float | None = Form(default=0.0),
+    photo: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    load_album_by_slug_or_fail(db, album_slug)
+    if not photo.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para criar a figurinha.")
+    if not (photo.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem JPG ou PNG valida.")
+
+    uploaded_photo_bytes = await photo.read()
+    if not uploaded_photo_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A foto enviada esta vazia.")
+    if len(uploaded_photo_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A foto enviada passou do limite de {settings.custom_upload_limit_mb} MB.",
+        )
+
+    is_ai_job = requested_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
+    steps = (
+        [
+            "Validando o modelo...",
+            "Preparando a base...",
+            "Criando sua figurinha com IA...",
+            "Preparando os arquivos finais...",
+            "Salvando no album...",
+        ]
+        if is_ai_job
+        else [
+            "Validando o modelo...",
+            "Preparando o modelo...",
+            "Removendo fundo...",
+            "Preparando o retrato...",
+            "Montando sua figurinha...",
+            "Preparando os arquivos finais...",
+            "Salvando no album...",
+        ]
+    )
+    job = _start_public_job(
+        job_type="CREATE_STICKER_AI" if is_ai_job else "CREATE_STICKER_MANUAL",
+        session_token=session_token,
+        album_slug=album_slug,
+        title="Criando sua figurinha com IA" if is_ai_job else "Incluindo sua figurinha no album",
+        subtitle="Esse processo pode levar alguns segundos." if is_ai_job else "Estamos montando sua figurinha com os ajustes escolhidos.",
+        steps=steps,
+    )
+
+    def worker() -> None:
+        worker_db = SessionLocal()
+        try:
+            album = load_album_by_slug_or_fail(worker_db, album_slug)
+            prepared_portrait_bytes = load_prepared_portrait_bytes(
+                album,
+                session_token=session_token,
+                asset_token=prepared_cutout_token,
+            )
+            reporter = _build_job_reporter(job.id, steps)
+            sticker = upsert_generated_sticker(
+                worker_db,
+                album=album,
+                session_token=session_token,
+                template_id=template_id,
+                requested_composition_mode=requested_composition_mode,
+                name=name,
+                profile_type=profile_type,
+                category_type=category_type,
+                position_type=position_type,
+                birth_date_text=birth_date_text,
+                height_text=height_text,
+                weight_text=weight_text,
+                city_or_team=city_or_team,
+                uploaded_photo_bytes=uploaded_photo_bytes,
+                prepared_portrait_bytes=prepared_portrait_bytes,
+                photo_offset_x=photo_offset_x,
+                photo_offset_y=photo_offset_y,
+                photo_scale=photo_scale,
+                photo_rotation=photo_rotation,
+                progress_callback=reporter,
+            )
+            worker_db.commit()
+            sticker = load_sticker_or_fail(worker_db, sticker.id)
+            public_progress_jobs.update(
+                job.id,
+                status="CONCLUIDO",
+                progress=100,
+                step_index=len(steps) - 1,
+                message="Sua figurinha ficou pronta.",
+                result=sticker_to_response(sticker),
+            )
+        except ValueError as err:
+            public_progress_jobs.update(
+                job.id,
+                status="FALHOU",
+                error=str(err),
+                message=str(err),
+            )
+        except Exception as err:
+            public_progress_jobs.update(
+                job.id,
+                status="FALHOU",
+                error="Nao foi possivel concluir a sua figurinha agora.",
+                message=str(err),
+            )
+        finally:
+            worker_db.close()
+
+    public_progress_jobs.run(job.id, worker)
+    return _job_response(job)
+
+
 @app.post("/albums/{album_slug}/my-sticker", response_model=StickerResponse)
 async def create_or_replace_my_sticker(
     album_slug: str,
@@ -536,13 +1060,16 @@ async def create_or_replace_my_sticker(
     category_type: CustomCategoryType = Form(default=CustomCategoryType.JOGADOR),
     position_type: CustomPositionType = Form(...),
     template_id: int | None = Form(default=None),
+    requested_composition_mode: CustomTemplateCompositionMode | None = Form(default=None),
     birth_date_text: str | None = Form(default=None, max_length=40),
     height_text: str | None = Form(default=None, max_length=40),
     weight_text: str | None = Form(default=None, max_length=40),
     city_or_team: str | None = Form(default=None, max_length=150),
+    prepared_cutout_token: str | None = Form(default=None, max_length=120),
     photo_offset_x: float | None = Form(default=0.0),
     photo_offset_y: float | None = Form(default=0.0),
     photo_scale: float | None = Form(default=1.0),
+    photo_rotation: float | None = Form(default=0.0),
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
@@ -562,11 +1089,17 @@ async def create_or_replace_my_sticker(
         )
 
     try:
+        prepared_portrait_bytes = load_prepared_portrait_bytes(
+            album,
+            session_token=session_token,
+            asset_token=prepared_cutout_token,
+        )
         sticker = upsert_generated_sticker(
             db,
             album=album,
             session_token=session_token,
             template_id=template_id,
+            requested_composition_mode=requested_composition_mode,
             name=name,
             profile_type=profile_type,
             category_type=category_type,
@@ -576,16 +1109,67 @@ async def create_or_replace_my_sticker(
             weight_text=weight_text,
             city_or_team=city_or_team,
             uploaded_photo_bytes=uploaded_photo_bytes,
+            prepared_portrait_bytes=prepared_portrait_bytes,
             photo_offset_x=photo_offset_x,
             photo_offset_y=photo_offset_y,
             photo_scale=photo_scale,
+            photo_rotation=photo_rotation,
         )
     except ValueError as err:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+        status_code_override = (
+            status.HTTP_402_PAYMENT_REQUIRED
+            if "Pague para liberar a criacao com IA" in str(err)
+            else status.HTTP_400_BAD_REQUEST
+        )
+        raise HTTPException(status_code=status_code_override, detail=str(err)) from err
 
     db.commit()
     sticker = load_sticker_or_fail(db, sticker.id)
     return sticker_to_response(sticker)
+
+
+@app.post("/albums/{album_slug}/my-sticker-cutout", response_model=MyStickerCutoutResponse)
+async def create_my_sticker_cutout(
+    album_slug: str,
+    session_token: str = Form(..., min_length=12, max_length=120),
+    photo: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    album = load_album_by_slug_or_fail(db, album_slug)
+    if not photo.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para remover o fundo.")
+    if not (photo.content_type or "").startswith("image/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma imagem JPG ou PNG valida.")
+
+    uploaded_photo_bytes = await photo.read()
+    if not uploaded_photo_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="A foto enviada esta vazia.")
+    if len(uploaded_photo_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"A foto enviada passou do limite de {settings.custom_upload_limit_mb} MB.",
+        )
+
+    try:
+        cutout_assets = build_manual_cutout_assets(uploaded_photo_bytes)
+        asset_token = save_prepared_cutout_assets(
+            album,
+            session_token=session_token,
+            cutout_bytes=cutout_assets.cutout_bytes,
+            portrait_bytes=cutout_assets.portrait_bytes,
+        )
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nao foi possivel remover o fundo da foto para a montagem manual.",
+        ) from err
+
+    return {
+        "image_data_url": f"data:{cutout_assets.preview_mime_type};base64,{base64.b64encode(cutout_assets.portrait_preview_bytes).decode('ascii')}",
+        "portrait_image_data_url": f"data:{cutout_assets.preview_mime_type};base64,{base64.b64encode(cutout_assets.portrait_preview_bytes).decode('ascii')}",
+        "cutout_image_data_url": f"data:{cutout_assets.preview_mime_type};base64,{base64.b64encode(cutout_assets.cutout_preview_bytes).decode('ascii')}",
+        "asset_token": asset_token,
+    }
 
 
 @app.delete("/albums/{album_slug}/my-sticker/{sticker_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -609,14 +1193,20 @@ def delete_my_sticker(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@app.get("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse | None)
-def get_my_sticker_unlock(
+def _get_my_sticker_unlock_by_type(
+    *,
     album_slug: str,
-    session_token: str = Query(..., min_length=12, max_length=120),
-    db: Session = Depends(get_db),
+    session_token: str,
+    unlock_type: CustomStickerUnlockType,
+    db: Session,
 ) -> dict | None:
     album = load_album_by_slug_or_fail(db, album_slug)
-    unlock = load_latest_custom_sticker_unlock(db, album_id=album.id, session_token=session_token)
+    unlock = load_latest_custom_sticker_unlock(
+        db,
+        album_id=album.id,
+        session_token=session_token,
+        unlock_type=unlock_type,
+    )
     if not unlock:
         return None
     if unlock.status == CustomStickerUnlockStatus.PENDENTE:
@@ -626,17 +1216,27 @@ def get_my_sticker_unlock(
     return custom_sticker_unlock_to_response(unlock, get_or_create_service_settings(db))
 
 
-@app.post("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse)
-def create_my_sticker_unlock(
+def _create_my_sticker_unlock_by_type(
+    *,
     album_slug: str,
     payload: CustomStickerUnlockRequest,
-    db: Session = Depends(get_db),
+    unlock_type: CustomStickerUnlockType,
+    db: Session,
 ) -> dict:
     album = load_album_by_slug_or_fail(db, album_slug)
     service_settings = get_or_create_service_settings(db)
     sticker = load_generated_sticker_for_session(db, album.id, payload.session_token)
-    if not sticker:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crie a Minha Figurinha antes de liberar o PDF completo.")
+    if unlock_type == CustomStickerUnlockType.MANUAL_PDF:
+        if not sticker:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Crie a Minha Figurinha manual antes de liberar o PDF completo.",
+            )
+        if sticker.composition_mode_used == CustomTemplateCompositionMode.AI_OPTIONAL:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Essa figurinha foi criada com IA e nao precisa da cobranca manual no PDF.",
+            )
     try:
         unlock = get_or_create_custom_sticker_unlock(
             db,
@@ -644,6 +1244,7 @@ def create_my_sticker_unlock(
             sticker=sticker,
             session_token=payload.session_token,
             service_settings=service_settings,
+            unlock_type=unlock_type,
         )
     except ValueError as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
@@ -654,16 +1255,185 @@ def create_my_sticker_unlock(
     return custom_sticker_unlock_to_response(unlock, service_settings)
 
 
+@app.get("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse | None)
+def get_my_sticker_unlock(
+    album_slug: str,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> dict | None:
+    return _get_my_sticker_unlock_by_type(
+        album_slug=album_slug,
+        session_token=session_token,
+        unlock_type=CustomStickerUnlockType.MANUAL_PDF,
+        db=db,
+    )
+
+
+@app.post("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse)
+def create_my_sticker_unlock(
+    album_slug: str,
+    payload: CustomStickerUnlockRequest,
+    db: Session = Depends(get_db),
+) -> dict:
+    return _create_my_sticker_unlock_by_type(
+        album_slug=album_slug,
+        payload=payload,
+        unlock_type=CustomStickerUnlockType.MANUAL_PDF,
+        db=db,
+    )
+
+
+@app.get("/albums/{album_slug}/my-sticker/manual-unlock", response_model=CustomStickerUnlockResponse | None)
+def get_my_sticker_manual_unlock(
+    album_slug: str,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> dict | None:
+    return _get_my_sticker_unlock_by_type(
+        album_slug=album_slug,
+        session_token=session_token,
+        unlock_type=CustomStickerUnlockType.MANUAL_PDF,
+        db=db,
+    )
+
+
+@app.post("/albums/{album_slug}/my-sticker/manual-unlock", response_model=CustomStickerUnlockResponse)
+def create_my_sticker_manual_unlock(
+    album_slug: str,
+    payload: CustomStickerUnlockRequest,
+    db: Session = Depends(get_db),
+) -> dict:
+    return _create_my_sticker_unlock_by_type(
+        album_slug=album_slug,
+        payload=payload,
+        unlock_type=CustomStickerUnlockType.MANUAL_PDF,
+        db=db,
+    )
+
+
+@app.get("/albums/{album_slug}/my-sticker/ai-unlock", response_model=CustomStickerUnlockResponse | None)
+def get_my_sticker_ai_unlock(
+    album_slug: str,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> dict | None:
+    return _get_my_sticker_unlock_by_type(
+        album_slug=album_slug,
+        session_token=session_token,
+        unlock_type=CustomStickerUnlockType.AI_CREATE,
+        db=db,
+    )
+
+
+@app.post("/albums/{album_slug}/my-sticker/ai-unlock", response_model=CustomStickerUnlockResponse)
+def create_my_sticker_ai_unlock(
+    album_slug: str,
+    payload: CustomStickerUnlockRequest,
+    db: Session = Depends(get_db),
+) -> dict:
+    return _create_my_sticker_unlock_by_type(
+        album_slug=album_slug,
+        payload=payload,
+        unlock_type=CustomStickerUnlockType.AI_CREATE,
+        db=db,
+    )
+
+
+@app.post("/exports/jobs", response_model=PublicProgressJobResponse)
+def create_export_job(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
+    album = load_album_by_slug_or_fail(db, payload.album_slug)
+    steps = [
+        "Separando suas figurinhas...",
+        "Montando as paginas...",
+        "Gerando o PDF...",
+        "Finalizando download...",
+    ]
+    job = _start_public_job(
+        job_type="EXPORT_PDF",
+        session_token=payload.session_token or "",
+        album_slug=payload.album_slug,
+        title="Preparando seu PDF",
+        subtitle="Estamos montando o arquivo para baixar.",
+        steps=steps,
+    )
+
+    def worker() -> None:
+        worker_db = SessionLocal()
+        try:
+            worker_album = load_album_by_slug_or_fail(worker_db, payload.album_slug)
+            stickers = selected_stickers_for_album_or_400(
+                worker_db,
+                worker_album,
+                payload.sticker_ids,
+                payload.session_token,
+            )
+            service_settings = get_or_create_service_settings(worker_db)
+            generated_sticker = generated_sticker_for_selection(stickers)
+            if not generated_sticker_has_export_access(
+                worker_db,
+                album_id=worker_album.id,
+                session_token=(payload.session_token or ""),
+                sticker=generated_sticker,
+                service_settings=service_settings,
+            ):
+                if generated_sticker and generated_sticker.composition_mode_used == CustomTemplateCompositionMode.AI_OPTIONAL:
+                    raise ValueError("Pague para liberar a criacao com IA antes de usar essa figurinha no PDF.")
+                raise ValueError("Pague para liberar o PDF com a Minha Figurinha ou baixe gratis sem ela.")
+            reporter = _build_job_reporter(job.id, steps)
+            export_record = build_export_pdf(worker_album, stickers, worker_db, progress_callback=reporter)
+            worker_db.commit()
+            public_progress_jobs.update(
+                job.id,
+                status="CONCLUIDO",
+                progress=100,
+                step_index=len(steps) - 1,
+                message="Download iniciando...",
+                result={
+                    "export_id": export_record.id,
+                    "item_count": export_record.item_count,
+                    "download_path": f"/exports/{export_record.id}/download",
+                    "file_name": Path(export_record.file_path).name,
+                },
+            )
+        except ValueError as err:
+            public_progress_jobs.update(
+                job.id,
+                status="FALHOU",
+                error=str(err),
+                message=str(err),
+            )
+        except Exception as err:
+            public_progress_jobs.update(
+                job.id,
+                status="FALHOU",
+                error="Nao foi possivel gerar o PDF agora.",
+                message=str(err),
+            )
+        finally:
+            worker_db.close()
+
+    public_progress_jobs.run(job.id, worker)
+    return _job_response(job)
+
+
 @app.post("/exports", response_model=ExportResponse)
 def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
     album = load_album_by_slug_or_fail(db, payload.album_slug)
     stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     service_settings = get_or_create_service_settings(db)
-    if (
-        has_generated_sticker(stickers)
-        and service_settings.custom_sticker_unlock_enabled
-        and not is_custom_sticker_unlocked(db, album_id=album.id, session_token=(payload.session_token or ""))
+    generated_sticker = generated_sticker_for_selection(stickers)
+    if not generated_sticker_has_export_access(
+        db,
+        album_id=album.id,
+        session_token=(payload.session_token or ""),
+        sticker=generated_sticker,
+        service_settings=service_settings,
     ):
+        if generated_sticker and generated_sticker.composition_mode_used == CustomTemplateCompositionMode.AI_OPTIONAL:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail="Pague para liberar a criacao com IA antes de usar essa figurinha no PDF.",
+            )
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="Pague para liberar o PDF com a Minha Figurinha ou baixe gratis sem ela.",
@@ -766,12 +1536,478 @@ def list_admin_albums(db: Session = Depends(get_db)) -> list[dict]:
 
 
 @app.get(
+    "/admin/source-documents",
+    response_model=list[SourceDocumentSummaryResponse],
+    dependencies=[Depends(require_admin)],
+)
+def list_admin_source_documents(
+    album_id: int | None = Query(default=None),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    statement = (
+        select(SourceDocument)
+        .options(
+            selectinload(SourceDocument.album),
+            selectinload(SourceDocument.pages).selectinload(SourceDocumentPage.blocks),
+            selectinload(SourceDocument.detected_stickers),
+        )
+        .order_by(SourceDocument.updated_at.desc(), SourceDocument.id.desc())
+    )
+    if album_id is not None:
+        statement = statement.where(SourceDocument.album_id == album_id)
+    documents = db.execute(statement).scalars().all()
+    return [source_document_to_summary_response(document) for document in documents]
+
+
+@app.get(
+    "/admin/source-documents/{document_id}",
+    response_model=SourceDocumentDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+def get_admin_source_document(document_id: int, db: Session = Depends(get_db)) -> dict:
+    try:
+        document = load_source_document_or_fail(db, document_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return source_document_to_detail_response(document)
+
+
+@app.get(
+    "/admin/source-documents/{document_id}/pages",
+    response_model=list[SourceDocumentPageResponse],
+    dependencies=[Depends(require_admin)],
+)
+def list_admin_source_document_pages(document_id: int, db: Session = Depends(get_db)) -> list[dict]:
+    try:
+        document = load_source_document_or_fail(db, document_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return [source_document_page_to_response(page) for page in document.pages]
+
+
+@app.post(
+    "/admin/source-documents/{document_id}/detect-stickers",
+    response_model=AutoDetectResponse,
+    dependencies=[Depends(require_admin)],
+)
+def detect_source_document_stickers(
+    document_id: int,
+    replace_existing: bool = Query(default=True),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        document = load_source_document_or_fail(db, document_id)
+        response = auto_detect_source_document_stickers(db, document, replace_existing=replace_existing)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return response
+
+
+@app.get(
+    "/admin/source-document-pages/{page_id}/detected-stickers",
+    response_model=list[SourceDetectedStickerResponse],
+    dependencies=[Depends(require_admin)],
+)
+def list_source_document_page_detected_stickers(page_id: int, db: Session = Depends(get_db)) -> list[dict]:
+    try:
+        page = load_source_document_page_or_fail(db, page_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return [source_detected_sticker_to_response(detected_sticker) for detected_sticker in page.detected_stickers]
+
+
+@app.post(
+    "/admin/source-documents/{document_id}/assign-detected-stickers",
+    response_model=SourceDetectedStickerBulkActionResponse,
+    dependencies=[Depends(require_admin)],
+)
+def assign_detected_stickers_to_collection(
+    document_id: int,
+    payload: SourceDetectedStickerAssignRequest,
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        document = load_source_document_or_fail(db, document_id)
+        collection = load_collection_or_fail(db, payload.collection_id)
+        response = assign_source_detected_stickers(
+            db,
+            document,
+            collection=collection,
+            detected_sticker_ids=payload.detected_sticker_ids,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return response
+
+
+@app.post(
+    "/admin/source-documents/{document_id}/discard-detected-stickers",
+    response_model=SourceDetectedStickerBulkActionResponse,
+    dependencies=[Depends(require_admin)],
+)
+def discard_detected_source_stickers(
+    document_id: int,
+    payload: SourceDetectedStickerBulkActionRequest,
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        document = load_source_document_or_fail(db, document_id)
+        response = discard_source_detected_stickers(
+            db,
+            document,
+            detected_sticker_ids=payload.detected_sticker_ids,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return response
+
+
+@app.get(
+    "/admin/page-layout-templates",
+    response_model=list[PageLayoutTemplateResponse],
+    dependencies=[Depends(require_admin)],
+)
+def list_admin_page_layout_templates(
+    album_id: int | None = Query(default=None),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    statement = (
+        select(PageLayoutTemplate)
+        .options(
+            selectinload(PageLayoutTemplate.album),
+            selectinload(PageLayoutTemplate.blocks).selectinload(PageLayoutTemplateBlock.collection),
+        )
+        .order_by(PageLayoutTemplate.created_at.desc(), PageLayoutTemplate.id.desc())
+    )
+    if album_id is not None:
+        statement = statement.where(PageLayoutTemplate.album_id == album_id)
+    templates = db.execute(statement).scalars().all()
+    return [page_layout_template_to_response(template) for template in templates]
+
+
+@app.post(
+    "/admin/source-documents",
+    response_model=SourceDocumentDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+async def create_source_document(
+    album_id: int = Form(...),
+    title: str = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        album = load_album_or_fail(db, album_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    if not file.filename or not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie um arquivo PDF valido.")
+    upload_bytes = await file.read()
+    if not upload_bytes:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O arquivo PDF esta vazio.")
+    normalized_title = (title or "").strip()
+    if len(normalized_title) < 2:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Informe um titulo para o documento.")
+
+    document = SourceDocument(
+        album=album,
+        title=normalized_title[:150],
+        pdf_path="",
+    )
+    try:
+        db.add(document)
+        db.flush()
+        save_source_document_and_render_pages(document, file.filename, upload_bytes, db)
+        db.commit()
+    except Exception as exc:
+        db.rollback()
+        detail = str(exc).strip()
+        if detail:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Nao consegui processar esse PDF. {detail}",
+            ) from exc
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nao consegui processar esse PDF agora. Verifique se ele nao esta corrompido, protegido ou fora do padrao esperado.",
+        ) from exc
+    document = load_source_document_or_fail(db, document.id)
+    return source_document_to_detail_response(document)
+
+
+@app.delete(
+    "/admin/source-documents/{document_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
+def delete_admin_source_document(document_id: int, db: Session = Depends(get_db)) -> Response:
+    try:
+        document = load_source_document_or_fail(db, document_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    delete_source_document_record(db, document)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.post(
+    "/admin/source-document-pages/{page_id}/layout-templates",
+    response_model=PageLayoutTemplateResponse,
+    dependencies=[Depends(require_admin)],
+)
+def create_page_layout_template(
+    page_id: int,
+    payload: PageLayoutTemplateCreate,
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        page = load_source_document_page_or_fail(db, page_id)
+        template = create_page_layout_template_from_source_page(db, page, name=payload.name)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return page_layout_template_to_response(template)
+
+
+@app.post(
+    "/admin/page-layout-templates/{template_id}/apply-to-page/{page_id}",
+    response_model=SourceDocumentPageResponse,
+    dependencies=[Depends(require_admin)],
+)
+def apply_page_layout_template(
+    template_id: int,
+    page_id: int,
+    replace_existing: bool = Query(default=True),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        template = load_page_layout_template_or_fail(db, template_id)
+        page = load_source_document_page_or_fail(db, page_id)
+        updated_page = apply_page_layout_template_to_source_page(
+            db,
+            template,
+            page,
+            replace_existing=replace_existing,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return source_document_page_to_response(updated_page)
+
+
+@app.delete(
+    "/admin/page-layout-templates/{template_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
+def delete_page_layout_template(template_id: int, db: Session = Depends(get_db)) -> Response:
+    try:
+        template = load_page_layout_template_or_fail(db, template_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    db.delete(template)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+def _validate_page_selection_block_bounds(*, x: float, y: float, width: float, height: float) -> None:
+    if x + width > 1.000001 or y + height > 1.000001:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="O bloco precisa caber dentro da pagina renderizada.",
+        )
+
+
+@app.post(
+    "/admin/source-document-pages/{page_id}/blocks",
+    response_model=PageSelectionBlockResponse,
+    dependencies=[Depends(require_admin)],
+)
+def create_page_selection_block(page_id: int, payload: PageSelectionBlockCreate, db: Session = Depends(get_db)) -> dict:
+    try:
+        page = load_source_document_page_or_fail(db, page_id)
+        collection = load_collection_or_fail(db, payload.collection_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+    if collection.album_id != page.document.album_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Escolha uma selecao do mesmo album desse documento fonte.",
+        )
+    _validate_page_selection_block_bounds(x=payload.x, y=payload.y, width=payload.width, height=payload.height)
+
+    next_sort_order = payload.sort_order or (
+        max((existing.sort_order for existing in page.blocks), default=0) + 1
+    )
+    block = PageSelectionBlock(
+        page_id=page.id,
+        collection_id=collection.id,
+        label=(payload.label or "").strip() or collection.name,
+        x=round(payload.x, 6),
+        y=round(payload.y, 6),
+        width=round(payload.width, 6),
+        height=round(payload.height, 6),
+        sort_order=next_sort_order,
+    )
+    db.add(block)
+    db.commit()
+    block = load_page_selection_block_or_fail(db, block.id)
+    return page_selection_block_to_response(block)
+
+
+@app.put(
+    "/admin/page-selection-blocks/{block_id}",
+    response_model=PageSelectionBlockResponse,
+    dependencies=[Depends(require_admin)],
+)
+def update_page_selection_block(block_id: int, payload: PageSelectionBlockUpdate, db: Session = Depends(get_db)) -> dict:
+    try:
+        block = load_page_selection_block_or_fail(db, block_id)
+        collection = load_collection_or_fail(db, payload.collection_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+    if collection.album_id != block.page.document.album_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Escolha uma selecao do mesmo album desse documento fonte.",
+        )
+    _validate_page_selection_block_bounds(x=payload.x, y=payload.y, width=payload.width, height=payload.height)
+
+    block.collection_id = collection.id
+    block.label = (payload.label or "").strip() or collection.name
+    block.x = round(payload.x, 6)
+    block.y = round(payload.y, 6)
+    block.width = round(payload.width, 6)
+    block.height = round(payload.height, 6)
+    block.sort_order = payload.sort_order
+    db.commit()
+    block = load_page_selection_block_or_fail(db, block.id)
+    return page_selection_block_to_response(block)
+
+
+@app.delete(
+    "/admin/page-selection-blocks/{block_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
+def delete_page_selection_block(block_id: int, db: Session = Depends(get_db)) -> Response:
+    try:
+        block = load_page_selection_block_or_fail(db, block_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    db.delete(block)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.post(
+    "/admin/page-selection-blocks/{block_id}/duplicate",
+    response_model=PageSelectionBlockResponse,
+    dependencies=[Depends(require_admin)],
+)
+def duplicate_source_page_selection_block(block_id: int, db: Session = Depends(get_db)) -> dict:
+    try:
+        block = load_page_selection_block_or_fail(db, block_id)
+        duplicated = duplicate_page_selection_block(db, block)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    db.commit()
+    return page_selection_block_to_response(duplicated)
+
+
+@app.post(
+    "/admin/source-document-pages/{page_id}/duplicate-previous-blocks",
+    response_model=SourceDocumentPageResponse,
+    dependencies=[Depends(require_admin)],
+)
+def duplicate_previous_source_page_blocks(
+    page_id: int,
+    replace_existing: bool = Query(default=True),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        page = load_source_document_page_or_fail(db, page_id)
+        updated_page = duplicate_blocks_from_previous_source_page(db, page, replace_existing=replace_existing)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return source_document_page_to_response(updated_page)
+
+
+@app.post(
+    "/admin/page-selection-blocks/{block_id}/detect-stickers",
+    response_model=BlockDetectResponse,
+    dependencies=[Depends(require_admin)],
+)
+def detect_stickers_inside_source_block(
+    block_id: int,
+    replace_existing: bool = Query(default=True),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        block = load_page_selection_block_or_fail(db, block_id)
+        response = auto_detect_source_block_stickers(db, block, replace_existing=replace_existing)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return response
+
+
+@app.get(
+    "/admin/page-selection-blocks/{block_id}/stickers",
+    response_model=list[StickerResponse],
+    dependencies=[Depends(require_admin)],
+)
+def list_source_block_stickers(block_id: int, db: Session = Depends(get_db)) -> list[dict]:
+    try:
+        load_page_selection_block_or_fail(db, block_id)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+    stickers = db.execute(
+        select(Sticker)
+        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+        .where(Sticker.source_block_id == block_id)
+        .order_by(Sticker.sort_order.asc(), Sticker.id.asc())
+    ).scalars().all()
+    return [sticker_to_response(sticker) for sticker in stickers]
+
+
+@app.get(
     "/admin/custom-templates",
     response_model=list[CustomTemplateSummaryResponse],
     dependencies=[Depends(require_admin)],
 )
-def list_admin_custom_templates(db: Session = Depends(get_db)) -> list[dict]:
-    templates = db.execute(
+def list_admin_custom_templates(
+    album_id: int | None = Query(default=None),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    statement = (
         select(CustomStickerTemplate)
         .options(
             selectinload(CustomStickerTemplate.layers),
@@ -784,7 +2020,10 @@ def list_admin_custom_templates(db: Session = Depends(get_db)) -> list[dict]:
             CustomStickerTemplate.position_type.asc(),
             CustomStickerTemplate.id.asc(),
         )
-    ).scalars().all()
+    )
+    if album_id is not None:
+        statement = statement.where(CustomStickerTemplate.album_id == album_id)
+    templates = db.execute(statement).scalars().all()
     return [custom_template_to_summary_response(template) for template in templates]
 
 
@@ -794,6 +2033,7 @@ def list_admin_custom_templates(db: Session = Depends(get_db)) -> list[dict]:
     dependencies=[Depends(require_admin)],
 )
 def create_admin_custom_template(payload: CustomTemplateCreate, db: Session = Depends(get_db)) -> dict:
+    load_album_or_fail(db, payload.album_id)
     template = CustomStickerTemplate()
     apply_custom_template_payload(template, payload)
     db.add(template)
@@ -818,11 +2058,29 @@ def get_admin_custom_template(template_id: int, db: Session = Depends(get_db)) -
     dependencies=[Depends(require_admin)],
 )
 def update_admin_custom_template(template_id: int, payload: CustomTemplateUpdate, db: Session = Depends(get_db)) -> dict:
+    load_album_or_fail(db, payload.album_id)
     template = load_custom_template_or_404(db, template_id)
     apply_custom_template_payload(template, payload)
     db.commit()
     template = load_custom_template_or_404(db, template_id)
     return custom_template_to_detail_response(template)
+
+
+@app.delete(
+    "/admin/custom-templates/{template_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(require_admin)],
+)
+def delete_admin_custom_template(template_id: int, db: Session = Depends(get_db)) -> Response:
+    template = load_custom_template_or_404(db, template_id)
+    generated_stickers = db.execute(select(Sticker).where(Sticker.template_id == template.id)).scalars().all()
+    for sticker in generated_stickers:
+        sticker.template_id = None
+    for layer in list(template.layers):
+        delete_custom_template_layer_image(layer)
+    db.delete(template)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.post(
@@ -876,6 +2134,49 @@ def delete_admin_custom_template_layer_file(template_id: int, layer_id: int, db:
     return custom_template_to_detail_response(template)
 
 
+@app.post(
+    "/admin/custom-templates/{template_id}/import-layers",
+    response_model=CustomTemplateDetailResponse,
+    dependencies=[Depends(require_admin)],
+)
+async def import_admin_custom_template_layers(
+    template_id: int,
+    files: list[UploadFile] = File(...),
+    db: Session = Depends(get_db),
+) -> dict:
+    template = load_custom_template_or_404(db, template_id)
+    if not files:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie pelo menos uma imagem para importar.")
+
+    imported_files: list[tuple[str, bytes]] = []
+    for file in files:
+        if not file.filename:
+            continue
+        if not (file.content_type or "").startswith("image/"):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie apenas imagens PNG, JPG ou WebP no importador.")
+        upload_bytes = await file.read()
+        if not upload_bytes:
+            continue
+        if len(upload_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Uma das imagens passou do limite de {settings.custom_upload_limit_mb} MB.",
+            )
+        imported_files.append((file.filename, upload_bytes))
+
+    if not imported_files:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nenhuma imagem valida foi encontrada no envio.")
+
+    try:
+        import_custom_template_layers(template, files=imported_files)
+    except OSError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nao foi possivel ler uma das imagens do pacote.") from err
+
+    db.commit()
+    template = load_custom_template_or_404(db, template_id)
+    return custom_template_to_detail_response(template)
+
+
 @app.get("/admin/service-config", response_model=ServiceConfigResponse, dependencies=[Depends(require_admin)])
 def get_admin_service_config(db: Session = Depends(get_db)) -> dict:
     service_settings = get_or_create_service_settings(db)
@@ -891,6 +2192,9 @@ def update_admin_service_config(payload: ServiceConfigUpdate, db: Session = Depe
     service_settings.custom_sticker_unlock_enabled = payload.custom_sticker_unlock_enabled
     service_settings.custom_sticker_unlock_price_cents = payload.custom_sticker_unlock_price_cents
     service_settings.custom_sticker_unlock_message = (payload.custom_sticker_unlock_message or "").strip() or None
+    service_settings.custom_ai_unlock_enabled = payload.custom_ai_unlock_enabled
+    service_settings.custom_ai_unlock_price_cents = payload.custom_ai_unlock_price_cents
+    service_settings.custom_ai_unlock_message = (payload.custom_ai_unlock_message or "").strip() or None
     service_settings.pack_size = payload.pack_size
     service_settings.print_price_cents = payload.print_price_cents
     service_settings.pack_price_cents = payload.pack_price_cents
@@ -1025,6 +2329,14 @@ def update_album(album_id: int, payload: AlbumUpdate, db: Session = Depends(get_
             for collection in sorted(album.collections, key=collection_sort_key)
         ],
     )
+
+
+@app.delete("/admin/albums/{album_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+def delete_admin_album(album_id: int, db: Session = Depends(get_db)) -> Response:
+    album = load_album_or_fail(db, album_id)
+    delete_album_record(db, album)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.post("/admin/collections", response_model=CollectionResponse, dependencies=[Depends(require_admin)])

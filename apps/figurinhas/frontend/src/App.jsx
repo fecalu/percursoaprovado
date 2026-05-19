@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { NavLink, Route, Routes } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import siteLogo from './assets/logo-topo-cutout.png'
 
 const normalizedBase = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
 const apiBase = `${normalizedBase}/api`
@@ -32,20 +33,31 @@ const serviceTypeLabels = {
 const customProfileOptions = [
   { value: 'HOMEM', label: 'Homem' },
   { value: 'MULHER', label: 'Mulher' },
-  { value: 'MENINO', label: 'Menino' },
-  { value: 'MENINA', label: 'Menina' }
+  { value: 'CRIANCA', label: 'Crianca' }
 ]
 
 const customBaseFieldByProfile = {
   HOMEM: 'custom_base_homem_path',
   MULHER: 'custom_base_mulher_path',
-  MENINO: 'custom_base_menino_path',
-  MENINA: 'custom_base_menina_path'
+  CRIANCA: 'custom_base_crianca_path'
 }
 
 const customGenerationModeOptions = [
-  { value: 'LAYERS', label: 'Composicao por camadas' },
-  { value: 'AI_OPTIONAL', label: 'IA opcional' }
+  { value: 'LAYERS', label: 'Somente montagem manual' },
+  { value: 'AI_OPTIONAL', label: 'Montagem manual + IA opcional' }
+]
+
+const publicCustomCreationModes = [
+  {
+    value: 'LAYERS',
+    label: 'Montagem manual',
+    description: 'Monte sua figurinha agora e ajuste sua foto do seu jeito.'
+  },
+  {
+    value: 'AI_OPTIONAL',
+    label: 'Criar com IA',
+    description: 'Receba uma versao premium com pagamento antes da geracao.'
+  }
 ]
 
 const customCategoryTypeOptions = [
@@ -68,6 +80,8 @@ const customTemplateLayerTypeOptions = [
   { value: 'SHINE', label: 'Brilho/acabamento' }
 ]
 
+const standardCustomTemplateLayerTypes = ['BACKGROUND', 'INFO_PANEL', 'FRAME', 'PHOTO_FRONT']
+
 const customTemplateTextFieldOptions = [
   { value: 'NAME', label: 'Nome' },
   { value: 'DATE', label: 'Data' },
@@ -77,6 +91,18 @@ const customTemplateTextFieldOptions = [
 ]
 
 const STICKERS_PER_SHEET = 16
+
+const sourceDocumentStatusLabels = {
+  RASCUNHO: 'Rascunho',
+  EM_REVISAO: 'Em revisao',
+  PUBLICADO: 'Publicado'
+}
+
+const sourceDetectedStatusLabels = {
+  PENDENTE: 'Pendente',
+  ATRIBUIDA: 'Atribuida',
+  DESCARTADA: 'Descartada'
+}
 
 function useAdminToken() {
   const [token, setToken] = useState(() => window.localStorage.getItem('figurinhas_admin_token') || '')
@@ -166,17 +192,49 @@ function categoryLabel(category) {
   return categoryOptions.find(option => option.value === category)?.label || category
 }
 
+function normalizeCustomProfileValue(profile) {
+  if (profile === 'MENINO' || profile === 'MENINA' || profile === 'CRIANCA') {
+    return 'CRIANCA'
+  }
+  return profile
+}
+
 function customProfileLabel(profile) {
-  return customProfileOptions.find(option => option.value === profile)?.label || profile || 'Minha Figurinha'
+  const normalized = normalizeCustomProfileValue(profile)
+  return customProfileOptions.find(option => option.value === normalized)?.label || normalized || 'Minha Figurinha'
 }
 
 function customPositionLabel(position) {
   return customPositionTypeOptions.find(option => option.value === position)?.label || position || 'Posicao'
 }
 
+function sourceDocumentStatusLabel(status) {
+  return sourceDocumentStatusLabels[status] || status || 'Rascunho'
+}
+
+function sourceDetectedStatusLabel(status) {
+  return sourceDetectedStatusLabels[status] || status || 'Pendente'
+}
+
+function sourceDocumentTitleFromFile(fileName) {
+  return String(fileName || '')
+    .replace(/\.pdf$/i, '')
+    .replace(/[_-]+/g, ' ')
+    .trim()
+}
+
 function customBasePathForProfile(config, profile) {
   if (!config || !profile) return ''
-  return config[customBaseFieldByProfile[profile]] || ''
+  const normalized = normalizeCustomProfileValue(profile)
+  return config[customBaseFieldByProfile[normalized]] || ''
+}
+
+function customCategoryLabel(category) {
+  return customCategoryTypeOptions.find(option => option.value === category)?.label || category || 'Categoria'
+}
+
+function buildCustomTemplateName(profile, position, category = 'JOGADOR') {
+  return `${customProfileLabel(profile)} · ${customCategoryLabel(category)} · ${customPositionLabel(position)}`
 }
 
 function createEmptyMyStickerForm() {
@@ -185,10 +243,12 @@ function createEmptyMyStickerForm() {
     profile_type: 'HOMEM',
     category_type: 'JOGADOR',
     position_type: 'ATACANTE',
+    requested_composition_mode: 'LAYERS',
     template_id: '',
     photo_offset_x: '0',
     photo_offset_y: '0',
     photo_scale: '1',
+    photo_rotation: '0',
     birth_date_text: '',
     height_text: '',
     weight_text: '',
@@ -197,8 +257,219 @@ function createEmptyMyStickerForm() {
   }
 }
 
+function createEmptySourceDocumentForm(albumId = '') {
+  return {
+    album_id: albumId ? String(albumId) : '',
+    title: '',
+    file: null
+  }
+}
+
+function createEmptySourceBlockForm() {
+  return {
+    collection_id: '',
+    label: '',
+    x: '',
+    y: '',
+    width: '',
+    height: '',
+    sort_order: '0'
+  }
+}
+
+function createEmptyPageLayoutForm() {
+  return {
+    name: ''
+  }
+}
+
+function normalizeDateInput(value) {
+  const digits = String(value || '')
+    .replace(/\D/g, '')
+    .slice(0, 8)
+  if (digits.length <= 2) return digits
+  if (digits.length <= 4) return `${digits.slice(0, 2)}-${digits.slice(2)}`
+  return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4)}`
+}
+
+function normalizeHeightInput(value) {
+  const cleaned = String(value || '')
+    .replace(/\s+/g, '')
+    .replace(/m/gi, '')
+    .replace(/\./g, ',')
+  let output = ''
+  let hasComma = false
+  for (const character of cleaned) {
+    if (/\d/.test(character)) {
+      output += character
+      continue
+    }
+    if (character === ',' && !hasComma) {
+      output += character
+      hasComma = true
+    }
+  }
+  if (!output) return ''
+  if (!hasComma) {
+    const digitsOnly = output.slice(0, 3)
+    if (digitsOnly.length === 3) {
+      return `${digitsOnly.slice(0, 1)},${digitsOnly.slice(1)}`
+    }
+    return digitsOnly
+  }
+  const [integerPart, decimalPart = ''] = output.split(',')
+  const normalizedInteger = integerPart.slice(0, 2)
+  return `${normalizedInteger},${decimalPart.slice(0, 2)}`
+}
+
+function normalizeWeightInput(value) {
+  return String(value || '')
+    .replace(/\D/g, '')
+    .slice(0, 3)
+}
+
+function stripHeightUnit(value) {
+  return normalizeHeightInput(String(value || '').replace(/m$/i, ''))
+}
+
+function stripWeightUnit(value) {
+  return normalizeWeightInput(String(value || '').replace(/kg$/i, ''))
+}
+
+function formatHeightForSticker(value) {
+  const normalized = normalizeHeightInput(value)
+  return normalized ? `${normalized}m` : ''
+}
+
+function formatWeightForSticker(value) {
+  const normalized = normalizeWeightInput(value)
+  return normalized ? `${normalized}kg` : ''
+}
+
+function myStickerTextValue(form, fieldName) {
+  const dateValue = (normalizeDateInput(form.birth_date_text) || 'DATA').trim() || 'DATA'
+  const heightValue = (formatHeightForSticker(form.height_text) || 'ALTURA').trim() || 'ALTURA'
+  const weightValue = (formatWeightForSticker(form.weight_text) || 'PESO').trim() || 'PESO'
+  const cityValue = (form.city_or_team || 'TIME').trim() || 'TIME'
+  switch (fieldName) {
+    case 'NAME':
+      return (form.name || 'NOME').toUpperCase()
+    case 'DATE':
+      return `${dateValue} |`
+    case 'HEIGHT':
+      return `${heightValue} |`
+    case 'WEIGHT':
+      return weightValue
+    case 'CITY_OR_TEAM':
+      return cityValue.toUpperCase()
+    default:
+      return ''
+  }
+}
+
+function CustomTemplateStackPreview({ template, alt, className = '' }) {
+  const layers = (template?.layers || [])
+    .filter(layer => layer.is_active && layer.file_path)
+    .sort((left, right) => (left.z_index || 0) - (right.z_index || 0))
+
+  if (!layers.length) {
+    return null
+  }
+
+  return (
+    <div className={`fig-template-stack-preview ${className}`.trim()} aria-label={alt}>
+      {layers.map(layer => (
+        <img
+          key={layer.id || `${layer.layer_type}-${layer.z_index}`}
+          src={apiFileUrl(layer.file_path)}
+          alt={alt}
+          className="fig-template-stack-preview-layer"
+          style={{ zIndex: layer.z_index || 0 }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function createDefaultCustomTemplateLayers() {
+  return [
+    {
+      layer_type: 'BACKGROUND',
+      label: '1. Fundo base',
+      file_path: '',
+      z_index: '0',
+      is_active: true
+    },
+    {
+      layer_type: 'INFO_PANEL',
+      label: '2. Faixa de informacoes',
+      file_path: '',
+      z_index: '20',
+      is_active: true
+    },
+    {
+      layer_type: 'FRAME',
+      label: '3. Moldura principal',
+      file_path: '',
+      z_index: '40',
+      is_active: true
+    },
+    {
+      layer_type: 'PHOTO_FRONT',
+      label: '4. Camisa frontal',
+      file_path: '',
+      z_index: '60',
+      is_active: true
+    }
+  ]
+}
+
+function isStandardCustomTemplateLayerType(layerType) {
+  return standardCustomTemplateLayerTypes.includes(layerType)
+}
+
+function createDefaultCustomTemplateTextSlots() {
+  return [
+    { field_name: 'NAME', x: '0.10', y: '0.802', width: '0.70', font_size: '20', font_weight: '700', text_align: 'center', color: '#ffffff' },
+    { field_name: 'DATE', x: '0.213', y: '0.846', width: '0.18', font_size: '15', font_weight: '700', text_align: 'center', color: '#ffffff' },
+    { field_name: 'HEIGHT', x: '0.402', y: '0.846', width: '0.13', font_size: '15', font_weight: '700', text_align: 'center', color: '#ffffff' },
+    { field_name: 'WEIGHT', x: '0.529', y: '0.846', width: '0.12', font_size: '15', font_weight: '700', text_align: 'center', color: '#ffffff' },
+    { field_name: 'CITY_OR_TEAM', x: '0.105', y: '0.905', width: '0.62', font_size: '15', font_weight: '700', text_align: 'center', color: '#ffffff' }
+  ]
+}
+
+function applyStandardCustomTemplateStructure(current) {
+  const existingLayersByType = new Map()
+  ;(current.layers || []).forEach(layer => {
+    if (!existingLayersByType.has(layer.layer_type)) {
+      existingLayersByType.set(layer.layer_type, layer)
+    }
+  })
+  const standardLayers = createDefaultCustomTemplateLayers().map(defaultLayer => {
+    const existing = existingLayersByType.get(defaultLayer.layer_type)
+    return existing
+      ? {
+          ...defaultLayer,
+          ...existing,
+          label: existing.label || defaultLayer.label,
+          z_index: existing.z_index || defaultLayer.z_index
+        }
+      : defaultLayer
+  })
+  const extraLayers = (current.layers || []).filter(
+    layer => !standardLayers.some(standardLayer => standardLayer.layer_type === layer.layer_type)
+  )
+  return {
+    ...current,
+    layers: [...standardLayers, ...extraLayers],
+    text_slots: current.text_slots?.length ? current.text_slots : createDefaultCustomTemplateTextSlots(),
+    photo_slot: current.photo_slot || createEmptyCustomTemplateForm().photo_slot
+  }
+}
+
 function createEmptyCustomTemplateForm() {
   return {
+    album_id: '',
     name: '',
     profile_type: 'HOMEM',
     category_type: 'JOGADOR',
@@ -206,7 +477,7 @@ function createEmptyCustomTemplateForm() {
     composition_mode: 'LAYERS',
     sort_order: '0',
     is_active: true,
-    layers: [],
+    layers: createDefaultCustomTemplateLayers(),
     photo_slot: {
       x: '0.12',
       y: '0.08',
@@ -215,11 +486,122 @@ function createEmptyCustomTemplateForm() {
       default_scale: '1',
       min_scale: '0.7',
       max_scale: '1.5',
+      portrait_z_index: '50',
       anchor_x: '0.5',
-      anchor_y: '0.5'
+      anchor_y: '0.5',
+      visible_x: '0.08',
+      visible_y: '0',
+      visible_width: '0.84',
+      visible_height: '0.74'
     },
-    text_slots: []
+    text_slots: createDefaultCustomTemplateTextSlots(),
+    manual_status: createEmptyCustomTemplateManualStatus()
   }
+}
+
+function createEmptyCustomTemplateManualStatus() {
+  return {
+    ready: false,
+    missing_count: 3,
+    missing_labels: [
+      'Fundo',
+      'Faixa de informacoes',
+      'Moldura ou camada frontal'
+    ],
+    checks: [
+      {
+        key: 'photo_slot',
+        label: 'Area da foto',
+        ready: true,
+        detail: 'A foto ja tem uma area padrao inicial para encaixe.'
+      },
+      {
+        key: 'background',
+        label: 'Fundo',
+        ready: false,
+        detail: 'Importe uma imagem de fundo para o modelo.'
+      },
+      {
+        key: 'info_panel',
+        label: 'Faixa de informacoes',
+        ready: false,
+        detail: 'Importe a faixa onde ficam nome, data, altura, peso e cidade/time.'
+      },
+      {
+        key: 'foreground',
+        label: 'Moldura ou camada frontal',
+        ready: false,
+        detail: 'Importe pelo menos uma moldura, camisa frontal, overlay ou brilho.'
+      },
+      {
+        key: 'text_slots',
+        label: 'Campos de texto',
+        ready: true,
+        detail: 'Os campos de texto padrao ja foram preparados sobre a faixa de informacoes.'
+      }
+    ],
+    layer_inventory: [
+      { layer_type: 'BACKGROUND', label: 'Fundo', count: 0 },
+      { layer_type: 'FRAME', label: 'Moldura', count: 0 },
+      { layer_type: 'PHOTO_FRONT', label: 'Camada frontal da foto', count: 0 },
+      { layer_type: 'INFO_PANEL', label: 'Faixa de informacoes', count: 0 },
+      { layer_type: 'OVERLAY', label: 'Overlay extra', count: 0 },
+      { layer_type: 'SHINE', label: 'Brilho/acabamento', count: 0 }
+    ]
+  }
+}
+
+function customTemplateDetailToForm(data) {
+  const baseForm = createEmptyCustomTemplateForm()
+  return applyStandardCustomTemplateStructure({
+    ...baseForm,
+    album_id: String(data.album_id || ''),
+    name: data.name || '',
+    profile_type: normalizeCustomProfileValue(data.profile_type) || 'HOMEM',
+    category_type: data.category_type || 'JOGADOR',
+    position_type: data.position_type || 'ATACANTE',
+    composition_mode: data.composition_mode || 'LAYERS',
+    sort_order: String(data.sort_order ?? 0),
+    is_active: Boolean(data.is_active),
+    layers: (data.layers?.length ? data.layers : baseForm.layers).map(layer => ({
+      id: layer.id,
+      layer_type: layer.layer_type,
+      label: layer.label || '',
+      file_path: layer.file_path || '',
+      z_index: String(layer.z_index ?? 0),
+      is_active: layer.is_active !== false
+    })),
+    photo_slot: data.photo_slot
+      ? {
+          x: String(data.photo_slot.x ?? 0),
+          y: String(data.photo_slot.y ?? 0),
+          width: String(data.photo_slot.width ?? 1),
+          height: String(data.photo_slot.height ?? 1),
+          default_scale: String(data.photo_slot.default_scale ?? 1),
+          min_scale: String(data.photo_slot.min_scale ?? 0.7),
+          max_scale: String(data.photo_slot.max_scale ?? 1.5),
+          portrait_z_index: String(data.photo_slot.portrait_z_index ?? 50),
+          anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
+          anchor_y: String(data.photo_slot.anchor_y ?? 0.5),
+          visible_x: String(data.photo_slot.visible_x ?? 0),
+          visible_y: String(data.photo_slot.visible_y ?? 0),
+          visible_width: String(data.photo_slot.visible_width ?? 1),
+          visible_height: String(data.photo_slot.visible_height ?? 0.9)
+        }
+      : baseForm.photo_slot,
+    text_slots: (data.text_slots?.length ? data.text_slots : baseForm.text_slots).map(slot => ({
+      id: slot.id,
+      field_name: slot.field_name,
+      x: String(slot.x ?? 0),
+      y: String(slot.y ?? 0),
+      width: String(slot.width ?? 0),
+      font_size: String(slot.font_size ?? 12),
+      font_weight: slot.font_weight || '',
+      text_align: slot.text_align || '',
+      color: slot.color || ''
+    })),
+    manual_status: data.manual_status || createEmptyCustomTemplateManualStatus()
+  })
 }
 
 function serviceConfigToForm(data) {
@@ -230,6 +612,9 @@ function serviceConfigToForm(data) {
     custom_sticker_unlock_enabled: data.custom_sticker_unlock_enabled,
     custom_sticker_unlock_price: moneyInputFromCents(data.custom_sticker_unlock_price_cents),
     custom_sticker_unlock_message: data.custom_sticker_unlock_message || '',
+    custom_ai_unlock_enabled: data.custom_ai_unlock_enabled,
+    custom_ai_unlock_price: moneyInputFromCents(data.custom_ai_unlock_price_cents),
+    custom_ai_unlock_message: data.custom_ai_unlock_message || '',
     pack_size: String(data.pack_size),
     print_price: moneyInputFromCents(data.print_price_cents),
     pack_price: moneyInputFromCents(data.pack_price_cents),
@@ -240,8 +625,7 @@ function serviceConfigToForm(data) {
     custom_prompt_template: data.custom_prompt_template || '',
     custom_base_homem_path: data.custom_base_homem_path || '',
     custom_base_mulher_path: data.custom_base_mulher_path || '',
-    custom_base_menino_path: data.custom_base_menino_path || '',
-    custom_base_menina_path: data.custom_base_menina_path || ''
+    custom_base_crianca_path: data.custom_base_crianca_path || data.custom_base_menino_path || data.custom_base_menina_path || ''
   }
 }
 
@@ -285,21 +669,26 @@ function triggerFileDownload(downloadPath) {
 }
 
 function Layout({ children }) {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const showingAdmin = location.pathname.startsWith('/admin')
+
+  function handleBrandToggle() {
+    navigate(showingAdmin ? '/' : '/admin')
+  }
+
   return (
     <div className="fig-app-shell">
       <header className="fig-topbar">
-        <div>
-          <p className="fig-kicker">Miniapp</p>
-          <h1>Figurinhas</h1>
-        </div>
-        <nav className="fig-nav">
-          <NavLink to="/" className={({ isActive }) => `fig-nav-link${isActive ? ' is-active' : ''}`}>
-            Catalogo
-          </NavLink>
-          <NavLink to="/admin" className={({ isActive }) => `fig-nav-link${isActive ? ' is-active' : ''}`}>
-            Admin
-          </NavLink>
-        </nav>
+        <button
+          type="button"
+          className="fig-topbar-brand"
+          aria-label={showingAdmin ? 'Abrir catalogo' : 'Abrir admin'}
+          title={showingAdmin ? 'Abrir catalogo' : 'Abrir admin'}
+          onClick={handleBrandToggle}
+        >
+          <img src={siteLogo} alt="Logo do site" className="fig-topbar-logo" />
+        </button>
       </header>
       <main className="fig-main">{children}</main>
     </div>
@@ -328,10 +717,13 @@ function PublicPage() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [donationModalOpen, setDonationModalOpen] = useState(false)
   const [customUnlockModalOpen, setCustomUnlockModalOpen] = useState(false)
+  const [customUnlockContext, setCustomUnlockContext] = useState('MANUAL_PDF')
   const [customUnlockStep, setCustomUnlockStep] = useState('choice')
   const [customUnlockData, setCustomUnlockData] = useState(null)
+  const [aiUnlockData, setAiUnlockData] = useState(null)
   const [customUnlockBusy, setCustomUnlockBusy] = useState(false)
   const [myStickerModalOpen, setMyStickerModalOpen] = useState(false)
+  const [myStickerModeConfirmed, setMyStickerModeConfirmed] = useState(false)
   const [previewPage, setPreviewPage] = useState(0)
   const [orderSubmitting, setOrderSubmitting] = useState(false)
   const [myStickerSubmitting, setMyStickerSubmitting] = useState(false)
@@ -341,6 +733,12 @@ function PublicPage() {
   const [pixCopied, setPixCopied] = useState(false)
   const [customUnlockCopied, setCustomUnlockCopied] = useState(false)
   const [myStickerForm, setMyStickerForm] = useState(createEmptyMyStickerForm)
+  const [manualCutoutDataUrl, setManualCutoutDataUrl] = useState('')
+  const [manualCutoutAssetToken, setManualCutoutAssetToken] = useState('')
+  const [manualCutoutBusy, setManualCutoutBusy] = useState(false)
+  const [publicFlowProgress, setPublicFlowProgress] = useState(null)
+  const myStickerCameraInputRef = useRef(null)
+  const myStickerGalleryInputRef = useRef(null)
   const [orderForm, setOrderForm] = useState({
     service_type: 'IMPRESSAO',
     customer_name: '',
@@ -421,19 +819,41 @@ function PublicPage() {
     () => !!customSticker && selectedStickers.some(sticker => sticker.id === customSticker.id),
     [customSticker, selectedStickers]
   )
+  const customStickerNeedsManualUnlock = useMemo(
+    () =>
+      Boolean(
+        customSticker &&
+          customSticker.composition_mode_used !== 'AI_OPTIONAL' &&
+          serviceConfig?.custom_sticker_unlock_enabled
+      ),
+    [customSticker, serviceConfig?.custom_sticker_unlock_enabled]
+  )
+  const customStickerNeedsAiUnlock = useMemo(
+    () =>
+      Boolean(
+        customSticker &&
+          customSticker.composition_mode_used === 'AI_OPTIONAL' &&
+          serviceConfig?.custom_ai_unlock_enabled
+      ),
+    [customSticker, serviceConfig?.custom_ai_unlock_enabled]
+  )
+  const customAiUnlockPaid = aiUnlockData?.status === 'PAGO'
+  const activeUnlockData = customUnlockContext === 'AI_CREATE' ? aiUnlockData : customUnlockData
+  const activeUnlockPriceCents =
+    customUnlockContext === 'AI_CREATE'
+      ? serviceConfig?.custom_ai_unlock_price_cents
+      : serviceConfig?.custom_sticker_unlock_price_cents
+  const activeUnlockMessage =
+    customUnlockContext === 'AI_CREATE'
+      ? serviceConfig?.custom_ai_unlock_message ||
+        'A criacao com IA e um recurso premium. Pague primeiro para liberar a geracao da sua figurinha.'
+      : serviceConfig?.custom_sticker_unlock_message ||
+        'Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00.'
+  const manualUnlockPriceLabel = formatCurrency(serviceConfig?.custom_sticker_unlock_price_cents || 0)
+  const aiUnlockPriceLabel = formatCurrency(serviceConfig?.custom_ai_unlock_price_cents || 0)
   const freeSelectedIds = useMemo(
     () => selectedStickers.filter(sticker => sticker.source_type !== 'GENERATED').map(sticker => sticker.id),
     [selectedStickers]
-  )
-  const currentCustomBasePreview = useMemo(
-    () => {
-      const selectedTemplate =
-        currentTemplateOptions.find(template => String(template.id) === String(myStickerForm.template_id)) ||
-        currentTemplateOptions[0] ||
-        null
-      return selectedTemplate?.preview_path || customBasePathForProfile(serviceConfig, myStickerForm.profile_type)
-    },
-    [currentTemplateOptions, myStickerForm.profile_type, myStickerForm.template_id, serviceConfig]
   )
   const currentTemplateOptions = useMemo(
     () =>
@@ -445,6 +865,125 @@ function PublicPage() {
       ),
     [customTemplateOptions, myStickerForm.profile_type, myStickerForm.category_type, myStickerForm.position_type]
   )
+  const currentManualTemplateOptions = useMemo(
+    () => currentTemplateOptions.filter(template => template.manual_ready),
+    [currentTemplateOptions]
+  )
+  const manualPreviewTemplate = useMemo(
+    () => currentManualTemplateOptions[0] || currentTemplateOptions[0] || null,
+    [currentManualTemplateOptions, currentTemplateOptions]
+  )
+  const manualTemplateExists = currentTemplateOptions.length > 0
+  const manualCreationAvailable = currentManualTemplateOptions.length > 0
+  const aiCreationAvailable = serviceConfig?.custom_generation_mode === 'AI_OPTIONAL'
+  const currentGenerationModeOptions = useMemo(() => {
+    const modes = []
+    if (manualTemplateExists || serviceConfig?.custom_generation_mode === 'LAYERS') {
+      modes.push({
+        ...publicCustomCreationModes[0],
+        disabled: !manualCreationAvailable,
+        description: manualCreationAvailable
+          ? 'Monte gratis agora e decida no final se quer baixar com ela no PDF.'
+          : manualTemplateExists
+            ? 'Esse modelo ainda esta em preparo. Finalize as camadas no administrador.'
+            : 'Ainda nao existe um modelo manual cadastrado para esse perfil e posicao.'
+      })
+    }
+    if (aiCreationAvailable) {
+      modes.push({
+        ...publicCustomCreationModes[1],
+        disabled: false
+      })
+    }
+    return modes
+  }, [aiCreationAvailable, manualCreationAvailable, manualTemplateExists, serviceConfig?.custom_generation_mode])
+  const effectiveTemplateOptions = useMemo(
+    () =>
+      myStickerForm.requested_composition_mode === 'LAYERS'
+        ? currentManualTemplateOptions
+        : currentTemplateOptions,
+    [currentManualTemplateOptions, currentTemplateOptions, myStickerForm.requested_composition_mode]
+  )
+  const selectedMyStickerTemplate = useMemo(
+    () =>
+      effectiveTemplateOptions.find(template => String(template.id) === String(myStickerForm.template_id)) ||
+      effectiveTemplateOptions[0] ||
+      null,
+    [effectiveTemplateOptions, myStickerForm.template_id]
+  )
+  const aiModePreview = useMemo(
+    () => customBasePathForProfile(serviceConfig, myStickerForm.profile_type),
+    [myStickerForm.profile_type, serviceConfig]
+  )
+  const manualPreviewLayers = useMemo(
+    () =>
+      (selectedMyStickerTemplate?.layers || [])
+        .filter(layer => layer.is_active && layer.file_path)
+        .sort((left, right) => (left.z_index || 0) - (right.z_index || 0)),
+    [selectedMyStickerTemplate]
+  )
+  const manualPreviewPhotoSlot = selectedMyStickerTemplate?.photo_slot || null
+  const manualPreviewTextSlots = useMemo(
+    () => (selectedMyStickerTemplate?.text_slots || []).filter(slot => slot.width > 0),
+    [selectedMyStickerTemplate]
+  )
+  const manualPreviewVisibleBox = useMemo(() => {
+    if (!manualPreviewPhotoSlot) return null
+    const visibleX = Math.min(Math.max(Number(manualPreviewPhotoSlot.visible_x ?? 0), 0), 1)
+    const visibleY = Math.min(Math.max(Number(manualPreviewPhotoSlot.visible_y ?? 0), 0), 1)
+    const visibleWidth = Math.min(Math.max(Number(manualPreviewPhotoSlot.visible_width ?? 1), 0.01), 1)
+    const visibleHeight = Math.min(Math.max(Number(manualPreviewPhotoSlot.visible_height ?? 0.9), 0.01), 1)
+    return {
+      left: ((manualPreviewPhotoSlot.x || 0) + (manualPreviewPhotoSlot.width || 0) * visibleX) * 100,
+      top: ((manualPreviewPhotoSlot.y || 0) + (manualPreviewPhotoSlot.height || 0) * visibleY) * 100,
+      width: (manualPreviewPhotoSlot.width || 0) * visibleWidth * 100,
+      height: (manualPreviewPhotoSlot.height || 0) * visibleHeight * 100
+    }
+  }, [manualPreviewPhotoSlot])
+
+  function dismissPublicFlowProgress() {
+    setPublicFlowProgress(null)
+  }
+
+  function syncPublicFlowProgress(job) {
+    if (!job) return
+    setPublicFlowProgress({
+      key: job.job_id,
+      title: job.title,
+      subtitle: job.subtitle,
+      label: job.message || '',
+      activeStepIndex: typeof job.step_index === 'number' ? job.step_index : 0,
+      isComplete: job.status === 'CONCLUIDO',
+      steps: job.steps || []
+    })
+  }
+
+  async function waitForPublicJob(path, options = {}) {
+    let job = await apiFetch(path, options)
+    syncPublicFlowProgress(job)
+
+    while (job && (job.status === 'PENDENTE' || job.status === 'PROCESSANDO')) {
+      await new Promise(resolve => window.setTimeout(resolve, 700))
+      job = await apiFetch(
+        `/public-jobs/${encodeURIComponent(job.job_id)}?session_token=${encodeURIComponent(sessionToken)}`
+      )
+      syncPublicFlowProgress(job)
+    }
+
+    if (!job) {
+      dismissPublicFlowProgress()
+      throw new Error('Nao foi possivel concluir a operacao.')
+    }
+    if (job.status === 'FALHOU') {
+      dismissPublicFlowProgress()
+      throw new Error(job.error || job.message || 'Nao foi possivel concluir a operacao.')
+    }
+
+    syncPublicFlowProgress(job)
+    await new Promise(resolve => window.setTimeout(resolve, 420))
+    dismissPublicFlowProgress()
+    return job.result
+  }
 
   useEffect(() => {
     let ignore = false
@@ -452,16 +991,14 @@ function PublicPage() {
       setBusy(true)
       setError('')
       try {
-        const [collectionsData, serviceData, templateData] = await Promise.all([
+        const [collectionsData, serviceData] = await Promise.all([
           apiFetch('/albums'),
-          apiFetch('/service-config'),
-          apiFetch('/custom-templates')
+          apiFetch('/service-config')
         ])
         if (ignore) return
         setAlbums(collectionsData)
         setSelectedAlbumSlug(current => current || collectionsData[0]?.slug || '')
         setServiceConfig(serviceData)
-        setCustomTemplateOptions(templateData)
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -477,6 +1014,32 @@ function PublicPage() {
       ignore = true
     }
   }, [])
+
+  useEffect(() => {
+    if (!selectedAlbumSlug) {
+      setCustomTemplateOptions([])
+      return
+    }
+
+    let ignore = false
+    async function loadTemplates() {
+      try {
+        const data = await apiFetch(`/custom-templates?album_slug=${encodeURIComponent(selectedAlbumSlug)}`)
+        if (!ignore) {
+          setCustomTemplateOptions(data)
+        }
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+          setCustomTemplateOptions([])
+        }
+      }
+    }
+    loadTemplates()
+    return () => {
+      ignore = true
+    }
+  }, [selectedAlbumSlug])
 
   useEffect(() => {
     if (!selectedCollectionSlug) {
@@ -519,6 +1082,7 @@ function PublicPage() {
     if (!selectedAlbumSlug) {
       setCustomSticker(null)
       setCustomUnlockData(null)
+      setAiUnlockData(null)
       return
     }
 
@@ -532,13 +1096,15 @@ function PublicPage() {
           setMyStickerForm(current => ({
             ...current,
             name: data.name || '',
-            profile_type: data.profile_type || 'HOMEM',
+            profile_type: normalizeCustomProfileValue(data.profile_type) || 'HOMEM',
             category_type: data.custom_category_type || 'JOGADOR',
             position_type: data.custom_position_type || 'ATACANTE',
+            requested_composition_mode: data.composition_mode_used || current.requested_composition_mode || 'LAYERS',
             template_id: data.template_id ? String(data.template_id) : '',
             photo_offset_x: String(data.photo_offset_x ?? 0),
             photo_offset_y: String(data.photo_offset_y ?? 0),
             photo_scale: String(data.photo_scale ?? 1),
+            photo_rotation: String(data.photo_rotation ?? 0),
             birth_date_text: data.birth_date_text || '',
             height_text: data.height_text || '',
             weight_text: data.weight_text || '',
@@ -559,7 +1125,7 @@ function PublicPage() {
   }, [selectedAlbumSlug, sessionToken])
 
   useEffect(() => {
-    if (!selectedAlbumSlug || !customSticker || !serviceConfig?.custom_sticker_unlock_enabled) {
+    if (!selectedAlbumSlug || !customSticker || !customStickerNeedsManualUnlock) {
       setCustomUnlockData(null)
       return
     }
@@ -583,37 +1149,70 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedAlbumSlug, customSticker, serviceConfig?.custom_sticker_unlock_enabled, sessionToken])
+  }, [selectedAlbumSlug, customSticker, customStickerNeedsManualUnlock, sessionToken])
+
+  useEffect(() => {
+    if (!selectedAlbumSlug || !serviceConfig?.custom_ai_unlock_enabled) {
+      setAiUnlockData(null)
+      return
+    }
+
+    let ignore = false
+    async function loadAiUnlock() {
+      try {
+        const data = await apiFetch(
+          `/albums/${selectedAlbumSlug}/my-sticker/ai-unlock?session_token=${encodeURIComponent(sessionToken)}`
+        )
+        if (!ignore) {
+          setAiUnlockData(data)
+        }
+      } catch {
+        if (!ignore) {
+          setAiUnlockData(null)
+        }
+      }
+    }
+    loadAiUnlock()
+    return () => {
+      ignore = true
+    }
+  }, [selectedAlbumSlug, serviceConfig?.custom_ai_unlock_enabled, sessionToken])
 
   useEffect(() => {
     setMyStickerForm(current => {
+      const enabledModeOptions = currentGenerationModeOptions.filter(option => !option.disabled)
+      const nextMode = enabledModeOptions.some(option => option.value === current.requested_composition_mode)
+        ? current.requested_composition_mode
+        : enabledModeOptions[0]?.value || 'LAYERS'
+      const templatePool = nextMode === 'LAYERS' ? currentManualTemplateOptions : currentTemplateOptions
       const templateStillValid = current.template_id
-        ? currentTemplateOptions.some(template => String(template.id) === String(current.template_id))
+        ? templatePool.some(template => String(template.id) === String(current.template_id))
         : false
       const nextTemplateId = templateStillValid
         ? current.template_id
-        : currentTemplateOptions.length === 1
-          ? String(currentTemplateOptions[0].id)
+        : templatePool.length === 1
+          ? String(templatePool[0].id)
           : ''
-      if (nextTemplateId === current.template_id) {
+      if (nextTemplateId === current.template_id && nextMode === current.requested_composition_mode) {
         return current
       }
       return {
         ...current,
+        requested_composition_mode: nextMode,
         template_id: nextTemplateId
       }
     })
-  }, [currentTemplateOptions])
+  }, [currentGenerationModeOptions, currentManualTemplateOptions, currentTemplateOptions])
 
   useEffect(() => {
-    if (!customUnlockModalOpen || customUnlockStep !== 'payment' || customUnlockData?.status !== 'PENDENTE') {
+    if (!customUnlockModalOpen || customUnlockStep !== 'payment' || activeUnlockData?.status !== 'PENDENTE') {
       return undefined
     }
     const timer = window.setInterval(() => {
-      refreshCustomUnlock(false)
+      refreshCustomUnlock(false, customUnlockContext)
     }, 5000)
     return () => window.clearInterval(timer)
-  }, [customUnlockModalOpen, customUnlockStep, customUnlockData?.status, selectedAlbumSlug, sessionToken, selectedIds, customStickerSelected])
+  }, [customUnlockModalOpen, customUnlockStep, activeUnlockData?.status, customUnlockContext, selectedAlbumSlug, sessionToken, selectedIds, customStickerSelected])
 
   useEffect(() => {
     if (!selectedAlbumSlug || selectedIds.length === 0 || !serviceConfig?.service_enabled) {
@@ -746,23 +1345,28 @@ function PublicPage() {
     if (!customUnlockModalOpen) {
       setCustomUnlockCopied(false)
       setCustomUnlockStep('choice')
+      setCustomUnlockContext('MANUAL_PDF')
     }
   }, [customUnlockModalOpen])
 
   useEffect(() => {
     if (!myStickerModalOpen) return
+    setManualCutoutDataUrl('')
+    setManualCutoutAssetToken('')
+    setMyStickerModeConfirmed(Boolean(customSticker))
     setMyStickerForm(current => ({
       name: customSticker?.name || current.name || '',
-      profile_type: customSticker?.profile_type || current.profile_type || 'HOMEM',
+      profile_type: normalizeCustomProfileValue(customSticker?.profile_type) || current.profile_type || 'HOMEM',
       category_type: customSticker?.custom_category_type || current.category_type || 'JOGADOR',
       position_type: customSticker?.custom_position_type || current.position_type || 'ATACANTE',
       template_id: customSticker?.template_id ? String(customSticker.template_id) : current.template_id || '',
       photo_offset_x: String(customSticker?.photo_offset_x ?? current.photo_offset_x ?? 0),
       photo_offset_y: String(customSticker?.photo_offset_y ?? current.photo_offset_y ?? 0),
       photo_scale: String(customSticker?.photo_scale ?? current.photo_scale ?? 1),
-      birth_date_text: customSticker?.birth_date_text || '',
-      height_text: customSticker?.height_text || '',
-      weight_text: customSticker?.weight_text || '',
+      photo_rotation: String(customSticker?.photo_rotation ?? current.photo_rotation ?? 0),
+      birth_date_text: normalizeDateInput(customSticker?.birth_date_text || ''),
+      height_text: stripHeightUnit(customSticker?.height_text || ''),
+      weight_text: stripWeightUnit(customSticker?.weight_text || ''),
       city_or_team: customSticker?.city_or_team || '',
       photo: null
     }))
@@ -771,6 +1375,8 @@ function PublicPage() {
   useEffect(() => {
     setPreviewPage(current => Math.min(current, previewPageCount - 1))
   }, [previewPageCount])
+
+  useEffect(() => () => setPublicFlowProgress(null), [])
 
   useEffect(() => {
     if (!selectedAlbum) {
@@ -844,10 +1450,116 @@ function PublicPage() {
     }
   }
 
+  function handleMyStickerPhotoChange(file) {
+    setMyStickerForm(current => ({
+      ...current,
+      photo: file || null,
+      photo_offset_x: '0',
+      photo_offset_y: '0',
+      photo_scale: String(manualPreviewPhotoSlot?.default_scale ?? 1),
+      photo_rotation: '0'
+    }))
+    setManualCutoutDataUrl('')
+    setManualCutoutAssetToken('')
+  }
+
+  function handleMyStickerPhotoInput(event) {
+    const file = event.target.files?.[0] || null
+    handleMyStickerPhotoChange(file)
+    event.target.value = ''
+  }
+
+  function openMyStickerPhotoPicker(source) {
+    if (source === 'camera') {
+      myStickerCameraInputRef.current?.click()
+      return
+    }
+    myStickerGalleryInputRef.current?.click()
+  }
+
+  function activateMyStickerMode(mode) {
+    setMyStickerModeConfirmed(true)
+    setManualCutoutDataUrl('')
+    setManualCutoutAssetToken('')
+    setMyStickerForm(current => ({
+      ...current,
+      requested_composition_mode: mode,
+      template_id: ''
+    }))
+  }
+
+  async function handleChooseMyStickerMode(mode) {
+    if (mode === 'AI_OPTIONAL' && serviceConfig?.custom_ai_unlock_enabled) {
+      if (customAiUnlockPaid) {
+        activateMyStickerMode(mode)
+        return
+      }
+      await handleStartCustomUnlock('AI_CREATE')
+      return
+    }
+    activateMyStickerMode(mode)
+  }
+
+  async function handlePrepareMyStickerCutout() {
+    if (!selectedAlbumSlug || !myStickerForm.photo) {
+      setError('Escolha uma foto para preparar a montagem manual.')
+      return
+    }
+    setManualCutoutBusy(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('session_token', sessionToken)
+      formData.append('photo', myStickerForm.photo)
+      const data = await waitForPublicJob(`/albums/${selectedAlbumSlug}/my-sticker-cutout-jobs`, {
+        method: 'POST',
+        body: formData
+      })
+      setMyStickerForm(current => ({
+        ...current,
+        photo_offset_x: '0',
+        photo_offset_y: '0',
+        photo_scale: String(manualPreviewPhotoSlot?.default_scale ?? 1),
+        photo_rotation: '0'
+      }))
+      setManualCutoutDataUrl(data?.portrait_image_data_url || data?.image_data_url || '')
+      setManualCutoutAssetToken(data?.asset_token || '')
+    } catch (err) {
+      setManualCutoutAssetToken('')
+      setError(err.message)
+    } finally {
+      setManualCutoutBusy(false)
+    }
+  }
+
   async function handleSubmitMySticker(event) {
     event.preventDefault()
     if (!selectedAlbumSlug || !myStickerForm.photo) {
       setError('Envie uma foto para criar a sua figurinha.')
+      return
+    }
+    if (myStickerForm.requested_composition_mode === 'LAYERS' && !manualCreationAvailable) {
+      setError('Ainda nao existe um modelo manual pronto para esse perfil e posicao.')
+      return
+    }
+    if (
+      myStickerForm.requested_composition_mode === 'LAYERS' &&
+      effectiveTemplateOptions.length > 1 &&
+      !myStickerForm.template_id
+    ) {
+      setError('Escolha um modelo manual para continuar.')
+      return
+    }
+    if (myStickerForm.requested_composition_mode === 'LAYERS' && !manualCutoutDataUrl) {
+      setError('Prepare a foto e ajuste a montagem manual antes de incluir no album.')
+      return
+    }
+    if (
+      myStickerForm.requested_composition_mode === 'AI_OPTIONAL' &&
+      serviceConfig?.custom_ai_unlock_enabled &&
+      !customAiUnlockPaid
+    ) {
+      await handleStartCustomUnlock('AI_CREATE')
       return
     }
 
@@ -860,42 +1572,47 @@ function PublicPage() {
       formData.append('profile_type', myStickerForm.profile_type)
       formData.append('category_type', myStickerForm.category_type || 'JOGADOR')
       formData.append('position_type', myStickerForm.position_type || 'ATACANTE')
+      formData.append('requested_composition_mode', myStickerForm.requested_composition_mode || 'LAYERS')
       if (myStickerForm.template_id) {
         formData.append('template_id', myStickerForm.template_id)
       }
-      formData.append('birth_date_text', myStickerForm.birth_date_text)
-      formData.append('height_text', myStickerForm.height_text)
-      formData.append('weight_text', myStickerForm.weight_text)
+      if (manualCutoutAssetToken) {
+        formData.append('prepared_cutout_token', manualCutoutAssetToken)
+      }
+      formData.append('birth_date_text', normalizeDateInput(myStickerForm.birth_date_text))
+      formData.append('height_text', formatHeightForSticker(myStickerForm.height_text))
+      formData.append('weight_text', formatWeightForSticker(myStickerForm.weight_text))
       formData.append('city_or_team', myStickerForm.city_or_team)
       formData.append('photo_offset_x', myStickerForm.photo_offset_x || '0')
       formData.append('photo_offset_y', myStickerForm.photo_offset_y || '0')
       formData.append('photo_scale', myStickerForm.photo_scale || '1')
+      formData.append('photo_rotation', myStickerForm.photo_rotation || '0')
       formData.append('photo', myStickerForm.photo)
 
-      const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker`, {
+      const data = await waitForPublicJob(`/albums/${selectedAlbumSlug}/my-sticker-jobs`, {
         method: 'POST',
         body: formData
       })
       setCustomSticker(data)
-      setSelectedStickers(current => [
-        ...current.filter(sticker => sticker.source_type !== 'GENERATED'),
-        toCustomSelectionItem(data)
-      ])
+      setSelectedStickers(current => [...current.filter(sticker => sticker.source_type !== 'GENERATED'), toCustomSelectionItem(data)])
       setMyStickerForm({
         name: data.name,
-        profile_type: data.profile_type || 'HOMEM',
+        profile_type: normalizeCustomProfileValue(data.profile_type) || 'HOMEM',
         category_type: data.custom_category_type || 'JOGADOR',
         position_type: data.custom_position_type || 'ATACANTE',
+        requested_composition_mode: data.composition_mode_used || myStickerForm.requested_composition_mode || 'LAYERS',
         template_id: data.template_id ? String(data.template_id) : '',
         photo_offset_x: String(data.photo_offset_x ?? 0),
         photo_offset_y: String(data.photo_offset_y ?? 0),
         photo_scale: String(data.photo_scale ?? 1),
-        birth_date_text: data.birth_date_text || '',
-        height_text: data.height_text || '',
-        weight_text: data.weight_text || '',
+        photo_rotation: String(data.photo_rotation ?? 0),
+        birth_date_text: normalizeDateInput(data.birth_date_text || ''),
+        height_text: stripHeightUnit(data.height_text || ''),
+        weight_text: stripWeightUnit(data.weight_text || ''),
         city_or_team: data.city_or_team || '',
         photo: null
       })
+      setManualCutoutAssetToken('')
       setMyStickerModalOpen(false)
     } catch (err) {
       setError(err.message)
@@ -905,7 +1622,7 @@ function PublicPage() {
   }
 
   async function requestExport(stickerIds) {
-    const data = await apiFetch('/exports', {
+    const data = await waitForPublicJob('/exports/jobs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -923,66 +1640,75 @@ function PublicPage() {
     }
   }
 
+  async function runExportFlow(stickerIds) {
+    setExporting(true)
+    setError('')
+    try {
+      await requestExport(stickerIds)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   async function handleExport() {
     if (!selectedAlbumSlug || selectedIds.length === 0) return
-    if (customStickerSelected && serviceConfig?.custom_sticker_unlock_enabled) {
+    if (customStickerSelected && customStickerNeedsAiUnlock && aiUnlockData?.status !== 'PAGO') {
+      await handleStartCustomUnlock('AI_CREATE')
+      return
+    }
+    if (customStickerSelected && customStickerNeedsManualUnlock) {
       if (customUnlockData?.status === 'PAGO') {
-        setExporting(true)
-        setError('')
-        try {
-          await requestExport(selectedIds)
-        } catch (err) {
-          setError(err.message)
-        } finally {
-          setExporting(false)
-        }
+        await runExportFlow(selectedIds)
         return
       }
+      setCustomUnlockContext('MANUAL_PDF')
       setCustomUnlockStep('choice')
       setCustomUnlockModalOpen(true)
       return
     }
 
-    setExporting(true)
-    setError('')
-    try {
-      await requestExport(selectedIds)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setExporting(false)
-    }
+    await runExportFlow(selectedIds)
   }
 
   async function handleExportWithoutMySticker() {
     if (!selectedAlbumSlug || freeSelectedIds.length === 0) return
     setCustomUnlockModalOpen(false)
-    setExporting(true)
-    setError('')
-    try {
-      await requestExport(freeSelectedIds)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setExporting(false)
-    }
+    await runExportFlow(freeSelectedIds)
   }
 
-  async function handleStartCustomUnlock() {
-    if (!selectedAlbumSlug || !customSticker) return
+  async function handleStartCustomUnlock(unlockType = 'MANUAL_PDF') {
+    if (!selectedAlbumSlug) return
     setCustomUnlockBusy(true)
     setError('')
     try {
-      const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker-unlock`, {
+      const path =
+        unlockType === 'AI_CREATE'
+          ? `/albums/${selectedAlbumSlug}/my-sticker/ai-unlock`
+          : `/albums/${selectedAlbumSlug}/my-sticker/manual-unlock`
+      const data = await apiFetch(path, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_token: sessionToken })
       })
-      setCustomUnlockData(data)
+      setCustomUnlockContext(unlockType)
+      if (unlockType === 'AI_CREATE') {
+        setAiUnlockData(data)
+      } else {
+        setCustomUnlockData(data)
+      }
       setCustomUnlockStep('payment')
       if (data.status === 'PAGO') {
-        setCustomUnlockModalOpen(false)
-        await requestExport(selectedIds)
+        if (unlockType === 'AI_CREATE') {
+          setCustomUnlockModalOpen(false)
+          activateMyStickerMode('AI_OPTIONAL')
+        } else {
+          setCustomUnlockModalOpen(false)
+          await runExportFlow(selectedIds)
+        }
+      } else {
+        setCustomUnlockModalOpen(true)
       }
     } catch (err) {
       setError(err.message)
@@ -991,16 +1717,28 @@ function PublicPage() {
     }
   }
 
-  async function refreshCustomUnlock(showErrors = false) {
-    if (!selectedAlbumSlug || !customStickerSelected) return
+  async function refreshCustomUnlock(showErrors = false, unlockType = customUnlockContext) {
+    if (!selectedAlbumSlug) return
+    if (unlockType === 'MANUAL_PDF' && (!customStickerSelected || !customStickerNeedsManualUnlock)) return
     try {
-      const data = await apiFetch(
-        `/albums/${selectedAlbumSlug}/my-sticker-unlock?session_token=${encodeURIComponent(sessionToken)}`
-      )
-      setCustomUnlockData(data)
+      const path =
+        unlockType === 'AI_CREATE'
+          ? `/albums/${selectedAlbumSlug}/my-sticker/ai-unlock?session_token=${encodeURIComponent(sessionToken)}`
+          : `/albums/${selectedAlbumSlug}/my-sticker/manual-unlock?session_token=${encodeURIComponent(sessionToken)}`
+      const data = await apiFetch(path)
+      if (unlockType === 'AI_CREATE') {
+        setAiUnlockData(data)
+      } else {
+        setCustomUnlockData(data)
+      }
       if (data?.status === 'PAGO') {
-        setCustomUnlockModalOpen(false)
-        await requestExport(selectedIds)
+        if (unlockType === 'AI_CREATE') {
+          setCustomUnlockModalOpen(false)
+          activateMyStickerMode('AI_OPTIONAL')
+        } else {
+          setCustomUnlockModalOpen(false)
+          await runExportFlow(selectedIds)
+        }
       }
     } catch (err) {
       if (showErrors) setError(err.message)
@@ -1018,9 +1756,9 @@ function PublicPage() {
   }
 
   async function handleCopyCustomUnlockPix() {
-    if (!customUnlockData?.qr_code) return
+    if (!activeUnlockData?.qr_code) return
     try {
-      await navigator.clipboard.writeText(customUnlockData.qr_code)
+      await navigator.clipboard.writeText(activeUnlockData.qr_code)
       setCustomUnlockCopied(true)
     } catch {
       setError('Nao foi possivel copiar o codigo Pix automaticamente.')
@@ -1546,11 +2284,161 @@ function PublicPage() {
 
               <div className="fig-section-block">
                 <div className="fig-section-block-head">
+                  <strong>Escolha o tipo da figurinha</strong>
+                  <span>Defina primeiro o perfil e a posicao. Isso decide quais modelos ficam disponiveis.</span>
+                </div>
+                <div className="fig-form-grid">
+                  <label className="fig-field">
+                    <span>Perfil da figurinha</span>
+                    <select
+                      value={myStickerForm.profile_type}
+                      onChange={event => {
+                        setMyStickerModeConfirmed(false)
+                        setManualCutoutDataUrl('')
+                        setManualCutoutAssetToken('')
+                        setMyStickerForm(current => ({
+                          ...current,
+                          profile_type: event.target.value,
+                          template_id: ''
+                        }))
+                      }}
+                    >
+                      {customProfileOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fig-field">
+                    <span>Posicao em campo</span>
+                    <select
+                      value={myStickerForm.position_type}
+                      onChange={event => {
+                        setMyStickerModeConfirmed(false)
+                        setManualCutoutDataUrl('')
+                        setManualCutoutAssetToken('')
+                        setMyStickerForm(current => ({
+                          ...current,
+                          position_type: event.target.value,
+                          template_id: ''
+                        }))
+                      }}
+                    >
+                      {customPositionTypeOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              {currentGenerationModeOptions.length > 0 ? (
+                <div className="fig-section-block">
+                  <div className="fig-section-block-head">
+                    <strong>Como sua figurinha sera criada</strong>
+                    <span>
+                        {currentGenerationModeOptions.length > 1
+                          ? 'Escolha como quer criar sua figurinha.'
+                          : 'O modo disponivel para esse perfil aparece logo abaixo.'}
+                    </span>
+                  </div>
+                  <div className="fig-order-choice-grid fig-order-choice-grid--single-mobile">
+                    {currentGenerationModeOptions.map(option => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        disabled={option.disabled}
+                        className={`fig-choice-card${myStickerModeConfirmed && myStickerForm.requested_composition_mode === option.value ? ' is-active' : ''}`}
+                        onClick={() => {
+                          if (option.disabled) {
+                            return
+                          }
+                          handleChooseMyStickerMode(option.value)
+                        }}
+                      >
+                        <div className="fig-choice-card-visual">
+                          <div className="fig-choice-card-preview">
+                            {option.value === 'LAYERS' ? (
+                              manualPreviewTemplate ? (
+                                <CustomTemplateStackPreview
+                                  template={manualPreviewTemplate}
+                                  alt="Preview do modelo manual"
+                                  className="fig-template-stack-preview--choice"
+                                />
+                              ) : (
+                                <div className="fig-choice-card-preview-empty">
+                                  <span>Manual</span>
+                                </div>
+                              )
+                            ) : aiModePreview ? (
+                              <img src={apiFileUrl(aiModePreview)} alt="Preview da base com IA" />
+                            ) : (
+                              <div className="fig-choice-card-preview-empty">
+                                <span>IA</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="fig-choice-card-price">
+                            {option.value === 'LAYERS'
+                              ? manualCreationAvailable
+                                ? manualUnlockPriceLabel
+                                : 'Em preparo'
+                              : customAiUnlockPaid
+                                ? 'IA liberada'
+                                : aiUnlockPriceLabel}
+                          </div>
+                        </div>
+                        <div className="fig-choice-card-copy">
+                          <strong>{option.label}</strong>
+                          {option.value === 'LAYERS' ? (
+                            <span>
+                                {manualCreationAvailable
+                                  ? 'Monte sua figurinha, ajuste sua foto com calma e decida depois se quer liberar no PDF.'
+                                  : 'Esse modelo manual ainda esta em preparo.'}
+                            </span>
+                          ) : (
+                            <span>
+                                {customAiUnlockPaid
+                                  ? 'Sua criacao com IA ja esta liberada. Agora e so continuar sem novo pagamento.'
+                                  : 'Libere a criacao com IA primeiro. Depois disso, voce continua normalmente e usa no PDF sem nova cobranca.'}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {!manualCreationAvailable && !aiCreationAvailable ? (
+                <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                  <div>
+                    <strong>Nenhum modo disponivel agora.</strong>
+                    <span>Cadastre um modelo manual ou reative a criacao por IA no administrador.</span>
+                  </div>
+                </div>
+              ) : null}
+
+              {!myStickerModeConfirmed && (manualCreationAvailable || aiCreationAvailable) ? (
+                <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                  <div>
+                    <strong>Escolha primeiro como quer criar sua figurinha.</strong>
+                    <span>Depois disso aparecem os campos, a foto e o passo certo para esse tipo de criacao.</span>
+                  </div>
+                </div>
+              ) : null}
+
+              {myStickerModeConfirmed ? (
+              <div className="fig-section-block">
+                <div className="fig-section-block-head">
                   <strong>Informacoes da figurinha</strong>
                   <span>Preencha do seu jeito.</span>
                 </div>
-              <div className="fig-form-grid">
-                <label className="fig-field">
+              <div className="fig-form-grid fig-form-grid--my-sticker">
+                <label className="fig-field fig-field--full">
                   <span>Nome</span>
                   <input
                     value={myStickerForm.name}
@@ -1558,53 +2446,15 @@ function PublicPage() {
                     required
                   />
                 </label>
-                <label className="fig-field">
-                  <span>Perfil da figurinha</span>
-                  <select
-                    value={myStickerForm.profile_type}
-                    onChange={event =>
-                      setMyStickerForm(current => ({
-                        ...current,
-                        profile_type: event.target.value,
-                        template_id: ''
-                      }))
-                    }
-                  >
-                    {customProfileOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="fig-field">
-                  <span>Posicao em campo</span>
-                  <select
-                    value={myStickerForm.position_type}
-                    onChange={event =>
-                      setMyStickerForm(current => ({
-                        ...current,
-                        position_type: event.target.value,
-                        template_id: ''
-                      }))
-                    }
-                  >
-                    {customPositionTypeOptions.map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {currentTemplateOptions.length > 1 ? (
+                {effectiveTemplateOptions.length > 1 ? (
                   <label className="fig-field fig-field--full">
-                    <span>Modelo da figurinha</span>
+                    <span>{myStickerForm.requested_composition_mode === 'LAYERS' ? 'Modelo manual' : 'Base da figurinha'}</span>
                     <select
                       value={myStickerForm.template_id}
                       onChange={event => setMyStickerForm(current => ({ ...current, template_id: event.target.value }))}
                     >
                       <option value="">Escolha um modelo</option>
-                      {currentTemplateOptions.map(template => (
+                      {effectiveTemplateOptions.map(template => (
                         <option key={template.id} value={String(template.id)}>
                           {template.name}
                         </option>
@@ -1612,42 +2462,198 @@ function PublicPage() {
                     </select>
                   </label>
                 ) : null}
-                {currentCustomBasePreview ? (
-                  <div className="fig-custom-base-inline">
-                    <div className="fig-custom-base-inline-preview">
-                      <img src={apiFileUrl(currentCustomBasePreview)} alt={`Base ${customProfileLabel(myStickerForm.profile_type)}`} />
-                    </div>
-                    <div className="fig-custom-base-inline-copy">
-                      <strong>Modelo da figurinha</strong>
-                      <span>
-                        O sistema vai usar esse template para montar sua figurinha.
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
-                    <div>
-                      <strong>Base padrao.</strong>
-                      <span>
-                        O sistema vai usar o layout padrao atual.
-                      </span>
-                    </div>
-                  </div>
-                )}
-                <label className="fig-field fig-field--full">
-                  <span>Foto</span>
+                <label className="fig-field fig-field--third">
+                  <span>Data</span>
                   <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    value={myStickerForm.birth_date_text}
                     onChange={event =>
-                      setMyStickerForm(current => ({ ...current, photo: event.target.files?.[0] || null }))
+                      setMyStickerForm(current => ({ ...current, birth_date_text: normalizeDateInput(event.target.value) }))
                     }
-                    required
+                    placeholder="10-06-1999"
+                    inputMode="numeric"
+                    maxLength={10}
                   />
                 </label>
-                <div className="fig-field fig-field--full">
-                  <span>Ajuste da foto</span>
-                  <div className="fig-photo-adjust-grid">
+                <label className="fig-field fig-field--third">
+                  <span>Altura</span>
+                  <div className="fig-input-with-suffix">
+                    <input
+                      value={myStickerForm.height_text}
+                      onChange={event =>
+                        setMyStickerForm(current => ({ ...current, height_text: normalizeHeightInput(event.target.value) }))
+                      }
+                      placeholder="1,70"
+                      inputMode="decimal"
+                    />
+                    <span className="fig-input-suffix">m</span>
+                  </div>
+                </label>
+                <label className="fig-field fig-field--third">
+                  <span>Peso</span>
+                  <div className="fig-input-with-suffix">
+                    <input
+                      value={myStickerForm.weight_text}
+                      onChange={event =>
+                        setMyStickerForm(current => ({ ...current, weight_text: normalizeWeightInput(event.target.value) }))
+                      }
+                      placeholder="87"
+                      inputMode="numeric"
+                    />
+                    <span className="fig-input-suffix">kg</span>
+                  </div>
+                </label>
+                <label className="fig-field fig-field--full">
+                  <span>Cidade ou time</span>
+                  <input
+                    value={myStickerForm.city_or_team}
+                    onChange={event => setMyStickerForm(current => ({ ...current, city_or_team: event.target.value }))}
+                    placeholder="Ex.: Fortaleza ou Brasil"
+                  />
+                </label>
+              </div>
+              </div>
+              ) : null}
+
+              {myStickerModeConfirmed ? (
+              <div className="fig-section-block">
+                <div className="fig-section-block-head">
+                  <strong>Foto e montagem</strong>
+                  <span>
+                    {myStickerForm.requested_composition_mode === 'LAYERS'
+                      ? '2. Ajuste a foto dentro da figurinha e so depois inclua no album.'
+                      : 'Confira a base usada pela IA.'}
+                  </span>
+                </div>
+
+                <label className="fig-field fig-field--full">
+                  <span>Foto</span>
+                  <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                    <div>
+                      <strong>{myStickerForm.photo ? 'Foto selecionada.' : 'Escolha como enviar sua foto.'}</strong>
+                      <span>
+                        {myStickerForm.photo
+                          ? myStickerForm.photo.name
+                          : 'No celular, voce pode tirar uma foto agora ou escolher uma imagem da galeria.'}
+                      </span>
+                    </div>
+                    <div className="fig-photo-source-actions">
+                      <button
+                        type="button"
+                        className="fig-secondary-button"
+                        onClick={() => openMyStickerPhotoPicker('camera')}
+                      >
+                        Tirar foto
+                      </button>
+                      <button
+                        type="button"
+                        className="fig-secondary-button"
+                        onClick={() => openMyStickerPhotoPicker('gallery')}
+                      >
+                        Galeria
+                      </button>
+                    </div>
+                    <input
+                      ref={myStickerCameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="user"
+                      className="fig-hidden-file-input"
+                      onChange={handleMyStickerPhotoInput}
+                    />
+                    <input
+                      ref={myStickerGalleryInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="fig-hidden-file-input"
+                      onChange={handleMyStickerPhotoInput}
+                    />
+                  </div>
+                </label>
+
+                {myStickerForm.requested_composition_mode === 'LAYERS' ? (
+                  <div className="fig-field fig-field--full">
+                    <span>Preparar encaixe</span>
+                    <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                      <div>
+                        <strong>1. Prepare a foto para a figurinha</strong>
+                        <span>Vamos remover o fundo e encaixar sua foto para voce ajustar do seu jeito.</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="fig-secondary-button"
+                        onClick={handlePrepareMyStickerCutout}
+                        disabled={!myStickerForm.photo || manualCutoutBusy}
+                      >
+                        {manualCutoutBusy ? 'Preparando encaixe...' : manualCutoutDataUrl ? 'Preparar de novo' : 'Preparar encaixe na figurinha'}
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+
+              {myStickerForm.requested_composition_mode === 'LAYERS' && selectedMyStickerTemplate ? (
+                <div className="fig-manual-editor">
+                  <div className="fig-manual-editor-preview">
+                    <div className="fig-manual-sticker-stage">
+                      {manualPreviewLayers.map(layer => (
+                        <img
+                          key={layer.id || `${layer.layer_type}-${layer.z_index}`}
+                          className="fig-manual-stage-layer"
+                          src={apiFileUrl(layer.file_path)}
+                          alt={layer.label}
+                          style={{ zIndex: layer.z_index || 0 }}
+                        />
+                      ))}
+                      {manualCutoutDataUrl && manualPreviewPhotoSlot ? (
+                        <div
+                          className="fig-manual-stage-portrait"
+                          style={{
+                            left: `${manualPreviewVisibleBox?.left ?? (manualPreviewPhotoSlot.x || 0) * 100}%`,
+                            top: `${manualPreviewVisibleBox?.top ?? (manualPreviewPhotoSlot.y || 0) * 100}%`,
+                            width: `${manualPreviewVisibleBox?.width ?? (manualPreviewPhotoSlot.width || 0) * 100}%`,
+                            height: `${manualPreviewVisibleBox?.height ?? (manualPreviewPhotoSlot.height || 0) * 100}%`,
+                            zIndex: manualPreviewPhotoSlot.portrait_z_index || 30
+                          }}
+                        >
+                          <img
+                            src={manualCutoutDataUrl}
+                            alt="Foto recortada"
+                            style={{
+                              left: `calc(${(manualPreviewPhotoSlot.anchor_x ?? 0.5) * 100}% + ${(Number(myStickerForm.photo_offset_x || 0) * 100).toFixed(2)}%)`,
+                              top: `calc(${(manualPreviewPhotoSlot.anchor_y ?? 0.5) * 100}% + ${(Number(myStickerForm.photo_offset_y || 0) * 100).toFixed(2)}%)`,
+                              transform: `translate(-${(manualPreviewPhotoSlot.anchor_x ?? 0.5) * 100}%, -${(manualPreviewPhotoSlot.anchor_y ?? 0.5) * 100}%) scale(${Number(myStickerForm.photo_scale || 1)}) rotate(${Number(myStickerForm.photo_rotation || 0)}deg)`,
+                              transformOrigin: `${(manualPreviewPhotoSlot.anchor_x ?? 0.5) * 100}% ${(manualPreviewPhotoSlot.anchor_y ?? 0.5) * 100}%`
+                            }}
+                          />
+                        </div>
+                      ) : null}
+                      {manualPreviewTextSlots.map(slot => (
+                        <div
+                          key={slot.id || slot.field_name}
+                          className={`fig-manual-stage-text fig-manual-stage-text--${slot.field_name.toLowerCase()}`}
+                          style={{
+                            left: `${(slot.x || 0) * 100}%`,
+                            top: `${(slot.y || 0) * 100}%`,
+                            width: `${(slot.width || 0) * 100}%`,
+                            fontSize: `${Math.max(7, (slot.font_size || 12) * 0.62)}px`,
+                            textAlign: slot.text_align || 'left',
+                            color: slot.color || '#ffffff'
+                          }}
+                        >
+                          {myStickerTextValue(myStickerForm, slot.field_name)}
+                        </div>
+                      ))}
+                    </div>
+                    {!manualCutoutDataUrl ? (
+                      <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                        <div>
+                          <strong>Aguardando recorte da foto.</strong>
+                          <span>Envie a foto e clique em preparar encaixe para abrir a montagem manual.</span>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="fig-photo-adjust-grid fig-photo-adjust-grid--editor">
                     <label className="fig-range-field">
                       <span>Esquerda / direita</span>
                       <input
@@ -1657,6 +2663,7 @@ function PublicPage() {
                         step="0.01"
                         value={myStickerForm.photo_offset_x}
                         onChange={event => setMyStickerForm(current => ({ ...current, photo_offset_x: event.target.value }))}
+                        disabled={!manualCutoutDataUrl}
                       />
                       <small>{Number(myStickerForm.photo_offset_x || 0).toFixed(2)}</small>
                     </label>
@@ -1669,6 +2676,7 @@ function PublicPage() {
                         step="0.01"
                         value={myStickerForm.photo_offset_y}
                         onChange={event => setMyStickerForm(current => ({ ...current, photo_offset_y: event.target.value }))}
+                        disabled={!manualCutoutDataUrl}
                       />
                       <small>{Number(myStickerForm.photo_offset_y || 0).toFixed(2)}</small>
                     </label>
@@ -1676,56 +2684,31 @@ function PublicPage() {
                       <span>Zoom</span>
                       <input
                         type="range"
-                        min="0.7"
-                        max="1.5"
+                        min={String(manualPreviewPhotoSlot?.min_scale ?? 0.7)}
+                        max={String(manualPreviewPhotoSlot?.max_scale ?? 1.5)}
                         step="0.01"
                         value={myStickerForm.photo_scale}
                         onChange={event => setMyStickerForm(current => ({ ...current, photo_scale: event.target.value }))}
+                        disabled={!manualCutoutDataUrl}
                       />
                       <small>{Number(myStickerForm.photo_scale || 1).toFixed(2)}x</small>
                     </label>
+                    <label className="fig-range-field">
+                      <span>Girar</span>
+                      <input
+                        type="range"
+                        min="-25"
+                        max="25"
+                        step="1"
+                        value={myStickerForm.photo_rotation}
+                        onChange={event => setMyStickerForm(current => ({ ...current, photo_rotation: event.target.value }))}
+                        disabled={!manualCutoutDataUrl}
+                      />
+                      <small>{Number(myStickerForm.photo_rotation || 0).toFixed(0)}°</small>
+                    </label>
                   </div>
                 </div>
-                <label className="fig-field">
-                  <span>Data</span>
-                  <input
-                    value={myStickerForm.birth_date_text}
-                    onChange={event => setMyStickerForm(current => ({ ...current, birth_date_text: event.target.value }))}
-                    placeholder="Ex.: 14/03/2018"
-                  />
-                </label>
-                <label className="fig-field">
-                  <span>Altura</span>
-                  <input
-                    value={myStickerForm.height_text}
-                    onChange={event => setMyStickerForm(current => ({ ...current, height_text: event.target.value }))}
-                    placeholder="Ex.: 1,62 m"
-                  />
-                </label>
-                <label className="fig-field">
-                  <span>Peso</span>
-                  <input
-                    value={myStickerForm.weight_text}
-                    onChange={event => setMyStickerForm(current => ({ ...current, weight_text: event.target.value }))}
-                    placeholder="Ex.: 58 kg"
-                  />
-                </label>
-                <label className="fig-field">
-                  <span>Cidade ou time</span>
-                  <input
-                    value={myStickerForm.city_or_team}
-                    onChange={event => setMyStickerForm(current => ({ ...current, city_or_team: event.target.value }))}
-                    placeholder="Ex.: Fortaleza ou Brasil"
-                  />
-                </label>
-              </div>
-              </div>
-
-              <div className="fig-section-block">
-                <div className="fig-section-block-head">
-                  <strong>Foto e estilo base</strong>
-                  <span>Escolha o perfil certo.</span>
-                </div>
+              ) : null}
 
               {customSticker ? (
                 <div className="fig-custom-preview fig-custom-preview--modal">
@@ -1742,13 +2725,18 @@ function PublicPage() {
                 </div>
               ) : null}
               </div>
+              ) : null}
 
               <div className="fig-hero-actions fig-hero-actions--sticky-mobile">
                 <button type="button" className="fig-secondary-button" onClick={() => setMyStickerModalOpen(false)}>
                   Cancelar
                 </button>
-                <button type="submit" className="fig-primary-button" disabled={myStickerSubmitting}>
-                  {myStickerSubmitting ? 'Criando figurinha...' : 'Criar e adicionar ao PDF'}
+                <button
+                  type="submit"
+                  className="fig-primary-button"
+                  disabled={myStickerSubmitting || manualCutoutBusy || !myStickerModeConfirmed || (!manualCreationAvailable && !aiCreationAvailable)}
+                >
+                  {myStickerSubmitting ? 'Incluindo figurinha...' : 'Incluir no album'}
                 </button>
               </div>
             </form>
@@ -1992,12 +2980,18 @@ function PublicPage() {
               <div>
                 <p className="fig-kicker">Minha Figurinha</p>
                 <h3>
-                  {customUnlockStep === 'payment' ? 'Libere o PDF completo por Pix' : 'Como voce quer baixar seu PDF?'}
+                  {customUnlockContext === 'AI_CREATE'
+                    ? 'Liberar criacao com IA'
+                    : customUnlockStep === 'payment'
+                      ? 'Libere o PDF completo por Pix'
+                      : 'Como voce quer baixar seu PDF?'}
                 </h3>
                 <p className="fig-modal-subtitle">
-                  {customUnlockStep === 'payment'
-                    ? 'Pague o Pix para manter sua figurinha no arquivo.'
-                    : 'Escolha como quer baixar.'}
+                  {customUnlockContext === 'AI_CREATE'
+                    ? 'Pague uma vez para continuar com a versao premium da sua figurinha.'
+                    : customUnlockStep === 'payment'
+                      ? 'Pague o Pix para manter sua figurinha no arquivo.'
+                      : 'Escolha como quer baixar.'}
                 </p>
               </div>
               <button type="button" className="fig-modal-close" onClick={() => setCustomUnlockModalOpen(false)}>
@@ -2006,7 +3000,7 @@ function PublicPage() {
             </div>
 
             <section className="fig-form-card fig-donation-modal-card">
-              {customUnlockStep === 'choice' ? (
+              {customUnlockContext === 'MANUAL_PDF' && customUnlockStep === 'choice' ? (
                 <>
                   <div className="fig-flow-step-row">
                     <span className="fig-flow-step is-active">1. Escolha</span>
@@ -2014,10 +3008,7 @@ function PublicPage() {
                     <span className="fig-flow-step">3. Baixar</span>
                   </div>
                   <div className="fig-service-notes">
-                    <p>
-                      {serviceConfig.custom_sticker_unlock_message ||
-                        'Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00.'}
-                    </p>
+                    <p>{activeUnlockMessage}</p>
                   </div>
 
                   <div className="fig-quote-grid fig-quote-grid--donation">
@@ -2030,7 +3021,7 @@ function PublicPage() {
                       <span>com sua figurinha</span>
                     </div>
                     <div className="fig-quote-item">
-                      <strong>{formatCurrency(serviceConfig.custom_sticker_unlock_price_cents)}</strong>
+                      <strong>{formatCurrency(activeUnlockPriceCents)}</strong>
                       <span>para liberar a personalizada</span>
                     </div>
                   </div>
@@ -2052,13 +3043,13 @@ function PublicPage() {
                     <button
                       type="button"
                       className="fig-choice-card fig-choice-card--primary"
-                      onClick={handleStartCustomUnlock}
+                      onClick={() => handleStartCustomUnlock('MANUAL_PDF')}
                       disabled={customUnlockBusy}
                     >
                       <strong>
                         {customUnlockBusy
                           ? 'Gerando Pix...'
-                          : `Liberar PDF completo por ${formatCurrency(serviceConfig.custom_sticker_unlock_price_cents)}`}
+                          : `Liberar PDF completo por ${formatCurrency(activeUnlockPriceCents)}`}
                       </strong>
                       <span>Mantem sua figurinha no PDF.</span>
                     </button>
@@ -2067,55 +3058,73 @@ function PublicPage() {
               ) : (
                 <>
                   <div className="fig-flow-step-row">
-                    <span className="fig-flow-step is-active">1. Escolha</span>
+                    <span className="fig-flow-step is-active">{customUnlockContext === 'AI_CREATE' ? '1. Pix' : '1. Escolha'}</span>
                     <span className="fig-flow-step is-active">2. Pix</span>
-                    <span className="fig-flow-step">3. Baixar</span>
+                    <span className="fig-flow-step">{customUnlockContext === 'AI_CREATE' ? '3. Criar' : '3. Baixar'}</span>
                   </div>
                   <div className="fig-service-notes">
-                    <p>Escaneie o Pix para liberar sua figurinha no PDF.</p>
+                    <p>
+                      {customUnlockContext === 'AI_CREATE'
+                        ? activeUnlockMessage
+                        : 'Escaneie o Pix para liberar sua figurinha no PDF.'}
+                    </p>
                   </div>
 
                   <div className="fig-unlock-hero-card">
                     <div>
-                      <span className="fig-unlock-hero-label">Liberacao</span>
-                      <strong>{formatCurrency(customUnlockData?.amount_cents || serviceConfig.custom_sticker_unlock_price_cents)}</strong>
+                      <span className="fig-unlock-hero-label">
+                        {customUnlockContext === 'AI_CREATE' ? 'Criacao com IA' : 'Liberacao'}
+                      </span>
+                      <strong>{formatCurrency(activeUnlockData?.amount_cents || activeUnlockPriceCents)}</strong>
                     </div>
                     <div>
-                      <span className="fig-unlock-hero-label">Seu PDF</span>
-                      <strong>{selectedIds.length} figurinhas</strong>
+                      <span className="fig-unlock-hero-label">
+                        {customUnlockContext === 'AI_CREATE' ? 'Seu acesso' : 'Seu PDF'}
+                      </span>
+                      <strong>
+                        {customUnlockContext === 'AI_CREATE' ? 'IA liberada' : `${selectedIds.length} figurinhas`}
+                      </strong>
                     </div>
                     <div>
                       <span className="fig-unlock-hero-label">Status</span>
                       <strong>
-                        {customUnlockData?.status === 'PAGO'
+                        {activeUnlockData?.status === 'PAGO'
                           ? 'Pago'
-                          : customUnlockData?.status === 'EXPIRADO'
+                          : activeUnlockData?.status === 'EXPIRADO'
                             ? 'Expirado'
-                            : customUnlockData?.status === 'FALHOU'
+                            : activeUnlockData?.status === 'FALHOU'
                               ? 'Falhou'
                               : 'Aguardando'}
                       </strong>
                     </div>
                   </div>
 
-                  {customUnlockData?.qr_code_base64 ? (
+                  {activeUnlockData?.qr_code_base64 ? (
                     <div className="fig-payment-qr-card">
                       <img
-                        src={`data:image/png;base64,${customUnlockData.qr_code_base64}`}
-                        alt="QR Code Pix para liberar Minha Figurinha"
+                        src={`data:image/png;base64,${activeUnlockData.qr_code_base64}`}
+                        alt={customUnlockContext === 'AI_CREATE' ? 'QR Code Pix para liberar criacao com IA' : 'QR Code Pix para liberar Minha Figurinha'}
                       />
                     </div>
                   ) : null}
 
                   <div className="fig-payment-focus-note">
-                    <strong>Sua Minha Figurinha entra no PDF assim que o Pix confirmar.</strong>
-                    <span>Se preferir, voce ainda pode voltar e baixar gratis sem ela.</span>
+                    <strong>
+                      {customUnlockContext === 'AI_CREATE'
+                        ? 'Depois do Pix confirmado, a criacao com IA fica liberada na hora.'
+                        : 'Sua Minha Figurinha entra no PDF assim que o Pix confirmar.'}
+                    </strong>
+                    <span>
+                      {customUnlockContext === 'AI_CREATE'
+                        ? 'Esse pagamento vale para esta sessao e nao sera cobrado de novo quando ela entrar no PDF.'
+                        : 'Se preferir, voce ainda pode voltar e baixar gratis sem ela.'}
+                    </span>
                   </div>
 
                   <div className="fig-helper-strip fig-helper-strip--donation">
                     <div>
                       <strong>Pix copia e cola</strong>
-                      <span className="fig-code-block">{customUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
+                      <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
                     </div>
                     <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
                       {customUnlockCopied ? 'Codigo copiado' : 'Copiar codigo Pix'}
@@ -2123,16 +3132,26 @@ function PublicPage() {
                   </div>
 
                   <div className="fig-hero-actions fig-hero-actions--sticky-mobile">
-                    <button type="button" className="fig-secondary-button" onClick={() => setCustomUnlockStep('choice')}>
-                      Voltar
-                    </button>
+                    {customUnlockContext === 'MANUAL_PDF' ? (
+                      <button type="button" className="fig-secondary-button" onClick={() => setCustomUnlockStep('choice')}>
+                        Voltar
+                      </button>
+                    ) : (
+                      <button type="button" className="fig-secondary-button" onClick={() => setCustomUnlockModalOpen(false)}>
+                        Cancelar
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="fig-primary-button"
-                      onClick={() => refreshCustomUnlock(true)}
+                      onClick={() => refreshCustomUnlock(true, customUnlockContext)}
                       disabled={customUnlockBusy}
                     >
-                      {customUnlockData?.status === 'PAGO' ? 'Liberado' : 'Ja paguei, verificar agora'}
+                      {activeUnlockData?.status === 'PAGO'
+                        ? customUnlockContext === 'AI_CREATE'
+                          ? 'IA liberada'
+                          : 'Liberado'
+                        : 'Ja paguei, verificar agora'}
                     </button>
                   </div>
                 </>
@@ -2197,6 +3216,38 @@ function PublicPage() {
           </div>
         </div>
       ) : null}
+
+      {publicFlowProgress ? (
+        <div className="fig-public-progress-backdrop" role="presentation">
+          <div className="fig-public-progress-card" role="status" aria-live="polite" aria-atomic="true">
+            <div className="fig-public-progress-spinner" />
+            <p className="fig-kicker">Aguarde</p>
+            <h3>{publicFlowProgress.title}</h3>
+            <p className="fig-public-progress-copy">{publicFlowProgress.subtitle}</p>
+            <div className="fig-public-progress-bar-shell" aria-hidden="true">
+              <div className={`fig-public-progress-bar${publicFlowProgress.isComplete ? ' is-complete' : ''}`} />
+            </div>
+            <div className="fig-public-progress-meta">
+              <strong>{publicFlowProgress.label}</strong>
+            </div>
+            <div className="fig-public-progress-steps">
+              {publicFlowProgress.steps?.map((stepLabel, index) => {
+                const isDone = publicFlowProgress.isComplete || index < publicFlowProgress.activeStepIndex
+                const isActive = !publicFlowProgress.isComplete && index === publicFlowProgress.activeStepIndex
+                return (
+                  <div
+                    key={`${publicFlowProgress.key}-${stepLabel}`}
+                    className={`fig-public-progress-step${isDone ? ' is-done' : ''}${isActive ? ' is-active' : ''}`}
+                  >
+                    <span className="fig-public-progress-step-dot" aria-hidden="true" />
+                    <span>{stepLabel}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   )
 }
@@ -2239,6 +3290,7 @@ function AdminPage() {
   const [selectedCollectionSlugManualOpen, setSelectedCollectionSlugManualOpen] = useState(false)
   const [savingAlbum, setSavingAlbum] = useState(false)
   const [savingAlbumEdit, setSavingAlbumEdit] = useState(false)
+  const [deletingAlbum, setDeletingAlbum] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [processingAuto, setProcessingAuto] = useState(false)
   const [editingStickerId, setEditingStickerId] = useState(null)
@@ -2263,6 +3315,9 @@ function AdminPage() {
     custom_sticker_unlock_enabled: false,
     custom_sticker_unlock_price: '5.00',
     custom_sticker_unlock_message: '',
+    custom_ai_unlock_enabled: false,
+    custom_ai_unlock_price: '5.00',
+    custom_ai_unlock_message: '',
     pack_size: '7',
     print_price: '0.00',
     pack_price: '0.00',
@@ -2273,16 +3328,53 @@ function AdminPage() {
     custom_prompt_template: '',
     custom_base_homem_path: '',
     custom_base_mulher_path: '',
-    custom_base_menino_path: '',
-    custom_base_menina_path: ''
+    custom_base_crianca_path: ''
   })
   const [savingService, setSavingService] = useState(false)
+  const [sourceDocuments, setSourceDocuments] = useState([])
+  const [selectedSourceDocumentId, setSelectedSourceDocumentId] = useState(null)
+  const [selectedSourceDocument, setSelectedSourceDocument] = useState(null)
+  const [sourceDocumentForm, setSourceDocumentForm] = useState(() => createEmptySourceDocumentForm())
+  const [savingSourceDocument, setSavingSourceDocument] = useState(false)
+  const [deletingSourceDocument, setDeletingSourceDocument] = useState(false)
+  const [loadingSourceDocuments, setLoadingSourceDocuments] = useState(false)
+  const [sourceDocumentUploadResetKey, setSourceDocumentUploadResetKey] = useState(0)
+  const [selectedSourceDocumentPageId, setSelectedSourceDocumentPageId] = useState(null)
+  const [sourcePageInteractionMode, setSourcePageInteractionMode] = useState('detected')
+  const [editingSourceBlockId, setEditingSourceBlockId] = useState(null)
+  const [sourceBlockForm, setSourceBlockForm] = useState(createEmptySourceBlockForm)
+  const [savingSourceBlock, setSavingSourceBlock] = useState(false)
+  const [sourceDetectedSelectionRect, setSourceDetectedSelectionRect] = useState(null)
+  const [sourceDetectedDragState, setSourceDetectedDragState] = useState(null)
+  const [sourceBlockSelectionRect, setSourceBlockSelectionRect] = useState(null)
+  const [sourceBlockDragState, setSourceBlockDragState] = useState(null)
+  const [sourceBlockDraftRect, setSourceBlockDraftRect] = useState(null)
+  const [sourceDetectedStickers, setSourceDetectedStickers] = useState([])
+  const [loadingSourceDetectedStickers, setLoadingSourceDetectedStickers] = useState(false)
+  const [processingSourceDocumentDetection, setProcessingSourceDocumentDetection] = useState(false)
+  const [selectedDetectedStickerIds, setSelectedDetectedStickerIds] = useState([])
+  const [sourceDetectedCollectionId, setSourceDetectedCollectionId] = useState('')
+  const [assigningDetectedStickers, setAssigningDetectedStickers] = useState(false)
+  const [discardingDetectedStickers, setDiscardingDetectedStickers] = useState(false)
+  const [processingSourceBlockDetection, setProcessingSourceBlockDetection] = useState(false)
+  const [sourceBlockStickers, setSourceBlockStickers] = useState([])
+  const [loadingSourceBlockStickers, setLoadingSourceBlockStickers] = useState(false)
+  const [duplicatingSourceBlocks, setDuplicatingSourceBlocks] = useState(false)
+  const [duplicatingSourceBlock, setDuplicatingSourceBlock] = useState(false)
+  const [pageLayoutTemplates, setPageLayoutTemplates] = useState([])
+  const [selectedPageLayoutTemplateId, setSelectedPageLayoutTemplateId] = useState(null)
+  const [pageLayoutForm, setPageLayoutForm] = useState(createEmptyPageLayoutForm)
+  const [savingPageLayoutTemplate, setSavingPageLayoutTemplate] = useState(false)
+  const [applyingPageLayoutTemplate, setApplyingPageLayoutTemplate] = useState(false)
+  const [deletingPageLayoutTemplate, setDeletingPageLayoutTemplate] = useState(false)
   const [customTemplates, setCustomTemplates] = useState([])
   const [selectedCustomTemplateId, setSelectedCustomTemplateId] = useState(null)
   const [customTemplateForm, setCustomTemplateForm] = useState(createEmptyCustomTemplateForm)
   const [savingCustomTemplate, setSavingCustomTemplate] = useState(false)
   const [uploadingTemplateLayerKey, setUploadingTemplateLayerKey] = useState('')
   const [deletingTemplateLayerKey, setDeletingTemplateLayerKey] = useState('')
+  const [importingTemplateBatch, setImportingTemplateBatch] = useState(false)
+  const [deletingCustomTemplate, setDeletingCustomTemplate] = useState(false)
   const [uploadingBaseProfile, setUploadingBaseProfile] = useState('')
   const [deletingBaseProfile, setDeletingBaseProfile] = useState('')
   const [orders, setOrders] = useState([])
@@ -2295,6 +3387,53 @@ function AdminPage() {
   })
   const [savingOrder, setSavingOrder] = useState(false)
   const [savingCollectionEdit, setSavingCollectionEdit] = useState(false)
+  const selectedSourceDocumentSummary =
+    sourceDocuments.find(document => document.id === selectedSourceDocumentId) || null
+  const selectedSourceDocumentPage =
+    selectedSourceDocument?.pages?.find(page => page.id === selectedSourceDocumentPageId) || null
+  const selectedSourceDocumentPreviousPage =
+    selectedSourceDocument?.pages?.find(page => page.page_number === (selectedSourceDocumentPage?.page_number || 0) - 1) || null
+  const selectedSourceBlock =
+    selectedSourceDocumentPage?.blocks?.find(block => block.id === editingSourceBlockId) || null
+  const selectedSourceDetectedStickers = useMemo(
+    () => sourceDetectedStickers.filter(detected => selectedDetectedStickerIds.includes(detected.id)),
+    [sourceDetectedStickers, selectedDetectedStickerIds]
+  )
+  const pendingSourceDetectedStickers = useMemo(
+    () => sourceDetectedStickers.filter(detected => detected.status === 'PENDENTE'),
+    [sourceDetectedStickers]
+  )
+  const selectedPageLayoutTemplate =
+    pageLayoutTemplates.find(template => template.id === selectedPageLayoutTemplateId) || null
+  const selectedCustomTemplateSummary =
+    customTemplates.find(template => template.id === selectedCustomTemplateId) || null
+  const suggestedCustomTemplateName =
+    customTemplateForm.name.trim() || buildCustomTemplateName(
+      customTemplateForm.profile_type,
+      customTemplateForm.position_type,
+      customTemplateForm.category_type
+    )
+  const importedTemplateLayerCount = customTemplateForm.layers.filter(layer => layer.file_path).length
+  const currentTemplateManualStatus = customTemplateForm.manual_status || createEmptyCustomTemplateManualStatus()
+  const indexedCustomTemplateLayers = useMemo(
+    () => customTemplateForm.layers.map((layer, index) => ({ layer, index })),
+    [customTemplateForm.layers]
+  )
+  const standardCustomTemplateLayers = useMemo(
+    () =>
+      standardCustomTemplateLayerTypes
+        .map(layerType => indexedCustomTemplateLayers.find(entry => entry.layer.layer_type === layerType))
+        .filter(Boolean),
+    [indexedCustomTemplateLayers]
+  )
+  const extraCustomTemplateLayers = useMemo(
+    () => indexedCustomTemplateLayers.filter(entry => !isStandardCustomTemplateLayerType(entry.layer.layer_type)),
+    [indexedCustomTemplateLayers]
+  )
+  const currentTemplatePreviewPath =
+    selectedCustomTemplateSummary?.preview_path ||
+    customTemplateForm.layers.find(layer => layer.file_path && layer.is_active)?.file_path ||
+    ''
 
   async function fetchCollectionWorkspace(collectionId, preferredPageId = currentPageId, shouldApply = () => true) {
     if (!token || !collectionId) return
@@ -2358,13 +3497,108 @@ function AdminPage() {
     setServiceForm(serviceConfigToForm(data))
   }
 
+  async function fetchSourceDocuments(activeDocumentId = selectedSourceDocumentId, shouldApply = () => true) {
+    if (!token || !selectedAlbumId) {
+      setSourceDocuments([])
+      setSelectedSourceDocumentId(null)
+      setSelectedSourceDocument(null)
+      return
+    }
+    setLoadingSourceDocuments(true)
+    try {
+      const data = await apiFetch(`/admin/source-documents?album_id=${selectedAlbumId}`, {
+        headers: buildAdminHeaders(token)
+      })
+      if (!shouldApply()) return
+      setSourceDocuments(data)
+      const nextId = data.some(document => document.id === activeDocumentId) ? activeDocumentId : data[0]?.id || null
+      setSelectedSourceDocumentId(nextId)
+      if (!nextId) {
+        setSelectedSourceDocument(null)
+      }
+    } finally {
+      if (!shouldApply()) return
+      setLoadingSourceDocuments(false)
+    }
+  }
+
+  async function fetchSourceDocumentDetailData(documentId = selectedSourceDocumentId, shouldApply = () => true) {
+    if (!token || !documentId) {
+      setSelectedSourceDocument(null)
+      return
+    }
+    const data = await apiFetch(`/admin/source-documents/${documentId}`, {
+      headers: buildAdminHeaders(token)
+    })
+    if (!shouldApply()) return
+    setSelectedSourceDocument(data)
+  }
+
+  async function fetchSourceBlockStickers(blockId = editingSourceBlockId, shouldApply = () => true) {
+    if (!token || !blockId) {
+      setSourceBlockStickers([])
+      return
+    }
+    setLoadingSourceBlockStickers(true)
+    try {
+      const data = await apiFetch(`/admin/page-selection-blocks/${blockId}/stickers`, {
+        headers: buildAdminHeaders(token)
+      })
+      if (!shouldApply()) return
+      setSourceBlockStickers(data)
+    } finally {
+      if (!shouldApply()) return
+      setLoadingSourceBlockStickers(false)
+    }
+  }
+
+  async function fetchSourceDetectedStickers(pageId = selectedSourceDocumentPageId, shouldApply = () => true) {
+    if (!token || !pageId) {
+      setSourceDetectedStickers([])
+      setSelectedDetectedStickerIds([])
+      return
+    }
+    setLoadingSourceDetectedStickers(true)
+    try {
+      const data = await apiFetch(`/admin/source-document-pages/${pageId}/detected-stickers`, {
+        headers: buildAdminHeaders(token)
+      })
+      if (!shouldApply()) return
+      setSourceDetectedStickers(data)
+      setSelectedDetectedStickerIds(current => current.filter(id => data.some(detected => detected.id === id)))
+    } finally {
+      if (!shouldApply()) return
+      setLoadingSourceDetectedStickers(false)
+    }
+  }
+
+  async function fetchPageLayoutTemplates(activeTemplateId = selectedPageLayoutTemplateId, shouldApply = () => true) {
+    if (!token || !selectedAlbumId) {
+      setPageLayoutTemplates([])
+      setSelectedPageLayoutTemplateId(null)
+      return
+    }
+    const data = await apiFetch(`/admin/page-layout-templates?album_id=${selectedAlbumId}`, {
+      headers: buildAdminHeaders(token)
+    })
+    if (!shouldApply()) return
+    setPageLayoutTemplates(data)
+    const nextId = data.some(template => template.id === activeTemplateId) ? activeTemplateId : data[0]?.id || null
+    setSelectedPageLayoutTemplateId(nextId)
+  }
+
   async function fetchCustomTemplates(activeTemplateId = selectedCustomTemplateId) {
-    if (!token) return
-    const data = await apiFetch('/admin/custom-templates', {
+    if (!token || !selectedAlbumId) {
+      setCustomTemplates([])
+      setSelectedCustomTemplateId(null)
+      setCustomTemplateForm(createEmptyCustomTemplateForm())
+      return
+    }
+    const data = await apiFetch(`/admin/custom-templates?album_id=${selectedAlbumId}`, {
       headers: buildAdminHeaders(token)
     })
     setCustomTemplates(data)
-    const nextId = activeTemplateId || data[0]?.id || null
+    const nextId = data.some(template => template.id === activeTemplateId) ? activeTemplateId : data[0]?.id || null
     setSelectedCustomTemplateId(nextId)
     if (!nextId) {
       setCustomTemplateForm(createEmptyCustomTemplateForm())
@@ -2386,7 +3620,7 @@ function AdminPage() {
     async function bootstrap() {
       setError('')
       try {
-        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchCustomTemplates(), fetchOrders()])
+        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchOrders()])
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -2400,9 +3634,86 @@ function AdminPage() {
   }, [token])
 
   useEffect(() => {
+    if (!token) return
+    fetchCustomTemplates()
+  }, [token, selectedAlbumId])
+
+  useEffect(() => {
+    if (!token || !selectedAlbumId) {
+      setPageLayoutTemplates([])
+      setSelectedPageLayoutTemplateId(null)
+      return
+    }
+    let ignore = false
+    async function loadPageLayoutTemplates() {
+      try {
+        await fetchPageLayoutTemplates(selectedPageLayoutTemplateId, () => !ignore)
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      }
+    }
+    loadPageLayoutTemplates()
+    return () => {
+      ignore = true
+    }
+  }, [token, selectedAlbumId])
+
+  useEffect(() => {
+    if (!token || !selectedAlbumId) {
+      setSourceDocuments([])
+      setSelectedSourceDocumentId(null)
+      setSelectedSourceDocument(null)
+      return
+    }
+    setSelectedSourceDocument(null)
+    let ignore = false
+    async function loadSourceDocuments() {
+      try {
+        await fetchSourceDocuments(selectedSourceDocumentId, () => !ignore)
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      }
+    }
+    loadSourceDocuments()
+    return () => {
+      ignore = true
+    }
+  }, [token, selectedAlbumId])
+
+  useEffect(() => {
+    if (!token || !selectedSourceDocumentId) {
+      if (!selectedSourceDocumentId) {
+        setSelectedSourceDocument(null)
+      }
+      return
+    }
+    let ignore = false
+    async function loadSourceDocumentDetail() {
+      try {
+        await fetchSourceDocumentDetailData(selectedSourceDocumentId, () => !ignore)
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      }
+    }
+    loadSourceDocumentDetail()
+    return () => {
+      ignore = true
+    }
+  }, [token, selectedSourceDocumentId])
+
+  useEffect(() => {
     if (!token || !selectedCustomTemplateId) {
       if (!selectedCustomTemplateId) {
-        setCustomTemplateForm(createEmptyCustomTemplateForm())
+        setCustomTemplateForm(current => ({
+          ...createEmptyCustomTemplateForm(),
+          album_id: String(selectedAlbumId || current.album_id || '')
+        }))
       }
       return
     }
@@ -2413,47 +3724,7 @@ function AdminPage() {
           headers: buildAdminHeaders(token)
         })
         if (ignore) return
-        setCustomTemplateForm({
-          name: data.name || '',
-          profile_type: data.profile_type || 'HOMEM',
-          category_type: data.category_type || 'JOGADOR',
-          position_type: data.position_type || 'ATACANTE',
-          composition_mode: data.composition_mode || 'LAYERS',
-          sort_order: String(data.sort_order ?? 0),
-          is_active: Boolean(data.is_active),
-          layers: (data.layers || []).map(layer => ({
-            id: layer.id,
-            layer_type: layer.layer_type,
-            label: layer.label || '',
-            file_path: layer.file_path || '',
-            z_index: String(layer.z_index ?? 0),
-            is_active: Boolean(layer.is_active)
-          })),
-          photo_slot: data.photo_slot
-            ? {
-                x: String(data.photo_slot.x ?? 0),
-                y: String(data.photo_slot.y ?? 0),
-                width: String(data.photo_slot.width ?? 1),
-                height: String(data.photo_slot.height ?? 1),
-                default_scale: String(data.photo_slot.default_scale ?? 1),
-                min_scale: String(data.photo_slot.min_scale ?? 0.7),
-                max_scale: String(data.photo_slot.max_scale ?? 1.5),
-                anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
-                anchor_y: String(data.photo_slot.anchor_y ?? 0.5)
-              }
-            : null,
-          text_slots: (data.text_slots || []).map(slot => ({
-            id: slot.id,
-            field_name: slot.field_name,
-            x: String(slot.x ?? 0),
-            y: String(slot.y ?? 0),
-            width: String(slot.width ?? 0),
-            font_size: String(slot.font_size ?? 12),
-            font_weight: slot.font_weight || '',
-            text_align: slot.text_align || '',
-            color: slot.color || ''
-          }))
-        })
+        setCustomTemplateForm(customTemplateDetailToForm(data))
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -2465,6 +3736,101 @@ function AdminPage() {
       ignore = true
     }
   }, [token, selectedCustomTemplateId])
+
+  useEffect(() => {
+    if (!selectedCustomTemplateId) {
+      setCustomTemplateForm(current => ({
+        ...current,
+        album_id: String(selectedAlbumId || '')
+      }))
+    }
+  }, [selectedAlbumId, selectedCustomTemplateId])
+
+  useEffect(() => {
+    setSourceDocumentForm(current => ({
+      ...current,
+      album_id: String(selectedAlbumId || current.album_id || '')
+    }))
+  }, [selectedAlbumId])
+
+  useEffect(() => {
+    const nextFilteredCollections = collections.filter(
+      collection => !selectedAlbumId || collection.album_id === selectedAlbumId
+    )
+    if (nextFilteredCollections.some(collection => String(collection.id) === sourceDetectedCollectionId)) {
+      return
+    }
+    setSourceDetectedCollectionId(String(selectedCollectionId || nextFilteredCollections[0]?.id || ''))
+  }, [collections, selectedAlbumId, selectedCollectionId, sourceDetectedCollectionId])
+
+  useEffect(() => {
+    const pagesList = selectedSourceDocument?.pages || []
+    const nextPageId = pagesList.some(page => page.id === selectedSourceDocumentPageId)
+      ? selectedSourceDocumentPageId
+      : pagesList[0]?.id || null
+    setSelectedSourceDocumentPageId(nextPageId)
+    setSourcePageInteractionMode('detected')
+    setEditingSourceBlockId(null)
+    setSourceBlockDraftRect(null)
+    setSourceBlockSelectionRect(null)
+    setSourceBlockDragState(null)
+    setSourceBlockForm(createEmptySourceBlockForm())
+    setSourceBlockStickers([])
+    setSourceDetectedStickers([])
+    setSelectedDetectedStickerIds([])
+  }, [selectedSourceDocumentId, selectedSourceDocument?.updated_at])
+
+  useEffect(() => {
+    if (!selectedSourceDocumentPage) return
+    setPageLayoutForm(current =>
+      current.name.trim()
+        ? current
+        : { name: `Layout pagina ${selectedSourceDocumentPage.page_number}` }
+    )
+  }, [selectedSourceDocumentPageId])
+
+  useEffect(() => {
+    if (!token || !selectedSourceDocumentPageId) {
+      setSourceDetectedStickers([])
+      setSelectedDetectedStickerIds([])
+      return
+    }
+    let ignore = false
+    async function loadDetectedStickers() {
+      try {
+        await fetchSourceDetectedStickers(selectedSourceDocumentPageId, () => !ignore)
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      }
+    }
+    loadDetectedStickers()
+    return () => {
+      ignore = true
+    }
+  }, [token, selectedSourceDocumentPageId, selectedSourceDocument?.updated_at])
+
+  useEffect(() => {
+    if (!token || !editingSourceBlockId) {
+      setSourceBlockStickers([])
+      return
+    }
+    let ignore = false
+    async function loadBlockStickers() {
+      try {
+        await fetchSourceBlockStickers(editingSourceBlockId, () => !ignore)
+      } catch (err) {
+        if (!ignore) {
+          setError(err.message)
+        }
+      }
+    }
+    loadBlockStickers()
+    return () => {
+      ignore = true
+    }
+  }, [token, editingSourceBlockId])
 
   useEffect(() => {
     if (!token || !selectedCollectionId) {
@@ -2707,6 +4073,8 @@ function AdminPage() {
     setSelectedCustomTemplateId(null)
     setCustomTemplateForm({
       ...createEmptyCustomTemplateForm(),
+      album_id: String(selectedAlbumId || ''),
+      name: buildCustomTemplateName('HOMEM', 'ATACANTE', 'JOGADOR'),
       sort_order: String(nextOrder)
     })
   }
@@ -2717,10 +4085,10 @@ function AdminPage() {
       layers: [
         ...current.layers,
         {
-          layer_type: 'BACKGROUND',
-          label: '',
+          layer_type: 'OVERLAY',
+          label: 'Overlay extra',
           file_path: '',
-          z_index: String(current.layers.length),
+          z_index: String((current.layers.length + 1) * 10),
           is_active: true
         }
       ]
@@ -2760,62 +4128,91 @@ function AdminPage() {
     }))
   }
 
+  function resolvePersistedTemplateLayer(persistedTemplate, referenceLayer, referenceIndex, currentLayers) {
+    const sourceLayers = currentLayers || customTemplateForm.layers || []
+    const ordinal = sourceLayers
+      .slice(0, referenceIndex + 1)
+      .filter(item => item.layer_type === referenceLayer.layer_type).length - 1
+    const candidates = (persistedTemplate?.layers || []).filter(item => item.layer_type === referenceLayer.layer_type)
+    return candidates[Math.max(ordinal, 0)] || candidates[0] || null
+  }
+
+  async function persistCustomTemplate({ successMessage = '' } = {}) {
+    const resolvedAlbumId = Number(customTemplateForm.album_id || selectedAlbumId || 0)
+    if (!resolvedAlbumId) {
+      throw new Error('Escolha um album antes de criar ou editar um modelo da Minha Figurinha.')
+    }
+    const payload = {
+      album_id: resolvedAlbumId,
+      name: suggestedCustomTemplateName,
+      profile_type: customTemplateForm.profile_type,
+      category_type: customTemplateForm.category_type,
+      position_type: customTemplateForm.position_type,
+      composition_mode: customTemplateForm.composition_mode,
+      sort_order: Number(customTemplateForm.sort_order || 0),
+      is_active: customTemplateForm.is_active,
+      layers: customTemplateForm.layers.map(layer => ({
+        layer_type: layer.layer_type,
+        label: layer.label,
+        file_path: layer.file_path || null,
+        z_index: Number(layer.z_index || 0),
+        is_active: layer.is_active
+      })),
+      photo_slot: customTemplateForm.photo_slot
+        ? {
+            x: Number(customTemplateForm.photo_slot.x || 0),
+            y: Number(customTemplateForm.photo_slot.y || 0),
+            width: Number(customTemplateForm.photo_slot.width || 0),
+            height: Number(customTemplateForm.photo_slot.height || 0),
+            default_scale: Number(customTemplateForm.photo_slot.default_scale || 1),
+            min_scale: Number(customTemplateForm.photo_slot.min_scale || 0.7),
+            max_scale: Number(customTemplateForm.photo_slot.max_scale || 1.5),
+            portrait_z_index: Number(customTemplateForm.photo_slot.portrait_z_index || 30),
+            anchor_x: Number(customTemplateForm.photo_slot.anchor_x || 0.5),
+            anchor_y: Number(customTemplateForm.photo_slot.anchor_y || 0.5),
+            visible_x: Number(customTemplateForm.photo_slot.visible_x || 0),
+            visible_y: Number(customTemplateForm.photo_slot.visible_y || 0),
+            visible_width: Number(customTemplateForm.photo_slot.visible_width || 1),
+            visible_height: Number(customTemplateForm.photo_slot.visible_height || 0.9)
+          }
+        : null,
+      text_slots: customTemplateForm.text_slots.map(slot => ({
+        field_name: slot.field_name,
+        x: Number(slot.x || 0),
+        y: Number(slot.y || 0),
+        width: Number(slot.width || 0),
+        font_size: Number(slot.font_size || 12),
+        font_weight: slot.font_weight || null,
+        text_align: slot.text_align || null,
+        color: slot.color || null
+      }))
+    }
+    const data = await apiFetch(
+      selectedCustomTemplateId ? `/admin/custom-templates/${selectedCustomTemplateId}` : '/admin/custom-templates',
+      {
+        method: selectedCustomTemplateId ? 'PUT' : 'POST',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify(payload)
+      }
+    )
+    setSelectedCustomTemplateId(data.id)
+    setCustomTemplateForm(customTemplateDetailToForm(data))
+    await fetchCustomTemplates(data.id)
+    if (successMessage) {
+      setMessage(successMessage)
+    }
+    return data
+  }
+
   async function handleSaveCustomTemplate(event) {
     event.preventDefault()
     setSavingCustomTemplate(true)
     setError('')
     setMessage('')
     try {
-      const payload = {
-        name: customTemplateForm.name,
-        profile_type: customTemplateForm.profile_type,
-        category_type: customTemplateForm.category_type,
-        position_type: customTemplateForm.position_type,
-        composition_mode: customTemplateForm.composition_mode,
-        sort_order: Number(customTemplateForm.sort_order || 0),
-        is_active: customTemplateForm.is_active,
-        layers: customTemplateForm.layers.map(layer => ({
-          layer_type: layer.layer_type,
-          label: layer.label,
-          file_path: layer.file_path || null,
-          z_index: Number(layer.z_index || 0),
-          is_active: layer.is_active
-        })),
-        photo_slot: customTemplateForm.photo_slot
-          ? {
-              x: Number(customTemplateForm.photo_slot.x || 0),
-              y: Number(customTemplateForm.photo_slot.y || 0),
-              width: Number(customTemplateForm.photo_slot.width || 0),
-              height: Number(customTemplateForm.photo_slot.height || 0),
-              default_scale: Number(customTemplateForm.photo_slot.default_scale || 1),
-              min_scale: Number(customTemplateForm.photo_slot.min_scale || 0.7),
-              max_scale: Number(customTemplateForm.photo_slot.max_scale || 1.5),
-              anchor_x: Number(customTemplateForm.photo_slot.anchor_x || 0.5),
-              anchor_y: Number(customTemplateForm.photo_slot.anchor_y || 0.5)
-            }
-          : null,
-        text_slots: customTemplateForm.text_slots.map(slot => ({
-          field_name: slot.field_name,
-          x: Number(slot.x || 0),
-          y: Number(slot.y || 0),
-          width: Number(slot.width || 0),
-          font_size: Number(slot.font_size || 12),
-          font_weight: slot.font_weight || null,
-          text_align: slot.text_align || null,
-          color: slot.color || null
-        }))
-      }
-      const data = await apiFetch(
-        selectedCustomTemplateId ? `/admin/custom-templates/${selectedCustomTemplateId}` : '/admin/custom-templates',
-        {
-          method: selectedCustomTemplateId ? 'PUT' : 'POST',
-          headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
-          body: JSON.stringify(payload)
-        }
-      )
-      setMessage(selectedCustomTemplateId ? 'Template atualizado.' : 'Template criado.')
-      await fetchCustomTemplates(data.id)
-      setSelectedCustomTemplateId(data.id)
+      await persistCustomTemplate({
+        successMessage: selectedCustomTemplateId ? 'Modelo salvo.' : 'Modelo criado.'
+      })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -2823,64 +4220,40 @@ function AdminPage() {
     }
   }
 
-  async function handleCustomTemplateLayerUpload(layer, file) {
-    if (!token || !selectedCustomTemplateId || !layer?.id || !file) return
-    const actionKey = `${selectedCustomTemplateId}:${layer.id}`
-    setUploadingTemplateLayerKey(actionKey)
+  async function handleCustomTemplateLayerUpload(layer, file, layerIndex) {
+    if (!token || !layer || !file) return
     setError('')
     setMessage('')
+    let actionKey = ''
     try {
+      let templateId = selectedCustomTemplateId
+      let targetLayer = layer
+
+      if (!templateId || !layer.id) {
+        const persisted = await persistCustomTemplate()
+        templateId = persisted.id
+        targetLayer = resolvePersistedTemplateLayer(persisted, layer, layerIndex, customTemplateForm.layers)
+        if (!targetLayer?.id) {
+          throw new Error('Nao consegui preparar essa camada para upload. Tente salvar o modelo e enviar novamente.')
+        }
+      }
+
+      actionKey = `${templateId}:${targetLayer.id}`
+      setUploadingTemplateLayerKey(actionKey)
       const formData = new FormData()
       formData.append('file', file)
-      const data = await apiFetch(`/admin/custom-templates/${selectedCustomTemplateId}/layers/${layer.id}/file`, {
+      const data = await apiFetch(`/admin/custom-templates/${templateId}/layers/${targetLayer.id}/file`, {
         method: 'POST',
         headers: buildAdminHeaders(token),
         body: formData
       })
-      setCustomTemplateForm({
-        ...createEmptyCustomTemplateForm(),
-        name: data.name,
-        profile_type: data.profile_type,
-        category_type: data.category_type,
-        position_type: data.position_type,
-        composition_mode: data.composition_mode,
-        sort_order: String(data.sort_order ?? 0),
-        is_active: data.is_active,
-        layers: (data.layers || []).map(item => ({
-          id: item.id,
-          layer_type: item.layer_type,
-          label: item.label,
-          file_path: item.file_path || '',
-          z_index: String(item.z_index ?? 0),
-          is_active: item.is_active
-        })),
-        photo_slot: data.photo_slot
-          ? {
-              x: String(data.photo_slot.x ?? 0),
-              y: String(data.photo_slot.y ?? 0),
-              width: String(data.photo_slot.width ?? 1),
-              height: String(data.photo_slot.height ?? 1),
-              default_scale: String(data.photo_slot.default_scale ?? 1),
-              min_scale: String(data.photo_slot.min_scale ?? 0.7),
-              max_scale: String(data.photo_slot.max_scale ?? 1.5),
-              anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
-              anchor_y: String(data.photo_slot.anchor_y ?? 0.5)
-            }
-          : null,
-        text_slots: (data.text_slots || []).map(item => ({
-          id: item.id,
-          field_name: item.field_name,
-          x: String(item.x ?? 0),
-          y: String(item.y ?? 0),
-          width: String(item.width ?? 0),
-          font_size: String(item.font_size ?? 12),
-          font_weight: item.font_weight || '',
-          text_align: item.text_align || '',
-          color: item.color || ''
-        }))
-      })
-      await fetchCustomTemplates(selectedCustomTemplateId)
-      setMessage('Camada enviada.')
+      setCustomTemplateForm(customTemplateDetailToForm(data))
+      await fetchCustomTemplates(templateId)
+      setMessage(
+        data.manual_status?.ready
+          ? 'Camada enviada. Modelo pronto para montagem manual.'
+          : `Camada enviada. Ainda faltam: ${(data.manual_status?.missing_labels || []).join(', ')}.`
+      )
     } catch (err) {
       setError(err.message)
     } finally {
@@ -2888,65 +4261,97 @@ function AdminPage() {
     }
   }
 
-  async function handleCustomTemplateLayerDelete(layer) {
-    if (!token || !selectedCustomTemplateId || !layer?.id || !layer.file_path) return
-    const actionKey = `${selectedCustomTemplateId}:${layer.id}`
-    setDeletingTemplateLayerKey(actionKey)
+  async function handleCustomTemplateLayerDelete(layer, layerIndex) {
+    if (!token || !layer?.file_path) return
     setError('')
     setMessage('')
+    let actionKey = ''
     try {
-      const data = await apiFetch(`/admin/custom-templates/${selectedCustomTemplateId}/layers/${layer.id}/file`, {
+      let templateId = selectedCustomTemplateId
+      let targetLayer = layer
+
+      if (!templateId || !layer.id) {
+        const persisted = await persistCustomTemplate()
+        templateId = persisted.id
+        targetLayer = resolvePersistedTemplateLayer(persisted, layer, layerIndex, customTemplateForm.layers)
+        if (!targetLayer?.id) {
+          throw new Error('Nao consegui localizar essa camada para remover a imagem.')
+        }
+      }
+
+      actionKey = `${templateId}:${targetLayer.id}`
+      setDeletingTemplateLayerKey(actionKey)
+      const data = await apiFetch(`/admin/custom-templates/${templateId}/layers/${targetLayer.id}/file`, {
         method: 'DELETE',
         headers: buildAdminHeaders(token)
       })
-      setCustomTemplateForm({
-        ...createEmptyCustomTemplateForm(),
-        name: data.name,
-        profile_type: data.profile_type,
-        category_type: data.category_type,
-        position_type: data.position_type,
-        composition_mode: data.composition_mode,
-        sort_order: String(data.sort_order ?? 0),
-        is_active: data.is_active,
-        layers: (data.layers || []).map(item => ({
-          id: item.id,
-          layer_type: item.layer_type,
-          label: item.label,
-          file_path: item.file_path || '',
-          z_index: String(item.z_index ?? 0),
-          is_active: item.is_active
-        })),
-        photo_slot: data.photo_slot
-          ? {
-              x: String(data.photo_slot.x ?? 0),
-              y: String(data.photo_slot.y ?? 0),
-              width: String(data.photo_slot.width ?? 1),
-              height: String(data.photo_slot.height ?? 1),
-              default_scale: String(data.photo_slot.default_scale ?? 1),
-              min_scale: String(data.photo_slot.min_scale ?? 0.7),
-              max_scale: String(data.photo_slot.max_scale ?? 1.5),
-              anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
-              anchor_y: String(data.photo_slot.anchor_y ?? 0.5)
-            }
-          : null,
-        text_slots: (data.text_slots || []).map(item => ({
-          id: item.id,
-          field_name: item.field_name,
-          x: String(item.x ?? 0),
-          y: String(item.y ?? 0),
-          width: String(item.width ?? 0),
-          font_size: String(item.font_size ?? 12),
-          font_weight: item.font_weight || '',
-          text_align: item.text_align || '',
-          color: item.color || ''
-        }))
-      })
-      await fetchCustomTemplates(selectedCustomTemplateId)
-      setMessage('Camada removida.')
+      setCustomTemplateForm(customTemplateDetailToForm(data))
+      await fetchCustomTemplates(templateId)
+      setMessage(
+        data.manual_status?.ready
+          ? 'Camada removida e o modelo segue pronto.'
+          : `Camada removida. Agora faltam: ${(data.manual_status?.missing_labels || []).join(', ')}.`
+      )
     } catch (err) {
       setError(err.message)
     } finally {
       setDeletingTemplateLayerKey('')
+    }
+  }
+
+  async function handleCustomTemplateBatchImport(fileList) {
+    if (!token || !fileList?.length) return
+    setImportingTemplateBatch(true)
+    setError('')
+    setMessage('')
+    try {
+      const persisted = await persistCustomTemplate()
+      const targetTemplateId = persisted.id
+      const formData = new FormData()
+      Array.from(fileList).forEach(file => {
+        formData.append('files', file)
+      })
+      const data = await apiFetch(`/admin/custom-templates/${targetTemplateId}/import-layers`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token),
+        body: formData
+      })
+      setCustomTemplateForm(customTemplateDetailToForm(data))
+      setSelectedCustomTemplateId(targetTemplateId)
+      await fetchCustomTemplates(targetTemplateId)
+      setMessage(
+        data.manual_status?.ready
+          ? 'Pacote importado. Modelo pronto para montagem manual.'
+          : `Pacote importado. Ainda faltam: ${(data.manual_status?.missing_labels || []).join(', ')}.`
+      )
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setImportingTemplateBatch(false)
+    }
+  }
+
+  async function handleDeleteCustomTemplate() {
+    if (!token || !selectedCustomTemplateId) return
+    const templateName = selectedCustomTemplateSummary?.name || suggestedCustomTemplateName || 'este modelo'
+    const confirmed = window.confirm(`Excluir "${templateName}"? Essa acao remove o modelo e as imagens das camadas.`)
+    if (!confirmed) return
+
+    setDeletingCustomTemplate(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(`/admin/custom-templates/${selectedCustomTemplateId}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      setSelectedCustomTemplateId(null)
+      await fetchCustomTemplates(null)
+      setMessage('Modelo excluido.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingCustomTemplate(false)
     }
   }
 
@@ -3061,6 +4466,677 @@ function AdminPage() {
     }
   }
 
+  async function handleDeleteAlbum() {
+    if (!selectedAlbumId || !selectedAlbum) return
+    const confirmed = window.confirm(
+      `Excluir "${selectedAlbum.name}"? Essa acao remove o album, as colecoes, figurinhas, modelos, pedidos e arquivos relacionados.`
+    )
+    if (!confirmed) return
+
+    const typedName = window.prompt(
+      `Para confirmar, digite exatamente o nome do album:\n\n${selectedAlbum.name}`
+    )
+    if (typedName === null) return
+    if (typedName.trim() !== selectedAlbum.name.trim()) {
+      window.alert('O nome digitado nao confere. O album nao foi excluido.')
+      return
+    }
+
+    setDeletingAlbum(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(`/admin/albums/${selectedAlbumId}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      setSelectedCollectionId(null)
+      setSelectedCollection(null)
+      setPages([])
+      setStickers([])
+      setCurrentPageId(null)
+      setSelectedCustomTemplateId(null)
+      setCustomTemplateForm(createEmptyCustomTemplateForm())
+      setSelectedSourceDocumentId(null)
+      setSelectedSourceDocument(null)
+      setSourceDocuments([])
+      resetStickerForm()
+      setAdminView('structure')
+      setMessage('Album excluido.')
+      await Promise.all([fetchAlbums(null), fetchCollections(null)])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingAlbum(false)
+    }
+  }
+
+  async function handleCreateSourceDocument(event) {
+    event.preventDefault()
+    if (!sourceDocumentForm.album_id || !sourceDocumentForm.title.trim() || !sourceDocumentForm.file) {
+      setError('Escolha o album, defina um titulo e envie o PDF antes de continuar.')
+      return
+    }
+
+    setSavingSourceDocument(true)
+    setError('')
+    setMessage('')
+    try {
+      const formData = new FormData()
+      formData.append('album_id', sourceDocumentForm.album_id)
+      formData.append('title', sourceDocumentForm.title.trim())
+      formData.append('file', sourceDocumentForm.file)
+      const created = await apiFetch('/admin/source-documents', {
+        method: 'POST',
+        headers: buildAdminHeaders(token),
+        body: formData
+      })
+      setSelectedSourceDocumentId(created.id)
+      setSelectedSourceDocument(created)
+      setSourceDocumentForm(createEmptySourceDocumentForm(selectedAlbumId || sourceDocumentForm.album_id))
+      setSourceDocumentUploadResetKey(current => current + 1)
+      await fetchSourceDocuments(created.id)
+      setMessage('Documento fonte enviado e paginas renderizadas.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingSourceDocument(false)
+    }
+  }
+
+  async function handleDeleteSourceDocument() {
+    if (!token || !selectedSourceDocumentId || !selectedSourceDocumentSummary) return
+    const confirmed = window.confirm(
+      `Excluir "${selectedSourceDocumentSummary.title}"? Essa acao remove o PDF e as paginas renderizadas desse documento fonte.`
+    )
+    if (!confirmed) return
+
+    setDeletingSourceDocument(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(`/admin/source-documents/${selectedSourceDocumentId}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      const deletedId = selectedSourceDocumentId
+      setSelectedSourceDocumentId(null)
+      setSelectedSourceDocument(null)
+      await fetchSourceDocuments(sourceDocuments.find(document => document.id !== deletedId)?.id || null)
+      setMessage('Documento fonte excluido.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingSourceDocument(false)
+    }
+  }
+
+  async function handleCreatePageLayoutTemplate(event) {
+    event.preventDefault()
+    if (!token || !selectedSourceDocumentPage) return
+    if (!pageLayoutForm.name.trim()) {
+      setError('Dê um nome para o layout mestre antes de salvar.')
+      return
+    }
+    setSavingPageLayoutTemplate(true)
+    setError('')
+    setMessage('')
+    try {
+      const created = await apiFetch(`/admin/source-document-pages/${selectedSourceDocumentPage.id}/layout-templates`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ name: pageLayoutForm.name.trim() })
+      })
+      await fetchPageLayoutTemplates(created.id)
+      setPageLayoutForm({ name: '' })
+      setMessage(`Layout mestre "${created.name}" salvo.`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingPageLayoutTemplate(false)
+    }
+  }
+
+  async function handleApplyPageLayoutTemplate() {
+    if (!token || !selectedSourceDocumentPage || !selectedPageLayoutTemplate) return
+    const hasExistingBlocks = (selectedSourceDocumentPage.blocks || []).length > 0
+    if (hasExistingBlocks) {
+      const confirmed = window.confirm(
+        `Aplicar o layout mestre "${selectedPageLayoutTemplate.name}"? Os blocos atuais da pagina ${selectedSourceDocumentPage.page_number} serao substituidos.`
+      )
+      if (!confirmed) return
+    }
+    setApplyingPageLayoutTemplate(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(
+        `/admin/page-layout-templates/${selectedPageLayoutTemplate.id}/apply-to-page/${selectedSourceDocumentPage.id}?replace_existing=true`,
+        {
+          method: 'POST',
+          headers: buildAdminHeaders(token)
+        }
+      )
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId)
+      ])
+      resetSourceBlockForm()
+      setMessage(`Layout mestre "${selectedPageLayoutTemplate.name}" aplicado na pagina ${selectedSourceDocumentPage.page_number}.`)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setApplyingPageLayoutTemplate(false)
+    }
+  }
+
+  async function handleDeletePageLayoutTemplate() {
+    if (!token || !selectedPageLayoutTemplate) return
+    const confirmed = window.confirm(`Excluir o layout mestre "${selectedPageLayoutTemplate.name}"?`)
+    if (!confirmed) return
+    setDeletingPageLayoutTemplate(true)
+    setError('')
+    setMessage('')
+    try {
+      const deletedId = selectedPageLayoutTemplate.id
+      await apiFetch(`/admin/page-layout-templates/${deletedId}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      await fetchPageLayoutTemplates(pageLayoutTemplates.find(template => template.id !== deletedId)?.id || null)
+      setMessage('Layout mestre excluido.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingPageLayoutTemplate(false)
+    }
+  }
+
+  function resetSourceBlockForm(nextPage = selectedSourceDocumentPage) {
+    const nextSortOrder =
+      ((nextPage?.blocks || []).reduce((maxValue, block) => Math.max(maxValue, Number(block.sort_order || 0)), 0) || 0) + 1
+    setEditingSourceBlockId(null)
+    setSourceBlockForm({
+      ...createEmptySourceBlockForm(),
+      sort_order: String(nextSortOrder)
+    })
+    setSourceBlockDraftRect(null)
+    setSourceBlockSelectionRect(null)
+    setSourceBlockDragState(null)
+  }
+
+  function detectedStickerIntersectsSelection(detectedSticker, selectionRect, dragState) {
+    if (!detectedSticker || detectedSticker.status !== 'PENDENTE') return false
+    const left = detectedSticker.x_ratio * dragState.width
+    const top = detectedSticker.y_ratio * dragState.height
+    const width = detectedSticker.width_ratio * dragState.width
+    const height = detectedSticker.height_ratio * dragState.height
+    return !(
+      left + width < selectionRect.left ||
+      left > selectionRect.left + selectionRect.width ||
+      top + height < selectionRect.top ||
+      top > selectionRect.top + selectionRect.height
+    )
+  }
+
+  function getSourcePreviewBoxStyle(xRatio, yRatio, widthRatio, heightRatio) {
+    return {
+      left: `${xRatio * 100}%`,
+      top: `${yRatio * 100}%`,
+      width: `${widthRatio * 100}%`,
+      height: `${heightRatio * 100}%`
+    }
+  }
+
+  function handleSourcePagePointerDown(event) {
+    if (!selectedSourceDocumentPage) return
+    if (event.target.closest('.fig-source-detected-overlay, .fig-source-block-overlay')) return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const startX = Math.min(Math.max(event.clientX - bounds.left, 0), bounds.width)
+    const startY = Math.min(Math.max(event.clientY - bounds.top, 0), bounds.height)
+    if (event.currentTarget.setPointerCapture && event.pointerId !== undefined) {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
+    if (sourcePageInteractionMode === 'block') {
+      setSourceBlockDragState({
+        startX,
+        startY,
+        width: bounds.width,
+        height: bounds.height
+      })
+      setSourceBlockSelectionRect({ left: startX, top: startY, width: 0, height: 0 })
+      return
+    }
+    if (sourcePageInteractionMode !== 'detected') return
+    setSourceDetectedDragState({
+      startX,
+      startY,
+      width: bounds.width,
+      height: bounds.height,
+      appendSelection: event.shiftKey || event.ctrlKey || event.metaKey
+    })
+    setSourceDetectedSelectionRect({ left: startX, top: startY, width: 0, height: 0 })
+  }
+
+  function handleSourcePagePointerMove(event) {
+    if (sourcePageInteractionMode === 'block') {
+      if (!sourceBlockDragState) return
+      const bounds = event.currentTarget.getBoundingClientRect()
+      const currentX = Math.min(Math.max(event.clientX - bounds.left, 0), bounds.width)
+      const currentY = Math.min(Math.max(event.clientY - bounds.top, 0), bounds.height)
+      const left = Math.min(sourceBlockDragState.startX, currentX)
+      const top = Math.min(sourceBlockDragState.startY, currentY)
+      const width = Math.abs(currentX - sourceBlockDragState.startX)
+      const height = Math.abs(currentY - sourceBlockDragState.startY)
+      setSourceBlockSelectionRect({ left, top, width, height })
+      return
+    }
+    if (sourcePageInteractionMode !== 'detected' || !sourceDetectedDragState) return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const currentX = Math.min(Math.max(event.clientX - bounds.left, 0), bounds.width)
+    const currentY = Math.min(Math.max(event.clientY - bounds.top, 0), bounds.height)
+    const left = Math.min(sourceDetectedDragState.startX, currentX)
+    const top = Math.min(sourceDetectedDragState.startY, currentY)
+    const width = Math.abs(currentX - sourceDetectedDragState.startX)
+    const height = Math.abs(currentY - sourceDetectedDragState.startY)
+    setSourceDetectedSelectionRect({ left, top, width, height })
+  }
+
+  function finalizeSourceBlockSelection() {
+    if (sourcePageInteractionMode === 'detected') {
+      if (
+        !sourceDetectedDragState ||
+        !sourceDetectedSelectionRect ||
+        sourceDetectedSelectionRect.width < 12 ||
+        sourceDetectedSelectionRect.height < 12
+      ) {
+        setSourceDetectedDragState(null)
+        setSourceDetectedSelectionRect(null)
+        return
+      }
+      const matchedIds = sourceDetectedStickers
+        .filter(detectedSticker => detectedStickerIntersectsSelection(detectedSticker, sourceDetectedSelectionRect, sourceDetectedDragState))
+        .map(detectedSticker => detectedSticker.id)
+      setSelectedDetectedStickerIds(current =>
+        sourceDetectedDragState.appendSelection ? [...new Set([...current, ...matchedIds])] : matchedIds
+      )
+      setSourceDetectedDragState(null)
+      setSourceDetectedSelectionRect(null)
+      return
+    }
+    if (
+      sourcePageInteractionMode !== 'block' ||
+      !sourceBlockDragState ||
+      !sourceBlockSelectionRect ||
+      sourceBlockSelectionRect.width < 12 ||
+      sourceBlockSelectionRect.height < 12
+    ) {
+      setSourceBlockDragState(null)
+      setSourceBlockSelectionRect(null)
+      return
+    }
+    const xRatio = sourceBlockSelectionRect.left / sourceBlockDragState.width
+    const yRatio = sourceBlockSelectionRect.top / sourceBlockDragState.height
+    const widthRatio = sourceBlockSelectionRect.width / sourceBlockDragState.width
+    const heightRatio = sourceBlockSelectionRect.height / sourceBlockDragState.height
+    setSourceBlockDraftRect({
+      xRatio,
+      yRatio,
+      widthRatio,
+      heightRatio
+    })
+    setSourceBlockForm(current => ({
+      ...current,
+      x: xRatio.toFixed(6),
+      y: yRatio.toFixed(6),
+      width: widthRatio.toFixed(6),
+      height: heightRatio.toFixed(6),
+      label: current.label || `Bloco ${current.sort_order || '1'}`
+    }))
+    setSourceBlockDragState(null)
+    setSourceBlockSelectionRect(null)
+  }
+
+  function loadSourceBlockForEdit(block) {
+    setSourcePageInteractionMode('block')
+    setSourceDetectedSelectionRect(null)
+    setSourceDetectedDragState(null)
+    setEditingSourceBlockId(block.id)
+    setSourceBlockForm({
+      collection_id: String(block.collection_id || ''),
+      label: block.label || '',
+      x: String(block.x),
+      y: String(block.y),
+      width: String(block.width),
+      height: String(block.height),
+      sort_order: String(block.sort_order || 0)
+    })
+    setSourceBlockDraftRect({
+      xRatio: block.x,
+      yRatio: block.y,
+      widthRatio: block.width,
+      heightRatio: block.height
+    })
+  }
+
+  async function handleSourceBlockSubmit(event) {
+    event.preventDefault()
+    if (!selectedSourceDocumentPageId || !sourceBlockForm.collection_id) return
+    setSavingSourceBlock(true)
+    setError('')
+    setMessage('')
+    const payload = {
+      collection_id: Number(sourceBlockForm.collection_id),
+      label: sourceBlockForm.label || null,
+      x: Number(sourceBlockForm.x),
+      y: Number(sourceBlockForm.y),
+      width: Number(sourceBlockForm.width),
+      height: Number(sourceBlockForm.height),
+      sort_order: Number(sourceBlockForm.sort_order || 0)
+    }
+    try {
+      await apiFetch(
+        editingSourceBlockId
+          ? `/admin/page-selection-blocks/${editingSourceBlockId}`
+          : `/admin/source-document-pages/${selectedSourceDocumentPageId}/blocks`,
+        {
+          method: editingSourceBlockId ? 'PUT' : 'POST',
+          headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+          body: JSON.stringify(payload)
+        }
+      )
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId)
+      ])
+      setMessage(editingSourceBlockId ? 'Bloco atualizado.' : 'Bloco criado.')
+      resetSourceBlockForm()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingSourceBlock(false)
+    }
+  }
+
+  async function handleDeleteSourceBlock() {
+    if (!token || !editingSourceBlockId || !selectedSourceBlock) return
+    const confirmed = window.confirm(`Excluir o bloco "${selectedSourceBlock.label || selectedSourceBlock.collection_name || 'sem nome'}"?`)
+    if (!confirmed) return
+    setSavingSourceBlock(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(`/admin/page-selection-blocks/${editingSourceBlockId}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId)
+      ])
+      setMessage('Bloco excluido.')
+      resetSourceBlockForm()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSavingSourceBlock(false)
+    }
+  }
+
+  async function handleDuplicateSourceBlock() {
+    if (!token || !editingSourceBlockId || !selectedSourceBlock) return
+    setDuplicatingSourceBlock(true)
+    setError('')
+    setMessage('')
+    try {
+      const duplicated = await apiFetch(`/admin/page-selection-blocks/${editingSourceBlockId}/duplicate`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token)
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId)
+      ])
+      setEditingSourceBlockId(duplicated.id)
+      setSourceBlockForm({
+        collection_id: String(duplicated.collection_id || ''),
+        label: duplicated.label || '',
+        x: String(duplicated.x),
+        y: String(duplicated.y),
+        width: String(duplicated.width),
+        height: String(duplicated.height),
+        sort_order: String(duplicated.sort_order || 0)
+      })
+      setSourceBlockDraftRect({
+        xRatio: duplicated.x,
+        yRatio: duplicated.y,
+        widthRatio: duplicated.width,
+        heightRatio: duplicated.height
+      })
+      setSourceBlockStickers([])
+      setMessage('Bloco duplicado. Ajuste a copia como preferir.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDuplicatingSourceBlock(false)
+    }
+  }
+
+  async function handleDuplicateSourceBlocksFromPreviousPage() {
+    if (!token || !selectedSourceDocumentPage) return
+    if (!selectedSourceDocumentPreviousPage) {
+      setError('Essa pagina ainda nao tem uma pagina anterior com blocos para duplicar.')
+      return
+    }
+
+    const hasExistingBlocks = (selectedSourceDocumentPage.blocks || []).length > 0
+    if (hasExistingBlocks) {
+      const confirmed = window.confirm(
+        `Duplicar os blocos da pagina ${selectedSourceDocumentPreviousPage.page_number}? Os blocos atuais da pagina ${selectedSourceDocumentPage.page_number} serao substituidos.`
+      )
+      if (!confirmed) return
+    }
+
+    setDuplicatingSourceBlocks(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(
+        `/admin/source-document-pages/${selectedSourceDocumentPage.id}/duplicate-previous-blocks?replace_existing=true`,
+        {
+          method: 'POST',
+          headers: buildAdminHeaders(token)
+        }
+      )
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId)
+      ])
+      resetSourceBlockForm()
+      setMessage(
+        `Blocos da pagina ${selectedSourceDocumentPreviousPage.page_number} duplicados para a pagina ${selectedSourceDocumentPage.page_number}.`
+      )
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDuplicatingSourceBlocks(false)
+    }
+  }
+
+  async function handleDetectSourceDocumentStickers() {
+    if (!token || !selectedSourceDocumentId || !selectedSourceDocument) return
+    setProcessingSourceDocumentDetection(true)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/source-documents/${selectedSourceDocumentId}/detect-stickers?replace_existing=true`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token)
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId),
+        selectedSourceDocumentPageId ? fetchSourceDetectedStickers(selectedSourceDocumentPageId) : Promise.resolve()
+      ])
+      const pageSummary = data.page_results.map(result => `P${result.page_number}: ${result.detected_count}`).join(' | ')
+      setMessage(
+        data.detected_count > 0
+          ? `Documento analisado. ${data.detected_count} figurinha(s) detectada(s). ${pageSummary}`
+          : 'Nao encontrei uma grade automatica compativel neste documento ainda.'
+      )
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setProcessingSourceDocumentDetection(false)
+    }
+  }
+
+  function handleToggleSourceDetectedSticker(detectedSticker) {
+    if (!detectedSticker || detectedSticker.status !== 'PENDENTE') return
+    setSelectedDetectedStickerIds(current =>
+      current.includes(detectedSticker.id)
+        ? current.filter(id => id !== detectedSticker.id)
+        : [...current, detectedSticker.id]
+    )
+  }
+
+  function handleToggleAllPendingDetectedStickers() {
+    if (!pendingSourceDetectedStickers.length) return
+    const pendingIds = pendingSourceDetectedStickers.map(detected => detected.id)
+    const allSelected = pendingIds.every(id => selectedDetectedStickerIds.includes(id))
+    setSelectedDetectedStickerIds(current =>
+      allSelected
+        ? current.filter(id => !pendingIds.includes(id))
+        : [...new Set([...current, ...pendingIds])]
+    )
+  }
+
+  async function handleAssignSourceDetectedStickers() {
+    if (!token || !selectedSourceDocumentId || !selectedDetectedStickerIds.length || !sourceDetectedCollectionId) return
+    setAssigningDetectedStickers(true)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/source-documents/${selectedSourceDocumentId}/assign-detected-stickers`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          collection_id: Number(sourceDetectedCollectionId),
+          detected_sticker_ids: selectedDetectedStickerIds
+        })
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId),
+        selectedSourceDocumentPageId ? fetchSourceDetectedStickers(selectedSourceDocumentPageId) : Promise.resolve(),
+        Number(sourceDetectedCollectionId) === selectedCollectionId
+          ? fetchCollectionWorkspace(selectedCollectionId, currentPageId)
+          : fetchCollections(selectedCollectionId)
+      ])
+      setSelectedDetectedStickerIds([])
+      setMessage(
+        data.affected_count > 0
+          ? `${data.affected_count} figurinha(s) enviada(s) para ${data.collection_name}.`
+          : 'Nenhuma figurinha pendente foi enviada nesta etapa.'
+      )
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setAssigningDetectedStickers(false)
+    }
+  }
+
+  async function handleDiscardSourceDetectedStickers() {
+    if (!token || !selectedSourceDocumentId || !selectedDetectedStickerIds.length) return
+    const confirmed = window.confirm('Descartar as figurinhas detectadas selecionadas?')
+    if (!confirmed) return
+    setDiscardingDetectedStickers(true)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/source-documents/${selectedSourceDocumentId}/discard-detected-stickers`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          detected_sticker_ids: selectedDetectedStickerIds
+        })
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId),
+        selectedSourceDocumentPageId ? fetchSourceDetectedStickers(selectedSourceDocumentPageId) : Promise.resolve()
+      ])
+      setSelectedDetectedStickerIds([])
+      setMessage(
+        data.affected_count > 0
+          ? `${data.affected_count} figurinha(s) descartada(s) da revisao.`
+          : 'Nenhuma figurinha pendente foi descartada.'
+      )
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDiscardingDetectedStickers(false)
+    }
+  }
+
+  async function handleDetectSourceBlockStickers() {
+    if (!token || !editingSourceBlockId || !selectedSourceBlock) return
+    setProcessingSourceBlockDetection(true)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/page-selection-blocks/${editingSourceBlockId}/detect-stickers?replace_existing=true`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token)
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId),
+        fetchSourceBlockStickers(editingSourceBlockId),
+        selectedCollectionId === selectedSourceBlock.collection_id
+          ? fetchCollectionWorkspace(selectedCollectionId, currentPageId)
+          : fetchCollections(selectedCollectionId)
+      ])
+      setMessage(
+        data.detected_count > 0
+          ? `O bloco gerou ${data.detected_count} figurinha(s) para ${data.collection_name}.`
+          : data.reason || 'Esse bloco ainda nao gerou figurinhas detectaveis.'
+      )
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setProcessingSourceBlockDetection(false)
+    }
+  }
+
+  async function handleDeleteSourceBlockSticker(stickerId) {
+    if (!token) return
+    const confirmed = window.confirm('Excluir essa figurinha detectada do bloco?')
+    if (!confirmed) return
+    setLoadingSourceBlockStickers(true)
+    setError('')
+    setMessage('')
+    try {
+      await apiFetch(`/admin/stickers/${stickerId}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId),
+        fetchSourceBlockStickers(editingSourceBlockId),
+        selectedSourceBlock?.collection_id === selectedCollectionId
+          ? fetchCollectionWorkspace(selectedCollectionId, currentPageId)
+          : fetchCollections(selectedCollectionId)
+      ])
+      setMessage('Figurinha removida da revisao do bloco.')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoadingSourceBlockStickers(false)
+    }
+  }
+
   async function handleUpdateCollection(event) {
     event.preventDefault()
     if (!selectedCollectionId) return
@@ -3172,6 +5248,9 @@ function AdminPage() {
           custom_sticker_unlock_enabled: serviceForm.custom_sticker_unlock_enabled,
           custom_sticker_unlock_price_cents: centsFromInput(serviceForm.custom_sticker_unlock_price),
           custom_sticker_unlock_message: serviceForm.custom_sticker_unlock_message,
+          custom_ai_unlock_enabled: serviceForm.custom_ai_unlock_enabled,
+          custom_ai_unlock_price_cents: centsFromInput(serviceForm.custom_ai_unlock_price),
+          custom_ai_unlock_message: serviceForm.custom_ai_unlock_message,
           pack_size: Number(serviceForm.pack_size || 7),
           print_price_cents: centsFromInput(serviceForm.print_price),
           pack_price_cents: centsFromInput(serviceForm.pack_price),
@@ -3514,6 +5593,14 @@ function AdminPage() {
           >
             Nova selecao
           </button>
+          <button
+            type="button"
+            className="fig-danger-button fig-admin-sidebar-action"
+            disabled={!selectedAlbumId || isCreationLocked || deletingAlbum}
+            onClick={handleDeleteAlbum}
+          >
+            {deletingAlbum ? 'Excluindo...' : 'Excluir album'}
+          </button>
           {isCreationLocked ? (
             <button type="button" className="fig-secondary-button fig-admin-sidebar-action" onClick={handleCancelCreation}>
               Cancelar criacao
@@ -3635,6 +5722,7 @@ function AdminPage() {
         {loading ? <p className="fig-empty-note">Carregando dados da selecao...</p> : null}
 
         {adminView === 'structure' ? (
+          <>
           <section className={`fig-admin-panel-grid${isCreationLocked ? ' fig-admin-panel-grid--single' : ''}`}>
             {!isCreatingCollection ? (
               <form
@@ -4004,15 +6092,794 @@ function AdminPage() {
               )}
             </div>
           </section>
+
+          <section className="fig-form-card fig-form-card--supporting fig-source-document-shell">
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Documentos fonte</p>
+              <h3>PDFs multipagina para alimentar varias selecoes</h3>
+            </div>
+            <p className="fig-empty-note">
+              Suba um PDF com varias paginas, detecte todas as figurinhas dele e depois so distribua as detectadas para
+              as selecoes certas. O bloco manual continua disponivel para apoio.
+            </p>
+
+            <div className="fig-source-document-grid">
+              <form className="fig-source-document-form" onSubmit={handleCreateSourceDocument}>
+                <div className="fig-form-grid fig-source-document-form-grid">
+                  <label className="fig-field">
+                    <span>Album</span>
+                    <select
+                      value={sourceDocumentForm.album_id}
+                      onChange={event =>
+                        setSourceDocumentForm(current => ({
+                          ...current,
+                          album_id: event.target.value
+                        }))
+                      }
+                    >
+                      <option value="">Selecione</option>
+                      {albums.map(album => (
+                        <option key={album.id} value={album.id}>
+                          {album.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="fig-field">
+                    <span>Titulo do documento</span>
+                    <input
+                      value={sourceDocumentForm.title}
+                      onChange={event =>
+                        setSourceDocumentForm(current => ({
+                          ...current,
+                          title: event.target.value
+                        }))
+                      }
+                      placeholder="Lote 03 · paginas mistas"
+                    />
+                  </label>
+
+                  <label className="fig-field fig-source-document-upload">
+                    <span>PDF multipagina</span>
+                    <input
+                      key={sourceDocumentUploadResetKey}
+                      className="fig-plain-file-input"
+                      type="file"
+                      accept="application/pdf"
+                      onChange={event => {
+                        const file = event.target.files?.[0] || null
+                        setSourceDocumentForm(current => ({
+                          ...current,
+                          file,
+                          title: current.title || sourceDocumentTitleFromFile(file?.name)
+                        }))
+                      }}
+                    />
+                    <small className="fig-helper-text">
+                      Use esse fluxo quando um unico PDF tiver varias selecoes espalhadas em paginas diferentes.
+                    </small>
+                  </label>
+                </div>
+
+                <div className="fig-hero-actions fig-source-document-actions">
+                  <button
+                    type="submit"
+                    className="fig-primary-button"
+                    disabled={savingSourceDocument || !sourceDocumentForm.album_id || !sourceDocumentForm.title.trim() || !sourceDocumentForm.file}
+                  >
+                    {savingSourceDocument ? 'Enviando documento...' : 'Enviar documento fonte'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="fig-order-layout fig-order-layout--editor fig-source-document-picker">
+                <div className="fig-order-list fig-source-document-list">
+                  {loadingSourceDocuments ? (
+                    <p className="fig-empty-note">Carregando documentos do album...</p>
+                  ) : sourceDocuments.length ? (
+                    sourceDocuments.map(document => (
+                      <button
+                        key={document.id}
+                        type="button"
+                        className={`fig-order-list-item fig-source-document-list-item${document.id === selectedSourceDocumentId ? ' is-active' : ''}`}
+                        onClick={() => setSelectedSourceDocumentId(document.id)}
+                      >
+                        <strong>{document.title}</strong>
+                        <span>{document.page_count} pagina(s) · {document.pending_detected_count || 0} pendente(s)</span>
+                        <small>{sourceDocumentStatusLabel(document.status)}</small>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="fig-empty-note">
+                      {selectedAlbum
+                        ? `Ainda nao existe documento fonte em ${selectedAlbum.name}.`
+                        : 'Escolha um album para comecar.'}
+                    </p>
+                  )}
+                </div>
+
+                <div className="fig-order-detail fig-source-document-detail">
+                  {selectedSourceDocument ? (
+                    <>
+                      <div className="fig-source-document-toolbar">
+                        <div>
+                          <strong>{selectedSourceDocument.title}</strong>
+                          <span>
+                            {selectedSourceDocument.album_name || selectedAlbum?.name || 'Album'} ·{' '}
+                            {sourceDocumentStatusLabel(selectedSourceDocument.status)}
+                          </span>
+                        </div>
+                        <div className="fig-hero-actions fig-hero-actions--compact">
+                          <button
+                            type="button"
+                            className="fig-secondary-button"
+                            disabled={processingSourceDocumentDetection}
+                            onClick={handleDetectSourceDocumentStickers}
+                          >
+                            {processingSourceDocumentDetection ? 'Detectando...' : 'Detectar todas as figurinhas'}
+                          </button>
+                          <button
+                            type="button"
+                            className="fig-inline-link"
+                            disabled={deletingSourceDocument}
+                            onClick={handleDeleteSourceDocument}
+                          >
+                            {deletingSourceDocument ? 'Excluindo...' : 'Excluir documento'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="fig-source-document-meta">
+                        <div>
+                          <span>Paginas</span>
+                          <strong>{selectedSourceDocument.page_count}</strong>
+                        </div>
+                        <div>
+                          <span>Blocos</span>
+                          <strong>{selectedSourceDocument.block_count}</strong>
+                        </div>
+                        <div>
+                          <span>Pendentes</span>
+                          <strong>{selectedSourceDocument.pending_detected_count || 0}</strong>
+                        </div>
+                        <div>
+                          <span>Atribuidas</span>
+                          <strong>{selectedSourceDocument.assigned_detected_count || 0}</strong>
+                        </div>
+                        <div>
+                          <span>Criado em</span>
+                          <strong>{formatDateTime(selectedSourceDocument.created_at)}</strong>
+                        </div>
+                      </div>
+
+                      <details className="fig-source-document-advanced">
+                        <summary>
+                          <div className="fig-source-document-advanced-summary">
+                            <strong>Layouts mestres</strong>
+                            <span>Salve um desenho pronto da pagina e reaplique em outras parecidas.</span>
+                          </div>
+                        </summary>
+                        <div className="fig-source-document-advanced-body">
+                          <div className="fig-order-layout fig-order-layout--editor">
+                            <form className="fig-form-card fig-form-card--supporting" onSubmit={handleCreatePageLayoutTemplate}>
+                              <div className="fig-panel-header">
+                                <p className="fig-kicker">Salvar layout</p>
+                                <h3>Guardar blocos da pagina atual</h3>
+                              </div>
+                              <div className="fig-form-grid">
+                                <label className="fig-field">
+                                  <span>Nome do layout</span>
+                                  <input
+                                    value={pageLayoutForm.name}
+                                    onChange={event => setPageLayoutForm({ name: event.target.value })}
+                                    placeholder="Layout 3 blocos verticais"
+                                  />
+                                </label>
+                              </div>
+                              <div className="fig-hero-actions">
+                                <button
+                                  type="submit"
+                                  className="fig-primary-button"
+                                  disabled={savingPageLayoutTemplate || !selectedSourceDocumentPage || !(selectedSourceDocumentPage.blocks || []).length}
+                                >
+                                  {savingPageLayoutTemplate ? 'Salvando layout...' : 'Salvar pagina atual como layout'}
+                                </button>
+                              </div>
+                            </form>
+
+                            <div className="fig-order-layout fig-order-layout--editor">
+                              <div className="fig-order-list">
+                                {pageLayoutTemplates.length ? (
+                                  pageLayoutTemplates.map(template => (
+                                    <button
+                                      key={template.id}
+                                      type="button"
+                                      className={`fig-order-list-item${template.id === selectedPageLayoutTemplateId ? ' is-active' : ''}`}
+                                      onClick={() => setSelectedPageLayoutTemplateId(template.id)}
+                                    >
+                                      <strong>{template.name}</strong>
+                                      <span>{template.block_count} bloco(s)</span>
+                                      <small>{formatDateTime(template.created_at)}</small>
+                                    </button>
+                                  ))
+                                ) : (
+                                  <p className="fig-empty-note">Nenhum layout mestre salvo neste album ainda.</p>
+                                )}
+                              </div>
+
+                              <div className="fig-order-detail">
+                                {selectedPageLayoutTemplate ? (
+                                  <>
+                                    <div className="fig-panel-header fig-panel-header--compact">
+                                      <p className="fig-kicker">Layout selecionado</p>
+                                      <h3>{selectedPageLayoutTemplate.name}</h3>
+                                    </div>
+                                    <div className="fig-selected-stickers">
+                                      {selectedPageLayoutTemplate.blocks.map(block => (
+                                        <span key={block.id} className="fig-selection-chip">
+                                          {(block.label || block.collection_name || `Bloco ${block.sort_order}`)} · {Math.round(block.width * 100)}%
+                                        </span>
+                                      ))}
+                                    </div>
+                                    <div className="fig-hero-actions">
+                                      <button
+                                        type="button"
+                                        className="fig-secondary-button"
+                                        disabled={!selectedSourceDocumentPage || applyingPageLayoutTemplate}
+                                        onClick={handleApplyPageLayoutTemplate}
+                                      >
+                                        {applyingPageLayoutTemplate ? 'Aplicando...' : 'Aplicar na pagina atual'}
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="fig-inline-link fig-inline-link--danger"
+                                        disabled={deletingPageLayoutTemplate}
+                                        onClick={handleDeletePageLayoutTemplate}
+                                      >
+                                        {deletingPageLayoutTemplate ? 'Excluindo...' : 'Excluir layout'}
+                                      </button>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <p className="fig-empty-note">Escolha um layout mestre salvo para aplicar na pagina atual.</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </details>
+
+                      <section className="fig-source-pages-strip">
+                        <div className="fig-panel-header fig-panel-header--compact">
+                          <p className="fig-kicker">Paginas do documento</p>
+                          <h3>Escolha uma pagina para revisar</h3>
+                        </div>
+                        <div className="fig-source-pages-grid">
+                          {(selectedSourceDocument.pages || []).map(page => (
+                            <button
+                              key={page.id}
+                              type="button"
+                              className={`fig-source-page-card${page.id === selectedSourceDocumentPageId ? ' is-active' : ''}`}
+                              onClick={() => {
+                                setSelectedSourceDocumentPageId(page.id)
+                                setSourcePageInteractionMode('detected')
+                                setSourceDetectedSelectionRect(null)
+                                setSourceDetectedDragState(null)
+                                resetSourceBlockForm(page)
+                              }}
+                            >
+                              <img src={apiFileUrl(page.image_path)} alt={`Pagina ${page.page_number} do documento ${selectedSourceDocument.title}`} />
+                              <div className="fig-source-page-card-copy">
+                                <strong>Pagina {page.page_number}</strong>
+                                <span>{page.blocks?.length || 0} bloco(s) · {page.pending_detected_count || 0} pendente(s)</span>
+                                <small>{page.assigned_detected_count || 0} atribuida(s)</small>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </section>
+
+                      <div className="fig-admin-workspace fig-admin-workspace--source">
+                        <section className="fig-page-panel fig-page-panel--source">
+                          {selectedSourceDocumentPage ? (
+                            <div className="fig-page-panel-header fig-page-panel-header--source">
+                              <div className="fig-page-panel-copy">
+                                <h3>Pagina {selectedSourceDocumentPage.page_number}</h3>
+                                <span className="fig-page-panel-meta">
+                                  {selectedSourceDocumentPage.pending_detected_count || 0} pendente(s) ·{' '}
+                                  {selectedSourceDocumentPage.assigned_detected_count || 0} atribuida(s) ·{' '}
+                                  {(selectedSourceDocumentPage.blocks || []).length} bloco(s)
+                                </span>
+                              </div>
+                              <div className="fig-hero-actions fig-hero-actions--compact fig-source-page-actions">
+                                <button
+                                  type="button"
+                                  className={`fig-secondary-button${sourcePageInteractionMode === 'detected' ? ' is-active' : ''}`}
+                                  onClick={() => {
+                                    setSourcePageInteractionMode('detected')
+                                    setSourceBlockSelectionRect(null)
+                                    setSourceBlockDragState(null)
+                                    setSourceDetectedSelectionRect(null)
+                                    setSourceDetectedDragState(null)
+                                  }}
+                                >
+                                  Detectadas
+                                </button>
+                                <button
+                                  type="button"
+                                  className={`fig-secondary-button${sourcePageInteractionMode === 'block' ? ' is-active' : ''}`}
+                                  onClick={() => {
+                                    setSourcePageInteractionMode('block')
+                                    setSourceDetectedSelectionRect(null)
+                                    setSourceDetectedDragState(null)
+                                  }}
+                                >
+                                  Bloco manual
+                                </button>
+                                <button
+                                  type="button"
+                                  className="fig-secondary-button"
+                                  disabled={!selectedSourceDocumentPreviousPage || duplicatingSourceBlocks}
+                                  onClick={handleDuplicateSourceBlocksFromPreviousPage}
+                                >
+                                  {duplicatingSourceBlocks ? 'Duplicando...' : 'Duplicar pagina anterior'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {selectedSourceDocumentPage ? (
+                            <div className="fig-page-image-shell">
+                              <div
+                                className="fig-page-image-frame"
+                                onPointerDown={handleSourcePagePointerDown}
+                                onPointerMove={handleSourcePagePointerMove}
+                                onPointerUp={finalizeSourceBlockSelection}
+                                onPointerCancel={finalizeSourceBlockSelection}
+                                onPointerLeave={() => {
+                                  if (sourceBlockDragState || sourceDetectedDragState) finalizeSourceBlockSelection()
+                                }}
+                              >
+                                <img
+                                  src={apiFileUrl(selectedSourceDocumentPage.image_path)}
+                                  alt={`Pagina ${selectedSourceDocumentPage.page_number} do documento ${selectedSourceDocument.title}`}
+                                />
+                                {sourceDetectedStickers.map(detectedSticker => (
+                                  <button
+                                    key={detectedSticker.id}
+                                    type="button"
+                                    className={`fig-source-detected-overlay is-${String(detectedSticker.status || '').toLowerCase()}${selectedDetectedStickerIds.includes(detectedSticker.id) ? ' is-selected' : ''}`}
+                                    style={getSourcePreviewBoxStyle(
+                                      detectedSticker.x_ratio,
+                                      detectedSticker.y_ratio,
+                                      detectedSticker.width_ratio,
+                                      detectedSticker.height_ratio
+                                    )}
+                                    onPointerDown={event => {
+                                      event.stopPropagation()
+                                    }}
+                                    onClick={event => {
+                                      event.stopPropagation()
+                                      handleToggleSourceDetectedSticker(detectedSticker)
+                                    }}
+                                    title={
+                                      detectedSticker.status === 'ATRIBUIDA'
+                                        ? detectedSticker.assigned_collection_name || 'Atribuida'
+                                        : detectedSticker.ocr_name_suggested || `Detectada ${detectedSticker.id}`
+                                    }
+                                  >
+                                    <span>
+                                      {detectedSticker.status === 'ATRIBUIDA'
+                                        ? detectedSticker.assigned_collection_name || 'Atribuida'
+                                        : detectedSticker.ocr_name_suggested || `#${detectedSticker.id}`}
+                                    </span>
+                                  </button>
+                                ))}
+                                {(selectedSourceDocumentPage.blocks || []).map(block => (
+                                  <button
+                                    key={block.id}
+                                    type="button"
+                                    className={`fig-source-block-overlay${editingSourceBlockId === block.id ? ' is-editing' : ''}`}
+                                    style={getSourcePreviewBoxStyle(block.x, block.y, block.width, block.height)}
+                                    onPointerDown={event => {
+                                      event.stopPropagation()
+                                    }}
+                                    onClick={event => {
+                                      event.stopPropagation()
+                                      loadSourceBlockForEdit(block)
+                                    }}
+                                    title={block.label || block.collection_name || `Bloco ${block.sort_order}`}
+                                  >
+                                    <span>{block.label || block.collection_name || `Bloco ${block.sort_order}`}</span>
+                                  </button>
+                                ))}
+                                {sourcePageInteractionMode === 'detected' && sourceDetectedSelectionRect ? (
+                                  <div
+                                    className="fig-source-detected-selection"
+                                    style={{
+                                      left: `${sourceDetectedSelectionRect.left}px`,
+                                      top: `${sourceDetectedSelectionRect.top}px`,
+                                      width: `${sourceDetectedSelectionRect.width}px`,
+                                      height: `${sourceDetectedSelectionRect.height}px`
+                                    }}
+                                  />
+                                ) : null}
+                                {sourceBlockSelectionRect ? (
+                                  <div
+                                    className="fig-source-block-overlay is-drafting"
+                                    style={{
+                                      left: `${sourceBlockSelectionRect.left}px`,
+                                      top: `${sourceBlockSelectionRect.top}px`,
+                                      width: `${sourceBlockSelectionRect.width}px`,
+                                      height: `${sourceBlockSelectionRect.height}px`
+                                    }}
+                                  />
+                                ) : null}
+                                {sourceBlockDraftRect ? (
+                                  <div
+                                    className="fig-source-block-overlay is-preview"
+                                    style={getSourcePreviewBoxStyle(
+                                      sourceBlockDraftRect.xRatio,
+                                      sourceBlockDraftRect.yRatio,
+                                      sourceBlockDraftRect.widthRatio,
+                                      sourceBlockDraftRect.heightRatio
+                                    )}
+                                  />
+                                ) : null}
+                              </div>
+                              <p className="fig-helper-text fig-helper-text--compact">
+                                {sourcePageInteractionMode === 'detected'
+                                  ? 'Clique nas caixas ou arraste uma area para selecionar varias de uma vez.'
+                                  : 'Clique e arraste na pagina para marcar uma area manualmente.'}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="fig-empty-note">Escolha uma pagina para comecar a marcar os blocos.</p>
+                          )}
+                        </section>
+
+                        <div className="fig-source-admin-tools">
+                          <section className="fig-form-card fig-mapper-form">
+                            <div className="fig-panel-header">
+                              <p className="fig-kicker">Detectadas da pagina</p>
+                              <h3>Selecionar e enviar</h3>
+                            </div>
+
+                            <div className="fig-form-grid">
+                              <label className="fig-field">
+                                <span>Selecao de destino</span>
+                                <select
+                                  value={sourceDetectedCollectionId}
+                                  onChange={event => setSourceDetectedCollectionId(event.target.value)}
+                                >
+                                  <option value="">Selecione</option>
+                                  {filteredCollections.map(collection => (
+                                    <option key={collection.id} value={collection.id}>
+                                      {collection.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                            </div>
+
+                            <div className="fig-selected-stickers">
+                              <span className="fig-selection-chip">Pendentes: {pendingSourceDetectedStickers.length}</span>
+                              <span className="fig-selection-chip">Selecionadas: {selectedDetectedStickerIds.length}</span>
+                              <span className="fig-selection-chip">
+                                Atribuidas: {sourceDetectedStickers.filter(detected => detected.status === 'ATRIBUIDA').length}
+                              </span>
+                            </div>
+
+                            <div className="fig-hero-actions">
+                                <button
+                                  type="button"
+                                  className="fig-secondary-button"
+                                  disabled={!pendingSourceDetectedStickers.length}
+                                  onClick={handleToggleAllPendingDetectedStickers}
+                                >
+                                {pendingSourceDetectedStickers.length &&
+                                pendingSourceDetectedStickers.every(detected => selectedDetectedStickerIds.includes(detected.id))
+                                  ? 'Limpar pendentes'
+                                  : 'Selecionar pendentes'}
+                              </button>
+                                <button
+                                  type="button"
+                                  className="fig-secondary-button"
+                                  disabled={!selectedDetectedStickerIds.length}
+                                  onClick={() => setSelectedDetectedStickerIds([])}
+                                >
+                                  Limpar selecao
+                                </button>
+                              <button
+                                type="button"
+                                className="fig-secondary-button"
+                                disabled={discardingDetectedStickers || !selectedDetectedStickerIds.length}
+                                onClick={handleDiscardSourceDetectedStickers}
+                              >
+                                {discardingDetectedStickers ? 'Descartando...' : 'Descartar'}
+                              </button>
+                              <button
+                                type="button"
+                                className="fig-primary-button"
+                                disabled={
+                                  assigningDetectedStickers ||
+                                  !selectedDetectedStickerIds.length ||
+                                  !sourceDetectedCollectionId
+                                }
+                                onClick={handleAssignSourceDetectedStickers}
+                              >
+                                {assigningDetectedStickers ? 'Enviando...' : 'Enviar para selecao'}
+                              </button>
+                            </div>
+
+                            <div className="fig-source-block-review">
+                              <div className="fig-panel-header fig-panel-header--compact">
+                                <p className="fig-kicker">Revisao</p>
+                                <h3>Caixas detectadas</h3>
+                              </div>
+                              {loadingSourceDetectedStickers ? (
+                                <p className="fig-empty-note">Carregando figurinhas detectadas...</p>
+                              ) : sourceDetectedStickers.length ? (
+                                <div className="fig-sticker-grid fig-source-block-review-grid">
+                                  {sourceDetectedStickers.map(detectedSticker => (
+                                    <article
+                                      key={detectedSticker.id}
+                                      className={`fig-sticker-card fig-source-review-card${selectedDetectedStickerIds.includes(detectedSticker.id) ? ' is-selected' : ''}`}
+                                    >
+                                      <button
+                                        type="button"
+                                        className="fig-source-review-card-toggle"
+                                        onClick={() => handleToggleSourceDetectedSticker(detectedSticker)}
+                                        disabled={detectedSticker.status !== 'PENDENTE'}
+                                      >
+                                        <div className="fig-sticker-card-media">
+                                          <img
+                                            src={apiFileUrl(detectedSticker.preview_path)}
+                                            alt={detectedSticker.ocr_name_suggested || `Detectada ${detectedSticker.id}`}
+                                          />
+                                        </div>
+                                        <div className="fig-sticker-card-body fig-source-review-card-body">
+                                          <strong>{detectedSticker.ocr_name_suggested || `Detectada ${detectedSticker.id}`}</strong>
+                                          <span>
+                                            {categoryLabel(detectedSticker.category)} · {sourceDetectedStatusLabel(detectedSticker.status)}
+                                            {detectedSticker.assigned_collection_name ? ` · ${detectedSticker.assigned_collection_name}` : ''}
+                                          </span>
+                                          <span>
+                                            {detectedSticker.ocr_name_suggested
+                                              ? `OCR ${detectedSticker.ocr_name_suggested} (${formatOcrConfidence(detectedSticker.ocr_confidence)})`
+                                              : detectedSticker.ocr_processed_at
+                                                ? 'OCR sem leitura'
+                                                : 'Sem OCR'}
+                                          </span>
+                                        </div>
+                                      </button>
+                                    </article>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="fig-empty-note">
+                                  Ainda nao existem figurinhas detectadas nessa pagina. Clique em Detectar todas as figurinhas para comecar.
+                                </p>
+                              )}
+                            </div>
+                          </section>
+
+                          <details className="fig-admin-advanced fig-source-manual-panel" open={Boolean(editingSourceBlockId)}>
+                            <summary>
+                              <div className="fig-admin-accordion-summary">
+                                <strong>Bloco manual</strong>
+                                <span>Use so quando precisar marcar uma area manualmente.</span>
+                              </div>
+                            </summary>
+                            <div className="fig-admin-advanced-body fig-source-manual-panel-body">
+                              <form className="fig-source-manual-form" onSubmit={handleSourceBlockSubmit}>
+                                <div className="fig-form-grid fig-source-manual-grid">
+                                  <label className="fig-field fig-field--third">
+                                    <span>Selecao</span>
+                                    <select
+                                      value={sourceBlockForm.collection_id}
+                                      onChange={event =>
+                                        setSourceBlockForm(current => ({
+                                          ...current,
+                                          collection_id: event.target.value,
+                                          label:
+                                            current.label ||
+                                            filteredCollections.find(collection => collection.id === Number(event.target.value))?.name ||
+                                            ''
+                                        }))
+                                      }
+                                    >
+                                      <option value="">Selecione</option>
+                                      {filteredCollections.map(collection => (
+                                        <option key={collection.id} value={collection.id}>
+                                          {collection.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+
+                                  <label className="fig-field fig-field--third">
+                                    <span>Rotulo do bloco</span>
+                                    <input
+                                      value={sourceBlockForm.label}
+                                      onChange={event =>
+                                        setSourceBlockForm(current => ({
+                                          ...current,
+                                          label: event.target.value
+                                        }))
+                                      }
+                                      placeholder="Brasil · bloco 1"
+                                    />
+                                  </label>
+
+                                  <label className="fig-field fig-field--compact">
+                                    <span>Ordem</span>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={sourceBlockForm.sort_order}
+                                      onChange={event =>
+                                        setSourceBlockForm(current => ({
+                                          ...current,
+                                          sort_order: event.target.value
+                                        }))
+                                      }
+                                    />
+                                  </label>
+
+                                  <label className="fig-field fig-field--compact">
+                                    <span>X</span>
+                                    <input value={sourceBlockForm.x} readOnly />
+                                  </label>
+
+                                  <label className="fig-field fig-field--compact">
+                                    <span>Y</span>
+                                    <input value={sourceBlockForm.y} readOnly />
+                                  </label>
+
+                                  <label className="fig-field fig-field--compact">
+                                    <span>Largura</span>
+                                    <input value={sourceBlockForm.width} readOnly />
+                                  </label>
+
+                                  <label className="fig-field fig-field--compact">
+                                    <span>Altura</span>
+                                    <input value={sourceBlockForm.height} readOnly />
+                                  </label>
+                                </div>
+
+                                <div className="fig-hero-actions">
+                                  <button type="button" className="fig-secondary-button" onClick={() => resetSourceBlockForm()}>
+                                    Limpar
+                                  </button>
+                                  {editingSourceBlockId ? (
+                                    <button
+                                      type="button"
+                                      className="fig-secondary-button"
+                                      disabled={savingSourceBlock || processingSourceBlockDetection || duplicatingSourceBlock}
+                                      onClick={handleDuplicateSourceBlock}
+                                    >
+                                      {duplicatingSourceBlock ? 'Duplicando...' : 'Duplicar bloco'}
+                                    </button>
+                                  ) : null}
+                                  {editingSourceBlockId ? (
+                                    <button
+                                      type="button"
+                                      className="fig-secondary-button"
+                                      disabled={processingSourceBlockDetection || savingSourceBlock}
+                                      onClick={handleDetectSourceBlockStickers}
+                                    >
+                                      {processingSourceBlockDetection ? 'Detectando...' : 'Detectar figurinhas'}
+                                    </button>
+                                  ) : null}
+                                  {editingSourceBlockId ? (
+                                    <button
+                                      type="button"
+                                      className="fig-secondary-button"
+                                      disabled={savingSourceBlock}
+                                      onClick={handleDeleteSourceBlock}
+                                    >
+                                      {savingSourceBlock ? 'Excluindo...' : 'Excluir bloco'}
+                                    </button>
+                                  ) : null}
+                                  <button
+                                    type="submit"
+                                    className="fig-primary-button"
+                                    disabled={
+                                      savingSourceBlock ||
+                                      !selectedSourceDocumentPageId ||
+                                      !sourceBlockForm.collection_id ||
+                                      !sourceBlockForm.x ||
+                                      !sourceBlockForm.width ||
+                                      !sourceBlockForm.height
+                                    }
+                                  >
+                                    {savingSourceBlock
+                                      ? 'Salvando...'
+                                      : editingSourceBlockId
+                                        ? 'Salvar bloco'
+                                        : 'Criar bloco'}
+                                  </button>
+                                </div>
+
+                                {editingSourceBlockId ? (
+                                  <div className="fig-source-block-review">
+                                    <div className="fig-panel-header fig-panel-header--compact">
+                                      <p className="fig-kicker">Revisao</p>
+                                      <h3>Recortes do bloco</h3>
+                                    </div>
+                                    {loadingSourceBlockStickers ? (
+                                      <p className="fig-empty-note">Carregando recortes detectados...</p>
+                                    ) : sourceBlockStickers.length ? (
+                                      <div className="fig-sticker-grid fig-source-block-review-grid">
+                                        {sourceBlockStickers.map(sticker => (
+                                          <article key={sticker.id} className="fig-sticker-card fig-source-review-card">
+                                            <div className="fig-sticker-card-media">
+                                              <img src={apiFileUrl(sticker.preview_path)} alt={sticker.name} />
+                                            </div>
+                                            <div className="fig-sticker-card-body fig-source-review-card-body">
+                                              <strong>{sticker.name}</strong>
+                                              <span>
+                                                {categoryLabel(sticker.category)}
+                                                {sticker.ocr_name_suggested
+                                                  ? ` · OCR ${sticker.ocr_name_suggested} (${formatOcrConfidence(sticker.ocr_confidence)})`
+                                                  : sticker.ocr_processed_at
+                                                    ? ' · OCR sem leitura'
+                                                    : ''}
+                                              </span>
+                                              <button
+                                                type="button"
+                                                className="fig-inline-link"
+                                                onClick={() => handleDeleteSourceBlockSticker(sticker.id)}
+                                              >
+                                                Excluir recorte
+                                              </button>
+                                            </div>
+                                          </article>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <p className="fig-empty-note">
+                                        Esse bloco ainda nao tem figurinhas geradas. Salve o bloco e clique em Detectar figurinhas.
+                                      </p>
+                                    )}
+                                  </div>
+                                ) : null}
+                              </form>
+                            </div>
+                          </details>
+                        </div>
+                      </div>
+
+                    </>
+                  ) : (
+                    <p className="fig-empty-note">
+                      Escolha um documento fonte na lista para ver as paginas renderizadas e seguir para o editor de blocos.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+          </>
         ) : null}
 
         {adminView === 'atendimento' ? (
-        <section className="fig-admin-summary-grid">
-            <div className="fig-admin-stack">
-            <form className="fig-form-card" onSubmit={handleSaveServiceConfig}>
+        <section className="fig-admin-summary-grid fig-admin-summary-grid--single">
+          <div className="fig-admin-stack">
+            <details className="fig-admin-advanced fig-admin-accordion">
+              <summary>
+                <div className="fig-admin-accordion-summary">
+                  <strong>Configuracao publica e cobranca</strong>
+                  <span>Pix, apoio, liberacao da Minha Figurinha e servico manual de retirada.</span>
+                </div>
+              </summary>
+              <div className="fig-admin-advanced-body fig-admin-accordion-body">
+            <form className="fig-form-card fig-form-card--supporting" onSubmit={handleSaveServiceConfig}>
               <div className="fig-panel-header">
                 <p className="fig-kicker">Configuracao publica</p>
-                <h3>Doacao e servico manual</h3>
+                <h3>Pix, apoio e retirada</h3>
               </div>
 
               <label className="fig-checkbox">
@@ -4032,7 +6899,18 @@ function AdminPage() {
                     setServiceForm(current => ({ ...current, custom_sticker_unlock_enabled: event.target.checked }))
                   }
                 />
-                <span>Cobrar para liberar o PDF com Minha Figurinha</span>
+                <span>Cobrar no PDF da Minha Figurinha manual</span>
+              </label>
+
+              <label className="fig-checkbox">
+                <input
+                  type="checkbox"
+                  checked={serviceForm.custom_ai_unlock_enabled}
+                  onChange={event =>
+                    setServiceForm(current => ({ ...current, custom_ai_unlock_enabled: event.target.checked }))
+                  }
+                />
+                <span>Cobrar antes de gerar a Minha Figurinha com IA</span>
               </label>
 
               <label className="fig-checkbox">
@@ -4046,7 +6924,7 @@ function AdminPage() {
 
               <div className="fig-form-grid">
                 <label className="fig-field">
-                  <span>Modo padrao da Minha Figurinha</span>
+                  <span>Modo disponivel no catalogo da Minha Figurinha</span>
                   <select
                     value={serviceForm.custom_generation_mode}
                     onChange={event => setServiceForm(current => ({ ...current, custom_generation_mode: event.target.value }))}
@@ -4058,6 +6936,16 @@ function AdminPage() {
                     ))}
                   </select>
                 </label>
+                <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight fig-field--full">
+                  <div>
+                    <strong>Como isso afeta o cliente</strong>
+                    <span>
+                      {serviceForm.custom_generation_mode === 'AI_OPTIONAL'
+                        ? 'O cliente pode escolher entre Montagem manual e Criar com IA. O manual so aparece quando existir um modelo pronto para aquele perfil e posicao.'
+                        : 'O cliente ve somente Montagem manual no catalogo. A opcao com IA fica escondida.'}
+                    </span>
+                  </div>
+                </div>
                 <label className="fig-field fig-field--full">
                   <span>Mensagem do modal de apoio</span>
                   <textarea
@@ -4067,8 +6955,14 @@ function AdminPage() {
                     placeholder="Se este material te ajudou, voce pode apoiar o projeto com uma doacao via Pix. O download continua gratuito."
                   />
                 </label>
+                <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight fig-field--full">
+                  <div>
+                    <strong>Minha Figurinha manual</strong>
+                    <span>O cliente monta primeiro e so ve a cobranca no final, quando for baixar o PDF com ela.</span>
+                  </div>
+                </div>
                 <label className="fig-field fig-field--full">
-                  <span>Mensagem da liberacao da Minha Figurinha</span>
+                  <span>Mensagem da cobranca manual</span>
                   <textarea
                     value={serviceForm.custom_sticker_unlock_message}
                     onChange={event =>
@@ -4079,7 +6973,7 @@ function AdminPage() {
                   />
                 </label>
                 <label className="fig-field">
-                  <span>Preco para liberar Minha Figurinha (R$)</span>
+                  <span>Preco da versao manual (R$)</span>
                   <input
                     type="number"
                     min="0"
@@ -4087,6 +6981,35 @@ function AdminPage() {
                     value={serviceForm.custom_sticker_unlock_price}
                     onChange={event =>
                       setServiceForm(current => ({ ...current, custom_sticker_unlock_price: event.target.value }))
+                    }
+                  />
+                </label>
+                <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight fig-field--full">
+                  <div>
+                    <strong>Minha Figurinha com IA</strong>
+                    <span>Quando ativa, a cobranca aparece antes da geracao. Quem paga aqui nao paga de novo no PDF.</span>
+                  </div>
+                </div>
+                <label className="fig-field fig-field--full">
+                  <span>Mensagem da cobranca da IA</span>
+                  <textarea
+                    value={serviceForm.custom_ai_unlock_message}
+                    onChange={event =>
+                      setServiceForm(current => ({ ...current, custom_ai_unlock_message: event.target.value }))
+                    }
+                    rows="3"
+                    placeholder="A criacao com IA e um recurso premium. Pague primeiro para liberar a geracao da sua figurinha."
+                  />
+                </label>
+                <label className="fig-field">
+                  <span>Preco da versao com IA (R$)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={serviceForm.custom_ai_unlock_price}
+                    onChange={event =>
+                      setServiceForm(current => ({ ...current, custom_ai_unlock_price: event.target.value }))
                     }
                   />
                 </label>
@@ -4148,85 +7071,32 @@ function AdminPage() {
               </button>
             </div>
           </form>
+              </div>
+            </details>
 
-          <section className="fig-form-card">
+            <details className="fig-admin-advanced fig-admin-accordion">
+              <summary>
+                <div className="fig-admin-accordion-summary">
+                  <strong>Ferramentas manuais</strong>
+                  <span>Modelos, camadas e ajustes da montagem manual da Minha Figurinha.</span>
+                </div>
+              </summary>
+              <div className="fig-admin-advanced-body fig-admin-accordion-body">
+          <section className="fig-form-card fig-form-card--focused">
             <div className="fig-panel-header">
               <p className="fig-kicker">Minha Figurinha</p>
-              <h3>Bases oficiais por perfil</h3>
+              <h3>Modelos da Minha Figurinha</h3>
             </div>
             <p className="fig-empty-note">
-              Envie 4 templates prontos, um para homem, mulher, menino e menina. O ideal e que cada base ja tenha o
-              layout final da figurinha e uma area central limpa para receber o retrato.
+              O fluxo principal agora e simples: escolha o perfil e a posicao, envie as 4 camadas principais e ajuste
+              os textos. O que for secundario fica recolhido.
             </p>
 
-            <div className="fig-custom-base-grid">
-              {customProfileOptions.map(option => {
-                const basePath = serviceForm[customBaseFieldByProfile[option.value]] || ''
-                const isUploading = uploadingBaseProfile === option.value
-                const isDeleting = deletingBaseProfile === option.value
-                return (
-                  <article key={option.value} className="fig-custom-base-card">
-                    <div className="fig-custom-base-card-head">
-                      <div>
-                        <strong>{option.label}</strong>
-                        <span>{basePath ? 'Base configurada' : 'Base ainda nao enviada'}</span>
-                      </div>
-                    </div>
-
-                    <div className="fig-custom-base-card-preview">
-                      {basePath ? (
-                        <img src={apiFileUrl(basePath)} alt={`Base ${option.label}`} />
-                      ) : (
-                        <div className="fig-custom-base-card-empty">
-                          <span>Sem base</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="fig-custom-base-card-actions">
-                      <label className="fig-secondary-button fig-file-button">
-                        {isUploading ? 'Enviando...' : basePath ? 'Trocar base' : 'Enviar base'}
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          disabled={isUploading}
-                          onChange={event => {
-                            const file = event.target.files?.[0]
-                            handleCustomBaseUpload(option.value, file)
-                            event.target.value = ''
-                          }}
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        className="fig-inline-link"
-                        disabled={!basePath || isDeleting}
-                        onClick={() => handleCustomBaseDelete(option.value)}
-                      >
-                        {isDeleting ? 'Removendo...' : 'Remover'}
-                      </button>
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="fig-form-card">
-            <div className="fig-panel-header">
-              <p className="fig-kicker">Minha Figurinha</p>
-              <h3>Templates por perfil e posicao</h3>
-            </div>
-            <p className="fig-empty-note">
-              Aqui nasce a base da composicao por camadas. Nesta primeira fase voce ja consegue cadastrar a combinacao
-              de perfil, categoria, posicao, camadas, encaixe da foto e slots de texto.
-            </p>
-
-            <div className="fig-order-layout">
+            <div className="fig-order-layout fig-order-layout--editor">
               <div className="fig-order-list">
                 <button type="button" className="fig-order-list-item" onClick={handleStartNewCustomTemplate}>
-                  <strong>Novo template</strong>
-                  <span>Comece uma nova combinacao</span>
+                  <strong>Novo modelo</strong>
+                  <span>Comecar outra combinacao</span>
                 </button>
                 {customTemplates.map(template => (
                   <button
@@ -4235,7 +7105,7 @@ function AdminPage() {
                     className={`fig-order-list-item${template.id === selectedCustomTemplateId ? ' is-active' : ''}`}
                     onClick={() => setSelectedCustomTemplateId(template.id)}
                   >
-                    <strong>{template.name}</strong>
+                    <strong>{template.name || buildCustomTemplateName(template.profile_type, template.position_type, template.category_type)}</strong>
                     <span>
                       {customProfileLabel(template.profile_type)} ·{' '}
                       {customPositionTypeOptions.find(option => option.value === template.position_type)?.label || template.position_type}
@@ -4243,10 +7113,17 @@ function AdminPage() {
                     <span>
                       {template.is_active ? 'Ativo' : 'Inativo'} · {template.layer_count} camada(s)
                     </span>
+                    <span className={`fig-template-status-note${template.manual_ready ? ' is-ready' : ''}`}>
+                      {template.manual_ready
+                        ? 'Pronto para montagem manual'
+                        : template.manual_status?.missing_count
+                          ? `Faltam: ${template.manual_status.missing_labels.join(', ')}`
+                          : 'Modelo ainda incompleto'}
+                    </span>
                   </button>
                 ))}
                 {customTemplates.length === 0 ? (
-                  <p className="fig-empty-note">Nenhum template cadastrado ainda.</p>
+                  <p className="fig-empty-note">Nenhum modelo cadastrado ainda.</p>
                 ) : null}
               </div>
 
@@ -4264,7 +7141,19 @@ function AdminPage() {
                     <span>Perfil</span>
                     <select
                       value={customTemplateForm.profile_type}
-                      onChange={event => setCustomTemplateForm(current => ({ ...current, profile_type: event.target.value }))}
+                      onChange={event =>
+                        setCustomTemplateForm(current => {
+                          const nextProfile = event.target.value
+                          const currentAutoName = buildCustomTemplateName(current.profile_type, current.position_type, current.category_type)
+                          return {
+                            ...current,
+                            profile_type: nextProfile,
+                            name: current.name.trim() === currentAutoName.trim()
+                              ? buildCustomTemplateName(nextProfile, current.position_type, current.category_type)
+                              : current.name
+                          }
+                        })
+                      }
                     >
                       {customProfileOptions.map(option => (
                         <option key={option.value} value={option.value}>
@@ -4273,7 +7162,7 @@ function AdminPage() {
                       ))}
                     </select>
                   </label>
-                  <label className="fig-field">
+                  <label className="fig-field fig-template-advanced-field">
                     <span>Categoria</span>
                     <select
                       value={customTemplateForm.category_type}
@@ -4290,7 +7179,19 @@ function AdminPage() {
                     <span>Posicao</span>
                     <select
                       value={customTemplateForm.position_type}
-                      onChange={event => setCustomTemplateForm(current => ({ ...current, position_type: event.target.value }))}
+                      onChange={event =>
+                        setCustomTemplateForm(current => {
+                          const nextPosition = event.target.value
+                          const currentAutoName = buildCustomTemplateName(current.profile_type, current.position_type, current.category_type)
+                          return {
+                            ...current,
+                            position_type: nextPosition,
+                            name: current.name.trim() === currentAutoName.trim()
+                              ? buildCustomTemplateName(current.profile_type, nextPosition, current.category_type)
+                              : current.name
+                          }
+                        })
+                      }
                     >
                       {customPositionTypeOptions.map(option => (
                         <option key={option.value} value={option.value}>
@@ -4299,7 +7200,7 @@ function AdminPage() {
                       ))}
                     </select>
                   </label>
-                  <label className="fig-field">
+                  <label className="fig-field fig-template-advanced-field">
                     <span>Modo</span>
                     <select
                       value={customTemplateForm.composition_mode}
@@ -4312,7 +7213,7 @@ function AdminPage() {
                       ))}
                     </select>
                   </label>
-                  <label className="fig-field">
+                  <label className="fig-field fig-template-advanced-field">
                     <span>Ordem</span>
                     <input
                       type="number"
@@ -4327,195 +7228,187 @@ function AdminPage() {
                       checked={customTemplateForm.is_active}
                       onChange={event => setCustomTemplateForm(current => ({ ...current, is_active: event.target.checked }))}
                     />
-                    <span>Template ativo para o catalogo</span>
+                    <span>Modelo ativo para o catalogo</span>
                   </label>
                 </div>
+
+                <div className="fig-helper-strip fig-helper-strip--compact">
+                  <div>
+                    <strong>Nome sugerido</strong>
+                    <span>{buildCustomTemplateName(customTemplateForm.profile_type, customTemplateForm.position_type, customTemplateForm.category_type)}</span>
+                  </div>
+                  <div>
+                    <strong>Album</strong>
+                    <span>{selectedAlbum?.name || 'Escolha um album na lateral antes de criar o modelo'}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="fig-inline-link"
+                    onClick={() => setCustomTemplateForm(current => applyStandardCustomTemplateStructure(current))}
+                  >
+                    Preparar modelo padrao de 4 camadas
+                  </button>
+                </div>
+
+                <div className={`fig-template-readiness-card${currentTemplateManualStatus.ready ? ' is-ready' : ''}`}>
+                  <div className="fig-template-readiness-header">
+                    <div>
+                      <strong>{currentTemplateManualStatus.ready ? 'Modelo pronto para montagem manual' : 'O que falta para liberar a montagem manual'}</strong>
+                      <span>
+                        {currentTemplateManualStatus.ready
+                          ? 'Esse modelo ja pode aparecer no catalogo no modo manual.'
+                          : currentTemplateManualStatus.missing_labels.length
+                            ? currentTemplateManualStatus.missing_labels.join(', ')
+                            : 'Salve o modelo e importe as camadas principais.'}
+                      </span>
+                    </div>
+                    <span className={`fig-template-readiness-badge${currentTemplateManualStatus.ready ? ' is-ready' : ''}`}>
+                      {currentTemplateManualStatus.ready ? 'Pronto' : `${currentTemplateManualStatus.missing_count} pendencia(s)`}
+                    </span>
+                  </div>
+
+                  <div className="fig-template-checklist">
+                    {currentTemplateManualStatus.checks.map(check => (
+                      <div key={check.key} className={`fig-template-check${check.ready ? ' is-ready' : ''}`}>
+                        <strong>{check.ready ? 'OK' : 'Falta'}</strong>
+                        <div>
+                          <span>{check.label}</span>
+                          <small>{check.detail}</small>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="fig-template-layer-badges">
+                    {currentTemplateManualStatus.layer_inventory.map(layer => (
+                      <span
+                        key={layer.layer_type}
+                        className={`fig-template-layer-badge${layer.count > 0 ? ' is-ready' : ''}`}
+                      >
+                        {layer.label}: {layer.count}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <details className="fig-admin-advanced">
+                  <summary>Importacao em lote (opcional e menos confiavel)</summary>
+                  <div className="fig-admin-advanced-body">
+                <div className="fig-helper-strip fig-helper-strip--card">
+                  {currentTemplatePreviewPath ? (
+                    <div className="fig-custom-base-inline fig-custom-base-inline--layer">
+                      <div className="fig-custom-base-inline-preview">
+                        <img src={apiFileUrl(currentTemplatePreviewPath)} alt={suggestedCustomTemplateName} />
+                      </div>
+                      <div className="fig-custom-base-inline-copy">
+                        <strong>{suggestedCustomTemplateName}</strong>
+                        <span>{importedTemplateLayerCount} camada(s) com imagem pronta</span>
+                      </div>
+                    </div>
+                  ) : null}
+                  <div>
+                    <strong>Importar pacote de camadas</strong>
+                    <span>
+                      Se o pacote nao reconhecer direito, pode ignorar esta etapa. O fluxo mais seguro agora e salvar o
+                      modelo e enviar cada camada logo abaixo: fundo, faixa de informacoes, moldura e camisa frontal.
+                    </span>
+                  </div>
+                  <div className="fig-custom-base-card-actions">
+                    <label className="fig-primary-button fig-file-button">
+                      {importingTemplateBatch ? 'Importando pacote...' : 'Importar pacote'}
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        multiple
+                        disabled={importingTemplateBatch || savingCustomTemplate}
+                        onChange={event => {
+                          handleCustomTemplateBatchImport(event.target.files)
+                          event.target.value = ''
+                        }}
+                      />
+                    </label>
+                    <small>Opcional. O caminho principal agora e camada por camada.</small>
+                  </div>
+                </div>
+                  </div>
+                </details>
 
                 <div className="fig-panel-header fig-panel-header--compact">
                   <p className="fig-kicker">Camadas</p>
                   <h3>Pilha visual</h3>
                 </div>
+                <div className="fig-helper-strip fig-helper-strip--compact">
+                  <div>
+                    <strong>Ordem esperada</strong>
+                    <span>1. Fundo base  2. Faixa de informacoes  3. Moldura principal  4. Camisa frontal</span>
+                  </div>
+                  <div>
+                    <strong>Textos</strong>
+                    <span>Nome, data, altura, peso e cidade/time ficam sobre a segunda camada.</span>
+                  </div>
+                </div>
                 <div className="fig-admin-stack">
-                  {customTemplateForm.layers.map((layer, index) => (
-                    <div key={`${layer.id || 'new'}-${index}`} className="fig-helper-strip fig-helper-strip--card">
-                      {layer.file_path ? (
-                        <div className="fig-custom-base-inline fig-custom-base-inline--layer">
-                          <div className="fig-custom-base-inline-preview">
+                  {standardCustomTemplateLayers.map(({ layer, index }) => (
+                    <div key={`${layer.id || 'new'}-${index}`} className="fig-helper-strip fig-helper-strip--card fig-template-layer-card">
+                      <div className="fig-custom-base-inline fig-custom-base-inline--layer">
+                        <div className="fig-custom-base-inline-preview">
+                          {layer.file_path ? (
                             <img src={apiFileUrl(layer.file_path)} alt={layer.label || `Camada ${index + 1}`} />
-                          </div>
-                          <div className="fig-custom-base-inline-copy">
-                            <strong>{layer.label || 'Camada sem nome'}</strong>
-                            <span>
-                              {customTemplateLayerTypeOptions.find(option => option.value === layer.layer_type)?.label || layer.layer_type}
-                            </span>
-                          </div>
+                          ) : (
+                            <div className="fig-custom-base-card-empty">
+                              <span>Sem imagem</span>
+                            </div>
+                          )}
                         </div>
-                      ) : null}
-                      <div className="fig-form-grid">
-                        <label className="fig-field">
-                          <span>Tipo</span>
-                          <select
-                            value={layer.layer_type}
-                            onChange={event =>
-                              setCustomTemplateForm(current => ({
-                                ...current,
-                                layers: current.layers.map((item, itemIndex) =>
-                                  itemIndex === index ? { ...item, layer_type: event.target.value } : item
-                                )
-                              }))
-                            }
-                          >
-                            {customTemplateLayerTypeOptions.map(option => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                        <label className="fig-field">
-                          <span>Label</span>
-                          <input
-                            value={layer.label}
-                            onChange={event =>
-                              setCustomTemplateForm(current => ({
-                                ...current,
-                                layers: current.layers.map((item, itemIndex) =>
-                                  itemIndex === index ? { ...item, label: event.target.value } : item
-                                )
-                              }))
-                            }
-                          />
-                        </label>
-                        <label className="fig-field">
-                          <span>Arquivo</span>
-                          <input
-                            value={layer.file_path}
-                            readOnly={!!layer.id}
-                            onChange={event =>
-                              setCustomTemplateForm(current => ({
-                                ...current,
-                                layers: current.layers.map((item, itemIndex) =>
-                                  itemIndex === index ? { ...item, file_path: event.target.value } : item
-                                )
-                              }))
-                            }
-                            placeholder="storage/.../camada.png"
-                          />
-                        </label>
-                        <label className="fig-field">
-                          <span>Ordem Z</span>
-                          <input
-                            type="number"
-                            min="0"
-                            value={layer.z_index}
-                            onChange={event =>
-                              setCustomTemplateForm(current => ({
-                                ...current,
-                                layers: current.layers.map((item, itemIndex) =>
-                                  itemIndex === index ? { ...item, z_index: event.target.value } : item
-                                )
-                              }))
-                            }
-                          />
-                        </label>
-                        <label className="fig-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={layer.is_active}
-                            onChange={event =>
-                              setCustomTemplateForm(current => ({
-                                ...current,
-                                layers: current.layers.map((item, itemIndex) =>
-                                  itemIndex === index ? { ...item, is_active: event.target.checked } : item
-                                )
-                              }))
-                            }
-                          />
-                          <span>Ativa</span>
-                        </label>
-                        <div className="fig-field fig-field--full">
-                          <span>Imagem da camada</span>
-                          <div className="fig-custom-base-card-actions">
-                            <label className="fig-secondary-button fig-file-button">
-                              {uploadingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}` ? 'Enviando...' : layer.file_path ? 'Trocar imagem' : 'Enviar imagem'}
-                              <input
-                                type="file"
-                                accept="image/png,image/jpeg,image/webp"
-                                disabled={!selectedCustomTemplateId || !layer.id || uploadingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
-                                onChange={event => {
-                                  const file = event.target.files?.[0]
-                                  handleCustomTemplateLayerUpload(layer, file)
-                                  event.target.value = ''
-                                }}
-                              />
-                            </label>
-                            <button
-                              type="button"
-                              className="fig-inline-link"
-                              disabled={!layer.file_path || deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
-                              onClick={() => handleCustomTemplateLayerDelete(layer)}
-                            >
-                              {deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}` ? 'Removendo...' : 'Remover imagem'}
-                            </button>
-                            <button type="button" className="fig-inline-link" onClick={() => removeCustomTemplateLayer(index)}>
-                              Remover camada
-                            </button>
-                          </div>
-                          {!selectedCustomTemplateId || !layer.id ? (
-                            <small>Salve o template primeiro para enviar a imagem desta camada.</small>
-                          ) : null}
+                        <div className="fig-custom-base-inline-copy">
+                          <strong>{layer.label || 'Camada sem nome'}</strong>
+                          <span>
+                            {layer.file_path ? 'Imagem enviada' : 'Envie a imagem desta camada'}
+                          </span>
                         </div>
                       </div>
+
+                      <div className="fig-custom-base-card-actions">
+                        <input
+                          className="fig-plain-file-input"
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          disabled={savingCustomTemplate || uploadingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
+                          onChange={event => {
+                            const file = event.target.files?.[0]
+                            handleCustomTemplateLayerUpload(layer, file, index)
+                            event.target.value = ''
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="fig-inline-link"
+                          disabled={!layer.file_path || savingCustomTemplate || deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
+                          onClick={() => handleCustomTemplateLayerDelete(layer, index)}
+                        >
+                          {deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}` ? 'Removendo...' : 'Remover imagem'}
+                        </button>
+                      </div>
+
+                      {!selectedCustomTemplateId || !layer.id ? (
+                        <small>Ao enviar a primeira imagem, o modelo e salvo automaticamente.</small>
+                      ) : null}
                     </div>
                   ))}
-                  <button type="button" className="fig-secondary-button" onClick={addCustomTemplateLayer}>
-                    Adicionar camada
-                  </button>
                 </div>
 
-                <div className="fig-panel-header fig-panel-header--compact">
-                  <p className="fig-kicker">Foto</p>
-                  <h3>Area segura da pessoa</h3>
-                </div>
-                <div className="fig-form-grid">
-                  {customTemplateForm.photo_slot ? (
-                    <>
-                      {[
-                        ['x', 'X'],
-                        ['y', 'Y'],
-                        ['width', 'Largura'],
-                        ['height', 'Altura'],
-                        ['default_scale', 'Escala padrao'],
-                        ['min_scale', 'Escala minima'],
-                        ['max_scale', 'Escala maxima'],
-                        ['anchor_x', 'Ancora X'],
-                        ['anchor_y', 'Ancora Y']
-                      ].map(([field, label]) => (
-                        <label key={field} className="fig-field">
-                          <span>{label}</span>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={customTemplateForm.photo_slot[field]}
-                            onChange={event =>
-                              setCustomTemplateForm(current => ({
-                                ...current,
-                                photo_slot: {
-                                  ...current.photo_slot,
-                                  [field]: event.target.value
-                                }
-                              }))
-                            }
-                          />
-                        </label>
-                      ))}
-                    </>
-                  ) : null}
-                </div>
-
+                <details className="fig-admin-advanced">
+                  <summary>Ajustar textos da faixa (avancado)</summary>
+                  <div className="fig-admin-advanced-body">
                 <div className="fig-panel-header fig-panel-header--compact">
                   <p className="fig-kicker">Textos</p>
-                  <h3>Slots variaveis</h3>
+                  <h3>Campos da figurinha</h3>
+                </div>
+                <div className="fig-helper-strip fig-helper-strip--compact">
+                  <div>
+                    <strong>Esses textos ficam sobre a faixa de informacoes</strong>
+                    <span>Nome, data de nascimento, altura, peso e cidade/time.</span>
+                  </div>
                 </div>
                 <div className="fig-admin-stack">
                   {customTemplateForm.text_slots.map((slot, index) => (
@@ -4609,28 +7502,314 @@ function AdminPage() {
                             placeholder="#ffffff"
                           />
                         </label>
-                        <div className="fig-field fig-field--full">
-                          <button type="button" className="fig-inline-link" onClick={() => removeCustomTemplateTextSlot(index)}>
-                            Remover slot de texto
-                          </button>
-                        </div>
                       </div>
                     </div>
                   ))}
-                  <button type="button" className="fig-secondary-button" onClick={addCustomTemplateTextSlot}>
-                    Adicionar slot de texto
-                  </button>
                 </div>
+                  </div>
+                </details>
+
+                <details className="fig-admin-advanced">
+                  <summary>Ajustes avancados do modelo</summary>
+                  <div className="fig-admin-advanced-body">
+                <div className="fig-panel-header fig-panel-header--compact">
+                  <p className="fig-kicker">Foto</p>
+                  <h3>Area segura da pessoa</h3>
+                </div>
+                <div className="fig-form-grid">
+                  {customTemplateForm.photo_slot ? (
+                    <>
+                      {[
+                        ['x', 'X'],
+                        ['y', 'Y'],
+                        ['width', 'Largura'],
+                        ['height', 'Altura'],
+                        ['default_scale', 'Escala padrao'],
+                        ['min_scale', 'Escala minima'],
+                        ['max_scale', 'Escala maxima'],
+                        ['portrait_z_index', 'Ordem da foto'],
+                        ['anchor_x', 'Ancora X'],
+                        ['anchor_y', 'Ancora Y'],
+                        ['visible_x', 'Mascara X'],
+                        ['visible_y', 'Mascara Y'],
+                        ['visible_width', 'Mascara largura'],
+                        ['visible_height', 'Mascara altura']
+                      ].map(([field, label]) => (
+                        <label key={field} className="fig-field">
+                          <span>{label}</span>
+                          <input
+                            type="number"
+                            step={field === 'portrait_z_index' ? '1' : '0.01'}
+                            value={customTemplateForm.photo_slot[field]}
+                            onChange={event =>
+                              setCustomTemplateForm(current => ({
+                                ...current,
+                                photo_slot: {
+                                  ...current.photo_slot,
+                                  [field]: event.target.value
+                                }
+                              }))
+                            }
+                          />
+                        </label>
+                      ))}
+                    </>
+                  ) : null}
+                </div>
+
+                <div className="fig-panel-header fig-panel-header--compact">
+                  <p className="fig-kicker">Camadas extras</p>
+                  <h3>Somente se precisar</h3>
+                </div>
+                {extraCustomTemplateLayers.length > 0 ? (
+                  <div className="fig-admin-stack">
+                    {extraCustomTemplateLayers.map(({ layer, index }) => (
+                      <div key={`${layer.id || 'extra'}-${index}`} className="fig-helper-strip fig-helper-strip--card fig-template-layer-card">
+                        <div className="fig-form-grid">
+                          <label className="fig-field">
+                            <span>Tipo</span>
+                            <select
+                              value={layer.layer_type}
+                              onChange={event =>
+                                setCustomTemplateForm(current => ({
+                                  ...current,
+                                  layers: current.layers.map((item, itemIndex) =>
+                                    itemIndex === index ? { ...item, layer_type: event.target.value } : item
+                                  )
+                                }))
+                              }
+                            >
+                              {customTemplateLayerTypeOptions.map(option => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="fig-field">
+                            <span>Label</span>
+                            <input
+                              value={layer.label}
+                              onChange={event =>
+                                setCustomTemplateForm(current => ({
+                                  ...current,
+                                  layers: current.layers.map((item, itemIndex) =>
+                                    itemIndex === index ? { ...item, label: event.target.value } : item
+                                  )
+                                }))
+                              }
+                            />
+                          </label>
+                          <label className="fig-field">
+                            <span>Ordem Z</span>
+                            <input
+                              type="number"
+                              min="0"
+                              value={layer.z_index}
+                              onChange={event =>
+                                setCustomTemplateForm(current => ({
+                                  ...current,
+                                  layers: current.layers.map((item, itemIndex) =>
+                                    itemIndex === index ? { ...item, z_index: event.target.value } : item
+                                  )
+                                }))
+                              }
+                            />
+                          </label>
+                          <label className="fig-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={layer.is_active}
+                              onChange={event =>
+                                setCustomTemplateForm(current => ({
+                                  ...current,
+                                  layers: current.layers.map((item, itemIndex) =>
+                                    itemIndex === index ? { ...item, is_active: event.target.checked } : item
+                                  )
+                                }))
+                              }
+                            />
+                            <span>Ativa</span>
+                          </label>
+                          <div className="fig-field fig-field--full">
+                            <div className="fig-custom-base-card-actions">
+                              <input
+                                className="fig-plain-file-input"
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                disabled={savingCustomTemplate || uploadingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
+                                onChange={event => {
+                                  const file = event.target.files?.[0]
+                                  handleCustomTemplateLayerUpload(layer, file, index)
+                                  event.target.value = ''
+                                }}
+                              />
+                              <button
+                                type="button"
+                                className="fig-inline-link"
+                                disabled={!layer.file_path || savingCustomTemplate || deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}`}
+                                onClick={() => handleCustomTemplateLayerDelete(layer, index)}
+                              >
+                                {deletingTemplateLayerKey === `${selectedCustomTemplateId}:${layer.id}` ? 'Removendo...' : 'Remover imagem'}
+                              </button>
+                              <button type="button" className="fig-inline-link" onClick={() => removeCustomTemplateLayer(index)}>
+                                Remover camada extra
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="fig-empty-note">Nenhuma camada extra adicionada.</p>
+                )}
+                <button type="button" className="fig-secondary-button" onClick={addCustomTemplateLayer}>
+                  Adicionar camada extra
+                </button>
+
+                <div className="fig-panel-header fig-panel-header--compact">
+                  <p className="fig-kicker">Interno</p>
+                  <h3>Configuracoes do modelo</h3>
+                </div>
+                <div className="fig-form-grid">
+                  <label className="fig-field">
+                    <span>Nome interno</span>
+                    <input
+                      value={customTemplateForm.name}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, name: event.target.value }))}
+                      placeholder="Homem · Jogador · Atacante"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Categoria</span>
+                    <select
+                      value={customTemplateForm.category_type}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, category_type: event.target.value }))}
+                    >
+                      {customCategoryTypeOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fig-field">
+                    <span>Modo</span>
+                    <select
+                      value={customTemplateForm.composition_mode}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, composition_mode: event.target.value }))}
+                    >
+                      {customGenerationModeOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="fig-field">
+                    <span>Ordem</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={customTemplateForm.sort_order}
+                      onChange={event => setCustomTemplateForm(current => ({ ...current, sort_order: event.target.value }))}
+                    />
+                  </label>
+                </div>
+
+                  </div>
+                </details>
 
                 <div className="fig-hero-actions">
                   <button type="button" className="fig-secondary-button" onClick={handleStartNewCustomTemplate}>
-                    Novo template
+                    Novo modelo
                   </button>
-                  <button type="submit" className="fig-primary-button" disabled={savingCustomTemplate}>
-                    {savingCustomTemplate ? 'Salvando...' : selectedCustomTemplateId ? 'Salvar template' : 'Criar template'}
+                  <button
+                    type="button"
+                    className="fig-inline-link fig-inline-link--danger"
+                    disabled={!selectedCustomTemplateId || deletingCustomTemplate || savingCustomTemplate}
+                    onClick={handleDeleteCustomTemplate}
+                  >
+                    {deletingCustomTemplate ? 'Excluindo...' : 'Excluir modelo'}
+                  </button>
+                  <button type="submit" className="fig-primary-button" disabled={savingCustomTemplate || importingTemplateBatch}>
+                    {savingCustomTemplate ? 'Salvando...' : selectedCustomTemplateId ? 'Salvar modelo' : 'Criar modelo'}
                   </button>
                 </div>
               </form>
+            </div>
+          </section>
+              </div>
+            </details>
+
+            <details className="fig-admin-advanced fig-admin-accordion">
+              <summary>
+                <div className="fig-admin-accordion-summary">
+                  <strong>Ferramentas de IA</strong>
+                  <span>Bases por perfil e prompt da OpenAI ficam separados da montagem manual.</span>
+                </div>
+              </summary>
+              <div className="fig-admin-advanced-body fig-admin-accordion-body">
+          <section className="fig-form-card">
+            <div className="fig-panel-header">
+              <p className="fig-kicker">Minha Figurinha</p>
+              <h3>Bases oficiais por perfil</h3>
+            </div>
+            <p className="fig-empty-note">
+              Envie 3 bases oficiais, uma para homem, mulher e crianca. Aqui fica so a parte que ajuda a IA.
+            </p>
+
+            <div className="fig-custom-base-grid">
+              {customProfileOptions.map(option => {
+                const basePath = serviceForm[customBaseFieldByProfile[option.value]] || ''
+                const isUploading = uploadingBaseProfile === option.value
+                const isDeleting = deletingBaseProfile === option.value
+                return (
+                  <article key={option.value} className="fig-custom-base-card">
+                    <div className="fig-custom-base-card-head">
+                      <div>
+                        <strong>{option.label}</strong>
+                        <span>{basePath ? 'Base configurada' : 'Base ainda nao enviada'}</span>
+                      </div>
+                    </div>
+
+                    <div className="fig-custom-base-card-preview">
+                      {basePath ? (
+                        <img src={apiFileUrl(basePath)} alt={`Base ${option.label}`} />
+                      ) : (
+                        <div className="fig-custom-base-card-empty">
+                          <span>Sem base</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="fig-custom-base-card-actions">
+                      <label className="fig-secondary-button fig-file-button">
+                        {isUploading ? 'Enviando...' : basePath ? 'Trocar base' : 'Enviar base'}
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          disabled={isUploading}
+                          onChange={event => {
+                            const file = event.target.files?.[0]
+                            handleCustomBaseUpload(option.value, file)
+                            event.target.value = ''
+                          }}
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        className="fig-inline-link"
+                        disabled={!basePath || isDeleting}
+                        onClick={() => handleCustomBaseDelete(option.value)}
+                      >
+                        {isDeleting ? 'Removendo...' : 'Remover'}
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
             </div>
           </section>
 
@@ -4661,8 +7840,19 @@ function AdminPage() {
               </div>
             </div>
           </section>
+              </div>
+            </details>
           </div>
 
+          <div className="fig-admin-stack">
+          <details className="fig-admin-advanced fig-admin-accordion">
+            <summary>
+              <div className="fig-admin-accordion-summary">
+                <strong>Pedidos e retirada</strong>
+                <span>Pedidos locais, status, notas internas e download do PDF do cliente.</span>
+              </div>
+            </summary>
+            <div className="fig-admin-advanced-body fig-admin-accordion-body">
           <section className="fig-form-card">
             <div className="fig-panel-header">
               <p className="fig-kicker">Pedidos</p>
@@ -4757,6 +7947,9 @@ function AdminPage() {
               ) : null}
             </div>
           </section>
+            </div>
+          </details>
+          </div>
         </section>
         ) : null}
 

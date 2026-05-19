@@ -4,9 +4,15 @@ import base64
 import io
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageOps
+import numpy as np
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
 from openai import APIConnectionError, APIStatusError, AuthenticationError, OpenAI, RateLimitError
+try:
+    import cv2
+except Exception:  # pragma: no cover
+    cv2 = None
 try:
     from rembg import remove as rembg_remove
 except Exception:  # pragma: no cover
@@ -16,15 +22,34 @@ except Exception:  # pragma: no cover
 PROFILE_LABELS = {
     "HOMEM": "Homem",
     "MULHER": "Mulher",
-    "MENINO": "Menino",
-    "MENINA": "Menina",
+    "CRIANCA": "Crianca",
+    "MENINO": "Crianca",
+    "MENINA": "Crianca",
 }
 
 PROFILE_THEMES = {
     "HOMEM": ("#0f2748", "#1f7a4d", "#cde7d7"),
     "MULHER": ("#5b1f55", "#d54f8a", "#f5c5da"),
+    "CRIANCA": ("#134f7c", "#22a2d6", "#cceaf6"),
     "MENINO": ("#134f7c", "#22a2d6", "#cceaf6"),
-    "MENINA": ("#7c2c49", "#ff7fa9", "#ffd8e6"),
+    "MENINA": ("#134f7c", "#22a2d6", "#cceaf6"),
+}
+
+CUSTOM_FONT_SEARCH = {
+    True: [
+        Path(__file__).resolve().parent / "fonts" / "ebrimabd.ttf",
+        Path("C:/Windows/Fonts/ebrimabd.ttf"),
+        Path("/usr/share/fonts/truetype/msttcorefonts/Ebrima Bold.ttf"),
+        Path("/usr/share/fonts/truetype/msttcorefonts/ebrimabd.ttf"),
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+    ],
+    False: [
+        Path(__file__).resolve().parent / "fonts" / "ebrima.ttf",
+        Path("C:/Windows/Fonts/ebrima.ttf"),
+        Path("/usr/share/fonts/truetype/msttcorefonts/Ebrima.ttf"),
+        Path("/usr/share/fonts/truetype/msttcorefonts/ebrima.ttf"),
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    ],
 }
 
 DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE = (
@@ -41,6 +66,15 @@ class CustomStickerRender:
     final_bytes: bytes
 
 
+@dataclass
+class ManualCutoutAssets:
+    cutout_bytes: bytes
+    portrait_bytes: bytes
+    cutout_preview_bytes: bytes
+    portrait_preview_bytes: bytes
+    preview_mime_type: str
+
+
 class _SafePromptValues(dict):
     def __missing__(self, key):  # pragma: no cover - defensive fallback
         return ""
@@ -50,6 +84,7 @@ def generate_custom_sticker_render(
     settings,
     *,
     uploaded_photo_bytes: bytes,
+    prepared_portrait_bytes: bytes | None = None,
     base_template_path: Path | None = None,
     composition_mode: str | None = None,
     template_layers: list[dict] | None = None,
@@ -67,15 +102,29 @@ def generate_custom_sticker_render(
     photo_offset_x: float | None = None,
     photo_offset_y: float | None = None,
     photo_scale: float | None = None,
+    photo_rotation: float | None = None,
+    progress_callback: Callable[[int, str], None] | None = None,
 ) -> CustomStickerRender:
-    uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
-    base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
+    def report(progress: int, message: str) -> None:
+        if progress_callback:
+            progress_callback(progress, message)
+
     active_template_layers = [layer for layer in (template_layers or []) if layer.get("file_path") and layer.get("is_active", True)]
     use_layer_composition = composition_mode == "LAYERS" and bool(active_template_layers) and bool(photo_slot)
+    uploaded_photo = None
+    base_template = None
     openai_sticker_image = None
     ai_error_message = None
-    if not use_layer_composition and base_template is not None and settings.openai_api_key:
+    report(8, "Validando o modelo...")
+    if not use_layer_composition:
+        uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
+        base_template = _open_base_template(base_template_path, target_size=(target_width_px, target_height_px))
+    elif not prepared_portrait_bytes:
+        uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
+
+    if not use_layer_composition and base_template is not None and settings.openai_api_key and uploaded_photo is not None:
         try:
+            report(26, "Preparando a base...")
             openai_sticker_image = _generate_sticker_with_openai(
                 settings,
                 uploaded_photo=uploaded_photo,
@@ -90,6 +139,7 @@ def generate_custom_sticker_render(
                 target_width_px=target_width_px,
                 target_height_px=target_height_px,
             )
+            report(74, "Criando sua figurinha com IA...")
         except Exception as exc:
             ai_error_message = _humanize_openai_error(exc)
         if openai_sticker_image is None:
@@ -98,7 +148,18 @@ def generate_custom_sticker_render(
         ai_error_message = "Configure uma chave da OpenAI para gerar a figurinha com IA usando a base oficial."
 
     if use_layer_composition:
-        portrait_image = _remove_photo_background(uploaded_photo)
+        if prepared_portrait_bytes:
+            report(34, "Aplicando o retrato preparado...")
+            with Image.open(io.BytesIO(prepared_portrait_bytes)) as prepared_image:
+                portrait_image = ImageOps.exif_transpose(prepared_image).convert("RGBA")
+        else:
+            if uploaded_photo is None:
+                uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
+            report(28, "Removendo fundo...")
+            cutout_image = _remove_photo_background(uploaded_photo)
+            report(56, "Preparando o retrato...")
+            portrait_image = _build_portrait_cutout(uploaded_photo, cutout_image)
+        report(82, "Montando sua figurinha...")
         final_image = _compose_sticker_card_from_layers(
             portrait_image=portrait_image,
             template_layers=active_template_layers,
@@ -114,11 +175,14 @@ def generate_custom_sticker_render(
             photo_offset_x=photo_offset_x,
             photo_offset_y=photo_offset_y,
             photo_scale=photo_scale,
+            photo_rotation=photo_rotation,
         )
     elif openai_sticker_image is not None:
+        report(88, "Finalizando o resultado...")
         final_image = _resize_to_exact(openai_sticker_image, (target_width_px, target_height_px))
         portrait_image = final_image
     else:
+        report(34, "Preparando a base...")
         portrait_image = _generate_portrait_with_fallback(
             settings,
             uploaded_photo=uploaded_photo,
@@ -133,6 +197,7 @@ def generate_custom_sticker_render(
             target_width_px=max(int(target_width_px * 0.86), 720),
             target_height_px=max(int(target_height_px * 0.62), 960),
         )
+        report(78, "Montando sua figurinha...")
         final_image = _compose_sticker_card(
             portrait_image,
             base_template=base_template,
@@ -148,6 +213,7 @@ def generate_custom_sticker_render(
         if ai_error_message:
             print(f"[figurinhas] Minha Figurinha usando fallback local: {ai_error_message}")
 
+    report(94, "Preparando os arquivos finais...")
     portrait_buffer = io.BytesIO()
     portrait_image.save(portrait_buffer, format="PNG", optimize=True)
 
@@ -199,6 +265,186 @@ def _remove_photo_background(uploaded_photo: Image.Image) -> Image.Image:
     result_bytes = rembg_remove(buffer.getvalue())
     with Image.open(io.BytesIO(result_bytes)) as raw_image:
         return ImageOps.exif_transpose(raw_image).convert("RGBA")
+
+
+def _detect_face_box(uploaded_photo: Image.Image) -> tuple[int, int, int, int] | None:
+    if cv2 is None:  # pragma: no cover - dependency fallback
+        return None
+
+    rgb_image = uploaded_photo.convert("RGB")
+    working_image = rgb_image
+    longest_side = max(rgb_image.width, rgb_image.height)
+    if longest_side > 1280:
+        scale = 1280 / longest_side
+        working_image = rgb_image.resize(
+            (max(1, int(round(rgb_image.width * scale))), max(1, int(round(rgb_image.height * scale)))),
+            Image.Resampling.LANCZOS,
+        )
+
+    image_array = np.array(working_image)
+    if image_array.size == 0:
+        return None
+
+    gray = cv2.cvtColor(image_array, cv2.COLOR_RGB2GRAY)
+    cascade_path = getattr(getattr(cv2, "data", None), "haarcascades", "")
+    if not cascade_path:
+        return None
+    classifier = cv2.CascadeClassifier(str(Path(cascade_path) / "haarcascade_frontalface_default.xml"))
+    if classifier.empty():  # pragma: no cover - defensive
+        return None
+
+    min_side = max(40, min(gray.shape[:2]) // 9)
+    detected = classifier.detectMultiScale(
+        gray,
+        scaleFactor=1.08,
+        minNeighbors=5,
+        minSize=(min_side, min_side),
+    )
+    if len(detected) == 0:
+        return None
+
+    x, y, width, height = max(detected, key=lambda item: item[2] * item[3])
+    scale_back_x = rgb_image.width / max(working_image.width, 1)
+    scale_back_y = rgb_image.height / max(working_image.height, 1)
+    return (
+        int(round(x * scale_back_x)),
+        int(round(y * scale_back_y)),
+        int(round(width * scale_back_x)),
+        int(round(height * scale_back_y)),
+    )
+
+
+def _estimate_head_box_from_cutout(cutout_image: Image.Image) -> tuple[int, int, int, int] | None:
+    alpha = cutout_image.getchannel("A")
+    subject_bbox = alpha.getbbox()
+    if subject_bbox is None:
+        return None
+
+    left, top, right, bottom = subject_bbox
+    subject_width = max(right - left, 1)
+    subject_height = max(bottom - top, 1)
+    upper_bound = top + max(int(subject_height * 0.48), 1)
+    upper_region = alpha.crop((left, top, right, upper_bound))
+    upper_bbox = upper_region.getbbox()
+    if upper_bbox is not None:
+        head_left = left + upper_bbox[0]
+        head_top = top + upper_bbox[1]
+        head_right = left + upper_bbox[2]
+        head_bottom = top + upper_bbox[3]
+        return (
+            head_left,
+            head_top,
+            max(head_right - head_left, 1),
+            max(head_bottom - head_top, 1),
+        )
+
+    estimated_width = max(int(subject_width * 0.56), 1)
+    estimated_height = max(int(subject_height * 0.32), 1)
+    estimated_left = left + max((subject_width - estimated_width) // 2, 0)
+    return estimated_left, top, estimated_width, estimated_height
+
+
+def _expand_subject_box_to_portrait(
+    image_size: tuple[int, int],
+    subject_box: tuple[int, int, int, int],
+    *,
+    face_detected: bool,
+) -> tuple[int, int, int, int]:
+    image_width, image_height = image_size
+    x, y, width, height = subject_box
+    side_padding = 0.58 if face_detected else 0.46
+    top_padding = 1.05 if face_detected else 0.38
+    bottom_padding = 0.34 if face_detected else 0.62
+
+    left = max(int(round(x - width * side_padding)), 0)
+    top = max(int(round(y - height * top_padding)), 0)
+    right = min(int(round(x + width + width * side_padding)), image_width)
+    bottom = min(int(round(y + height + height * bottom_padding)), image_height)
+
+    if right <= left:
+        right = min(left + max(width, 1), image_width)
+    if bottom <= top:
+        bottom = min(top + max(height, 1), image_height)
+    return left, top, right, bottom
+
+
+def _pad_cutout_image(image: Image.Image, *, padding_ratio: float = 0.08) -> Image.Image:
+    padding_x = max(int(round(image.width * padding_ratio)), 6)
+    padding_y = max(int(round(image.height * padding_ratio)), 6)
+    canvas = Image.new("RGBA", (image.width + padding_x * 2, image.height + padding_y * 2), (0, 0, 0, 0))
+    canvas.alpha_composite(image.convert("RGBA"), (padding_x, padding_y))
+    return canvas
+
+
+def _build_portrait_cutout(uploaded_photo: Image.Image, cutout_image: Image.Image) -> Image.Image:
+    face_box = _detect_face_box(uploaded_photo)
+    if face_box is not None:
+        crop_box = _expand_subject_box_to_portrait(cutout_image.size, face_box, face_detected=True)
+    else:
+        estimated_head_box = _estimate_head_box_from_cutout(cutout_image)
+        if estimated_head_box is None:
+            return cutout_image.convert("RGBA")
+        crop_box = _expand_subject_box_to_portrait(cutout_image.size, estimated_head_box, face_detected=False)
+
+    portrait = cutout_image.crop(crop_box).convert("RGBA")
+    return _pad_cutout_image(portrait)
+
+
+def _encode_preview_image(image: Image.Image, *, max_longest_side: int = 1200) -> tuple[bytes, str]:
+    preview = image.convert("RGBA")
+    longest_side = max(preview.width, preview.height)
+    if longest_side > max_longest_side:
+        scale = max_longest_side / longest_side
+        preview = preview.resize(
+            (max(1, int(round(preview.width * scale))), max(1, int(round(preview.height * scale)))),
+            Image.Resampling.LANCZOS,
+        )
+
+    buffer = io.BytesIO()
+    try:
+        preview.save(buffer, format="WEBP", quality=90, method=6)
+        return buffer.getvalue(), "image/webp"
+    except Exception:  # pragma: no cover - Pillow/codec fallback
+        buffer = io.BytesIO()
+        preview.save(buffer, format="PNG", optimize=True)
+        return buffer.getvalue(), "image/png"
+
+
+def build_manual_cutout_assets(
+    uploaded_photo_bytes: bytes,
+    *,
+    progress_callback: Callable[[int, str], None] | None = None,
+) -> ManualCutoutAssets:
+    def report(progress: int, message: str) -> None:
+        if progress_callback:
+            progress_callback(progress, message)
+
+    report(12, "Recebendo a foto...")
+    uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
+    report(32, "Removendo fundo...")
+    cutout_image = _remove_photo_background(uploaded_photo)
+    report(58, "Preparando o retrato...")
+    portrait_image = _build_portrait_cutout(uploaded_photo, cutout_image)
+    report(82, "Gerando o preview...")
+    portrait_preview_bytes, preview_mime_type = _encode_preview_image(portrait_image, max_longest_side=1200)
+    cutout_preview_bytes, _ = _encode_preview_image(cutout_image, max_longest_side=1200)
+
+    report(94, "Finalizando o encaixe...")
+    cutout_buffer = io.BytesIO()
+    cutout_image.save(cutout_buffer, format="PNG", optimize=True)
+    portrait_buffer = io.BytesIO()
+    portrait_image.save(portrait_buffer, format="PNG", optimize=True)
+    return ManualCutoutAssets(
+        cutout_bytes=cutout_buffer.getvalue(),
+        portrait_bytes=portrait_buffer.getvalue(),
+        cutout_preview_bytes=cutout_preview_bytes,
+        portrait_preview_bytes=portrait_preview_bytes,
+        preview_mime_type=preview_mime_type,
+    )
+
+
+def remove_photo_background_bytes(uploaded_photo_bytes: bytes) -> bytes:
+    return build_manual_cutout_assets(uploaded_photo_bytes).cutout_bytes
 
 
 def _generate_sticker_with_openai(
@@ -677,44 +923,56 @@ def _compose_sticker_card_from_layers(
     photo_offset_x: float | None = None,
     photo_offset_y: float | None = None,
     photo_scale: float | None = None,
+    photo_rotation: float | None = None,
 ) -> Image.Image:
     canvas = Image.new("RGBA", (width_px, height_px), (0, 0, 0, 0))
     sorted_layers = sorted(template_layers, key=lambda item: int(item.get("z_index", 0)))
-    background_layers = [layer for layer in sorted_layers if layer.get("layer_type") == "BACKGROUND"]
-    front_layers = [layer for layer in sorted_layers if layer.get("layer_type") != "BACKGROUND"]
+    portrait_z_index = int(photo_slot.get("portrait_z_index", 50))
+    portrait_drawn = False
 
-    for layer in background_layers:
+    for layer in sorted_layers:
+        layer_z_index = int(layer.get("z_index", 0))
+        if not portrait_drawn and layer_z_index > portrait_z_index:
+            _paste_portrait_into_slot(
+                canvas,
+                portrait_image=portrait_image,
+                photo_slot=photo_slot,
+                width_px=width_px,
+                height_px=height_px,
+                photo_offset_x=photo_offset_x,
+                photo_offset_y=photo_offset_y,
+                photo_scale=photo_scale,
+                photo_rotation=photo_rotation,
+            )
+            portrait_drawn = True
         layer_image = _open_template_layer(layer.get("file_path"), (width_px, height_px))
         if layer_image is not None:
             canvas.alpha_composite(layer_image)
 
-    _paste_portrait_into_slot(
-        canvas,
-        portrait_image=portrait_image,
-        photo_slot=photo_slot,
-        width_px=width_px,
-        height_px=height_px,
-        photo_offset_x=photo_offset_x,
-        photo_offset_y=photo_offset_y,
-        photo_scale=photo_scale,
-    )
-
-    for layer in front_layers:
-        layer_image = _open_template_layer(layer.get("file_path"), (width_px, height_px))
-        if layer_image is not None:
-            canvas.alpha_composite(layer_image)
+    if not portrait_drawn:
+        _paste_portrait_into_slot(
+            canvas,
+            portrait_image=portrait_image,
+            photo_slot=photo_slot,
+            width_px=width_px,
+            height_px=height_px,
+            photo_offset_x=photo_offset_x,
+            photo_offset_y=photo_offset_y,
+            photo_scale=photo_scale,
+            photo_rotation=photo_rotation,
+        )
 
     draw = ImageDraw.Draw(canvas)
     _draw_template_text_slots(
         draw,
         text_slots=text_slots,
-        values={
-            "NAME": name.upper(),
-            "DATE": birth_date_text or "--",
-            "HEIGHT": height_text or "--",
-            "WEIGHT": weight_text or "--",
-            "CITY_OR_TEAM": city_or_team or "--",
-        },
+        values=_build_layer_text_values(
+            name=name,
+            birth_date_text=birth_date_text,
+            height_text=height_text,
+            weight_text=weight_text,
+            city_or_team=city_or_team,
+        ),
         width_px=width_px,
         height_px=height_px,
     )
@@ -791,6 +1049,7 @@ def _paste_portrait_into_slot(
     photo_offset_x: float | None = None,
     photo_offset_y: float | None = None,
     photo_scale: float | None = None,
+    photo_rotation: float | None = None,
 ) -> None:
     slot_x = int(float(photo_slot.get("x", 0)) * width_px)
     slot_y = int(float(photo_slot.get("y", 0)) * height_px)
@@ -803,13 +1062,37 @@ def _paste_portrait_into_slot(
     scale = max(min_scale, min(max_scale, requested_scale))
     anchor_x = float(photo_slot.get("anchor_x", 0.5))
     anchor_y = float(photo_slot.get("anchor_y", 0.5))
+    visible_x = min(max(float(photo_slot.get("visible_x", 0)), 0), 1)
+    visible_y = min(max(float(photo_slot.get("visible_y", 0)), 0), 1)
+    visible_width = min(max(float(photo_slot.get("visible_width", 1)), 0.01), 1)
+    visible_height = min(max(float(photo_slot.get("visible_height", 0.9)), 0.01), 1)
     offset_x = float(photo_offset_x or 0)
     offset_y = float(photo_offset_y or 0)
+    rotation = float(photo_rotation or 0)
 
-    fitted = _fit_contain_rgba(portrait_image, (slot_width, slot_height), scale=scale)
-    paste_x = slot_x + int((slot_width - fitted.width) * anchor_x) + int(round(offset_x * width_px))
-    paste_y = slot_y + int((slot_height - fitted.height) * anchor_y) + int(round(offset_y * height_px))
-    canvas.alpha_composite(fitted, (paste_x, paste_y))
+    visible_left = slot_x + int(round(slot_width * visible_x))
+    visible_top = slot_y + int(round(slot_height * visible_y))
+    visible_right = slot_x + int(round(slot_width * min(visible_x + visible_width, 1)))
+    visible_bottom = slot_y + int(round(slot_height * min(visible_y + visible_height, 1)))
+    visible_right = max(visible_right, visible_left + 1)
+    visible_bottom = max(visible_bottom, visible_top + 1)
+    visible_width_px = max(1, visible_right - visible_left)
+    visible_height_px = max(1, visible_bottom - visible_top)
+
+    fitted = _fit_contain_rgba(portrait_image, (visible_width_px, visible_height_px), scale=scale)
+    if abs(rotation) > 0.01:
+        fitted = fitted.rotate(rotation, resample=Image.Resampling.BICUBIC, expand=True)
+    paste_x = visible_left + int((visible_width_px - fitted.width) * anchor_x) + int(round(offset_x * visible_width_px))
+    paste_y = visible_top + int((visible_height_px - fitted.height) * anchor_y) + int(round(offset_y * visible_height_px))
+
+    portrait_layer = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    portrait_layer.alpha_composite(fitted, (paste_x, paste_y))
+
+    visibility_mask = Image.new("L", canvas.size, 0)
+    ImageDraw.Draw(visibility_mask).rectangle((visible_left, visible_top, visible_right, visible_bottom), fill=255)
+    portrait_alpha = portrait_layer.getchannel("A")
+    portrait_layer.putalpha(ImageChops.multiply(portrait_alpha, visibility_mask))
+    canvas.alpha_composite(portrait_layer)
 
 
 def _resize_to_exact(image: Image.Image, target_size: tuple[int, int]) -> Image.Image:
@@ -830,14 +1113,10 @@ def _vertical_gradient(size: tuple[int, int], start_hex: str, end_hex: str) -> I
 
 
 def _load_font(size: int, *, bold: bool) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    font_names = (
-        ("DejaVuSans-Bold.ttf", "DejaVuSans.ttf")
-        if bold
-        else ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf")
-    )
-    for font_name in font_names:
+    for font_path in CUSTOM_FONT_SEARCH[bold]:
         try:
-            return ImageFont.truetype(font_name, size=size)
+            if font_path.exists():
+                return ImageFont.truetype(str(font_path), size=size)
         except OSError:
             continue
     return ImageFont.load_default()
@@ -897,6 +1176,28 @@ def _draw_template_text_slots(
             shadow_fill=(0, 0, 0, 160),
             shadow_offset=(0, max(height_px // 500, 1)),
         )
+
+
+def _build_layer_text_values(
+    *,
+    name: str,
+    birth_date_text: str | None,
+    height_text: str | None,
+    weight_text: str | None,
+    city_or_team: str | None,
+) -> dict[str, str]:
+    date_value = (birth_date_text or "--").strip() or "--"
+    height_value = (height_text or "--").strip() or "--"
+    weight_value = (weight_text or "--").strip() or "--"
+    city_value = (city_or_team or "--").strip() or "--"
+
+    return {
+        "NAME": (name or "NOME").strip().upper(),
+        "DATE": f"{date_value} |",
+        "HEIGHT": f"{height_value} |",
+        "WEIGHT": weight_value,
+        "CITY_OR_TEAM": city_value.upper(),
+    }
 
 
 def _truncate_to_width(text: str, font: ImageFont.FreeTypeFont | ImageFont.ImageFont, max_width: int) -> str:

@@ -44,9 +44,22 @@ class StickerSourceType(str, enum.Enum):
     GENERATED = "GENERATED"
 
 
+class SourceDocumentStatus(str, enum.Enum):
+    RASCUNHO = "RASCUNHO"
+    EM_REVISAO = "EM_REVISAO"
+    PUBLICADO = "PUBLICADO"
+
+
+class SourceDetectedStickerStatus(str, enum.Enum):
+    PENDENTE = "PENDENTE"
+    ATRIBUIDA = "ATRIBUIDA"
+    DESCARTADA = "DESCARTADA"
+
+
 class CustomProfileType(str, enum.Enum):
     HOMEM = "HOMEM"
     MULHER = "MULHER"
+    CRIANCA = "CRIANCA"
     MENINO = "MENINO"
     MENINA = "MENINA"
 
@@ -91,6 +104,11 @@ class CustomStickerUnlockStatus(str, enum.Enum):
     FALHOU = "FALHOU"
 
 
+class CustomStickerUnlockType(str, enum.Enum):
+    MANUAL_PDF = "MANUAL_PDF"
+    AI_CREATE = "AI_CREATE"
+
+
 class Album(Base):
     __tablename__ = "figurinhas_albums"
 
@@ -107,8 +125,17 @@ class Album(Base):
     collections: Mapped[list["Collection"]] = relationship(
         back_populates="album", cascade="all, delete-orphan", order_by="Collection.updated_at.desc()"
     )
+    custom_templates: Mapped[list["CustomStickerTemplate"]] = relationship(
+        back_populates="album", order_by="CustomStickerTemplate.sort_order.asc()"
+    )
     print_orders: Mapped[list["PrintOrder"]] = relationship(
         back_populates="album", order_by="PrintOrder.created_at.desc()"
+    )
+    source_documents: Mapped[list["SourceDocument"]] = relationship(
+        back_populates="album", cascade="all, delete-orphan", order_by="SourceDocument.created_at.desc()"
+    )
+    page_layout_templates: Mapped[list["PageLayoutTemplate"]] = relationship(
+        back_populates="album", cascade="all, delete-orphan", order_by="PageLayoutTemplate.created_at.desc()"
     )
 
 
@@ -144,6 +171,149 @@ class Collection(Base):
     print_orders: Mapped[list["PrintOrder"]] = relationship(
         back_populates="collection", cascade="all, delete-orphan", order_by="PrintOrder.created_at.desc()"
     )
+    source_blocks: Mapped[list["PageSelectionBlock"]] = relationship(back_populates="collection")
+    source_detected_stickers: Mapped[list["SourceDetectedSticker"]] = relationship(
+        back_populates="assigned_collection"
+    )
+
+
+class SourceDocument(Base):
+    __tablename__ = "figurinhas_source_documents"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    album_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_albums.id"), nullable=False, index=True)
+    title: Mapped[str] = mapped_column(String(150), nullable=False)
+    pdf_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    page_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    status: Mapped[SourceDocumentStatus] = mapped_column(
+        Enum(SourceDocumentStatus), default=SourceDocumentStatus.RASCUNHO, nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    album: Mapped[Album] = relationship(back_populates="source_documents")
+    pages: Mapped[list["SourceDocumentPage"]] = relationship(
+        back_populates="document", cascade="all, delete-orphan", order_by="SourceDocumentPage.page_number.asc()"
+    )
+    source_stickers: Mapped[list["Sticker"]] = relationship(back_populates="source_document")
+    detected_stickers: Mapped[list["SourceDetectedSticker"]] = relationship(
+        back_populates="document", cascade="all, delete-orphan", order_by="SourceDetectedSticker.id.asc()"
+    )
+
+
+class SourceDocumentPage(Base):
+    __tablename__ = "figurinhas_source_document_pages"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_source_documents.id"), nullable=False, index=True)
+    page_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    image_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    width: Mapped[int] = mapped_column(Integer, nullable=False)
+    height: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    document: Mapped[SourceDocument] = relationship(back_populates="pages")
+    blocks: Mapped[list["PageSelectionBlock"]] = relationship(
+        back_populates="page", cascade="all, delete-orphan", order_by="PageSelectionBlock.sort_order.asc()"
+    )
+    source_stickers: Mapped[list["Sticker"]] = relationship(back_populates="source_document_page")
+    detected_stickers: Mapped[list["SourceDetectedSticker"]] = relationship(
+        back_populates="page", cascade="all, delete-orphan", order_by="SourceDetectedSticker.id.asc()"
+    )
+
+
+class PageSelectionBlock(Base):
+    __tablename__ = "figurinhas_page_selection_blocks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    page_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_source_document_pages.id"), nullable=False, index=True)
+    collection_id: Mapped[int | None] = mapped_column(ForeignKey("figurinhas_collections.id"), nullable=True, index=True)
+    label: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    x: Mapped[float] = mapped_column(Float, nullable=False)
+    y: Mapped[float] = mapped_column(Float, nullable=False)
+    width: Mapped[float] = mapped_column(Float, nullable=False)
+    height: Mapped[float] = mapped_column(Float, nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    page: Mapped[SourceDocumentPage] = relationship(back_populates="blocks")
+    collection: Mapped[Collection | None] = relationship(back_populates="source_blocks")
+    source_stickers: Mapped[list["Sticker"]] = relationship(back_populates="source_block")
+
+
+class PageLayoutTemplate(Base):
+    __tablename__ = "figurinhas_page_layout_templates"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    album_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_albums.id"), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    album: Mapped[Album] = relationship(back_populates="page_layout_templates")
+    blocks: Mapped[list["PageLayoutTemplateBlock"]] = relationship(
+        back_populates="template", cascade="all, delete-orphan", order_by="PageLayoutTemplateBlock.sort_order.asc()"
+    )
+
+
+class PageLayoutTemplateBlock(Base):
+    __tablename__ = "figurinhas_page_layout_template_blocks"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    template_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_page_layout_templates.id"), nullable=False, index=True)
+    collection_id: Mapped[int | None] = mapped_column(ForeignKey("figurinhas_collections.id"), nullable=True, index=True)
+    label: Mapped[str | None] = mapped_column(String(150), nullable=True)
+    x: Mapped[float] = mapped_column(Float, nullable=False)
+    y: Mapped[float] = mapped_column(Float, nullable=False)
+    width: Mapped[float] = mapped_column(Float, nullable=False)
+    height: Mapped[float] = mapped_column(Float, nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    template: Mapped[PageLayoutTemplate] = relationship(back_populates="blocks")
+    collection: Mapped[Collection | None] = relationship()
+
+
+class SourceDetectedSticker(Base):
+    __tablename__ = "figurinhas_source_detected_stickers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_source_documents.id"), nullable=False, index=True)
+    page_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_source_document_pages.id"), nullable=False, index=True)
+    assigned_collection_id: Mapped[int | None] = mapped_column(
+        ForeignKey("figurinhas_collections.id"), nullable=True, index=True
+    )
+    status: Mapped[SourceDetectedStickerStatus] = mapped_column(
+        Enum(SourceDetectedStickerStatus), default=SourceDetectedStickerStatus.PENDENTE, nullable=False
+    )
+    category: Mapped[StickerCategory] = mapped_column(Enum(StickerCategory), default=StickerCategory.JOGADOR)
+    x_ratio: Mapped[float] = mapped_column(Float, nullable=False)
+    y_ratio: Mapped[float] = mapped_column(Float, nullable=False)
+    width_ratio: Mapped[float] = mapped_column(Float, nullable=False)
+    height_ratio: Mapped[float] = mapped_column(Float, nullable=False)
+    preview_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    crop_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    ocr_name_raw: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    ocr_name_suggested: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    ocr_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    ocr_processed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    document: Mapped[SourceDocument] = relationship(back_populates="detected_stickers")
+    page: Mapped[SourceDocumentPage] = relationship(back_populates="detected_stickers")
+    assigned_collection: Mapped[Collection | None] = relationship(back_populates="source_detected_stickers")
 
 
 class Page(Base):
@@ -182,6 +352,15 @@ class Sticker(Base):
     composition_mode_used: Mapped[CustomTemplateCompositionMode | None] = mapped_column(
         Enum(CustomTemplateCompositionMode), nullable=True
     )
+    source_document_id: Mapped[int | None] = mapped_column(
+        ForeignKey("figurinhas_source_documents.id"), nullable=True, index=True
+    )
+    source_document_page_id: Mapped[int | None] = mapped_column(
+        ForeignKey("figurinhas_source_document_pages.id"), nullable=True, index=True
+    )
+    source_block_id: Mapped[int | None] = mapped_column(
+        ForeignKey("figurinhas_page_selection_blocks.id"), nullable=True, index=True
+    )
     birth_date_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
     height_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
     weight_text: Mapped[str | None] = mapped_column(String(40), nullable=True)
@@ -191,6 +370,7 @@ class Sticker(Base):
     photo_offset_x: Mapped[float | None] = mapped_column(Float, nullable=True)
     photo_offset_y: Mapped[float | None] = mapped_column(Float, nullable=True)
     photo_scale: Mapped[float | None] = mapped_column(Float, nullable=True)
+    photo_rotation: Mapped[float | None] = mapped_column(Float, nullable=True)
     export_width_pt: Mapped[float | None] = mapped_column(Float, nullable=True)
     export_height_pt: Mapped[float | None] = mapped_column(Float, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -214,12 +394,16 @@ class Sticker(Base):
     collection: Mapped[Collection] = relationship(back_populates="stickers")
     page: Mapped[Page] = relationship(back_populates="stickers")
     template: Mapped["CustomStickerTemplate | None"] = relationship(back_populates="generated_stickers")
+    source_document: Mapped["SourceDocument | None"] = relationship(back_populates="source_stickers")
+    source_document_page: Mapped["SourceDocumentPage | None"] = relationship(back_populates="source_stickers")
+    source_block: Mapped["PageSelectionBlock | None"] = relationship(back_populates="source_stickers")
 
 
 class CustomStickerTemplate(Base):
     __tablename__ = "figurinhas_custom_sticker_templates"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    album_id: Mapped[int | None] = mapped_column(ForeignKey("figurinhas_albums.id"), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     profile_type: Mapped[CustomProfileType] = mapped_column(Enum(CustomProfileType), nullable=False, index=True)
     category_type: Mapped[CustomCategoryType] = mapped_column(
@@ -236,6 +420,7 @@ class CustomStickerTemplate(Base):
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
+    album: Mapped["Album | None"] = relationship(back_populates="custom_templates")
     layers: Mapped[list["CustomStickerTemplateLayer"]] = relationship(
         back_populates="template", cascade="all, delete-orphan", order_by="CustomStickerTemplateLayer.z_index.asc()"
     )
@@ -282,8 +467,13 @@ class CustomStickerTemplatePhotoSlot(Base):
     default_scale: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
     min_scale: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
     max_scale: Mapped[float] = mapped_column(Float, default=1.5, nullable=False)
+    portrait_z_index: Mapped[int] = mapped_column(Integer, default=30, nullable=False)
     anchor_x: Mapped[float] = mapped_column(Float, default=0.5, nullable=False)
     anchor_y: Mapped[float] = mapped_column(Float, default=0.5, nullable=False)
+    visible_x: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    visible_y: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    visible_width: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    visible_height: Mapped[float] = mapped_column(Float, default=0.9, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
@@ -351,6 +541,9 @@ class ServiceSettings(Base):
     custom_sticker_unlock_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     custom_sticker_unlock_price_cents: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
     custom_sticker_unlock_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    custom_ai_unlock_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    custom_ai_unlock_price_cents: Mapped[int] = mapped_column(Integer, default=500, nullable=False)
+    custom_ai_unlock_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
@@ -362,8 +555,11 @@ class CustomStickerUnlock(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     album_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_albums.id"), nullable=False, index=True)
-    sticker_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_stickers.id"), nullable=False, index=True)
+    sticker_id: Mapped[int | None] = mapped_column(ForeignKey("figurinhas_stickers.id"), nullable=True, index=True)
     session_token: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    unlock_type: Mapped[CustomStickerUnlockType] = mapped_column(
+        Enum(CustomStickerUnlockType), default=CustomStickerUnlockType.MANUAL_PDF, nullable=False, index=True
+    )
     amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     status: Mapped[CustomStickerUnlockStatus] = mapped_column(
         Enum(CustomStickerUnlockStatus), default=CustomStickerUnlockStatus.PENDENTE, nullable=False
@@ -383,7 +579,7 @@ class CustomStickerUnlock(Base):
     )
 
     album: Mapped[Album] = relationship()
-    sticker: Mapped[Sticker] = relationship()
+    sticker: Mapped[Sticker | None] = relationship()
 
 
 class PrintOrder(Base):
