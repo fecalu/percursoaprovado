@@ -27,6 +27,7 @@ from .mercadopago import MercadoPagoError, MercadoPagoPixClient
 from .models import (
     Album,
     Collection,
+    CollectionExportMode,
     CollectionStatus,
     CollectionType,
     CustomCategoryType,
@@ -182,6 +183,60 @@ def default_group_order_for_collection_type(collection_type: CollectionType | st
     return mapping.get(normalized, 9)
 
 
+def default_export_mode_for_collection_type(collection_type: CollectionType | str) -> CollectionExportMode:
+    normalized = (
+        collection_type
+        if isinstance(collection_type, CollectionType)
+        else CollectionType(collection_type or CollectionType.SELECAO.value)
+    )
+    if normalized == CollectionType.OUTROS:
+        return CollectionExportMode.APPEND_FULL_PDF
+    return CollectionExportMode.GRID
+
+
+def normalize_collection_export_settings(collection: Collection) -> int:
+    normalized_count = 0
+    current_type = (
+        collection.collection_type
+        if isinstance(collection.collection_type, CollectionType)
+        else CollectionType((collection.collection_type or CollectionType.SELECAO.value))
+    )
+    expected_mode = default_export_mode_for_collection_type(current_type)
+    current_mode = (
+        collection.export_mode
+        if isinstance(collection.export_mode, CollectionExportMode)
+        else CollectionExportMode((collection.export_mode or expected_mode.value))
+    )
+    if current_mode != expected_mode:
+        collection.export_mode = expected_mode
+        normalized_count += 1
+
+    expected_allow_quantity = current_type == CollectionType.OUTROS
+    if bool(collection.allow_quantity_choice) != expected_allow_quantity:
+        collection.allow_quantity_choice = expected_allow_quantity
+        normalized_count += 1
+
+    expected_default_quantity = max(0, int(collection.default_quantity or 0))
+    expected_max_quantity = max(0, int(collection.max_quantity_per_order or 0))
+    if current_type == CollectionType.OUTROS:
+        if expected_default_quantity <= 0:
+            expected_default_quantity = 1
+        if expected_max_quantity > 0 and expected_max_quantity < expected_default_quantity:
+            expected_max_quantity = expected_default_quantity
+    else:
+        expected_default_quantity = 1
+        expected_max_quantity = 1
+
+    if int(collection.default_quantity or 0) != expected_default_quantity:
+        collection.default_quantity = expected_default_quantity
+        normalized_count += 1
+    if int(collection.max_quantity_per_order or 0) != expected_max_quantity:
+        collection.max_quantity_per_order = expected_max_quantity
+        normalized_count += 1
+
+    return normalized_count
+
+
 def infer_collection_type_from_name(name: str) -> CollectionType:
     normalized = (name or "").strip().upper()
     if normalized == "ESCUDOS":
@@ -201,21 +256,18 @@ def normalize_collection_metadata(db: Session) -> int:
     type_counters: dict[CollectionType, int] = defaultdict(int)
     ordered = sorted(collections, key=lambda item: (item.album_id or 0, item.sort_order or 0, item.name.lower(), item.id))
     for collection in ordered:
-        inferred_type = infer_collection_type_from_name(collection.name)
         current_type = (
             collection.collection_type
             if isinstance(collection.collection_type, CollectionType)
             else CollectionType((collection.collection_type or CollectionType.SELECAO.value))
         )
-        if current_type != inferred_type:
-            collection.collection_type = inferred_type
-            normalized_count += 1
-        expected_group_order = default_group_order_for_collection_type(inferred_type)
+        expected_group_order = default_group_order_for_collection_type(current_type)
         if int(collection.display_group_order or 0) != expected_group_order:
             collection.display_group_order = expected_group_order
             normalized_count += 1
-        type_counters[inferred_type] += 1
-        expected_item_order = type_counters[inferred_type]
+        normalized_count += normalize_collection_export_settings(collection)
+        type_counters[current_type] += 1
+        expected_item_order = type_counters[current_type]
         if int(collection.display_item_order or 0) <= 0 or int(collection.display_item_order or 0) == 999:
             collection.display_item_order = expected_item_order
             normalized_count += 1
@@ -414,6 +466,28 @@ def save_pdf_and_render_pages(collection: Collection, upload_name: str, upload_b
     collection.pages.clear()
     collection.stickers.clear()
     collection.exports.clear()
+    db.flush()
+
+    pages_dir = settings.storage_root / "pages" / collection.slug
+    pages_dir.mkdir(parents=True, exist_ok=True)
+
+    with fitz.open(pdf_path) as source_pdf:
+        for page_index in range(source_pdf.page_count):
+            page = source_pdf.load_page(page_index)
+            pixmap = page.get_pixmap(matrix=fitz.Matrix(settings.render_scale, settings.render_scale), alpha=False)
+            image_path = pages_dir / f"page-{page_index + 1}.png"
+            pixmap.save(image_path)
+            with Image.open(image_path) as image:
+                width, height = image.size
+            db.add(
+                Page(
+                    collection=collection,
+                    page_number=page_index + 1,
+                    image_path=str(image_path.relative_to(settings.storage_root).as_posix()),
+                    width=width,
+                    height=height,
+                )
+            )
     db.flush()
 
 
@@ -2578,18 +2652,143 @@ def upsert_generated_sticker(
     db.add(sticker)
     db.flush()
     return sticker
+def _resolve_export_extra_documents(
+    album: Album,
+    extra_selections: list[dict] | None,
+    db: Session,
+) -> tuple[list[dict], list[dict]]:
+    if not extra_selections:
+        return [], []
+
+    normalized_quantities: dict[int, int] = defaultdict(int)
+    interleaved_collection_ids: set[int] = set()
+    for item in extra_selections:
+        collection_id = int(item.get("collection_id") or 0)
+        quantity = int(item.get("quantity") or 0)
+        apply_to_all_sheets = bool(item.get("apply_to_all_sheets"))
+        if collection_id <= 0:
+            continue
+        if apply_to_all_sheets:
+            interleaved_collection_ids.add(collection_id)
+            continue
+        if quantity <= 0:
+            continue
+        normalized_quantities[collection_id] += quantity
+
+    if not normalized_quantities and not interleaved_collection_ids:
+        return [], []
+
+    collections = db.execute(
+        select(Collection).where(
+            Collection.id.in_(sorted(set(normalized_quantities.keys()) | interleaved_collection_ids)),
+            Collection.album_id == album.id,
+        )
+    ).scalars().all()
+    collections_by_id = {collection.id: collection for collection in collections}
+
+    append_documents: list[dict] = []
+    interleaved_documents: list[dict] = []
+
+    def supports_interleaved_back(collection: Collection) -> bool:
+        slug = (collection.slug or "").strip().lower()
+        name = (collection.name or "").strip().upper()
+        return slug == "verso" or name == "VERSO"
+
+    for collection_id, requested_quantity in normalized_quantities.items():
+        collection = collections_by_id.get(collection_id)
+        if not collection:
+            raise ValueError("Nao foi possivel localizar um dos extras selecionados para esse album.")
+
+        export_mode = (
+            collection.export_mode
+            if isinstance(collection.export_mode, CollectionExportMode)
+            else CollectionExportMode((collection.export_mode or CollectionExportMode.GRID.value))
+        )
+        if export_mode != CollectionExportMode.APPEND_FULL_PDF:
+            raise ValueError(f"A colecao {collection.name} nao esta configurada como extra de PDF.")
+        if not collection.source_pdf_path:
+            raise ValueError(f"A colecao {collection.name} ainda nao possui PDF completo para anexar.")
+
+        source_pdf_path = settings.storage_root / collection.source_pdf_path
+        if not source_pdf_path.exists():
+            raise FileNotFoundError(f"PDF completo da colecao {collection.name} nao encontrado.")
+
+        max_quantity = max(0, int(collection.max_quantity_per_order or 0))
+        quantity = requested_quantity if max_quantity <= 0 else min(requested_quantity, max_quantity)
+        if quantity <= 0:
+            continue
+
+        with fitz.open(source_pdf_path) as document:
+            page_count = int(document.page_count)
+        if page_count <= 0:
+            raise ValueError(f"O PDF completo da colecao {collection.name} nao possui paginas validas.")
+
+        append_documents.append(
+            {
+                "collection_id": collection.id,
+                "collection_name": collection.name,
+                "file_path": source_pdf_path,
+                "page_count": page_count,
+                "quantity": quantity,
+            }
+        )
+
+    for collection_id in sorted(interleaved_collection_ids):
+        collection = collections_by_id.get(collection_id)
+        if not collection:
+            raise ValueError("Nao foi possivel localizar um dos extras selecionados para esse album.")
+        if not supports_interleaved_back(collection):
+            raise ValueError(f"A colecao {collection.name} nao pode ser usada como verso intercalado.")
+        export_mode = (
+            collection.export_mode
+            if isinstance(collection.export_mode, CollectionExportMode)
+            else CollectionExportMode((collection.export_mode or CollectionExportMode.GRID.value))
+        )
+        if export_mode != CollectionExportMode.APPEND_FULL_PDF:
+            raise ValueError(f"A colecao {collection.name} nao esta configurada como extra de PDF.")
+        if not collection.source_pdf_path:
+            raise ValueError(f"A colecao {collection.name} ainda nao possui PDF completo para usar como verso.")
+
+        source_pdf_path = settings.storage_root / collection.source_pdf_path
+        if not source_pdf_path.exists():
+            raise FileNotFoundError(f"PDF completo da colecao {collection.name} nao encontrado.")
+
+        with fitz.open(source_pdf_path) as document:
+            page_count = int(document.page_count)
+        if page_count <= 0:
+            raise ValueError(f"O PDF completo da colecao {collection.name} nao possui paginas validas.")
+
+        interleaved_documents.append(
+            {
+                "collection_id": collection.id,
+                "collection_name": collection.name,
+                "file_path": source_pdf_path,
+                "page_count": page_count,
+                "interleave_first_page_only": True,
+            }
+        )
+
+    return append_documents, interleaved_documents
 
 
-def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> dict:
-    if not stickers:
-        raise ValueError("Selecione pelo menos uma figurinha para exportar.")
+def prepare_export_plan(
+    album: Album,
+    stickers: list[Sticker],
+    db: Session,
+    extra_selections: list[dict] | None = None,
+) -> dict:
+    append_documents, interleaved_documents = _resolve_export_extra_documents(album, extra_selections, db)
+    if not stickers and not append_documents:
+        raise ValueError("Selecione pelo menos uma figurinha ou extra para exportar.")
 
     selected_collection_ids = sorted({sticker.collection_id for sticker in stickers})
-    collections = db.execute(
-        select(Collection)
-        .options(selectinload(Collection.pages))
-        .where(Collection.id.in_(selected_collection_ids))
-    ).scalars().all()
+    collections = []
+    if selected_collection_ids:
+        collections = db.execute(
+            select(Collection)
+            .options(selectinload(Collection.pages))
+            .where(Collection.id.in_(selected_collection_ids))
+        ).scalars().all()
     collections_by_id = {collection.id: collection for collection in collections}
     template_collections = db.execute(
         select(Collection)
@@ -2692,11 +2891,18 @@ def prepare_export_plan(album: Album, stickers: list[Sticker], db: Session) -> d
                 }
             )
 
+    append_page_count = sum(int(item["page_count"]) * int(item["quantity"]) for item in append_documents)
+    interleaved_page_count = len(batches) * len(interleaved_documents)
+
     return {
         "source_pdf_paths": source_pdf_paths,
         "page_sizes_by_collection": page_sizes_by_collection,
         "batches": batches,
-        "sheet_count": len(batches),
+        "append_documents": append_documents,
+        "interleaved_documents": interleaved_documents,
+        "append_page_count": append_page_count,
+        "interleaved_page_count": interleaved_page_count,
+        "sheet_count": len(batches) + append_page_count + interleaved_page_count,
     }
 
 
@@ -2705,6 +2911,7 @@ def build_export_pdf(
     stickers: list[Sticker],
     db: Session,
     plan: dict | None = None,
+    extra_selections: list[dict] | None = None,
     progress_callback: Callable[[int, str], None] | None = None,
 ) -> Export:
     def report(progress: int, message: str) -> None:
@@ -2717,22 +2924,27 @@ def build_export_pdf(
     export_key = f"{datetime.utcnow():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
     export_path = export_dir / f"{album.slug}-{export_key}.pdf"
 
-    plan = plan or prepare_export_plan(album, stickers, db)
+    plan = plan or prepare_export_plan(album, stickers, db, extra_selections=extra_selections)
     page_sizes_by_collection = plan["page_sizes_by_collection"]
     batches = plan["batches"]
+    append_documents = plan.get("append_documents", [])
+    interleaved_documents = plan.get("interleaved_documents", [])
     initial_page_size = batches[0]["page_size"] if batches else (595.2756, 841.8898)
 
     documents: dict[int, fitz.Document] = {}
+    extra_documents: dict[str, fitz.Document] = {}
     try:
         pdf = canvas.Canvas(str(export_path), pagesize=initial_page_size)
         pdf.setTitle(f"{album.name} - figurinhas selecionadas")
 
         is_first_page = True
-        total_batches = max(len(batches), 1)
+        total_pages = max(plan.get("sheet_count", len(batches)), 1)
+        current_page_number = 0
         for batch_index, batch in enumerate(batches, start=1):
+            current_page_number += 1
             report(
-                20 + int(((batch_index - 1) / total_batches) * 58),
-                f"Montando pagina {batch_index} de {total_batches}...",
+                20 + int(((current_page_number - 1) / total_pages) * 58),
+                f"Montando pagina {current_page_number} de {total_pages}...",
             )
             page_width, page_height = batch["page_size"]
             if not is_first_page:
@@ -2768,14 +2980,92 @@ def build_export_pdf(
             _draw_export_cut_reference_lines(pdf, batch["placements"], page_height)
             is_first_page = False
 
+            for interleaved_document in interleaved_documents:
+                document_key = str(interleaved_document["file_path"])
+                document = extra_documents.get(document_key)
+                if document is None:
+                    document = fitz.open(interleaved_document["file_path"])
+                    extra_documents[document_key] = document
+
+                current_page_number += 1
+                report(
+                    20 + int(((current_page_number - 1) / total_pages) * 58),
+                    f"Aplicando verso {interleaved_document['collection_name']} ({current_page_number} de {total_pages})...",
+                )
+                page = document.load_page(0)
+                back_width = float(page.rect.width)
+                back_height = float(page.rect.height)
+                pdf.showPage()
+                pdf.setPageSize((back_width, back_height))
+                pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
+                pdf.drawImage(
+                    ImageReader(io.BytesIO(pixmap.tobytes("png"))),
+                    0,
+                    0,
+                    width=back_width,
+                    height=back_height,
+                    preserveAspectRatio=False,
+                    mask="auto",
+                )
+
+        for extra_document in append_documents:
+            document_key = str(extra_document["file_path"])
+            document = extra_documents.get(document_key)
+            if document is None:
+                document = fitz.open(extra_document["file_path"])
+                extra_documents[document_key] = document
+
+            for repetition_index in range(int(extra_document["quantity"])):
+                for page_index in range(int(extra_document["page_count"])):
+                    current_page_number += 1
+                    report(
+                        20 + int(((current_page_number - 1) / total_pages) * 58),
+                        f"Anexando {extra_document['collection_name']} ({current_page_number} de {total_pages})...",
+                    )
+                    page = document.load_page(page_index)
+                    page_width = float(page.rect.width)
+                    page_height = float(page.rect.height)
+                    if not is_first_page:
+                        pdf.showPage()
+                    pdf.setPageSize((page_width, page_height))
+                    pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
+                    pdf.drawImage(
+                        ImageReader(io.BytesIO(pixmap.tobytes("png"))),
+                        0,
+                        0,
+                        width=page_width,
+                        height=page_height,
+                        preserveAspectRatio=False,
+                        mask="auto",
+                    )
+                    is_first_page = False
+
         report(88, "Gerando o PDF...")
         pdf.save()
     finally:
         for document in documents.values():
             document.close()
+        for document in extra_documents.values():
+            document.close()
 
     report(98, "Finalizando download...")
-    primary_collection = next((sticker.collection for sticker in stickers if not sticker.collection.is_system), stickers[0].collection)
+    if stickers:
+        primary_collection = next(
+            (sticker.collection for sticker in stickers if not sticker.collection.is_system),
+            stickers[0].collection,
+        )
+    else:
+        primary_collection = None
+        for item in extra_selections or []:
+            collection_id = int(item.get("collection_id") or 0)
+            quantity = int(item.get("quantity") or 0)
+            apply_to_all_sheets = bool(item.get("apply_to_all_sheets"))
+            if collection_id > 0 and (quantity > 0 or apply_to_all_sheets):
+                primary_collection = db.get(Collection, collection_id)
+                if primary_collection is not None:
+                    break
+        if primary_collection is None:
+            raise ValueError("Nao foi possivel identificar a colecao principal desse export.")
     export_record = Export(
         collection=primary_collection,
         file_path=str(export_path.relative_to(settings.storage_root).as_posix()),
@@ -2847,9 +3137,22 @@ def _draw_export_cut_reference_lines(pdf: canvas.Canvas, placements: list[tuple[
 
 
 def build_order_quote(album: Album, stickers: list[Sticker], db: Session, service_settings: ServiceSettings) -> dict:
-    plan = prepare_export_plan(album, stickers, db)
+    return build_order_quote_with_extras(album, stickers, [], db, service_settings)
+
+
+def build_order_quote_with_extras(
+    album: Album,
+    stickers: list[Sticker],
+    extra_selections: list[dict],
+    db: Session,
+    service_settings: ServiceSettings,
+) -> dict:
+    plan = prepare_export_plan(album, stickers, db, extra_selections=extra_selections)
     item_count = len(stickers)
     sheet_count = plan["sheet_count"]
+    extra_page_count = int(plan.get("append_page_count", 0) or 0) + int(plan.get("interleaved_page_count", 0) or 0)
+    selected_extra_count = sum(int(item.get("quantity") or 0) for item in extra_selections)
+    selected_extra_count += int(plan.get("interleaved_page_count", 0) or 0)
     pack_size = service_settings.pack_size
     pack_remainder = item_count % pack_size
     pack_eligible = pack_remainder == 0
@@ -2874,6 +3177,8 @@ def build_order_quote(album: Album, stickers: list[Sticker], db: Session, servic
         "pack_total_cents": pack_total_cents,
         "pack_eligible": pack_eligible,
         "pack_remainder": pack_remainder,
+        "extra_page_count": extra_page_count,
+        "selected_extra_count": selected_extra_count,
         "pix_key": service_settings.pix_key,
         "pix_holder": service_settings.pix_holder,
         "pickup_note": service_settings.pickup_note,
@@ -2978,6 +3283,7 @@ def create_print_order(
     db: Session,
     album: Album,
     stickers: list[Sticker],
+    extra_selections: list[dict],
     service_type: PrintServiceType,
     customer_name: str,
     customer_whatsapp: str,
@@ -2992,7 +3298,7 @@ def create_print_order(
     if not (service_settings.pix_key or "").strip():
         raise ValueError("Configure a chave Pix antes de receber pedidos.")
 
-    quote = build_order_quote(album, stickers, db, service_settings)
+    quote = build_order_quote_with_extras(album, stickers, extra_selections, db, service_settings)
     total_price_cents = quote["print_total_cents"]
     pack_count = 0
     pack_price_cents = 0
@@ -3349,6 +3655,10 @@ def load_print_order_or_fail(db: Session, order_id: int) -> PrintOrder:
 
 
 def collection_to_response(collection: Collection, stats: dict[str, int]) -> dict:
+    preview_image_path = None
+    if collection.pages:
+        first_page = min(collection.pages, key=lambda page: (page.page_number, page.id))
+        preview_image_path = first_page.image_path or None
     return {
         "id": collection.id,
         "album_id": collection.album_id,
@@ -3359,10 +3669,15 @@ def collection_to_response(collection: Collection, stats: dict[str, int]) -> dic
         "description": collection.description,
         "sort_order": collection.sort_order,
         "collection_type": collection.collection_type,
+        "export_mode": collection.export_mode,
+        "allow_quantity_choice": collection.allow_quantity_choice,
+        "default_quantity": collection.default_quantity,
+        "max_quantity_per_order": collection.max_quantity_per_order,
         "display_group_order": collection.display_group_order,
         "display_item_order": collection.display_item_order,
         "status": collection.status,
         "source_pdf_path": collection.source_pdf_path,
+        "preview_image_path": preview_image_path,
         "created_at": collection.created_at,
         "updated_at": collection.updated_at,
         "sticker_count": stats.get("stickers", 0),

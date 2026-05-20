@@ -19,7 +19,9 @@ from .mercadopago import MercadoPagoError
 from .models import (
     Album,
     Collection,
+    CollectionExportMode,
     CollectionStatus,
+    CollectionType,
     CustomCategoryType,
     CustomPositionType,
     CustomStickerTemplate,
@@ -101,6 +103,7 @@ from .services import (
     auto_detect_source_block_stickers,
     build_export_pdf,
     build_order_quote,
+    build_order_quote_with_extras,
     collection_stats,
     collection_sort_key,
     collection_to_response,
@@ -168,6 +171,7 @@ from .services import (
     normalize_legacy_custom_template_photo_visibility,
     normalize_legacy_custom_template_zoom_limits,
     normalize_collection_metadata,
+    normalize_collection_export_settings,
     normalize_legacy_custom_template_text_layouts,
     normalize_custom_profile_type,
     normalize_template_text_slots,
@@ -313,6 +317,22 @@ def ensure_runtime_schema() -> None:
             if "collection_type" not in collection_columns:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_collections ADD COLUMN collection_type VARCHAR(30) NOT NULL DEFAULT 'SELECAO'"
+                )
+            if "export_mode" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN export_mode VARCHAR(30) NOT NULL DEFAULT 'GRID'"
+                )
+            if "allow_quantity_choice" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN allow_quantity_choice BOOLEAN NOT NULL DEFAULT 0"
+                )
+            if "default_quantity" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN default_quantity INTEGER NOT NULL DEFAULT 1"
+                )
+            if "max_quantity_per_order" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN max_quantity_per_order INTEGER NOT NULL DEFAULT 1"
                 )
             if "display_group_order" not in collection_columns:
                 connection.exec_driver_sql(
@@ -709,6 +729,8 @@ def selected_stickers_for_album_or_400(
     session_token: str | None = None,
 ) -> list[Sticker]:
     unique_ids = list(dict.fromkeys(sticker_ids))
+    if not unique_ids:
+        return []
     public_filter = and_(
         Collection.is_system.is_(False),
         Collection.status == CollectionStatus.PUBLICADA,
@@ -1445,7 +1467,13 @@ def create_export_job(payload: ExportRequest, db: Session = Depends(get_db)) -> 
                     raise ValueError("Pague para liberar a criacao com IA antes de usar essa figurinha no PDF.")
                 raise ValueError("Pague para liberar o PDF com a Minha Figurinha ou baixe gratis sem ela.")
             reporter = _build_job_reporter(job.id, steps)
-            export_record = build_export_pdf(worker_album, stickers, worker_db, progress_callback=reporter)
+            export_record = build_export_pdf(
+                worker_album,
+                stickers,
+                worker_db,
+                extra_selections=[item.model_dump() for item in payload.extras],
+                progress_callback=reporter,
+            )
             worker_db.commit()
             public_progress_jobs.update(
                 job.id,
@@ -1503,7 +1531,12 @@ def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="Pague para liberar o PDF com a Minha Figurinha ou baixe gratis sem ela.",
         )
-    export_record = build_export_pdf(album, stickers, db)
+    export_record = build_export_pdf(
+        album,
+        stickers,
+        db,
+        extra_selections=[item.model_dump() for item in payload.extras],
+    )
     db.commit()
     return {
         "export_id": export_record.id,
@@ -1518,7 +1551,13 @@ def quote_print_order(payload: OrderQuoteRequest, db: Session = Depends(get_db))
     album = load_album_by_slug_or_fail(db, payload.album_slug)
     stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     service_settings = get_or_create_service_settings(db)
-    quote = build_order_quote(album, stickers, db, service_settings)
+    quote = build_order_quote_with_extras(
+        album,
+        stickers,
+        [item.model_dump() for item in payload.extras],
+        db,
+        service_settings,
+    )
     quote.pop("plan", None)
     return quote
 
@@ -1533,6 +1572,7 @@ def create_public_print_order(payload: PrintOrderCreate, db: Session = Depends(g
             db=db,
             album=album,
             stickers=stickers,
+            extra_selections=[item.model_dump() for item in payload.extras],
             service_type=payload.service_type,
             customer_name=payload.customer_name,
             customer_whatsapp=payload.customer_whatsapp,
@@ -2440,10 +2480,15 @@ def create_collection(payload: CollectionCreate, db: Session = Depends(get_db)) 
         slug=slug,
         description=(payload.description or "").strip() or None,
         collection_type=payload.collection_type,
+        export_mode=payload.export_mode,
+        allow_quantity_choice=payload.allow_quantity_choice,
+        default_quantity=payload.default_quantity,
+        max_quantity_per_order=payload.max_quantity_per_order,
         display_group_order=payload.display_group_order,
         display_item_order=payload.display_item_order,
         sort_order=payload.sort_order,
     )
+    normalize_collection_export_settings(collection)
     db.add(collection)
     db.commit()
     db.refresh(collection)
@@ -2460,9 +2505,14 @@ def update_collection(collection_id: int, payload: CollectionUpdate, db: Session
     collection.slug = slug
     collection.description = (payload.description or "").strip() or None
     collection.collection_type = payload.collection_type
+    collection.export_mode = payload.export_mode
+    collection.allow_quantity_choice = payload.allow_quantity_choice
+    collection.default_quantity = payload.default_quantity
+    collection.max_quantity_per_order = payload.max_quantity_per_order
     collection.display_group_order = payload.display_group_order
     collection.display_item_order = payload.display_item_order
     collection.sort_order = payload.sort_order
+    normalize_collection_export_settings(collection)
     db.commit()
     db.refresh(collection)
     stats = collection_stats(db, [collection.id])
@@ -2644,11 +2694,32 @@ def delete_sticker(sticker_id: int, db: Session = Depends(get_db)) -> Response:
 def publish_collection(collection_id: int, payload: PublishCollectionRequest, db: Session = Depends(get_db)) -> dict:
     collection = load_collection_or_fail(db, collection_id)
     stats = collection_stats(db, [collection.id]).get(collection.id, {})
-    if payload.status == CollectionStatus.PUBLICADA and stats.get("stickers", 0) == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cadastre pelo menos uma figurinha antes de publicar a colecao.",
+    if payload.status == CollectionStatus.PUBLICADA:
+        normalized_collection_type = (
+            collection.collection_type
+            if isinstance(collection.collection_type, CollectionType)
+            else CollectionType((collection.collection_type or CollectionType.SELECAO.value))
         )
+        normalized_export_mode = (
+            collection.export_mode
+            if isinstance(collection.export_mode, CollectionExportMode)
+            else CollectionExportMode((collection.export_mode or CollectionExportMode.GRID.value))
+        )
+        is_append_only_extra = (
+            normalized_collection_type == CollectionType.OUTROS
+            and normalized_export_mode == CollectionExportMode.APPEND_FULL_PDF
+        )
+        if is_append_only_extra:
+            if not (collection.source_pdf_path or "").strip():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Envie o PDF completo desse extra antes de publicar a colecao.",
+                )
+        elif stats.get("stickers", 0) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cadastre pelo menos uma figurinha antes de publicar a colecao.",
+            )
     collection.status = payload.status
     db.commit()
     db.refresh(collection)

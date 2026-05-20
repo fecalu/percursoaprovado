@@ -1109,7 +1109,10 @@ function PublicPage() {
   const [quote, setQuote] = useState(null)
   const [quoteBusy, setQuoteBusy] = useState(false)
   const [orderFormOpen, setOrderFormOpen] = useState(false)
+  const [selectedExportExtras, setSelectedExportExtras] = useState({})
+  const [selectedExportExtraApplyAll, setSelectedExportExtraApplyAll] = useState({})
   const [mobileAlbumPickerOpen, setMobileAlbumPickerOpen] = useState(false)
+  const [mobilePrintGuideOpen, setMobilePrintGuideOpen] = useState(false)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [mobileCollectionTypeFilter, setMobileCollectionTypeFilter] = useState('SELECAO')
   const [donationModalOpen, setDonationModalOpen] = useState(false)
@@ -1181,7 +1184,56 @@ function PublicPage() {
     () => availableCollections.find(collection => collection.slug === selectedCollectionSlug) || null,
     [availableCollections, selectedCollectionSlug]
   )
+  const availablePdfExtras = useMemo(
+    () => {
+      if (
+        !selectedCollection ||
+        (selectedCollection.collection_type || 'SELECAO') !== 'OUTROS' ||
+        selectedCollection.export_mode !== 'APPEND_FULL_PDF' ||
+        !selectedCollection.source_pdf_path
+      ) {
+        return []
+      }
+      return [selectedCollection]
+    },
+    [selectedCollection]
+  )
+  const showPdfExtrasPanel = selectedCollection?.collection_type === 'OUTROS' && availablePdfExtras.length > 0
+  const supportsApplyExtraToAllSheets = useMemo(() => {
+    if (!selectedCollection) return false
+    const slug = (selectedCollection.slug || '').trim().toLowerCase()
+    const name = (selectedCollection.name || '').trim().toUpperCase()
+    return slug === 'verso' || name === 'VERSO'
+  }, [selectedCollection])
+  const normalizedSelectedExportExtras = useMemo(
+    () =>
+      availablePdfExtras
+        .map(collection => ({
+          collection_id: collection.id,
+          apply_to_all_sheets: Boolean(selectedExportExtraApplyAll[collection.id]),
+          quantity: (() => {
+            if (selectedExportExtraApplyAll[collection.id]) {
+              return 0
+            }
+            const currentQuantity = Math.max(0, Number(selectedExportExtras[collection.id] || 0))
+            const maxQuantity = Number(collection.max_quantity_per_order || 0)
+            return maxQuantity > 0 ? Math.min(currentQuantity, maxQuantity) : currentQuantity
+          })()
+        }))
+        .filter(item => item.quantity > 0 || item.apply_to_all_sheets),
+    [availablePdfExtras, selectedExportExtras, selectedExportExtraApplyAll]
+  )
+  const selectedExtraCopies = useMemo(
+    () =>
+      normalizedSelectedExportExtras.reduce(
+        (total, item) => total + (item.apply_to_all_sheets ? 1 : item.quantity),
+        0
+      ),
+    [normalizedSelectedExportExtras]
+  )
   const selectedIds = useMemo(() => selectedStickers.map(sticker => sticker.id), [selectedStickers])
+  const hasExportSelection = selectedIds.length > 0 || selectedExtraCopies > 0
+  const exportSelectionCount = selectedIds.length + selectedExtraCopies
   const selectedCountByCollection = useMemo(
     () =>
       selectedStickers.reduce((accumulator, sticker) => {
@@ -1665,7 +1717,7 @@ function PublicPage() {
   }, [customUnlockModalOpen, customUnlockStep, activeUnlockData?.status, customUnlockContext, selectedAlbumSlug, sessionToken, selectedIds, customStickerSelected])
 
   useEffect(() => {
-    if (!selectedAlbumSlug || selectedIds.length === 0 || !serviceConfig?.service_enabled) {
+    if (!selectedAlbumSlug || !hasExportSelection) {
       setQuote(null)
       setOrderFormOpen(false)
       return
@@ -1681,7 +1733,8 @@ function PublicPage() {
           body: JSON.stringify({
             album_slug: selectedAlbumSlug,
             sticker_ids: selectedIds,
-            session_token: sessionToken
+            session_token: sessionToken,
+            extras: normalizedSelectedExportExtras
           })
         })
         if (ignore) return
@@ -1701,11 +1754,35 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedAlbumSlug, selectedIds, serviceConfig?.service_enabled, sessionToken])
+  }, [selectedAlbumSlug, hasExportSelection, selectedIds, sessionToken, normalizedSelectedExportExtras])
 
   useEffect(() => {
     setOrderResult(null)
-  }, [selectedAlbumSlug, selectedIds])
+  }, [selectedAlbumSlug, selectedIds, normalizedSelectedExportExtras])
+
+  useEffect(() => {
+    setSelectedExportExtras({})
+    setSelectedExportExtraApplyAll({})
+  }, [selectedAlbumSlug])
+
+  useEffect(() => {
+    setSelectedExportExtras(current => {
+      const allowedIds = new Set(availablePdfExtras.map(collection => collection.id))
+      const nextEntries = Object.entries(current).filter(([key]) => allowedIds.has(Number(key)))
+      if (nextEntries.length === Object.keys(current).length) {
+        return current
+      }
+      return Object.fromEntries(nextEntries)
+    })
+    setSelectedExportExtraApplyAll(current => {
+      const allowedIds = new Set(availablePdfExtras.map(collection => collection.id))
+      const nextEntries = Object.entries(current).filter(([key]) => allowedIds.has(Number(key)))
+      if (nextEntries.length === Object.keys(current).length) {
+        return current
+      }
+      return Object.fromEntries(nextEntries)
+    })
+  }, [availablePdfExtras])
 
   useEffect(() => {
     if (quote && !quote.pack_eligible && orderForm.service_type === 'IMPRESSAO_PACOTINHOS') {
@@ -1869,6 +1946,34 @@ function PublicPage() {
             }
           ]
     )
+  }
+
+  function updateExportExtraQuantity(collectionId, nextQuantity, maxQuantity) {
+    setSelectedExportExtras(current => {
+      const requested = Math.max(0, Number(nextQuantity || 0))
+      const normalized = Number(maxQuantity || 0) > 0 ? Math.min(requested, Number(maxQuantity)) : requested
+      if (normalized <= 0) {
+        const { [collectionId]: _removed, ...rest } = current
+        return rest
+      }
+      return {
+        ...current,
+        [collectionId]: normalized
+      }
+    })
+  }
+
+  function toggleExportExtraApplyAll(collectionId, enabled) {
+    setSelectedExportExtraApplyAll(current => ({
+      ...current,
+      [collectionId]: Boolean(enabled)
+    }))
+    if (enabled) {
+      setSelectedExportExtras(current => {
+        const { [collectionId]: _removed, ...rest } = current
+        return rest
+      })
+    }
   }
 
   function toggleCustomStickerSelection() {
@@ -2126,7 +2231,8 @@ function PublicPage() {
       body: JSON.stringify({
         album_slug: selectedAlbumSlug,
         sticker_ids: stickerIds,
-        session_token: sessionToken
+        session_token: sessionToken,
+        extras: normalizedSelectedExportExtras
       })
     })
     if (serviceConfig?.donation_enabled && serviceConfig?.pix_key) {
@@ -2151,7 +2257,7 @@ function PublicPage() {
   }
 
   async function handleExport() {
-    if (!selectedAlbumSlug || selectedIds.length === 0) return
+    if (!selectedAlbumSlug || !hasExportSelection) return
     if (customStickerSelected && customStickerNeedsAiUnlock && aiUnlockData?.status !== 'PAGO') {
       await handleStartCustomUnlock('AI_CREATE')
       return
@@ -2171,7 +2277,7 @@ function PublicPage() {
   }
 
   async function handleExportWithoutMySticker() {
-    if (!selectedAlbumSlug || freeSelectedIds.length === 0) return
+    if (!selectedAlbumSlug || (freeSelectedIds.length === 0 && selectedExtraCopies === 0)) return
     setCustomUnlockModalOpen(false)
     await runExportFlow(freeSelectedIds)
   }
@@ -2273,7 +2379,7 @@ function PublicPage() {
 
   async function handleCreateOrder(event) {
     event.preventDefault()
-    if (!selectedAlbumSlug || selectedIds.length === 0) return
+    if (!selectedAlbumSlug || !hasExportSelection) return
     setOrderSubmitting(true)
     setError('')
     try {
@@ -2284,6 +2390,7 @@ function PublicPage() {
           album_slug: selectedAlbumSlug,
           sticker_ids: selectedIds,
           session_token: sessionToken,
+          extras: normalizedSelectedExportExtras,
           ...orderForm
         })
       })
@@ -2396,9 +2503,9 @@ function PublicPage() {
             <button
               type="button"
               className="fig-secondary-button fig-mobile-top-button"
-              onClick={() => setMobileAlbumPickerOpen(true)}
+              onClick={() => setMobilePrintGuideOpen(true)}
             >
-              Trocar album
+              Como imprimir
             </button>
           </div>
 
@@ -2517,7 +2624,7 @@ function PublicPage() {
               <button
                 type="button"
                 className="fig-secondary-button"
-                disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
+                disabled={!hasExportSelection || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
                 onClick={() => setOrderFormOpen(true)}
               >
                 Quero que voce prepare para mim
@@ -2526,10 +2633,17 @@ function PublicPage() {
             <button
               type="button"
               className="fig-primary-button"
-              disabled={!selectedAlbumSlug || selectedIds.length === 0 || exporting}
+              disabled={!selectedAlbumSlug || !hasExportSelection || exporting}
               onClick={handleExport}
             >
-              {exporting ? 'Gerando PDF...' : `Gerar PDF gratis (${selectedIds.length})`}
+              {exporting ? (
+                'Gerando PDF...'
+              ) : (
+                <>
+                  <span className="fig-button-main">Gerar PDF gratis ({exportSelectionCount})</span>
+                  {quote ? <small className="fig-button-sub">Gera {quote.sheet_count} folha(s)</small> : null}
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -2551,6 +2665,66 @@ function PublicPage() {
             </select>
           </label>
         </div>
+
+        {showPdfExtrasPanel ? (
+          <section className="fig-export-extras-panel">
+            <div className="fig-section-block-head">
+              <strong>Extras no final do PDF</strong>
+              <span>Esses itens entram inteiros no fim do arquivo e voce escolhe quantas copias quer.</span>
+            </div>
+            <div className="fig-export-extras-list">
+              {availablePdfExtras.map(collection => {
+                const maxQuantity = Number(collection.max_quantity_per_order || 0)
+                const currentQuantity = Number(selectedExportExtras[collection.id] || 0)
+                const applyToAllSheets = Boolean(selectedExportExtraApplyAll[collection.id])
+                return (
+                  <div key={collection.id} className="fig-export-extra-card">
+                    {collection.preview_image_path ? (
+                      <img
+                        className="fig-export-extra-preview"
+                        src={apiFileUrl(collection.preview_image_path)}
+                        alt={`Preview de ${collection.name}`}
+                      />
+                    ) : null}
+                    <div className="fig-export-extra-card-body">
+                      <strong>{collection.name}</strong>
+                      <span>PDF completo anexado no final</span>
+                      {supportsApplyExtraToAllSheets ? (
+                        <label className="fig-export-extra-toggle">
+                          <input
+                            type="checkbox"
+                            checked={applyToAllSheets}
+                            onChange={event => toggleExportExtraApplyAll(collection.id, event.target.checked)}
+                          />
+                          <span>Aplicar verso em todas as folhas</span>
+                        </label>
+                      ) : null}
+                    </div>
+                    <div className="fig-export-extra-stepper">
+                      <button
+                        type="button"
+                        className="fig-secondary-button"
+                        onClick={() => updateExportExtraQuantity(collection.id, currentQuantity - 1, maxQuantity)}
+                        disabled={applyToAllSheets || currentQuantity <= 0}
+                      >
+                        -
+                      </button>
+                      <strong>{currentQuantity}</strong>
+                      <button
+                        type="button"
+                        className="fig-secondary-button"
+                        onClick={() => updateExportExtraQuantity(collection.id, currentQuantity + 1, maxQuantity)}
+                        disabled={applyToAllSheets || (maxQuantity > 0 && currentQuantity >= maxQuantity)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        ) : null}
 
         {orderResult ? (
           <section className="fig-success-panel">
@@ -2688,7 +2862,7 @@ function PublicPage() {
               <button
                 type="button"
                 className="fig-secondary-button fig-mobile-bottom-secondary"
-                disabled={selectedIds.length === 0 || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
+                disabled={!hasExportSelection || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
                 onClick={() => setOrderFormOpen(true)}
               >
                 Preparar
@@ -2697,10 +2871,17 @@ function PublicPage() {
             <button
               type="button"
               className="fig-primary-button fig-mobile-bottom-primary"
-              disabled={!selectedAlbumSlug || selectedIds.length === 0 || exporting}
+              disabled={!selectedAlbumSlug || !hasExportSelection || exporting}
               onClick={handleExport}
             >
-              {exporting ? 'Gerando...' : 'Gerar PDF'}
+              {exporting ? (
+                'Gerando...'
+              ) : (
+                <>
+                  <span className="fig-button-main">Gerar PDF ({exportSelectionCount})</span>
+                  {quote ? <small className="fig-button-sub">Gera {quote.sheet_count} folha(s)</small> : null}
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -2738,6 +2919,26 @@ function PublicPage() {
                   <span>{album.published_collection_count} selecoes publicadas</span>
                 </button>
               ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {mobilePrintGuideOpen ? (
+        <div className="fig-modal-backdrop" onClick={() => setMobilePrintGuideOpen(false)}>
+          <div className="fig-modal-shell fig-modal-shell--mobile" onClick={event => event.stopPropagation()}>
+            <div className="fig-modal-header">
+              <div>
+                <p className="fig-kicker">Impressao</p>
+                <h3>Como imprimir</h3>
+              </div>
+              <button type="button" className="fig-modal-close" onClick={() => setMobilePrintGuideOpen(false)}>
+                Fechar
+              </button>
+            </div>
+            <div className="fig-print-guide-placeholder">
+              <strong>Guia de impressao</strong>
+              <p>Vamos colocar aqui uma arte explicando como imprimir da forma correta.</p>
             </div>
           </div>
         </div>
@@ -3355,6 +3556,14 @@ function PublicPage() {
                       : `pacotinhos de ${quote.pack_size}`}
                   </span>
                 </div>
+                <div className="fig-quote-item">
+                  <strong>{quote.extra_page_count}</strong>
+                  <span>
+                    {quote.selected_extra_count > 0
+                      ? `${quote.selected_extra_count} pagina(s) extra(s) ou verso(s)`
+                      : 'nenhum extra adicional'}
+                  </span>
+                </div>
               </div>
 
               <div className="fig-service-notes">
@@ -3369,6 +3578,12 @@ function PublicPage() {
                   <p className="fig-warning-text">
                     Para eu montar os pacotinhos, a quantidade precisa fechar em grupos de {quote.pack_size}.
                     Sua selecao atual precisa de mais {quote.pack_size - quote.pack_remainder} figurinha(s).
+                  </p>
+                ) : null}
+                {quote.extra_page_count > 0 ? (
+                  <p>
+                    Os extras do tipo <strong>Outros</strong> entram como paginas completas no final do PDF ou como
+                    verso intercalado, e ja estao somados no total acima.
                   </p>
                 ) : null}
                 {quote.pickup_note ? <p>{quote.pickup_note}</p> : null}
@@ -3590,13 +3805,13 @@ function PublicPage() {
                       type="button"
                       className="fig-choice-card"
                       onClick={handleExportWithoutMySticker}
-                      disabled={freeSelectedIds.length === 0}
+                      disabled={freeSelectedIds.length === 0 && selectedExtraCopies === 0}
                     >
                       <strong>Baixar gratis sem Minha Figurinha</strong>
                       <span>
-                        {freeSelectedIds.length > 0
+                        {freeSelectedIds.length > 0 || selectedExtraCopies > 0
                           ? 'Baixa agora sem a personalizada.'
-                          : 'Adicione outras figurinhas para liberar essa opcao.'}
+                          : 'Adicione figurinhas ou extras para liberar essa opcao.'}
                       </span>
                     </button>
                     <button
@@ -4049,6 +4264,21 @@ function AdminPage() {
     }
   }
 
+  function updateExportExtraQuantity(collectionId, nextQuantity, maxQuantity) {
+    setSelectedExportExtras(current => {
+      const requested = Math.max(0, Number(nextQuantity || 0))
+      const normalized = Number(maxQuantity || 0) > 0 ? Math.min(requested, Number(maxQuantity)) : requested
+      if (normalized <= 0) {
+        const { [collectionId]: _removed, ...rest } = current
+        return rest
+      }
+      return {
+        ...current,
+        [collectionId]: normalized
+      }
+    })
+  }
+
   async function fetchCollections(activeCollectionId = selectedCollectionId) {
     if (!token) return
     setLoading(true)
@@ -4465,6 +4695,8 @@ function AdminPage() {
     () => orders.find(order => order.id === selectedOrderId) || null,
     [orders, selectedOrderId]
   )
+  const isAppendOnlyExtraCollection =
+    selectedCollection?.collection_type === 'OUTROS' && selectedCollection?.export_mode === 'APPEND_FULL_PDF'
   const isCreatingAlbum = albumStructureMode === 'create'
   const isCreatingCollection = collectionStructureMode === 'create'
   const isCreationLocked = isCreatingAlbum || isCreatingCollection
@@ -8873,11 +9105,13 @@ function AdminPage() {
           <>
             <div className="fig-admin-header fig-admin-section-head">
               <div>
-                <p className="fig-kicker">Gestao da selecao</p>
+                <p className="fig-kicker">{isAppendOnlyExtraCollection ? 'Gestao do extra' : 'Gestao da selecao'}</p>
                 <h3>{selectedCollection.name}</h3>
                 <p>
-                  Album atual: <strong>{selectedCollection.album_name || 'Sem album'}</strong>. Suba o PDF, mapeie as
-                  areas de corte e publique quando o catalogo estiver pronto.
+                  Album atual: <strong>{selectedCollection.album_name || 'Sem album'}</strong>.{' '}
+                  {isAppendOnlyExtraCollection
+                    ? 'Suba o PDF completo desse extra e publique para ele aparecer como anexo no final do PDF.'
+                    : 'Suba o PDF, mapeie as areas de corte e publique quando o catalogo estiver pronto.'}
                 </p>
               </div>
               <div className="fig-hero-actions">
@@ -8906,7 +9140,7 @@ function AdminPage() {
                   Voltar para rascunho
                 </button>
                 <button type="button" className="fig-primary-button" onClick={() => handlePublish('PUBLICADA')}>
-                  Publicar selecao
+                  {isAppendOnlyExtraCollection ? 'Publicar extra' : 'Publicar selecao'}
                 </button>
               </div>
             </div>
@@ -8930,32 +9164,51 @@ function AdminPage() {
               </div>
             </div>
 
-            <div className="fig-auto-actions">
+            {isAppendOnlyExtraCollection ? (
               <div className="fig-helper-strip">
-                A automacao usa o layout padrao do PDF para criar recortes, tenta sugerir nomes com OCR e deixa a
-                revisao final mais leve.
+                Esse tipo entra como <strong>PDF inteiro no final</strong>. Nao precisa processar paginas, detectar
+                recortes nem mapear figurinhas individuais.
               </div>
-              <div className="fig-hero-actions">
-                <button
-                  type="button"
-                  className="fig-secondary-button"
-                  disabled={!currentPageId || processingAuto}
-                  onClick={() => handleAutoDetect('current')}
-                >
-                  {processingAuto ? 'Processando...' : 'Processar pagina atual'}
-                </button>
-                <button
-                  type="button"
-                  className="fig-primary-button"
-                  disabled={pages.length === 0 || processingAuto}
-                  onClick={() => handleAutoDetect('all')}
-                >
-                  {processingAuto ? 'Processando...' : 'Processar todas as paginas'}
-                </button>
+            ) : (
+              <div className="fig-auto-actions">
+                <div className="fig-helper-strip">
+                  A automacao usa o layout padrao do PDF para criar recortes, tenta sugerir nomes com OCR e deixa a
+                  revisao final mais leve.
+                </div>
+                <div className="fig-hero-actions">
+                  <button
+                    type="button"
+                    className="fig-secondary-button"
+                    disabled={!currentPageId || processingAuto}
+                    onClick={() => handleAutoDetect('current')}
+                  >
+                    {processingAuto ? 'Processando...' : 'Processar pagina atual'}
+                  </button>
+                  <button
+                    type="button"
+                    className="fig-primary-button"
+                    disabled={pages.length === 0 || processingAuto}
+                    onClick={() => handleAutoDetect('all')}
+                  >
+                    {processingAuto ? 'Processando...' : 'Processar todas as paginas'}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {adminView === 'mapping' ? (
+              isAppendOnlyExtraCollection ? (
+                <section className="fig-form-card">
+                  <div className="fig-panel-header">
+                    <p className="fig-kicker">Mapeamento desnecessario</p>
+                    <h3>Esse extra ja esta pronto</h3>
+                  </div>
+                  <p className="fig-empty-note">
+                    O tipo <strong>Outros</strong> usa o PDF inteiro como anexo no final do arquivo. Depois de subir o
+                    PDF original, basta publicar a colecao.
+                  </p>
+                </section>
+              ) : (
             <div className="fig-admin-workspace">
               <section className="fig-page-panel">
                 <div className="fig-page-selector">
@@ -9148,6 +9401,7 @@ function AdminPage() {
                 </div>
               </section>
             </div>
+              )
             ) : null}
           </>
         ) : null}

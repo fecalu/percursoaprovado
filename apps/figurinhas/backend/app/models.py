@@ -23,6 +23,11 @@ class CollectionType(str, enum.Enum):
     OUTROS = "OUTROS"
 
 
+class CollectionExportMode(str, enum.Enum):
+    GRID = "GRID"
+    APPEND_FULL_PDF = "APPEND_FULL_PDF"
+
+
 class StickerCategory(str, enum.Enum):
     JOGADOR = "JOGADOR"
     GOLEIRO = "GOLEIRO"
@@ -160,6 +165,12 @@ class Collection(Base):
     collection_type: Mapped[CollectionType] = mapped_column(
         Enum(CollectionType), default=CollectionType.SELECAO, nullable=False
     )
+    export_mode: Mapped[CollectionExportMode] = mapped_column(
+        Enum(CollectionExportMode), default=CollectionExportMode.GRID, nullable=False
+    )
+    allow_quantity_choice: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    default_quantity: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    max_quantity_per_order: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     display_group_order: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     display_item_order: Mapped[int] = mapped_column(Integer, default=999, nullable=False)
     is_system: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

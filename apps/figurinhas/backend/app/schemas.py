@@ -7,6 +7,7 @@ from typing import Any
 from pydantic import BaseModel, Field, field_validator
 
 from .models import (
+    CollectionExportMode,
     CollectionStatus,
     CollectionType,
     CustomCategoryType,
@@ -47,6 +48,12 @@ class CollectionSummaryResponse(BaseModel):
     description: str | None
     sort_order: int
     collection_type: CollectionType
+    source_pdf_path: str | None = None
+    preview_image_path: str | None = None
+    export_mode: CollectionExportMode
+    allow_quantity_choice: bool
+    default_quantity: int
+    max_quantity_per_order: int
     display_group_order: int
     display_item_order: int
     status: CollectionStatus
@@ -73,6 +80,10 @@ class CollectionCreate(BaseModel):
     slug: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=500)
     collection_type: CollectionType = CollectionType.SELECAO
+    export_mode: CollectionExportMode = CollectionExportMode.GRID
+    allow_quantity_choice: bool = False
+    default_quantity: int = Field(default=1, ge=0, le=9999)
+    max_quantity_per_order: int = Field(default=0, ge=0, le=9999)
     display_group_order: int = Field(default=1, ge=0, le=9999)
     display_item_order: int = Field(default=999, ge=0, le=9999)
     sort_order: int = Field(default=0, ge=0, le=9999)
@@ -83,6 +94,10 @@ class CollectionUpdate(BaseModel):
     slug: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=500)
     collection_type: CollectionType = CollectionType.SELECAO
+    export_mode: CollectionExportMode = CollectionExportMode.GRID
+    allow_quantity_choice: bool = False
+    default_quantity: int = Field(default=1, ge=0, le=9999)
+    max_quantity_per_order: int = Field(default=0, ge=0, le=9999)
     display_group_order: int = Field(default=1, ge=0, le=9999)
     display_item_order: int = Field(default=999, ge=0, le=9999)
     sort_order: int = Field(default=0, ge=0, le=9999)
@@ -102,6 +117,11 @@ class CollectionResponse(BaseModel):
     description: str | None
     sort_order: int
     collection_type: CollectionType
+    preview_image_path: str | None
+    export_mode: CollectionExportMode
+    allow_quantity_choice: bool
+    default_quantity: int
+    max_quantity_per_order: int
     display_group_order: int
     display_item_order: int
     status: CollectionStatus
@@ -534,8 +554,15 @@ class AdminLoginRequest(BaseModel):
 
 class ExportRequest(BaseModel):
     album_slug: str
-    sticker_ids: list[int] = Field(min_length=1)
+    sticker_ids: list[int] = Field(default_factory=list)
     session_token: str | None = Field(default=None, max_length=120)
+    extras: list["ExportExtraSelection"] = Field(default_factory=list)
+
+
+class ExportExtraSelection(BaseModel):
+    collection_id: int = Field(ge=1)
+    quantity: int = Field(default=1, ge=0, le=100)
+    apply_to_all_sheets: bool = False
 
 
 class ExportResponse(BaseModel):
@@ -592,8 +619,9 @@ class ServiceConfigUpdate(BaseModel):
 
 class OrderQuoteRequest(BaseModel):
     album_slug: str
-    sticker_ids: list[int] = Field(min_length=1)
+    sticker_ids: list[int] = Field(default_factory=list)
     session_token: str | None = Field(default=None, max_length=120)
+    extras: list[ExportExtraSelection] = Field(default_factory=list)
 
 
 class OrderQuoteResponse(BaseModel):
@@ -608,6 +636,8 @@ class OrderQuoteResponse(BaseModel):
     pack_total_cents: int | None
     pack_eligible: bool
     pack_remainder: int
+    extra_page_count: int
+    selected_extra_count: int
     pix_key: str | None
     pix_holder: str | None
     pickup_note: str | None
@@ -615,8 +645,9 @@ class OrderQuoteResponse(BaseModel):
 
 class PrintOrderCreate(BaseModel):
     album_slug: str
-    sticker_ids: list[int] = Field(min_length=1)
+    sticker_ids: list[int] = Field(default_factory=list)
     session_token: str | None = Field(default=None, max_length=120)
+    extras: list[ExportExtraSelection] = Field(default_factory=list)
     service_type: PrintServiceType
     customer_name: str = Field(min_length=2, max_length=150)
     customer_whatsapp: str = Field(min_length=8, max_length=40)
