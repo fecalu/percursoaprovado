@@ -53,13 +53,13 @@ CUSTOM_FONT_SEARCH = {
 }
 
 DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE = (
-    "{base_hint}Preserve the person's real facial features, skin tone, hair, smile and identity from the second image. "
-    "Use the first image as the fixed official sticker template. Keep the exact same layout, frame, background, shirt, badges, typography areas, proportions, orientation and collectible card structure from the first image. "
-    "Replace only the person area with the real person from the second image, centered and naturally integrated into the shirt and frame. "
-    "Do not invent a new sticker design, do not change the club or country badge, do not change the shirt colors, do not change the background artwork, and do not create a different card brand or different template. "
-    "The final result must look like the same sticker from the first image, only with the new person inserted correctly. "
-    "{details_hint}{city_hint}Do not redesign the base, do not remove borders, do not add extra people, extra hands, duplicated features, random logos, watermarks or collage artifacts. "
-    "Return one complete finished sticker image only."
+    "Keep the official sticker very close to the first image, preserving the background, base, frame, information band, framing and overall sticker structure. "
+    "{base_hint}Adjust only the person so the result looks natural, using the second image as the real reference for the face and identity. "
+    "You may adapt the shirt, neck, shoulders and torso integration only as much as necessary to keep natural anatomy between head and body. "
+    "The head must stay at a realistic size and proportion in relation to the body. "
+    "Do not create a big head, small head, stretched head, misaligned head or pasted-face effect. "
+    "Keep the person's real facial features and identity from the second image. "
+    "{details_hint}{city_hint}Do not alter the background, base, frame, information band or overall sticker design. Return one complete finished sticker image only."
 )
 
 

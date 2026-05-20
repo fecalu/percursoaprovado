@@ -177,6 +177,7 @@ def default_group_order_for_collection_type(collection_type: CollectionType | st
         CollectionType.LEGENDS: 3,
         CollectionType.ESPECIAL: 4,
         CollectionType.PARCEIROS: 5,
+        CollectionType.OUTROS: 6,
     }
     return mapping.get(normalized, 9)
 

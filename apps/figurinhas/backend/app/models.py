@@ -20,6 +20,7 @@ class CollectionType(str, enum.Enum):
     LEGENDS = "LEGENDS"
     ESPECIAL = "ESPECIAL"
     PARCEIROS = "PARCEIROS"
+    OUTROS = "OUTROS"
 
 
 class StickerCategory(str, enum.Enum):

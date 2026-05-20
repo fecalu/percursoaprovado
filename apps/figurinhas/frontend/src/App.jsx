@@ -291,7 +291,8 @@ const collectionTypeOptions = [
   { value: 'ESCUDOS', label: 'Escudos' },
   { value: 'LEGENDS', label: 'Legends' },
   { value: 'ESPECIAL', label: 'Especial' },
-  { value: 'PARCEIROS', label: 'Parceiros' }
+  { value: 'PARCEIROS', label: 'Parceiros' },
+  { value: 'OUTROS', label: 'Outros' }
 ]
 
 function defaultCollectionGroupOrder(collectionType) {
@@ -304,6 +305,8 @@ function defaultCollectionGroupOrder(collectionType) {
       return '4'
     case 'PARCEIROS':
       return '5'
+    case 'OUTROS':
+      return '6'
     default:
       return '1'
   }
@@ -322,7 +325,8 @@ const publicCollectionGroups = [
   { type: 'ESCUDOS', label: 'Escudos' },
   { type: 'LEGENDS', label: 'Legends' },
   { type: 'ESPECIAL', label: 'Especiais' },
-  { type: 'PARCEIROS', label: 'Parceiros' }
+  { type: 'PARCEIROS', label: 'Parceiros' },
+  { type: 'OUTROS', label: 'Outros' }
 ]
 
 function createEmptyCollectionAdminForm(albumId = '') {
