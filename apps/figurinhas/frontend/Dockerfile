@@ -1,6 +1,6 @@
 FROM node:20-alpine AS build
 
-ARG VITE_BASE_PATH=/figurinhas/
+ARG VITE_BASE_PATH=/
 
 WORKDIR /app
 

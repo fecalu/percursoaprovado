@@ -54,8 +54,11 @@ CUSTOM_FONT_SEARCH = {
 
 DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE = (
     "{base_hint}Preserve the person's real facial features, skin tone, hair, smile and identity from the second image. "
-    "The final result must look like one single authentic collectible football sticker, never like a pasted portrait, cutout or collage. "
-    "{details_hint}{city_hint}Do not redesign the base, do not remove borders, do not alter the official shirt, do not add extra people, extra hands, duplicated features, random logos, watermarks or collage artifacts. "
+    "Use the first image as the fixed official sticker template. Keep the exact same layout, frame, background, shirt, badges, typography areas, proportions, orientation and collectible card structure from the first image. "
+    "Replace only the person area with the real person from the second image, centered and naturally integrated into the shirt and frame. "
+    "Do not invent a new sticker design, do not change the club or country badge, do not change the shirt colors, do not change the background artwork, and do not create a different card brand or different template. "
+    "The final result must look like the same sticker from the first image, only with the new person inserted correctly. "
+    "{details_hint}{city_hint}Do not redesign the base, do not remove borders, do not add extra people, extra hands, duplicated features, random logos, watermarks or collage artifacts. "
     "Return one complete finished sticker image only."
 )
 
@@ -115,6 +118,7 @@ def generate_custom_sticker_render(
     base_template = None
     openai_sticker_image = None
     ai_error_message = None
+    openai_reference_photo = None
     report(8, "Validando o modelo...")
     if not use_layer_composition:
         uploaded_photo = _open_uploaded_photo(uploaded_photo_bytes)
@@ -124,10 +128,19 @@ def generate_custom_sticker_render(
 
     if not use_layer_composition and base_template is not None and settings.openai_api_key and uploaded_photo is not None:
         try:
+            if prepared_portrait_bytes:
+                report(18, "Preparando o retrato...")
+                with Image.open(io.BytesIO(prepared_portrait_bytes)) as prepared_image:
+                    openai_reference_photo = ImageOps.exif_transpose(prepared_image).convert("RGBA")
+            else:
+                report(18, "Removendo fundo...")
+                cutout_image = _remove_photo_background(uploaded_photo)
+                report(24, "Preparando o retrato...")
+                openai_reference_photo = _build_portrait_cutout(uploaded_photo, cutout_image)
             report(26, "Preparando a base...")
             openai_sticker_image = _generate_sticker_with_openai(
                 settings,
-                uploaded_photo=uploaded_photo,
+                uploaded_photo=openai_reference_photo or uploaded_photo,
                 base_template=base_template,
                 prompt_template=prompt_template,
                 name=name,
@@ -146,6 +159,9 @@ def generate_custom_sticker_render(
             ai_error_message = ai_error_message or "Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente."
     elif not use_layer_composition and base_template is not None:
         ai_error_message = "Configure uma chave da OpenAI para gerar a figurinha com IA usando a base oficial."
+
+    if composition_mode == "AI_OPTIONAL" and openai_sticker_image is None:
+        raise ValueError(ai_error_message or "Nao foi possivel gerar a figurinha com IA usando a base selecionada. Tente novamente.")
 
     if use_layer_composition:
         if prepared_portrait_bytes:
@@ -352,9 +368,11 @@ def _expand_subject_box_to_portrait(
 ) -> tuple[int, int, int, int]:
     image_width, image_height = image_size
     x, y, width, height = subject_box
-    side_padding = 0.58 if face_detected else 0.46
-    top_padding = 1.05 if face_detected else 0.38
-    bottom_padding = 0.34 if face_detected else 0.62
+    # Bias the portrait crop upward so high zoom keeps more hair/forehead
+    # while still trimming excess shoulders and torso.
+    side_padding = 0.62 if face_detected else 0.5
+    top_padding = 1.32 if face_detected else 0.58
+    bottom_padding = 0.24 if face_detected else 0.48
 
     left = max(int(round(x - width * side_padding)), 0)
     top = max(int(round(y - height * top_padding)), 0)
@@ -368,7 +386,7 @@ def _expand_subject_box_to_portrait(
     return left, top, right, bottom
 
 
-def _pad_cutout_image(image: Image.Image, *, padding_ratio: float = 0.08) -> Image.Image:
+def _pad_cutout_image(image: Image.Image, *, padding_ratio: float = 0.12) -> Image.Image:
     padding_x = max(int(round(image.width * padding_ratio)), 6)
     padding_y = max(int(round(image.height * padding_ratio)), 6)
     canvas = Image.new("RGBA", (image.width + padding_x * 2, image.height + padding_y * 2), (0, 0, 0, 0))

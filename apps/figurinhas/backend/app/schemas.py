@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from .models import (
     CollectionStatus,
+    CollectionType,
     CustomCategoryType,
     CustomProfileType,
     CustomPositionType,
@@ -45,6 +46,9 @@ class CollectionSummaryResponse(BaseModel):
     slug: str
     description: str | None
     sort_order: int
+    collection_type: CollectionType
+    display_group_order: int
+    display_item_order: int
     status: CollectionStatus
     sticker_count: int
     page_count: int
@@ -68,6 +72,9 @@ class CollectionCreate(BaseModel):
     name: str = Field(min_length=2, max_length=150)
     slug: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=500)
+    collection_type: CollectionType = CollectionType.SELECAO
+    display_group_order: int = Field(default=1, ge=0, le=9999)
+    display_item_order: int = Field(default=999, ge=0, le=9999)
     sort_order: int = Field(default=0, ge=0, le=9999)
 
 
@@ -75,6 +82,9 @@ class CollectionUpdate(BaseModel):
     name: str = Field(min_length=2, max_length=150)
     slug: str = Field(min_length=2, max_length=150)
     description: str | None = Field(default=None, max_length=500)
+    collection_type: CollectionType = CollectionType.SELECAO
+    display_group_order: int = Field(default=1, ge=0, le=9999)
+    display_item_order: int = Field(default=999, ge=0, le=9999)
     sort_order: int = Field(default=0, ge=0, le=9999)
 
 
@@ -91,6 +101,9 @@ class CollectionResponse(BaseModel):
     slug: str
     description: str | None
     sort_order: int
+    collection_type: CollectionType
+    display_group_order: int
+    display_item_order: int
     status: CollectionStatus
     source_pdf_path: str | None
     created_at: datetime
@@ -348,7 +361,7 @@ class CustomTemplatePhotoSlotInput(BaseModel):
     height: float = Field(default=1, gt=0, le=1)
     default_scale: float = Field(default=1, gt=0, le=5)
     min_scale: float = Field(default=0.7, gt=0, le=5)
-    max_scale: float = Field(default=1.5, gt=0, le=8)
+    max_scale: float = Field(default=2.4, gt=0, le=8)
     portrait_z_index: int = Field(default=30, ge=-999, le=999)
     anchor_x: float = Field(default=0.5, ge=0, le=1)
     anchor_y: float = Field(default=0.5, ge=0, le=1)

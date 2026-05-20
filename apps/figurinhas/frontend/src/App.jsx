@@ -91,6 +91,9 @@ const customTemplateTextFieldOptions = [
 ]
 
 const STICKERS_PER_SHEET = 16
+const MANUAL_STICKER_RENDER_BASE_WIDTH = 834
+const MANUAL_STICKER_RENDER_BASE_HEIGHT = 1105
+const MANUAL_STICKER_PREVIEW_FALLBACK_SCALE = 320 / MANUAL_STICKER_RENDER_BASE_WIDTH
 
 const sourceDocumentStatusLabels = {
   RASCUNHO: 'Rascunho',
@@ -283,6 +286,58 @@ function createEmptyPageLayoutForm() {
   }
 }
 
+const collectionTypeOptions = [
+  { value: 'SELECAO', label: 'Selecao' },
+  { value: 'ESCUDOS', label: 'Escudos' },
+  { value: 'LEGENDS', label: 'Legends' },
+  { value: 'ESPECIAL', label: 'Especial' },
+  { value: 'PARCEIROS', label: 'Parceiros' }
+]
+
+function defaultCollectionGroupOrder(collectionType) {
+  switch (collectionType) {
+    case 'ESCUDOS':
+      return '2'
+    case 'LEGENDS':
+      return '3'
+    case 'ESPECIAL':
+      return '4'
+    case 'PARCEIROS':
+      return '5'
+    default:
+      return '1'
+  }
+}
+
+function collectionTypeLabel(collectionType) {
+  return (
+    collectionTypeOptions.find(option => option.value === collectionType)?.label ||
+    collectionType ||
+    'Selecao'
+  )
+}
+
+const publicCollectionGroups = [
+  { type: 'SELECAO', label: 'Selecoes' },
+  { type: 'ESCUDOS', label: 'Escudos' },
+  { type: 'LEGENDS', label: 'Legends' },
+  { type: 'ESPECIAL', label: 'Especiais' },
+  { type: 'PARCEIROS', label: 'Parceiros' }
+]
+
+function createEmptyCollectionAdminForm(albumId = '') {
+  return {
+    album_id: albumId ? String(albumId) : '',
+    name: '',
+    slug: '',
+    description: '',
+    collection_type: 'SELECAO',
+    display_group_order: defaultCollectionGroupOrder('SELECAO'),
+    display_item_order: '999',
+    sort_order: '0'
+  }
+}
+
 function normalizeDateInput(value) {
   const digits = String(value || '')
     .replace(/\D/g, '')
@@ -367,6 +422,23 @@ function myStickerTextValue(form, fieldName) {
   }
 }
 
+function customTemplateSampleTextValue(fieldName) {
+  switch (fieldName) {
+    case 'NAME':
+      return 'SEU NOME'
+    case 'DATE':
+      return '14-05-1994 |'
+    case 'HEIGHT':
+      return '1,83m |'
+    case 'WEIGHT':
+      return '75kg'
+    case 'CITY_OR_TEAM':
+      return 'TIME'
+    default:
+      return ''
+  }
+}
+
 function CustomTemplateStackPreview({ template, alt, className = '' }) {
   const layers = (template?.layers || [])
     .filter(layer => layer.is_active && layer.file_path)
@@ -438,6 +510,18 @@ function createDefaultCustomTemplateTextSlots() {
   ]
 }
 
+function createEmptyCustomTemplateTextBulkForm() {
+  return {
+    delta_x: '0',
+    delta_y: '0',
+    delta_width: '0',
+    delta_font_size: '0',
+    font_weight: '',
+    text_align: '',
+    color: ''
+  }
+}
+
 function applyStandardCustomTemplateStructure(current) {
   const existingLayersByType = new Map()
   ;(current.layers || []).forEach(layer => {
@@ -485,7 +569,7 @@ function createEmptyCustomTemplateForm() {
       height: '0.62',
       default_scale: '1',
       min_scale: '0.7',
-      max_scale: '1.5',
+      max_scale: '2.4',
       portrait_z_index: '50',
       anchor_x: '0.5',
       anchor_y: '0.5',
@@ -579,7 +663,7 @@ function customTemplateDetailToForm(data) {
           height: String(data.photo_slot.height ?? 1),
           default_scale: String(data.photo_slot.default_scale ?? 1),
           min_scale: String(data.photo_slot.min_scale ?? 0.7),
-          max_scale: String(data.photo_slot.max_scale ?? 1.5),
+          max_scale: String(data.photo_slot.max_scale ?? 2.4),
           portrait_z_index: String(data.photo_slot.portrait_z_index ?? 50),
           anchor_x: String(data.photo_slot.anchor_x ?? 0.5),
           anchor_y: String(data.photo_slot.anchor_y ?? 0.5),
@@ -695,6 +779,314 @@ function Layout({ children }) {
   )
 }
 
+function ManualMaskEditorModal({ open, imageDataUrl, originalImageDataUrl, onClose, onApply }) {
+  const canvasRef = useRef(null)
+  const originalCanvasRef = useRef(null)
+  const tempCanvasRef = useRef(null)
+  const historyRef = useRef([])
+  const drawingRef = useRef(false)
+  const lastPointRef = useRef(null)
+  const [tool, setTool] = useState('erase')
+  const [brushSize, setBrushSize] = useState(24)
+  const [ready, setReady] = useState(false)
+  const [applying, setApplying] = useState(false)
+  const [editorError, setEditorError] = useState('')
+  const [historyDepth, setHistoryDepth] = useState(0)
+
+  useEffect(() => {
+    if (!originalCanvasRef.current) {
+      originalCanvasRef.current = document.createElement('canvas')
+    }
+    if (!tempCanvasRef.current) {
+      tempCanvasRef.current = document.createElement('canvas')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!open || !imageDataUrl) return undefined
+    let cancelled = false
+    historyRef.current = []
+    setHistoryDepth(0)
+    setEditorError('')
+    setReady(false)
+    setApplying(false)
+    setTool('erase')
+    setBrushSize(24)
+
+    async function loadEditorImages() {
+      try {
+        const [currentImage, originalImage] = await Promise.all([
+          loadImageFromUrl(imageDataUrl),
+          loadImageFromUrl(originalImageDataUrl || imageDataUrl),
+        ])
+        if (cancelled) return
+
+        const longestSide = Math.max(currentImage.naturalWidth || currentImage.width, currentImage.naturalHeight || currentImage.height, 1)
+        const scale = longestSide > 900 ? 900 / longestSide : 1
+        const width = Math.max(1, Math.round((currentImage.naturalWidth || currentImage.width) * scale))
+        const height = Math.max(1, Math.round((currentImage.naturalHeight || currentImage.height) * scale))
+
+        const canvas = canvasRef.current
+        const originalCanvas = originalCanvasRef.current
+        const tempCanvas = tempCanvasRef.current
+        if (!canvas || !originalCanvas || !tempCanvas) return
+
+        canvas.width = width
+        canvas.height = height
+        originalCanvas.width = width
+        originalCanvas.height = height
+        tempCanvas.width = width
+        tempCanvas.height = height
+
+        const context = canvas.getContext('2d')
+        const originalContext = originalCanvas.getContext('2d')
+        if (!context || !originalContext) return
+
+        context.clearRect(0, 0, width, height)
+        originalContext.clearRect(0, 0, width, height)
+        context.drawImage(currentImage, 0, 0, width, height)
+        originalContext.drawImage(originalImage, 0, 0, width, height)
+        setReady(true)
+      } catch (error) {
+        if (cancelled) return
+        setEditorError('Nao foi possivel abrir o ajuste fino dessa foto.')
+      }
+    }
+
+    loadEditorImages()
+    return () => {
+      cancelled = true
+      drawingRef.current = false
+      lastPointRef.current = null
+    }
+  }, [open, imageDataUrl, originalImageDataUrl])
+
+  function loadImageFromUrl(url) {
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => resolve(image)
+      image.onerror = () => reject(new Error('image-load-failed'))
+      image.src = url
+    })
+  }
+
+  function mapCanvasPoint(event) {
+    const canvas = canvasRef.current
+    if (!canvas) return null
+    const bounds = canvas.getBoundingClientRect()
+    const scaleX = canvas.width / Math.max(bounds.width, 1)
+    const scaleY = canvas.height / Math.max(bounds.height, 1)
+    return {
+      x: Math.min(Math.max((event.clientX - bounds.left) * scaleX, 0), canvas.width),
+      y: Math.min(Math.max((event.clientY - bounds.top) * scaleY, 0), canvas.height),
+    }
+  }
+
+  function pushHistorySnapshot() {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    historyRef.current.push(canvas.toDataURL('image/png'))
+    if (historyRef.current.length > 12) {
+      historyRef.current.shift()
+    }
+    setHistoryDepth(historyRef.current.length)
+  }
+
+  function drawStroke(fromPoint, toPoint) {
+    const canvas = canvasRef.current
+    const originalCanvas = originalCanvasRef.current
+    const tempCanvas = tempCanvasRef.current
+    if (!canvas || !originalCanvas || !tempCanvas) return
+    const context = canvas.getContext('2d')
+    if (!context) return
+
+    if (tool === 'erase') {
+      context.save()
+      context.globalCompositeOperation = 'destination-out'
+      context.lineCap = 'round'
+      context.lineJoin = 'round'
+      context.lineWidth = brushSize
+      context.beginPath()
+      context.moveTo(fromPoint.x, fromPoint.y)
+      context.lineTo(toPoint.x, toPoint.y)
+      context.stroke()
+      context.restore()
+      return
+    }
+
+    const tempContext = tempCanvas.getContext('2d')
+    if (!tempContext) return
+    tempContext.clearRect(0, 0, tempCanvas.width, tempCanvas.height)
+    tempContext.save()
+    tempContext.lineCap = 'round'
+    tempContext.lineJoin = 'round'
+    tempContext.lineWidth = brushSize
+    tempContext.strokeStyle = '#000000'
+    tempContext.beginPath()
+    tempContext.moveTo(fromPoint.x, fromPoint.y)
+    tempContext.lineTo(toPoint.x, toPoint.y)
+    tempContext.stroke()
+    tempContext.globalCompositeOperation = 'source-in'
+    tempContext.drawImage(originalCanvas, 0, 0)
+    tempContext.restore()
+    context.drawImage(tempCanvas, 0, 0)
+  }
+
+  function handlePointerDown(event) {
+    if (!ready || applying) return
+    event.preventDefault()
+    const point = mapCanvasPoint(event)
+    const canvas = canvasRef.current
+    if (!point || !canvas) return
+    pushHistorySnapshot()
+    drawingRef.current = true
+    lastPointRef.current = point
+    if (canvas.setPointerCapture && event.pointerId !== undefined) {
+      canvas.setPointerCapture(event.pointerId)
+    }
+    drawStroke(point, point)
+  }
+
+  function handlePointerMove(event) {
+    if (!drawingRef.current) return
+    event.preventDefault()
+    const point = mapCanvasPoint(event)
+    if (!point || !lastPointRef.current) return
+    drawStroke(lastPointRef.current, point)
+    lastPointRef.current = point
+  }
+
+  function finishDrawing(event) {
+    if (event) {
+      event.preventDefault()
+    }
+    drawingRef.current = false
+    lastPointRef.current = null
+  }
+
+  function handleUndo() {
+    const canvas = canvasRef.current
+    const snapshot = historyRef.current.pop()
+    if (!canvas || !snapshot) return
+    setHistoryDepth(historyRef.current.length)
+    const context = canvas.getContext('2d')
+    if (!context) return
+    const image = new Image()
+    image.onload = () => {
+      context.clearRect(0, 0, canvas.width, canvas.height)
+      context.drawImage(image, 0, 0, canvas.width, canvas.height)
+    }
+    image.src = snapshot
+  }
+
+  function handleUseOriginal() {
+    if (!originalImageDataUrl) return
+    onApply({
+      dataUrl: originalImageDataUrl,
+      file: null,
+      usesOriginal: true,
+    })
+  }
+
+  function handleApply() {
+    const canvas = canvasRef.current
+    if (!canvas || applying) return
+    setApplying(true)
+    setEditorError('')
+    canvas.toBlob(blob => {
+      if (!blob) {
+        setApplying(false)
+        setEditorError('Nao foi possivel salvar esse ajuste fino.')
+        return
+      }
+      const dataUrl = canvas.toDataURL('image/png')
+      const file = new File([blob], 'manual-portrait-adjust.png', { type: 'image/png' })
+      onApply({ dataUrl, file, usesOriginal: false })
+      setApplying(false)
+    }, 'image/png')
+  }
+
+  if (!open) return null
+
+  return (
+    <div className="fig-mask-editor-backdrop" onClick={onClose}>
+      <div className="fig-mask-editor-shell" onClick={event => event.stopPropagation()}>
+        <div className="fig-mask-editor-header">
+          <div>
+            <p className="fig-kicker">Ajuste fino</p>
+            <h3>Apague so as rebarbas da foto</h3>
+            <p className="fig-mask-editor-copy">Use a borrachinha para tirar ombro, fundo ou sobras que ainda apareceram.</p>
+          </div>
+          <button type="button" className="fig-modal-close" onClick={onClose}>
+            Fechar
+          </button>
+        </div>
+
+        {editorError ? <p className="fig-error-banner">{editorError}</p> : null}
+
+        <div className="fig-mask-editor-stage">
+          <canvas
+            ref={canvasRef}
+            className="fig-mask-editor-canvas"
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={finishDrawing}
+            onPointerCancel={finishDrawing}
+            onPointerLeave={finishDrawing}
+          />
+          {!ready ? <div className="fig-mask-editor-empty">Preparando o ajuste fino...</div> : null}
+        </div>
+
+        <div className="fig-mask-editor-toolbar">
+          <div className="fig-mask-editor-tools">
+            <button
+              type="button"
+              className={`fig-secondary-button${tool === 'erase' ? ' is-active' : ''}`}
+              disabled={!ready || applying}
+              onClick={() => setTool('erase')}
+            >
+              Apagar
+            </button>
+            <button
+              type="button"
+              className={`fig-secondary-button${tool === 'restore' ? ' is-active' : ''}`}
+              disabled={!ready || applying}
+              onClick={() => setTool('restore')}
+            >
+              Restaurar
+            </button>
+            <button type="button" className="fig-secondary-button" disabled={!historyDepth || applying} onClick={handleUndo}>
+              Desfazer
+            </button>
+            <button type="button" className="fig-secondary-button" disabled={!ready || applying} onClick={handleUseOriginal}>
+              Usar recorte automatico
+            </button>
+          </div>
+
+          <div className="fig-mask-editor-tools fig-mask-editor-tools--compact">
+            <label className="fig-range-field fig-range-field--mask">
+              <span>Tamanho do pincel</span>
+              <input
+                type="range"
+                min="10"
+                max="64"
+                step="2"
+                value={brushSize}
+                onChange={event => setBrushSize(Number(event.target.value))}
+                disabled={!ready || applying}
+              />
+              <small>{brushSize}px</small>
+            </label>
+            <button type="button" className="fig-primary-button" disabled={!ready || applying} onClick={handleApply}>
+              {applying ? 'Salvando...' : 'Concluir'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PublicPage() {
   const sessionToken = usePublicSessionToken()
   const [albums, setAlbums] = useState([])
@@ -734,9 +1126,14 @@ function PublicPage() {
   const [customUnlockCopied, setCustomUnlockCopied] = useState(false)
   const [myStickerForm, setMyStickerForm] = useState(createEmptyMyStickerForm)
   const [manualCutoutDataUrl, setManualCutoutDataUrl] = useState('')
+  const [manualCutoutOriginalDataUrl, setManualCutoutOriginalDataUrl] = useState('')
   const [manualCutoutAssetToken, setManualCutoutAssetToken] = useState('')
+  const [manualEditedPortraitFile, setManualEditedPortraitFile] = useState(null)
   const [manualCutoutBusy, setManualCutoutBusy] = useState(false)
+  const [manualMaskEditorOpen, setManualMaskEditorOpen] = useState(false)
   const [publicFlowProgress, setPublicFlowProgress] = useState(null)
+  const [manualStageElement, setManualStageElement] = useState(null)
+  const [manualStageScale, setManualStageScale] = useState(MANUAL_STICKER_PREVIEW_FALLBACK_SCALE)
   const myStickerCameraInputRef = useRef(null)
   const myStickerGalleryInputRef = useRef(null)
   const [orderForm, setOrderForm] = useState({
@@ -758,6 +1155,16 @@ function PublicPage() {
     [albums, selectedAlbumSlug]
   )
   const availableCollections = selectedAlbum?.collections || []
+  const groupedAvailableCollections = useMemo(
+    () =>
+      publicCollectionGroups
+        .map(group => ({
+          ...group,
+          items: availableCollections.filter(collection => (collection.collection_type || 'SELECAO') === group.type)
+        }))
+        .filter(group => group.items.length > 0),
+    [availableCollections]
+  )
   const selectedCollection = useMemo(
     () => availableCollections.find(collection => collection.slug === selectedCollectionSlug) || null,
     [availableCollections, selectedCollectionSlug]
@@ -940,6 +1347,37 @@ function PublicPage() {
       height: (manualPreviewPhotoSlot.height || 0) * visibleHeight * 100
     }
   }, [manualPreviewPhotoSlot])
+
+  useEffect(() => {
+    if (!manualStageElement) {
+      setManualStageScale(MANUAL_STICKER_PREVIEW_FALLBACK_SCALE)
+      return undefined
+    }
+
+    const updateManualStageScale = () => {
+      const rect = manualStageElement.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+      const nextScale = Math.max(
+        0.2,
+        Math.min(
+          rect.width / MANUAL_STICKER_RENDER_BASE_WIDTH,
+          rect.height / MANUAL_STICKER_RENDER_BASE_HEIGHT
+        )
+      )
+      setManualStageScale(current => (Math.abs(current - nextScale) < 0.01 ? current : nextScale))
+    }
+
+    updateManualStageScale()
+
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', updateManualStageScale)
+      return () => window.removeEventListener('resize', updateManualStageScale)
+    }
+
+    const observer = new ResizeObserver(() => updateManualStageScale())
+    observer.observe(manualStageElement)
+    return () => observer.disconnect()
+  }, [manualStageElement])
 
   function dismissPublicFlowProgress() {
     setPublicFlowProgress(null)
@@ -1352,7 +1790,10 @@ function PublicPage() {
   useEffect(() => {
     if (!myStickerModalOpen) return
     setManualCutoutDataUrl('')
+    setManualCutoutOriginalDataUrl('')
     setManualCutoutAssetToken('')
+    setManualEditedPortraitFile(null)
+    setManualMaskEditorOpen(false)
     setMyStickerModeConfirmed(Boolean(customSticker))
     setMyStickerForm(current => ({
       name: customSticker?.name || current.name || '',
@@ -1460,7 +1901,10 @@ function PublicPage() {
       photo_rotation: '0'
     }))
     setManualCutoutDataUrl('')
+    setManualCutoutOriginalDataUrl('')
     setManualCutoutAssetToken('')
+    setManualEditedPortraitFile(null)
+    setManualMaskEditorOpen(false)
   }
 
   function handleMyStickerPhotoInput(event) {
@@ -1480,7 +1924,10 @@ function PublicPage() {
   function activateMyStickerMode(mode) {
     setMyStickerModeConfirmed(true)
     setManualCutoutDataUrl('')
+    setManualCutoutOriginalDataUrl('')
     setManualCutoutAssetToken('')
+    setManualEditedPortraitFile(null)
+    setManualMaskEditorOpen(false)
     setMyStickerForm(current => ({
       ...current,
       requested_composition_mode: mode,
@@ -1522,14 +1969,34 @@ function PublicPage() {
         photo_scale: String(manualPreviewPhotoSlot?.default_scale ?? 1),
         photo_rotation: '0'
       }))
-      setManualCutoutDataUrl(data?.portrait_image_data_url || data?.image_data_url || '')
+      const portraitDataUrl = data?.portrait_image_data_url || data?.image_data_url || ''
+      setManualCutoutDataUrl(portraitDataUrl)
+      setManualCutoutOriginalDataUrl(portraitDataUrl)
       setManualCutoutAssetToken(data?.asset_token || '')
+      setManualEditedPortraitFile(null)
+      setManualMaskEditorOpen(false)
     } catch (err) {
+      setManualCutoutDataUrl('')
+      setManualCutoutOriginalDataUrl('')
       setManualCutoutAssetToken('')
+      setManualEditedPortraitFile(null)
+      setManualMaskEditorOpen(false)
       setError(err.message)
     } finally {
       setManualCutoutBusy(false)
     }
+  }
+
+  function handleApplyManualMaskEditor(result) {
+    if (!result) return
+    if (result.usesOriginal) {
+      setManualCutoutDataUrl(manualCutoutOriginalDataUrl)
+      setManualEditedPortraitFile(null)
+    } else {
+      setManualCutoutDataUrl(result.dataUrl || manualCutoutDataUrl)
+      setManualEditedPortraitFile(result.file || null)
+    }
+    setManualMaskEditorOpen(false)
   }
 
   async function handleSubmitMySticker(event) {
@@ -1579,6 +2046,9 @@ function PublicPage() {
       if (manualCutoutAssetToken) {
         formData.append('prepared_cutout_token', manualCutoutAssetToken)
       }
+      if (manualEditedPortraitFile) {
+        formData.append('prepared_portrait', manualEditedPortraitFile, manualEditedPortraitFile.name || 'manual-portrait-adjust.png')
+      }
       formData.append('birth_date_text', normalizeDateInput(myStickerForm.birth_date_text))
       formData.append('height_text', formatHeightForSticker(myStickerForm.height_text))
       formData.append('weight_text', formatWeightForSticker(myStickerForm.weight_text))
@@ -1612,7 +2082,11 @@ function PublicPage() {
         city_or_team: data.city_or_team || '',
         photo: null
       })
+      setManualCutoutDataUrl('')
+      setManualCutoutOriginalDataUrl('')
       setManualCutoutAssetToken('')
+      setManualEditedPortraitFile(null)
+      setManualMaskEditorOpen(false)
       setMyStickerModalOpen(false)
     } catch (err) {
       setError(err.message)
@@ -1830,26 +2304,35 @@ function PublicPage() {
         {selectedAlbum ? (
           <div className="fig-sidebar-subsection">
             <div className="fig-panel-header fig-panel-header--compact">
-              <p className="fig-kicker">Selecoes</p>
+              <p className="fig-kicker">Colecoes</p>
               <h3>{selectedAlbum.name}</h3>
             </div>
-            <div className="fig-collection-list fig-collection-list--nested">
-              {availableCollections.map(collection => (
-                <button
-                  key={collection.id}
-                  type="button"
-                  className={`fig-collection-button fig-collection-button--compact${
-                    collection.slug === selectedCollectionSlug ? ' is-active' : ''
-                  }`}
-                  onClick={() => setSelectedCollectionSlug(collection.slug)}
-                >
-                  <strong>{collection.name}</strong>
-                  <span>
-                    {selectedCountByCollection[collection.slug]
-                      ? `${selectedCountByCollection[collection.slug]} marcada(s)`
-                      : `${collection.sticker_count} figurinhas`}
-                  </span>
-                </button>
+            <div className="fig-collection-groups">
+              {groupedAvailableCollections.map(group => (
+                <div key={group.type} className="fig-collection-group">
+                  <div className="fig-collection-group-head">
+                    <span>{group.label}</span>
+                  </div>
+                  <div className="fig-collection-list fig-collection-list--nested">
+                    {group.items.map(collection => (
+                      <button
+                        key={collection.id}
+                        type="button"
+                        className={`fig-collection-button fig-collection-button--compact${
+                          collection.slug === selectedCollectionSlug ? ' is-active' : ''
+                        }`}
+                        onClick={() => setSelectedCollectionSlug(collection.slug)}
+                      >
+                        <strong>{collection.name}</strong>
+                        <span>
+                          {selectedCountByCollection[collection.slug]
+                            ? `${selectedCountByCollection[collection.slug]} marcada(s)`
+                            : `${collection.sticker_count} figurinhas`}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
@@ -1897,20 +2380,25 @@ function PublicPage() {
 
           {selectedAlbum ? (
             <div className="fig-mobile-collection-strip">
-              {availableCollections.map(collection => (
-                <button
-                  key={collection.id}
-                  type="button"
-                  className={`fig-mobile-collection-chip${collection.slug === selectedCollectionSlug ? ' is-active' : ''}`}
-                  onClick={() => setSelectedCollectionSlug(collection.slug)}
-                >
-                  <strong>{collection.name}</strong>
-                  <span>
-                    {selectedCountByCollection[collection.slug]
-                      ? `${selectedCountByCollection[collection.slug]} marcada(s)`
-                      : `${collection.sticker_count} figurinhas`}
-                  </span>
-                </button>
+              {groupedAvailableCollections.map(group => (
+                <div key={group.type} className="fig-mobile-collection-group">
+                  <div className="fig-mobile-collection-group-title">{group.label}</div>
+                  {group.items.map(collection => (
+                    <button
+                      key={collection.id}
+                      type="button"
+                      className={`fig-mobile-collection-chip${collection.slug === selectedCollectionSlug ? ' is-active' : ''}`}
+                      onClick={() => setSelectedCollectionSlug(collection.slug)}
+                    >
+                      <strong>{collection.name}</strong>
+                      <span>
+                        {selectedCountByCollection[collection.slug]
+                          ? `${selectedCountByCollection[collection.slug]} marcada(s)`
+                          : `${collection.sticker_count} figurinhas`}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               ))}
             </div>
           ) : null}
@@ -2574,10 +3062,11 @@ function PublicPage() {
                   <div className="fig-field fig-field--full">
                     <span>Preparar encaixe</span>
                     <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
-                      <div>
-                        <strong>1. Prepare a foto para a figurinha</strong>
-                        <span>Vamos remover o fundo e encaixar sua foto para voce ajustar do seu jeito.</span>
-                      </div>
+                    <div>
+                      <strong>1. Prepare a foto para a figurinha</strong>
+                      <span>Vamos remover o fundo e encaixar sua foto para voce ajustar do seu jeito.</span>
+                    </div>
+                    <div className="fig-photo-source-actions">
                       <button
                         type="button"
                         className="fig-secondary-button"
@@ -2586,6 +3075,15 @@ function PublicPage() {
                       >
                         {manualCutoutBusy ? 'Preparando encaixe...' : manualCutoutDataUrl ? 'Preparar de novo' : 'Preparar encaixe na figurinha'}
                       </button>
+                      <button
+                        type="button"
+                        className="fig-secondary-button"
+                        onClick={() => setManualMaskEditorOpen(true)}
+                        disabled={!manualCutoutDataUrl || manualCutoutBusy}
+                      >
+                        Ajuste fino
+                      </button>
+                    </div>
                     </div>
                   </div>
                 ) : null}
@@ -2593,7 +3091,7 @@ function PublicPage() {
               {myStickerForm.requested_composition_mode === 'LAYERS' && selectedMyStickerTemplate ? (
                 <div className="fig-manual-editor">
                   <div className="fig-manual-editor-preview">
-                    <div className="fig-manual-sticker-stage">
+                    <div className="fig-manual-sticker-stage" ref={setManualStageElement}>
                       {manualPreviewLayers.map(layer => (
                         <img
                           key={layer.id || `${layer.layer_type}-${layer.z_index}`}
@@ -2634,9 +3132,11 @@ function PublicPage() {
                             left: `${(slot.x || 0) * 100}%`,
                             top: `${(slot.y || 0) * 100}%`,
                             width: `${(slot.width || 0) * 100}%`,
-                            fontSize: `${Math.max(7, (slot.font_size || 12) * 0.62)}px`,
+                            fontSize: `${Math.max(6, (slot.font_size || 12) * manualStageScale)}px`,
+                            fontWeight: slot.font_weight || '700',
                             textAlign: slot.text_align || 'left',
-                            color: slot.color || '#ffffff'
+                            color: slot.color || '#ffffff',
+                            textShadow: `0 ${Math.max(0.6, manualStageScale * 1.4).toFixed(2)}px 0 rgba(0, 0, 0, 0.32)`
                           }}
                         >
                           {myStickerTextValue(myStickerForm, slot.field_name)}
@@ -2648,6 +3148,13 @@ function PublicPage() {
                         <div>
                           <strong>Aguardando recorte da foto.</strong>
                           <span>Envie a foto e clique em preparar encaixe para abrir a montagem manual.</span>
+                        </div>
+                      </div>
+                    ) : manualEditedPortraitFile ? (
+                      <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                        <div>
+                          <strong>Ajuste fino aplicado.</strong>
+                          <span>Se ainda sobrar alguma rebarba, abra o ajuste fino de novo e retoque mais um pouco.</span>
                         </div>
                       </div>
                     ) : null}
@@ -2685,7 +3192,7 @@ function PublicPage() {
                       <input
                         type="range"
                         min={String(manualPreviewPhotoSlot?.min_scale ?? 0.7)}
-                        max={String(manualPreviewPhotoSlot?.max_scale ?? 1.5)}
+                        max={String(manualPreviewPhotoSlot?.max_scale ?? 2.4)}
                         step="0.01"
                         value={myStickerForm.photo_scale}
                         onChange={event => setMyStickerForm(current => ({ ...current, photo_scale: event.target.value }))}
@@ -2743,6 +3250,14 @@ function PublicPage() {
           </div>
         </div>
       ) : null}
+
+      <ManualMaskEditorModal
+        open={manualMaskEditorOpen}
+        imageDataUrl={manualCutoutDataUrl}
+        originalImageDataUrl={manualCutoutOriginalDataUrl || manualCutoutDataUrl}
+        onClose={() => setManualMaskEditorOpen(false)}
+        onApply={handleApplyManualMaskEditor}
+      />
 
       {orderFormOpen && quote ? (
         <div className="fig-modal-backdrop" onClick={() => setOrderFormOpen(false)}>
@@ -3270,7 +3785,7 @@ function AdminPage() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [albumForm, setAlbumForm] = useState({ name: '', slug: '', description: '', sort_order: '0' })
-  const [createForm, setCreateForm] = useState({ album_id: '', name: '', slug: '', description: '', sort_order: '0' })
+  const [createForm, setCreateForm] = useState(createEmptyCollectionAdminForm)
   const [albumSlugEdited, setAlbumSlugEdited] = useState(false)
   const [createCollectionSlugEdited, setCreateCollectionSlugEdited] = useState(false)
   const [albumSlugManualOpen, setAlbumSlugManualOpen] = useState(false)
@@ -3280,12 +3795,7 @@ function AdminPage() {
   const [selectedAlbumForm, setSelectedAlbumForm] = useState({ name: '', slug: '', description: '', sort_order: '0' })
   const [selectedAlbumSlugEdited, setSelectedAlbumSlugEdited] = useState(false)
   const [selectedAlbumSlugManualOpen, setSelectedAlbumSlugManualOpen] = useState(false)
-  const [selectedCollectionForm, setSelectedCollectionForm] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    sort_order: '0'
-  })
+  const [selectedCollectionForm, setSelectedCollectionForm] = useState(createEmptyCollectionAdminForm)
   const [selectedCollectionSlugEdited, setSelectedCollectionSlugEdited] = useState(false)
   const [selectedCollectionSlugManualOpen, setSelectedCollectionSlugManualOpen] = useState(false)
   const [savingAlbum, setSavingAlbum] = useState(false)
@@ -3356,6 +3866,7 @@ function AdminPage() {
   const [sourceDetectedCollectionId, setSourceDetectedCollectionId] = useState('')
   const [assigningDetectedStickers, setAssigningDetectedStickers] = useState(false)
   const [discardingDetectedStickers, setDiscardingDetectedStickers] = useState(false)
+  const [unassigningDetectedStickers, setUnassigningDetectedStickers] = useState(false)
   const [processingSourceBlockDetection, setProcessingSourceBlockDetection] = useState(false)
   const [sourceBlockStickers, setSourceBlockStickers] = useState([])
   const [loadingSourceBlockStickers, setLoadingSourceBlockStickers] = useState(false)
@@ -3370,6 +3881,7 @@ function AdminPage() {
   const [customTemplates, setCustomTemplates] = useState([])
   const [selectedCustomTemplateId, setSelectedCustomTemplateId] = useState(null)
   const [customTemplateForm, setCustomTemplateForm] = useState(createEmptyCustomTemplateForm)
+  const [customTemplateTextBulkForm, setCustomTemplateTextBulkForm] = useState(createEmptyCustomTemplateTextBulkForm)
   const [savingCustomTemplate, setSavingCustomTemplate] = useState(false)
   const [uploadingTemplateLayerKey, setUploadingTemplateLayerKey] = useState('')
   const [deletingTemplateLayerKey, setDeletingTemplateLayerKey] = useState('')
@@ -3387,6 +3899,7 @@ function AdminPage() {
   })
   const [savingOrder, setSavingOrder] = useState(false)
   const [savingCollectionEdit, setSavingCollectionEdit] = useState(false)
+  const [deletingCollection, setDeletingCollection] = useState(false)
   const selectedSourceDocumentSummary =
     sourceDocuments.find(document => document.id === selectedSourceDocumentId) || null
   const selectedSourceDocumentPage =
@@ -3399,8 +3912,20 @@ function AdminPage() {
     () => sourceDetectedStickers.filter(detected => selectedDetectedStickerIds.includes(detected.id)),
     [sourceDetectedStickers, selectedDetectedStickerIds]
   )
+  const selectedPendingSourceDetectedStickers = useMemo(
+    () => selectedSourceDetectedStickers.filter(detected => detected.status === 'PENDENTE'),
+    [selectedSourceDetectedStickers]
+  )
+  const selectedAssignedSourceDetectedStickers = useMemo(
+    () => selectedSourceDetectedStickers.filter(detected => detected.status === 'ATRIBUIDA'),
+    [selectedSourceDetectedStickers]
+  )
   const pendingSourceDetectedStickers = useMemo(
     () => sourceDetectedStickers.filter(detected => detected.status === 'PENDENTE'),
+    [sourceDetectedStickers]
+  )
+  const assignedSourceDetectedStickers = useMemo(
+    () => sourceDetectedStickers.filter(detected => detected.status === 'ATRIBUIDA'),
     [sourceDetectedStickers]
   )
   const selectedPageLayoutTemplate =
@@ -3429,6 +3954,26 @@ function AdminPage() {
   const extraCustomTemplateLayers = useMemo(
     () => indexedCustomTemplateLayers.filter(entry => !isStandardCustomTemplateLayerType(entry.layer.layer_type)),
     [indexedCustomTemplateLayers]
+  )
+  const customTemplatePreviewLayers = useMemo(
+    () =>
+      customTemplateForm.layers
+        .filter(layer => layer.is_active && layer.file_path)
+        .sort((left, right) => Number(left.z_index || 0) - Number(right.z_index || 0)),
+    [customTemplateForm.layers]
+  )
+  const customTemplatePreviewTextSlots = useMemo(
+    () =>
+      customTemplateForm.text_slots
+        .map(slot => ({
+          ...slot,
+          x: Number(slot.x || 0),
+          y: Number(slot.y || 0),
+          width: Number(slot.width || 0),
+          font_size: Number(slot.font_size || 12)
+        }))
+        .filter(slot => slot.width > 0),
+    [customTemplateForm.text_slots]
   )
   const currentTemplatePreviewPath =
     selectedCustomTemplateSummary?.preview_path ||
@@ -3941,7 +4486,7 @@ function AdminPage() {
 
   useEffect(() => {
     if (!selectedCollection) {
-      setSelectedCollectionForm({ name: '', slug: '', description: '', sort_order: '0' })
+      setSelectedCollectionForm(createEmptyCollectionAdminForm())
       setSelectedCollectionSlugEdited(false)
       setSelectedCollectionSlugManualOpen(false)
       return
@@ -3950,6 +4495,9 @@ function AdminPage() {
       name: selectedCollection.name || '',
       slug: selectedCollection.slug || '',
       description: selectedCollection.description || '',
+      collection_type: selectedCollection.collection_type || 'SELECAO',
+      display_group_order: String(selectedCollection.display_group_order ?? 1),
+      display_item_order: String(selectedCollection.display_item_order ?? 999),
       sort_order: String(selectedCollection.sort_order ?? 0)
     })
     setSelectedCollectionSlugEdited(false)
@@ -4128,6 +4676,30 @@ function AdminPage() {
     }))
   }
 
+  function applyBulkCustomTemplateTextAdjustments() {
+    const deltaX = Number(customTemplateTextBulkForm.delta_x || 0)
+    const deltaY = Number(customTemplateTextBulkForm.delta_y || 0)
+    const deltaWidth = Number(customTemplateTextBulkForm.delta_width || 0)
+    const deltaFontSize = Number(customTemplateTextBulkForm.delta_font_size || 0)
+    const nextFontWeight = customTemplateTextBulkForm.font_weight.trim()
+    const nextTextAlign = customTemplateTextBulkForm.text_align.trim()
+    const nextColor = customTemplateTextBulkForm.color.trim()
+
+    setCustomTemplateForm(current => ({
+      ...current,
+      text_slots: current.text_slots.map(slot => ({
+        ...slot,
+        x: String(Number(slot.x || 0) + deltaX),
+        y: String(Number(slot.y || 0) + deltaY),
+        width: String(Math.max(0, Number(slot.width || 0) + deltaWidth)),
+        font_size: String(Math.max(1, Number(slot.font_size || 12) + deltaFontSize)),
+        font_weight: nextFontWeight || slot.font_weight,
+        text_align: nextTextAlign || slot.text_align,
+        color: nextColor || slot.color
+      }))
+    }))
+  }
+
   function resolvePersistedTemplateLayer(persistedTemplate, referenceLayer, referenceIndex, currentLayers) {
     const sourceLayers = currentLayers || customTemplateForm.layers || []
     const ordinal = sourceLayers
@@ -4166,7 +4738,7 @@ function AdminPage() {
             height: Number(customTemplateForm.photo_slot.height || 0),
             default_scale: Number(customTemplateForm.photo_slot.default_scale || 1),
             min_scale: Number(customTemplateForm.photo_slot.min_scale || 0.7),
-            max_scale: Number(customTemplateForm.photo_slot.max_scale || 1.5),
+            max_scale: Number(customTemplateForm.photo_slot.max_scale || 2.4),
             portrait_z_index: Number(customTemplateForm.photo_slot.portrait_z_index || 30),
             anchor_x: Number(customTemplateForm.photo_slot.anchor_x || 0.5),
             anchor_y: Number(customTemplateForm.photo_slot.anchor_y || 0.5),
@@ -4425,10 +4997,17 @@ function AdminPage() {
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           ...createForm,
+          display_group_order: Number(createForm.display_group_order || 1),
+          display_item_order: Number(createForm.display_item_order || 999),
           sort_order: Number(createForm.sort_order || 0)
         })
       })
-      setCreateForm(current => ({ ...current, name: '', slug: '', description: '', sort_order: '0' }))
+      setCreateForm(current => ({
+        ...createEmptyCollectionAdminForm(current.album_id),
+        album_id: current.album_id,
+        collection_type: current.collection_type,
+        display_group_order: current.display_group_order
+      }))
       setCreateCollectionSlugEdited(false)
       setCreateCollectionSlugManualOpen(false)
       setCollectionStructureMode('edit')
@@ -4965,6 +5544,28 @@ function AdminPage() {
 
   async function handleDetectSourceDocumentStickers() {
     if (!token || !selectedSourceDocumentId || !selectedSourceDocument) return
+    const assignedCount = Number(selectedSourceDocument.assigned_detected_count || 0)
+    const pendingCount = Number(selectedSourceDocument.pending_detected_count || 0)
+    const totalDetectedCount = assignedCount + pendingCount
+    const warningLines = totalDetectedCount > 0
+      ? [
+          `Esse documento ja tem ${totalDetectedCount} figurinha(s) detectada(s).`,
+          assignedCount > 0
+            ? `${assignedCount} atribuida(s) sera(o) desfeita(s) e voltara(o) para pendente.`
+            : null,
+          pendingCount > 0
+            ? `${pendingCount} pendente(s) atual(is) sera(o) substituida(s).`
+            : null,
+          'A leitura sera refeita do zero em todas as paginas.',
+          '',
+          'Deseja continuar?'
+        ].filter(Boolean)
+      : [
+          'A leitura automatica sera feita em todas as paginas deste documento.',
+          'Deseja continuar?'
+        ]
+    const confirmed = window.confirm(warningLines.join('\n'))
+    if (!confirmed) return
     setProcessingSourceDocumentDetection(true)
     setError('')
     setMessage('')
@@ -4991,8 +5592,14 @@ function AdminPage() {
     }
   }
 
+  const selectedSourceDocumentHasDetectedStickers = Boolean(
+    selectedSourceDocument &&
+      (Number(selectedSourceDocument.pending_detected_count || 0) > 0 ||
+        Number(selectedSourceDocument.assigned_detected_count || 0) > 0)
+  )
+
   function handleToggleSourceDetectedSticker(detectedSticker) {
-    if (!detectedSticker || detectedSticker.status !== 'PENDENTE') return
+    if (!detectedSticker || detectedSticker.status === 'DESCARTADA') return
     setSelectedDetectedStickerIds(current =>
       current.includes(detectedSticker.id)
         ? current.filter(id => id !== detectedSticker.id)
@@ -5012,7 +5619,7 @@ function AdminPage() {
   }
 
   async function handleAssignSourceDetectedStickers() {
-    if (!token || !selectedSourceDocumentId || !selectedDetectedStickerIds.length || !sourceDetectedCollectionId) return
+    if (!token || !selectedSourceDocumentId || !selectedPendingSourceDetectedStickers.length || !sourceDetectedCollectionId) return
     setAssigningDetectedStickers(true)
     setError('')
     setMessage('')
@@ -5022,7 +5629,7 @@ function AdminPage() {
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           collection_id: Number(sourceDetectedCollectionId),
-          detected_sticker_ids: selectedDetectedStickerIds
+          detected_sticker_ids: selectedPendingSourceDetectedStickers.map(detected => detected.id)
         })
       })
       await Promise.all([
@@ -5047,7 +5654,7 @@ function AdminPage() {
   }
 
   async function handleDiscardSourceDetectedStickers() {
-    if (!token || !selectedSourceDocumentId || !selectedDetectedStickerIds.length) return
+    if (!token || !selectedSourceDocumentId || !selectedPendingSourceDetectedStickers.length) return
     const confirmed = window.confirm('Descartar as figurinhas detectadas selecionadas?')
     if (!confirmed) return
     setDiscardingDetectedStickers(true)
@@ -5058,7 +5665,7 @@ function AdminPage() {
         method: 'POST',
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({
-          detected_sticker_ids: selectedDetectedStickerIds
+          detected_sticker_ids: selectedPendingSourceDetectedStickers.map(detected => detected.id)
         })
       })
       await Promise.all([
@@ -5076,6 +5683,40 @@ function AdminPage() {
       setError(err.message)
     } finally {
       setDiscardingDetectedStickers(false)
+    }
+  }
+
+  async function handleUnassignSourceDetectedStickers() {
+    if (!token || !selectedSourceDocumentId || !selectedAssignedSourceDetectedStickers.length) return
+    const confirmed = window.confirm('Voltar as figurinhas atribuidas selecionadas para pendente?')
+    if (!confirmed) return
+    setUnassigningDetectedStickers(true)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/source-documents/${selectedSourceDocumentId}/unassign-detected-stickers`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          detected_sticker_ids: selectedAssignedSourceDetectedStickers.map(detected => detected.id)
+        })
+      })
+      await Promise.all([
+        fetchSourceDocuments(selectedSourceDocumentId),
+        fetchSourceDocumentDetailData(selectedSourceDocumentId),
+        selectedSourceDocumentPageId ? fetchSourceDetectedStickers(selectedSourceDocumentPageId) : Promise.resolve(),
+        selectedCollectionId ? fetchCollectionWorkspace(selectedCollectionId, currentPageId) : fetchCollections(selectedCollectionId)
+      ])
+      setSelectedDetectedStickerIds([])
+      setMessage(
+        data.affected_count > 0
+          ? `${data.affected_count} figurinha(s) voltou(aram) para pendente.`
+          : 'Nenhuma figurinha atribuida foi alterada.'
+      )
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUnassigningDetectedStickers(false)
     }
   }
 
@@ -5149,6 +5790,8 @@ function AdminPage() {
         headers: buildAdminHeaders(token, { 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           ...selectedCollectionForm,
+          display_group_order: Number(selectedCollectionForm.display_group_order || 1),
+          display_item_order: Number(selectedCollectionForm.display_item_order || 999),
           sort_order: Number(selectedCollectionForm.sort_order || 0)
         })
       })
@@ -5158,6 +5801,46 @@ function AdminPage() {
       setError(err.message)
     } finally {
       setSavingCollectionEdit(false)
+    }
+  }
+
+  async function handleDeleteCollection() {
+    if (!selectedCollectionId || !selectedCollection) return
+    const confirmed = window.confirm(
+      `Excluir "${selectedCollection.name}"? Essa acao remove a colecao, figurinhas, paginas, PDF de origem, exports e pedidos vinculados.`
+    )
+    if (!confirmed) return
+
+    const typedName = window.prompt(
+      `Para confirmar, digite exatamente o nome da colecao:\n\n${selectedCollection.name}`
+    )
+    if (typedName === null) return
+    if (typedName.trim() !== selectedCollection.name.trim()) {
+      window.alert('O nome digitado nao confere. A colecao nao foi excluida.')
+      return
+    }
+
+    setDeletingCollection(true)
+    setError('')
+    setMessage('')
+    try {
+      const deletedId = selectedCollectionId
+      await apiFetch(`/admin/collections/${deletedId}`, {
+        method: 'DELETE',
+        headers: buildAdminHeaders(token)
+      })
+      setSelectedCollectionId(null)
+      setSelectedCollection(null)
+      setPages([])
+      setStickers([])
+      setCurrentPageId(null)
+      resetStickerForm()
+      setMessage('Colecao excluida.')
+      await Promise.all([fetchAlbums(selectedAlbumId), fetchCollections(collections.find(collection => collection.id !== deletedId)?.id || null)])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setDeletingCollection(false)
     }
   }
 
@@ -5181,10 +5864,7 @@ function AdminPage() {
     const nextOrder =
       filteredCollections.reduce((maxValue, collection) => Math.max(maxValue, Number(collection.sort_order || 0)), 0) + 1
     setCreateForm({
-      album_id: String(selectedAlbumId || ''),
-      name: '',
-      slug: '',
-      description: '',
+      ...createEmptyCollectionAdminForm(selectedAlbumId || ''),
       sort_order: String(nextOrder)
     })
     setCreateCollectionSlugEdited(false)
@@ -5634,7 +6314,7 @@ function AdminPage() {
         </div>
 
         <div className="fig-panel-header fig-admin-section-head">
-          <p className="fig-kicker">Selecoes do album</p>
+          <p className="fig-kicker">Colecoes do album</p>
           <h3>{selectedAlbum?.name || 'Escolha um album'}</h3>
         </div>
         <div className="fig-collection-list">
@@ -5653,13 +6333,13 @@ function AdminPage() {
             >
               <strong>{collection.name}</strong>
               <span>
-                Ordem {collection.sort_order} · {collection.status === 'PUBLICADA' ? 'Publicada' : 'Rascunho'} ·{' '}
+                {collectionTypeLabel(collection.collection_type)} · Ordem {collection.sort_order} · {collection.status === 'PUBLICADA' ? 'Publicada' : 'Rascunho'} ·{' '}
                 {collection.sticker_count} figurinhas
               </span>
             </button>
           ))}
           {selectedAlbumId && filteredCollections.length === 0 ? (
-            <p className="fig-empty-note">Nenhuma selecao cadastrada nesse album ainda.</p>
+            <p className="fig-empty-note">Nenhuma colecao cadastrada nesse album ainda.</p>
           ) : null}
         </div>
       </aside>
@@ -5856,13 +6536,13 @@ function AdminPage() {
                 onSubmit={isCreatingCollection ? handleCreateCollection : handleUpdateCollection}
               >
                 <div className="fig-panel-header">
-                  <p className="fig-kicker">{isCreatingCollection ? 'Nova selecao' : 'Selecao'}</p>
-                  <h3>{isCreatingCollection ? 'Cadastre uma selecao nova' : 'Editar selecao selecionada'}</h3>
+                  <p className="fig-kicker">{isCreatingCollection ? 'Nova colecao' : 'Colecao'}</p>
+                  <h3>{isCreatingCollection ? 'Cadastre uma colecao nova' : 'Editar colecao selecionada'}</h3>
                 </div>
                 <p className="fig-empty-note">
                   {isCreatingCollection
-                    ? 'A selecao nasce dentro do album escolhido abaixo e so depois segue para PDF, mapeamento e publicacao.'
-                    : 'Aqui voce pode corrigir nome, slug e ordem da selecao.'}
+                    ? 'A colecao nasce dentro do album escolhido abaixo e so depois segue para PDF, mapeamento e publicacao.'
+                    : 'Aqui voce pode corrigir nome, slug, tipo e ordem da colecao.'}
                 </p>
                 <div className="fig-form-grid">
                   <label className="fig-field">
@@ -5894,6 +6574,27 @@ function AdminPage() {
                       }
                       placeholder="Brasil"
                     />
+                  </label>
+                  <label className="fig-field">
+                    <span>Tipo</span>
+                    <select
+                      value={isCreatingCollection ? createForm.collection_type : selectedCollectionForm.collection_type}
+                      onChange={event => {
+                        const nextType = event.target.value
+                        const nextGroupOrder = defaultCollectionGroupOrder(nextType)
+                        if (isCreatingCollection) {
+                          setCreateForm(current => ({ ...current, collection_type: nextType, display_group_order: nextGroupOrder }))
+                        } else {
+                          setSelectedCollectionForm(current => ({ ...current, collection_type: nextType, display_group_order: nextGroupOrder }))
+                        }
+                      }}
+                    >
+                      {collectionTypeOptions.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className="fig-field">
                     <span>Slug</span>
@@ -5961,6 +6662,34 @@ function AdminPage() {
                       placeholder="0"
                     />
                   </label>
+                  <label className="fig-field">
+                    <span>Grupo</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={isCreatingCollection ? createForm.display_group_order : selectedCollectionForm.display_group_order}
+                      onChange={event =>
+                        isCreatingCollection
+                          ? setCreateForm(current => ({ ...current, display_group_order: event.target.value }))
+                          : setSelectedCollectionForm(current => ({ ...current, display_group_order: event.target.value }))
+                      }
+                      placeholder="1"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Ordem no grupo</span>
+                    <input
+                      type="number"
+                      min="0"
+                      value={isCreatingCollection ? createForm.display_item_order : selectedCollectionForm.display_item_order}
+                      onChange={event =>
+                        isCreatingCollection
+                          ? setCreateForm(current => ({ ...current, display_item_order: event.target.value }))
+                          : setSelectedCollectionForm(current => ({ ...current, display_item_order: event.target.value }))
+                      }
+                      placeholder="999"
+                    />
+                  </label>
                   <label className="fig-field fig-field--full">
                     <span>Descricao</span>
                     <textarea
@@ -5990,22 +6719,32 @@ function AdminPage() {
                       Cancelar criacao
                     </button>
                   )}
+                  {!isCreatingCollection ? (
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      disabled={deletingCollection || !selectedCollection}
+                      onClick={handleDeleteCollection}
+                    >
+                      {deletingCollection ? 'Excluindo...' : 'Excluir colecao'}
+                    </button>
+                  ) : null}
                   <button
                     type="submit"
                     className="fig-primary-button"
                     disabled={
                       isCreatingCollection
                         ? savingCollection || !createForm.album_id
-                        : savingCollectionEdit || !selectedCollection
+                        : savingCollectionEdit || deletingCollection || !selectedCollection
                     }
                   >
                     {isCreatingCollection
                       ? savingCollection
                         ? 'Salvando...'
-                        : 'Criar selecao'
+                        : 'Criar colecao'
                       : savingCollectionEdit
                         ? 'Salvando...'
-                        : 'Salvar selecao'}
+                        : 'Salvar colecao'}
                   </button>
                 </div>
                 {!isCreatingCollection && !selectedCollection ? (
@@ -6217,7 +6956,11 @@ function AdminPage() {
                             disabled={processingSourceDocumentDetection}
                             onClick={handleDetectSourceDocumentStickers}
                           >
-                            {processingSourceDocumentDetection ? 'Detectando...' : 'Detectar todas as figurinhas'}
+                            {processingSourceDocumentDetection
+                              ? 'Detectando...'
+                              : selectedSourceDocumentHasDetectedStickers
+                                ? 'Redetectar tudo'
+                                : 'Detectar todas as figurinhas'}
                           </button>
                           <button
                             type="button"
@@ -6583,18 +7326,29 @@ function AdminPage() {
                                   ? 'Limpar pendentes'
                                   : 'Selecionar pendentes'}
                               </button>
-                                <button
-                                  type="button"
-                                  className="fig-secondary-button"
-                                  disabled={!selectedDetectedStickerIds.length}
-                                  onClick={() => setSelectedDetectedStickerIds([])}
-                                >
-                                  Limpar selecao
-                                </button>
                               <button
                                 type="button"
                                 className="fig-secondary-button"
-                                disabled={discardingDetectedStickers || !selectedDetectedStickerIds.length}
+                                disabled={!selectedDetectedStickerIds.length}
+                                onClick={() => setSelectedDetectedStickerIds([])}
+                              >
+                                Limpar selecao
+                              </button>
+                              <button
+                                type="button"
+                                className="fig-secondary-button"
+                                disabled={
+                                  unassigningDetectedStickers ||
+                                  !selectedAssignedSourceDetectedStickers.length
+                                }
+                                onClick={handleUnassignSourceDetectedStickers}
+                              >
+                                {unassigningDetectedStickers ? 'Voltando...' : 'Voltar para pendente'}
+                              </button>
+                              <button
+                                type="button"
+                                className="fig-secondary-button"
+                                disabled={discardingDetectedStickers || !selectedPendingSourceDetectedStickers.length}
                                 onClick={handleDiscardSourceDetectedStickers}
                               >
                                 {discardingDetectedStickers ? 'Descartando...' : 'Descartar'}
@@ -6604,7 +7358,7 @@ function AdminPage() {
                                 className="fig-primary-button"
                                 disabled={
                                   assigningDetectedStickers ||
-                                  !selectedDetectedStickerIds.length ||
+                                  !selectedPendingSourceDetectedStickers.length ||
                                   !sourceDetectedCollectionId
                                 }
                                 onClick={handleAssignSourceDetectedStickers}
@@ -7347,6 +8101,44 @@ function AdminPage() {
                     <span>Nome, data, altura, peso e cidade/time ficam sobre a segunda camada.</span>
                   </div>
                 </div>
+                {customTemplatePreviewLayers.length ? (
+                  <div className="fig-helper-strip fig-helper-strip--card fig-helper-strip--preview">
+                    <div className="fig-manual-editor-preview fig-manual-editor-preview--admin">
+                      <div className="fig-manual-sticker-stage fig-manual-sticker-stage--admin">
+                        {customTemplatePreviewLayers.map(layer => (
+                          <img
+                            key={layer.id || `${layer.layer_type}-${layer.z_index}`}
+                            className="fig-manual-stage-layer"
+                            src={apiFileUrl(layer.file_path)}
+                            alt={layer.label || suggestedCustomTemplateName}
+                            style={{ zIndex: Number(layer.z_index || 0) }}
+                          />
+                        ))}
+                        {customTemplatePreviewTextSlots.map(slot => (
+                          <div
+                            key={slot.id || slot.field_name}
+                            className={`fig-manual-stage-text fig-manual-stage-text--${slot.field_name.toLowerCase()}`}
+                            style={{
+                              left: `${slot.x * 100}%`,
+                              top: `${slot.y * 100}%`,
+                              width: `${slot.width * 100}%`,
+                              fontSize: `${Math.max(6, slot.font_size)}px`,
+                              fontWeight: slot.font_weight || '700',
+                              textAlign: slot.text_align || 'left',
+                              color: slot.color || '#ffffff'
+                            }}
+                          >
+                            {customTemplateSampleTextValue(slot.field_name)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <strong>Preview ao vivo</strong>
+                      <span>Os textos acima reagem em tempo real enquanto voce ajusta posicao, largura e fonte.</span>
+                    </div>
+                  </div>
+                ) : null}
                 <div className="fig-admin-stack">
                   {standardCustomTemplateLayers.map(({ layer, index }) => (
                     <div key={`${layer.id || 'new'}-${index}`} className="fig-helper-strip fig-helper-strip--card fig-template-layer-card">
@@ -7408,6 +8200,86 @@ function AdminPage() {
                   <div>
                     <strong>Esses textos ficam sobre a faixa de informacoes</strong>
                     <span>Nome, data de nascimento, altura, peso e cidade/time.</span>
+                  </div>
+                </div>
+                <div className="fig-helper-strip fig-helper-strip--card">
+                  <div>
+                    <strong>Aplicar em lote</strong>
+                    <span>Use valores positivos ou negativos para mover todos os textos juntos sem editar campo por campo.</span>
+                  </div>
+                  <div className="fig-form-grid">
+                    <label className="fig-field">
+                      <span>Delta X</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={customTemplateTextBulkForm.delta_x}
+                        onChange={event => setCustomTemplateTextBulkForm(current => ({ ...current, delta_x: event.target.value }))}
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Delta Y</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={customTemplateTextBulkForm.delta_y}
+                        onChange={event => setCustomTemplateTextBulkForm(current => ({ ...current, delta_y: event.target.value }))}
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Delta largura</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={customTemplateTextBulkForm.delta_width}
+                        onChange={event => setCustomTemplateTextBulkForm(current => ({ ...current, delta_width: event.target.value }))}
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Delta fonte</span>
+                      <input
+                        type="number"
+                        step="1"
+                        value={customTemplateTextBulkForm.delta_font_size}
+                        onChange={event => setCustomTemplateTextBulkForm(current => ({ ...current, delta_font_size: event.target.value }))}
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Peso para todos</span>
+                      <input
+                        value={customTemplateTextBulkForm.font_weight}
+                        onChange={event => setCustomTemplateTextBulkForm(current => ({ ...current, font_weight: event.target.value }))}
+                        placeholder="700"
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Alinhamento para todos</span>
+                      <input
+                        value={customTemplateTextBulkForm.text_align}
+                        onChange={event => setCustomTemplateTextBulkForm(current => ({ ...current, text_align: event.target.value }))}
+                        placeholder="center"
+                      />
+                    </label>
+                    <label className="fig-field">
+                      <span>Cor para todos</span>
+                      <input
+                        value={customTemplateTextBulkForm.color}
+                        onChange={event => setCustomTemplateTextBulkForm(current => ({ ...current, color: event.target.value }))}
+                        placeholder="#ffffff"
+                      />
+                    </label>
+                  </div>
+                  <div className="fig-custom-base-card-actions">
+                    <button type="button" className="fig-secondary-button" onClick={applyBulkCustomTemplateTextAdjustments}>
+                      Aplicar em todos
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-inline-link"
+                      onClick={() => setCustomTemplateTextBulkForm(createEmptyCustomTemplateTextBulkForm())}
+                    >
+                      Resetar lote
+                    </button>
                   </div>
                 </div>
                 <div className="fig-admin-stack">

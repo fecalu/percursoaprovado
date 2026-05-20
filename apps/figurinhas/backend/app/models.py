@@ -14,6 +14,14 @@ class CollectionStatus(str, enum.Enum):
     PUBLICADA = "PUBLICADA"
 
 
+class CollectionType(str, enum.Enum):
+    SELECAO = "SELECAO"
+    ESCUDOS = "ESCUDOS"
+    LEGENDS = "LEGENDS"
+    ESPECIAL = "ESPECIAL"
+    PARCEIROS = "PARCEIROS"
+
+
 class StickerCategory(str, enum.Enum):
     JOGADOR = "JOGADOR"
     GOLEIRO = "GOLEIRO"
@@ -148,6 +156,11 @@ class Collection(Base):
     slug: Mapped[str] = mapped_column(String(150), unique=True, nullable=False, index=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    collection_type: Mapped[CollectionType] = mapped_column(
+        Enum(CollectionType), default=CollectionType.SELECAO, nullable=False
+    )
+    display_group_order: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    display_item_order: Mapped[int] = mapped_column(Integer, default=999, nullable=False)
     is_system: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     status: Mapped[CollectionStatus] = mapped_column(
         Enum(CollectionStatus), default=CollectionStatus.RASCUNHO, nullable=False

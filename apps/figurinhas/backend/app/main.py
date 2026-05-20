@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import traceback
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Response, UploadFile, status
@@ -111,11 +112,13 @@ from .services import (
     create_print_order,
     crop_sticker_image,
     discard_source_detected_stickers,
+    unassign_source_detected_stickers,
     duplicate_page_selection_block,
     duplicate_blocks_from_previous_source_page,
     delete_source_document_record,
     delete_custom_base_image,
     delete_album_record,
+    delete_collection_record,
     delete_custom_template_layer_image,
     delete_generated_stickers_for_session,
     ensure_album_slug_unique,
@@ -146,6 +149,7 @@ from .services import (
     load_prepared_portrait_bytes,
     page_to_response,
     page_layout_template_to_response,
+    pending_custom_sticker_unlock_matches_settings,
     source_document_page_to_response,
     source_detected_sticker_to_response,
     source_document_to_detail_response,
@@ -162,9 +166,12 @@ from .services import (
     sync_custom_sticker_unlock_status,
     sticker_to_response,
     normalize_legacy_custom_template_photo_visibility,
+    normalize_legacy_custom_template_zoom_limits,
+    normalize_collection_metadata,
     normalize_legacy_custom_template_text_layouts,
     normalize_custom_profile_type,
     normalize_template_text_slots,
+    cleanup_orphaned_source_document_artifacts,
     assign_source_detected_stickers,
     upsert_generated_sticker,
     validate_sticker_bounds,
@@ -302,6 +309,18 @@ def ensure_runtime_schema() -> None:
             if "sort_order" not in collection_columns:
                 connection.exec_driver_sql(
                     "ALTER TABLE figurinhas_collections ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0"
+                )
+            if "collection_type" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN collection_type VARCHAR(30) NOT NULL DEFAULT 'SELECAO'"
+                )
+            if "display_group_order" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN display_group_order INTEGER NOT NULL DEFAULT 1"
+                )
+            if "display_item_order" not in collection_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_collections ADD COLUMN display_item_order INTEGER NOT NULL DEFAULT 999"
                 )
             if "is_system" not in collection_columns:
                 connection.exec_driver_sql(
@@ -584,8 +603,11 @@ def startup() -> None:
     with OrmSession(engine) as db:
         ensure_default_album_assignments(db)
         ensure_default_custom_template_assignments(db)
+        normalize_collection_metadata(db)
+        cleanup_orphaned_source_document_artifacts(db)
         normalize_legacy_custom_template_text_layouts(db)
         normalize_legacy_custom_template_photo_visibility(db)
+        normalize_legacy_custom_template_zoom_limits(db)
         get_or_create_service_settings(db)
         db.commit()
 
@@ -647,22 +669,22 @@ def apply_custom_template_payload(template: CustomStickerTemplate, payload: Cust
     if payload.photo_slot is None:
         template.photo_slot = None
     else:
-        template.photo_slot = CustomStickerTemplatePhotoSlot(
-            x=payload.photo_slot.x,
-            y=payload.photo_slot.y,
-            width=payload.photo_slot.width,
-            height=payload.photo_slot.height,
-            default_scale=payload.photo_slot.default_scale,
-            min_scale=payload.photo_slot.min_scale,
-            max_scale=payload.photo_slot.max_scale,
-            portrait_z_index=payload.photo_slot.portrait_z_index,
-            anchor_x=payload.photo_slot.anchor_x,
-            anchor_y=payload.photo_slot.anchor_y,
-            visible_x=payload.photo_slot.visible_x,
-            visible_y=payload.photo_slot.visible_y,
-            visible_width=payload.photo_slot.visible_width,
-            visible_height=payload.photo_slot.visible_height,
-        )
+        photo_slot = template.photo_slot or CustomStickerTemplatePhotoSlot()
+        photo_slot.x = payload.photo_slot.x
+        photo_slot.y = payload.photo_slot.y
+        photo_slot.width = payload.photo_slot.width
+        photo_slot.height = payload.photo_slot.height
+        photo_slot.default_scale = payload.photo_slot.default_scale
+        photo_slot.min_scale = payload.photo_slot.min_scale
+        photo_slot.max_scale = payload.photo_slot.max_scale
+        photo_slot.portrait_z_index = payload.photo_slot.portrait_z_index
+        photo_slot.anchor_x = payload.photo_slot.anchor_x
+        photo_slot.anchor_y = payload.photo_slot.anchor_y
+        photo_slot.visible_x = payload.photo_slot.visible_x
+        photo_slot.visible_y = payload.photo_slot.visible_y
+        photo_slot.visible_width = payload.photo_slot.visible_width
+        photo_slot.visible_height = payload.photo_slot.visible_height
+        template.photo_slot = photo_slot
 
     template.text_slots.clear()
     for slot in payload.text_slots:
@@ -678,7 +700,6 @@ def apply_custom_template_payload(template: CustomStickerTemplate, payload: Cust
                 color=(slot.color or "").strip() or None,
             )
         )
-    normalize_template_text_slots(template)
 
 
 def selected_stickers_for_album_or_400(
@@ -937,6 +958,7 @@ async def create_or_replace_my_sticker_job(
     weight_text: str | None = Form(default=None, max_length=40),
     city_or_team: str | None = Form(default=None, max_length=150),
     prepared_cutout_token: str | None = Form(default=None, max_length=120),
+    prepared_portrait: UploadFile | None = File(default=None),
     photo_offset_x: float | None = Form(default=0.0),
     photo_offset_y: float | None = Form(default=0.0),
     photo_scale: float | None = Form(default=1.0),
@@ -958,6 +980,21 @@ async def create_or_replace_my_sticker_job(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"A foto enviada passou do limite de {settings.custom_upload_limit_mb} MB.",
         )
+    prepared_portrait_bytes: bytes | None = None
+    if prepared_portrait and prepared_portrait.filename:
+        if prepared_portrait.content_type and not prepared_portrait.content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="O ajuste fino da foto precisa ser enviado como imagem PNG valida.",
+            )
+        prepared_portrait_bytes = await prepared_portrait.read()
+        if not prepared_portrait_bytes:
+            prepared_portrait_bytes = None
+        elif len(prepared_portrait_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"O ajuste fino da foto passou do limite de {settings.custom_upload_limit_mb} MB.",
+            )
 
     is_ai_job = requested_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
     steps = (
@@ -992,7 +1029,7 @@ async def create_or_replace_my_sticker_job(
         worker_db = SessionLocal()
         try:
             album = load_album_by_slug_or_fail(worker_db, album_slug)
-            prepared_portrait_bytes = load_prepared_portrait_bytes(
+            resolved_prepared_portrait_bytes = prepared_portrait_bytes or load_prepared_portrait_bytes(
                 album,
                 session_token=session_token,
                 asset_token=prepared_cutout_token,
@@ -1013,7 +1050,7 @@ async def create_or_replace_my_sticker_job(
                 weight_text=weight_text,
                 city_or_team=city_or_team,
                 uploaded_photo_bytes=uploaded_photo_bytes,
-                prepared_portrait_bytes=prepared_portrait_bytes,
+                prepared_portrait_bytes=resolved_prepared_portrait_bytes,
                 photo_offset_x=photo_offset_x,
                 photo_offset_y=photo_offset_y,
                 photo_scale=photo_scale,
@@ -1038,11 +1075,13 @@ async def create_or_replace_my_sticker_job(
                 message=str(err),
             )
         except Exception as err:
+            traceback.print_exc()
+            error_message = str(err).strip() or "Nao foi possivel concluir a sua figurinha agora."
             public_progress_jobs.update(
                 job.id,
                 status="FALHOU",
-                error="Nao foi possivel concluir a sua figurinha agora.",
-                message=str(err),
+                error=error_message,
+                message=error_message,
             )
         finally:
             worker_db.close()
@@ -1066,6 +1105,7 @@ async def create_or_replace_my_sticker(
     weight_text: str | None = Form(default=None, max_length=40),
     city_or_team: str | None = Form(default=None, max_length=150),
     prepared_cutout_token: str | None = Form(default=None, max_length=120),
+    prepared_portrait: UploadFile | None = File(default=None),
     photo_offset_x: float | None = Form(default=0.0),
     photo_offset_y: float | None = Form(default=0.0),
     photo_scale: float | None = Form(default=1.0),
@@ -1087,9 +1127,24 @@ async def create_or_replace_my_sticker(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"A foto enviada passou do limite de {settings.custom_upload_limit_mb} MB.",
         )
+    prepared_portrait_bytes: bytes | None = None
+    if prepared_portrait and prepared_portrait.filename:
+        if prepared_portrait.content_type and not prepared_portrait.content_type.startswith("image/"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="O ajuste fino da foto precisa ser enviado como imagem PNG valida.",
+            )
+        prepared_portrait_bytes = await prepared_portrait.read()
+        if not prepared_portrait_bytes:
+            prepared_portrait_bytes = None
+        elif len(prepared_portrait_bytes) > settings.custom_upload_limit_mb * 1024 * 1024:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"O ajuste fino da foto passou do limite de {settings.custom_upload_limit_mb} MB.",
+            )
 
     try:
-        prepared_portrait_bytes = load_prepared_portrait_bytes(
+        prepared_portrait_bytes = prepared_portrait_bytes or load_prepared_portrait_bytes(
             album,
             session_token=session_token,
             asset_token=prepared_cutout_token,
@@ -1201,6 +1256,7 @@ def _get_my_sticker_unlock_by_type(
     db: Session,
 ) -> dict | None:
     album = load_album_by_slug_or_fail(db, album_slug)
+    service_settings = get_or_create_service_settings(db)
     unlock = load_latest_custom_sticker_unlock(
         db,
         album_id=album.id,
@@ -1211,9 +1267,18 @@ def _get_my_sticker_unlock_by_type(
         return None
     if unlock.status == CustomStickerUnlockStatus.PENDENTE:
         sync_custom_sticker_unlock_status(unlock)
+        if unlock.status == CustomStickerUnlockStatus.PENDENTE and not pending_custom_sticker_unlock_matches_settings(
+            unlock,
+            service_settings,
+            unlock_type,
+        ):
+            unlock.status = CustomStickerUnlockStatus.EXPIRADO
+            unlock.mp_status_detail = "price_changed"
         db.commit()
         db.refresh(unlock)
-    return custom_sticker_unlock_to_response(unlock, get_or_create_service_settings(db))
+        if unlock.status == CustomStickerUnlockStatus.EXPIRADO and unlock.mp_status_detail == "price_changed":
+            return None
+    return custom_sticker_unlock_to_response(unlock, service_settings)
 
 
 def _create_my_sticker_unlock_by_type(
@@ -1663,6 +1728,31 @@ def discard_detected_source_stickers(
     try:
         document = load_source_document_or_fail(db, document_id)
         response = discard_source_detected_stickers(
+            db,
+            document,
+            detected_sticker_ids=payload.detected_sticker_ids,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    db.commit()
+    return response
+
+
+@app.post(
+    "/admin/source-documents/{document_id}/unassign-detected-stickers",
+    response_model=SourceDetectedStickerBulkActionResponse,
+    dependencies=[Depends(require_admin)],
+)
+def unassign_detected_source_stickers(
+    document_id: int,
+    payload: SourceDetectedStickerBulkActionRequest,
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        document = load_source_document_or_fail(db, document_id)
+        response = unassign_source_detected_stickers(
             db,
             document,
             detected_sticker_ids=payload.detected_sticker_ids,
@@ -2349,6 +2439,9 @@ def create_collection(payload: CollectionCreate, db: Session = Depends(get_db)) 
         name=payload.name.strip(),
         slug=slug,
         description=(payload.description or "").strip() or None,
+        collection_type=payload.collection_type,
+        display_group_order=payload.display_group_order,
+        display_item_order=payload.display_item_order,
         sort_order=payload.sort_order,
     )
     db.add(collection)
@@ -2366,6 +2459,9 @@ def update_collection(collection_id: int, payload: CollectionUpdate, db: Session
     collection.name = payload.name.strip()
     collection.slug = slug
     collection.description = (payload.description or "").strip() or None
+    collection.collection_type = payload.collection_type
+    collection.display_group_order = payload.display_group_order
+    collection.display_item_order = payload.display_item_order
     collection.sort_order = payload.sort_order
     db.commit()
     db.refresh(collection)
@@ -2382,6 +2478,14 @@ def assign_collection_album(collection_id: int, payload: CollectionAlbumAssign, 
     db.refresh(collection)
     stats = collection_stats(db, [collection.id])
     return collection_to_response(collection, stats.get(collection.id, {}))
+
+
+@app.delete("/admin/collections/{collection_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(require_admin)])
+def delete_admin_collection(collection_id: int, db: Session = Depends(get_db)) -> Response:
+    collection = load_collection_or_fail(db, collection_id)
+    delete_collection_record(db, collection)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.get("/admin/collections/{collection_id}", response_model=CollectionResponse, dependencies=[Depends(require_admin)])

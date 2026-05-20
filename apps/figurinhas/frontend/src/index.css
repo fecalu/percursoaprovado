@@ -174,6 +174,32 @@ a {
   gap: 0.55rem;
 }
 
+.fig-collection-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.fig-collection-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.fig-collection-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fig-collection-group-head span {
+  color: #607286;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .fig-sidebar-subsection,
 .fig-sidebar-summary {
   padding-top: 0.25rem;
@@ -1419,12 +1445,134 @@ a {
   gap: 0.75rem;
 }
 
+.fig-mask-editor-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(17, 34, 53, 0.62);
+  backdrop-filter: blur(10px);
+}
+
+.fig-mask-editor-shell {
+  width: min(980px, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0.99), rgba(241, 247, 252, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 30px 70px rgba(17, 34, 53, 0.26);
+}
+
+.fig-mask-editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.fig-mask-editor-copy {
+  margin: 0.18rem 0 0;
+  color: #5a6c82;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.fig-mask-editor-stage {
+  position: relative;
+  min-height: 220px;
+  display: grid;
+  place-items: center;
+  padding: 0.9rem;
+  border-radius: 24px;
+  background:
+    linear-gradient(45deg, rgba(17, 34, 53, 0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(17, 34, 53, 0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(17, 34, 53, 0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(17, 34, 53, 0.06) 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+  border: 1px solid rgba(17, 34, 53, 0.08);
+}
+
+.fig-mask-editor-canvas {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(58vh, 640px);
+  display: block;
+  border-radius: 18px;
+  background: transparent;
+  box-shadow: 0 18px 42px rgba(17, 34, 53, 0.14);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.fig-mask-editor-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #5a6c82;
+  font-weight: 700;
+  background: rgba(248, 251, 255, 0.82);
+  border-radius: inherit;
+}
+
+.fig-mask-editor-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.fig-mask-editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.fig-mask-editor-tools .fig-secondary-button,
+.fig-mask-editor-tools .fig-primary-button {
+  white-space: normal;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.fig-mask-editor-tools--compact {
+  justify-content: flex-end;
+}
+
+.fig-mask-editor-tools .fig-secondary-button.is-active {
+  border-color: rgba(18, 92, 68, 0.34);
+  background: rgba(18, 92, 68, 0.12);
+  color: #125c44;
+  box-shadow: 0 10px 24px rgba(18, 92, 68, 0.12);
+}
+
+.fig-range-field--mask {
+  min-width: min(280px, 100%);
+}
+
 .fig-manual-editor-preview {
   position: relative;
   z-index: 0;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+}
+
+.fig-manual-editor-preview--admin {
+  min-width: min(320px, 100%);
 }
 
 .fig-manual-sticker-stage {
@@ -1438,6 +1586,10 @@ a {
   overflow: hidden;
   background: linear-gradient(180deg, rgba(230, 238, 245, 0.9), rgba(244, 247, 250, 0.94));
   box-shadow: 0 22px 44px rgba(17, 34, 53, 0.14);
+}
+
+.fig-manual-sticker-stage--admin {
+  width: min(100%, 360px);
 }
 
 .fig-manual-stage-layer,
@@ -1560,6 +1712,12 @@ a {
   flex-wrap: wrap;
   gap: 0.65rem;
   margin-top: 0.2rem;
+}
+
+.fig-photo-source-actions .fig-secondary-button,
+.fig-photo-source-actions .fig-primary-button {
+  white-space: normal;
+  line-height: 1.2;
 }
 
 .fig-hidden-file-input {
@@ -2687,6 +2845,45 @@ a {
     justify-content: stretch;
   }
 
+  .fig-mask-editor-shell {
+    max-height: calc(100vh - 1rem);
+    padding: 0.9rem;
+    border-radius: 24px;
+  }
+
+  .fig-mask-editor-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fig-mask-editor-toolbar {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .fig-mask-editor-tools,
+  .fig-mask-editor-tools--compact {
+    justify-content: stretch;
+  }
+
+  .fig-mask-editor-tools > * {
+    flex: 1 1 calc(50% - 0.4rem);
+  }
+
+  .fig-range-field--mask {
+    min-width: 0;
+  }
+
+  .fig-mask-editor-stage {
+    min-height: 180px;
+    padding: 0.7rem;
+  }
+
+  .fig-mask-editor-canvas {
+    width: 100%;
+    max-height: 46vh;
+  }
+
   .fig-modal-backdrop {
     padding: 1rem;
   }
@@ -2838,6 +3035,22 @@ a {
     overflow-x: auto;
     padding-bottom: 0.18rem;
     scrollbar-width: none;
+  }
+
+  .fig-mobile-collection-group {
+    min-width: max-content;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .fig-mobile-collection-group-title {
+    padding-left: 0.1rem;
+    color: #607286;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .fig-mobile-collection-strip::-webkit-scrollbar {
@@ -3013,8 +3226,11 @@ a {
   }
 
   .fig-photo-source-actions .fig-secondary-button {
-    flex: 1 1 0;
+    flex: 1 1 calc(50% - 0.35rem);
     min-width: 0;
+    min-height: 44px;
+    padding: 0.72rem 0.72rem;
+    font-size: 0.82rem;
   }
 
   .fig-custom-preview {
@@ -3178,9 +3394,18 @@ a {
     backdrop-filter: blur(12px);
   }
 
+  .fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
   .fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile .fig-primary-button,
   .fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile .fig-secondary-button {
     min-height: 48px;
+    white-space: normal;
+    line-height: 1.2;
+    min-width: 0;
   }
 
   .fig-modal-shell--public-flow .fig-order-choice-grid {

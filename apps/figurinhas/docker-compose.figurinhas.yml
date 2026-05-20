@@ -36,7 +36,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_BASE_PATH: /figurinhas/
+        VITE_BASE_PATH: /
     container_name: figurinhas_frontend
     restart: unless-stopped
     depends_on:
