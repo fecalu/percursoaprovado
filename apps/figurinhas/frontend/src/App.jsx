@@ -1107,6 +1107,7 @@ function PublicPage() {
   const [orderFormOpen, setOrderFormOpen] = useState(false)
   const [mobileAlbumPickerOpen, setMobileAlbumPickerOpen] = useState(false)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+  const [mobileCollectionTypeFilter, setMobileCollectionTypeFilter] = useState('SELECAO')
   const [donationModalOpen, setDonationModalOpen] = useState(false)
   const [customUnlockModalOpen, setCustomUnlockModalOpen] = useState(false)
   const [customUnlockContext, setCustomUnlockContext] = useState('MANUAL_PDF')
@@ -1164,6 +1165,13 @@ function PublicPage() {
         }))
         .filter(group => group.items.length > 0),
     [availableCollections]
+  )
+  const activeMobileCollectionGroup = useMemo(
+    () =>
+      groupedAvailableCollections.find(group => group.type === mobileCollectionTypeFilter) ||
+      groupedAvailableCollections[0] ||
+      null,
+    [groupedAvailableCollections, mobileCollectionTypeFilter]
   )
   const selectedCollection = useMemo(
     () => availableCollections.find(collection => collection.slug === selectedCollectionSlug) || null,
@@ -1766,6 +1774,18 @@ function PublicPage() {
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
   }, [mobileAlbumPickerOpen, mobileFilterOpen])
+
+  useEffect(() => {
+    if (!groupedAvailableCollections.length) return
+    if (!groupedAvailableCollections.some(group => group.type === mobileCollectionTypeFilter)) {
+      setMobileCollectionTypeFilter(groupedAvailableCollections[0].type)
+    }
+  }, [groupedAvailableCollections, mobileCollectionTypeFilter])
+
+  useEffect(() => {
+    if (!selectedCollection?.collection_type) return
+    setMobileCollectionTypeFilter(selectedCollection.collection_type)
+  }, [selectedCollectionSlug])
 
   useEffect(() => {
     if (!orderFormOpen) {
@@ -2379,11 +2399,31 @@ function PublicPage() {
           </div>
 
           {selectedAlbum ? (
-            <div className="fig-mobile-collection-strip">
-              {groupedAvailableCollections.map(group => (
-                <div key={group.type} className="fig-mobile-collection-group">
-                  <div className="fig-mobile-collection-group-title">{group.label}</div>
-                  {group.items.map(collection => (
+            <div className="fig-mobile-collections-card">
+              <div className="fig-mobile-collections-head">
+                <div className="fig-mobile-collections-copy">
+                  <span className="fig-mobile-collections-label">Colecoes</span>
+                  <strong>{selectedCollection?.name || 'Escolha uma colecao'}</strong>
+                  <small>{availableCollections.length} colecao(oes) disponivel(is)</small>
+                </div>
+              </div>
+
+              <div className="fig-mobile-collection-type-strip">
+                {groupedAvailableCollections.map(group => (
+                  <button
+                    key={group.type}
+                    type="button"
+                    className={`fig-mobile-collection-type-pill${group.type === activeMobileCollectionGroup?.type ? ' is-active' : ''}`}
+                    onClick={() => setMobileCollectionTypeFilter(group.type)}
+                  >
+                    {group.label}
+                  </button>
+                ))}
+              </div>
+
+              {activeMobileCollectionGroup ? (
+                <div className="fig-mobile-collection-strip">
+                  {activeMobileCollectionGroup.items.map(collection => (
                     <button
                       key={collection.id}
                       type="button"
@@ -2399,7 +2439,7 @@ function PublicPage() {
                     </button>
                   ))}
                 </div>
-              ))}
+              ) : null}
             </div>
           ) : null}
 
