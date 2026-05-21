@@ -3896,16 +3896,17 @@ def service_settings_to_response(service_settings: ServiceSettings, *, include_s
         "pix_holder": service_settings.pix_holder,
         "donation_message": service_settings.donation_message,
         "pickup_note": service_settings.pickup_note,
+        # Public flow uses these base previews to show the available AI model.
+        "custom_base_homem_path": service_settings.custom_base_homem_path,
+        "custom_base_mulher_path": service_settings.custom_base_mulher_path,
+        "custom_base_crianca_path": (
+            service_settings.custom_base_menino_path or service_settings.custom_base_menina_path
+        ),
     }
     if include_sensitive:
         response.update(
             {
                 "custom_prompt_template": service_settings.custom_prompt_template or DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE,
-                "custom_base_homem_path": service_settings.custom_base_homem_path,
-                "custom_base_mulher_path": service_settings.custom_base_mulher_path,
-                "custom_base_crianca_path": (
-                    service_settings.custom_base_menino_path or service_settings.custom_base_menina_path
-                ),
                 "custom_base_menino_path": service_settings.custom_base_menino_path,
                 "custom_base_menina_path": service_settings.custom_base_menina_path,
             }

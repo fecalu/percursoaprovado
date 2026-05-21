@@ -1151,6 +1151,7 @@ function PublicPage() {
   const [mobilePrintGuideOpen, setMobilePrintGuideOpen] = useState(false)
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [mobileCollectionTypeFilter, setMobileCollectionTypeFilter] = useState('SELECAO')
+  const [desktopCollectionTypeFilter, setDesktopCollectionTypeFilter] = useState('SELECAO')
   const [donationModalOpen, setDonationModalOpen] = useState(false)
   const [customUnlockModalOpen, setCustomUnlockModalOpen] = useState(false)
   const [customUnlockContext, setCustomUnlockContext] = useState('MANUAL_PDF')
@@ -1215,6 +1216,13 @@ function PublicPage() {
       groupedAvailableCollections[0] ||
       null,
     [groupedAvailableCollections, mobileCollectionTypeFilter]
+  )
+  const activeDesktopCollectionGroup = useMemo(
+    () =>
+      groupedAvailableCollections.find(group => group.type === desktopCollectionTypeFilter) ||
+      groupedAvailableCollections[0] ||
+      null,
+    [groupedAvailableCollections, desktopCollectionTypeFilter]
   )
   const selectedCollection = useMemo(
     () => availableCollections.find(collection => collection.slug === selectedCollectionSlug) || null,
@@ -1900,8 +1908,20 @@ function PublicPage() {
   }, [groupedAvailableCollections, mobileCollectionTypeFilter])
 
   useEffect(() => {
+    if (!groupedAvailableCollections.length) return
+    if (!groupedAvailableCollections.some(group => group.type === desktopCollectionTypeFilter)) {
+      setDesktopCollectionTypeFilter(groupedAvailableCollections[0].type)
+    }
+  }, [groupedAvailableCollections, desktopCollectionTypeFilter])
+
+  useEffect(() => {
     if (!selectedCollection?.collection_type) return
     setMobileCollectionTypeFilter(selectedCollection.collection_type)
+  }, [selectedCollectionSlug])
+
+  useEffect(() => {
+    if (!selectedCollection?.collection_type) return
+    setDesktopCollectionTypeFilter(selectedCollection.collection_type)
   }, [selectedCollectionSlug])
 
   useEffect(() => {
@@ -2474,14 +2494,26 @@ function PublicPage() {
               <p className="fig-kicker">Colecoes</p>
               <h3>{selectedAlbum.name}</h3>
             </div>
-            <div className="fig-collection-groups">
+            <div className="fig-sidebar-group-filter">
               {groupedAvailableCollections.map(group => (
-                <div key={group.type} className="fig-collection-group">
+                <button
+                  key={group.type}
+                  type="button"
+                  className={`fig-sidebar-group-pill${group.type === activeDesktopCollectionGroup?.type ? ' is-active' : ''}`}
+                  onClick={() => setDesktopCollectionTypeFilter(group.type)}
+                >
+                  {group.label}
+                </button>
+              ))}
+            </div>
+            <div className="fig-collection-groups">
+              {activeDesktopCollectionGroup ? (
+                <div key={activeDesktopCollectionGroup.type} className="fig-collection-group">
                   <div className="fig-collection-group-head">
-                    <span>{group.label}</span>
+                    <span>{activeDesktopCollectionGroup.label}</span>
                   </div>
                   <div className="fig-collection-list fig-collection-list--nested">
-                    {group.items.map(collection => (
+                    {activeDesktopCollectionGroup.items.map(collection => (
                       <button
                         key={collection.id}
                         type="button"
@@ -2500,7 +2532,7 @@ function PublicPage() {
                     ))}
                   </div>
                 </div>
-              ))}
+              ) : null}
             </div>
           </div>
         ) : null}

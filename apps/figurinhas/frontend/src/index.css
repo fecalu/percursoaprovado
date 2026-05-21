@@ -133,6 +133,29 @@ a {
   gap: 1rem;
 }
 
+.fig-public-layout > .fig-sidebar-panel {
+  position: sticky;
+  top: 1rem;
+  align-self: start;
+  max-height: calc(100vh - 2rem);
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.fig-public-layout > .fig-sidebar-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fig-public-layout > .fig-sidebar-panel::-webkit-scrollbar-thumb {
+  background: rgba(17, 34, 53, 0.18);
+  border-radius: 999px;
+}
+
+.fig-public-layout > .fig-sidebar-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .fig-admin-sidebar-actions {
   display: flex;
   flex-direction: column;
@@ -198,6 +221,46 @@ a {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.fig-sidebar-group-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.fig-sidebar-group-pill {
+  min-height: 32px;
+  padding: 0.42rem 0.7rem;
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 248, 252, 0.98));
+  color: #5a6c82;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.fig-sidebar-group-pill:hover {
+  transform: translateY(-1px);
+  border-color: rgba(17, 34, 53, 0.18);
+  box-shadow: 0 10px 22px rgba(17, 34, 53, 0.06);
+}
+
+.fig-sidebar-group-pill.is-active {
+  border-color: rgba(31, 122, 77, 0.45);
+  background: linear-gradient(180deg, rgba(242, 250, 245, 0.98), rgba(233, 246, 238, 0.98));
+  color: #145237;
+  box-shadow:
+    0 14px 28px rgba(31, 122, 77, 0.11),
+    0 0 0 1px rgba(31, 122, 77, 0.08);
 }
 
 .fig-sidebar-subsection,
