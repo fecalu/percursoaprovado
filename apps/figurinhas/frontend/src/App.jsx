@@ -1230,25 +1230,25 @@ function PublicPage() {
   )
   const availablePdfExtras = useMemo(
     () => {
-      if (
-        !selectedCollection ||
-        (selectedCollection.collection_type || 'SELECAO') !== 'OUTROS' ||
-        selectedCollection.export_mode !== 'APPEND_FULL_PDF' ||
-        !(selectedCollection.page_count > 0 || selectedCollection.preview_image_path)
-      ) {
+      if (!selectedCollection || (selectedCollection.collection_type || 'SELECAO') !== 'OUTROS') {
         return []
       }
-      return [selectedCollection]
+      return availableCollections.filter(
+        collection =>
+          (collection.collection_type || 'SELECAO') === 'OUTROS' &&
+          collection.export_mode === 'APPEND_FULL_PDF' &&
+          (collection.page_count > 0 || collection.preview_image_path)
+      )
     },
-    [selectedCollection]
+    [availableCollections, selectedCollection]
   )
   const showPdfExtrasPanel = selectedCollection?.collection_type === 'OUTROS' && availablePdfExtras.length > 0
-  const supportsApplyExtraToAllSheets = useMemo(() => {
-    if (!selectedCollection) return false
-    const slug = (selectedCollection.slug || '').trim().toLowerCase()
-    const name = (selectedCollection.name || '').trim().toUpperCase()
+  function supportsApplyExtraToAllSheets(collection) {
+    if (!collection) return false
+    const slug = (collection.slug || '').trim().toLowerCase()
+    const name = (collection.name || '').trim().toUpperCase()
     return slug === 'verso' || name === 'VERSO'
-  }, [selectedCollection])
+  }
   const normalizedSelectedExportExtras = useMemo(
     () =>
       availablePdfExtras
@@ -2783,7 +2783,7 @@ function PublicPage() {
                     <div className="fig-export-extra-card-body">
                       <strong>{collection.name}</strong>
                       <span>PDF completo anexado no final</span>
-                      {supportsApplyExtraToAllSheets ? (
+                      {supportsApplyExtraToAllSheets(collection) ? (
                         <label className="fig-export-extra-toggle">
                           <input
                             type="checkbox"
