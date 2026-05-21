@@ -354,7 +354,7 @@ class StickerResponse(BaseModel):
     width_ratio: float
     height_ratio: float
     preview_path: str
-    crop_path: str
+    crop_path: str | None
     active: bool
     detected_automatically: bool
     ocr_name_raw: str | None
@@ -552,6 +552,11 @@ class AdminLoginRequest(BaseModel):
     password: str = Field(min_length=1)
 
 
+class AdminSessionResponse(BaseModel):
+    token: str
+    expires_at: datetime
+
+
 class ExportRequest(BaseModel):
     album_slug: str
     sticker_ids: list[int] = Field(default_factory=list)
@@ -572,7 +577,7 @@ class ExportResponse(BaseModel):
     file_name: str
 
 
-class ServiceConfigResponse(BaseModel):
+class PublicServiceConfigResponse(BaseModel):
     service_enabled: bool
     donation_enabled: bool
     custom_generation_mode: CustomTemplateCompositionMode
@@ -589,6 +594,9 @@ class ServiceConfigResponse(BaseModel):
     pix_holder: str | None
     donation_message: str | None
     pickup_note: str | None
+
+
+class ServiceConfigResponse(PublicServiceConfigResponse):
     custom_prompt_template: str | None = None
     custom_base_homem_path: str | None = None
     custom_base_mulher_path: str | None = None

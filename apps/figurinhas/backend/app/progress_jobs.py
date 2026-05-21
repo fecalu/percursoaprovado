@@ -2,9 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from queue import Full, Queue
 from threading import Lock, Thread
 from typing import Any, Callable
 import uuid
+
+from .config import get_settings
+
+
+settings = get_settings()
 
 
 @dataclass
@@ -26,10 +32,56 @@ class PublicProgressJob:
     updated_at: datetime = field(default_factory=datetime.utcnow)
 
 
+@dataclass
+class _QueuedPublicJob:
+    job_id: str
+    worker: Callable[[], None]
+
+
 class PublicProgressJobStore:
     def __init__(self) -> None:
         self._jobs: dict[str, PublicProgressJob] = {}
         self._lock = Lock()
+        self._queue: Queue[_QueuedPublicJob] = Queue(maxsize=max(1, settings.public_job_queue_limit))
+        self._workers_started = False
+        self._worker_count = max(1, settings.public_job_worker_count)
+        self._worker_lock = Lock()
+
+    def _ensure_workers(self) -> None:
+        if self._workers_started:
+            return
+        with self._worker_lock:
+            if self._workers_started:
+                return
+            for index in range(self._worker_count):
+                thread = Thread(
+                    target=self._worker_loop,
+                    name=f"fig-public-job-{index + 1}",
+                    daemon=True,
+                )
+                thread.start()
+            self._workers_started = True
+
+    def _worker_loop(self) -> None:
+        while True:
+            queued_job = self._queue.get()
+            try:
+                self.update(
+                    queued_job.job_id,
+                    status="PROCESSANDO",
+                    message=None,
+                )
+                try:
+                    queued_job.worker()
+                except Exception as err:  # pragma: no cover - defensive worker guard
+                    self.update(
+                        queued_job.job_id,
+                        status="FALHOU",
+                        error=str(err),
+                        message=str(err),
+                    )
+            finally:
+                self._queue.task_done()
 
     def _cleanup_locked(self) -> None:
         threshold = datetime.utcnow() - timedelta(hours=2)
@@ -65,6 +117,10 @@ class PublicProgressJobStore:
             )
             self._jobs[job.id] = job
             return job
+
+    def discard(self, job_id: str) -> None:
+        with self._lock:
+            self._jobs.pop(job_id, None)
 
     def get(self, job_id: str, *, session_token: str | None = None) -> PublicProgressJob | None:
         with self._lock:
@@ -105,16 +161,16 @@ class PublicProgressJobStore:
                 job.error = error
             job.updated_at = datetime.utcnow()
 
-    def run(self, job_id: str, worker: Callable[[], None]) -> None:
-        def _runner() -> None:
-            try:
-                worker()
-            except Exception as err:  # pragma: no cover - defensive thread guard
-                self.update(job_id, status="FALHOU", error=str(err))
+    def run(self, job_id: str, worker: Callable[[], None]) -> bool:
+        self._ensure_workers()
+        try:
+            self._queue.put_nowait(_QueuedPublicJob(job_id=job_id, worker=worker))
+        except Full:
+            return False
+        return True
 
-        thread = Thread(target=_runner, daemon=True)
-        thread.start()
+    def queued_count(self) -> int:
+        return self._queue.qsize()
 
 
 public_progress_jobs = PublicProgressJobStore()
-

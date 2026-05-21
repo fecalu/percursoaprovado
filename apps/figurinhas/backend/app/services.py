@@ -3654,7 +3654,7 @@ def load_print_order_or_fail(db: Session, order_id: int) -> PrintOrder:
     return order
 
 
-def collection_to_response(collection: Collection, stats: dict[str, int]) -> dict:
+def collection_to_response(collection: Collection, stats: dict[str, int], *, include_sensitive: bool = True) -> dict:
     preview_image_path = None
     if collection.pages:
         first_page = min(collection.pages, key=lambda page: (page.page_number, page.id))
@@ -3676,7 +3676,7 @@ def collection_to_response(collection: Collection, stats: dict[str, int]) -> dic
         "display_group_order": collection.display_group_order,
         "display_item_order": collection.display_item_order,
         "status": collection.status,
-        "source_pdf_path": collection.source_pdf_path,
+        "source_pdf_path": collection.source_pdf_path if include_sensitive else None,
         "preview_image_path": preview_image_path,
         "created_at": collection.created_at,
         "updated_at": collection.updated_at,
@@ -3834,7 +3834,7 @@ def source_document_to_detail_response(document: SourceDocument) -> dict:
     return payload
 
 
-def sticker_to_response(sticker: Sticker) -> dict:
+def sticker_to_response(sticker: Sticker, *, include_sensitive: bool = True) -> dict:
     return {
         "id": sticker.id,
         "collection_id": sticker.collection_id,
@@ -3865,7 +3865,7 @@ def sticker_to_response(sticker: Sticker) -> dict:
         "width_ratio": sticker.width_ratio,
         "height_ratio": sticker.height_ratio,
         "preview_path": sticker.preview_path,
-        "crop_path": sticker.crop_path,
+        "crop_path": sticker.crop_path if include_sensitive else None,
         "active": sticker.active,
         "detected_automatically": sticker.detected_automatically,
         "ocr_name_raw": sticker.ocr_name_raw,
@@ -3878,8 +3878,8 @@ def sticker_to_response(sticker: Sticker) -> dict:
     }
 
 
-def service_settings_to_response(service_settings: ServiceSettings) -> dict:
-    return {
+def service_settings_to_response(service_settings: ServiceSettings, *, include_sensitive: bool = True) -> dict:
+    response = {
         "service_enabled": service_settings.service_enabled,
         "donation_enabled": service_settings.donation_enabled,
         "custom_generation_mode": service_settings.custom_generation_mode,
@@ -3896,15 +3896,21 @@ def service_settings_to_response(service_settings: ServiceSettings) -> dict:
         "pix_holder": service_settings.pix_holder,
         "donation_message": service_settings.donation_message,
         "pickup_note": service_settings.pickup_note,
-        "custom_prompt_template": service_settings.custom_prompt_template or DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE,
-        "custom_base_homem_path": service_settings.custom_base_homem_path,
-        "custom_base_mulher_path": service_settings.custom_base_mulher_path,
-        "custom_base_crianca_path": (
-            service_settings.custom_base_menino_path or service_settings.custom_base_menina_path
-        ),
-        "custom_base_menino_path": service_settings.custom_base_menino_path,
-        "custom_base_menina_path": service_settings.custom_base_menina_path,
     }
+    if include_sensitive:
+        response.update(
+            {
+                "custom_prompt_template": service_settings.custom_prompt_template or DEFAULT_CUSTOM_STICKER_PROMPT_TEMPLATE,
+                "custom_base_homem_path": service_settings.custom_base_homem_path,
+                "custom_base_mulher_path": service_settings.custom_base_mulher_path,
+                "custom_base_crianca_path": (
+                    service_settings.custom_base_menino_path or service_settings.custom_base_menina_path
+                ),
+                "custom_base_menino_path": service_settings.custom_base_menino_path,
+                "custom_base_menina_path": service_settings.custom_base_menina_path,
+            }
+        )
+    return response
 
 
 def custom_template_layer_inventory(template: CustomStickerTemplate | None) -> dict[CustomTemplateLayerType, int]:

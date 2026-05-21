@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 import base64
+import hashlib
+import hmac
+import time
 import traceback
+import uuid
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from threading import Lock
 
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Response, UploadFile, status
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import Session, selectinload
@@ -48,6 +53,7 @@ from .models import (
 )
 from .schemas import (
     AdminLoginRequest,
+    AdminSessionResponse,
     AlbumCreate,
     AlbumResponse,
     AlbumUpdate,
@@ -75,6 +81,7 @@ from .schemas import (
     PageSelectionBlockCreate,
     PageSelectionBlockUpdate,
     PublicProgressJobResponse,
+    PublicServiceConfigResponse,
     PageResponse,
     SourceDetectedStickerBulkActionRequest,
     SourceDetectedStickerBulkActionResponse,
@@ -185,6 +192,17 @@ from .progress_jobs import public_progress_jobs
 
 
 settings = get_settings()
+PUBLIC_FILE_PREFIXES = (
+    "pages/",
+    "crops/",
+    "custom_stickers/",
+    "custom_portraits/",
+    "custom_bases/",
+    "custom_template_layers/",
+    "source_document_pages/",
+    "source_detected/",
+)
+EXPORT_DOWNLOAD_TTL_SECONDS = 600
 
 app = FastAPI(title="Figurinhas API")
 app.add_middleware(
@@ -194,7 +212,170 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.mount("/files", StaticFiles(directory=str(settings.storage_root)), name="files")
+
+
+def _is_allowed_public_file_path(relative_path: str) -> bool:
+    normalized = (relative_path or "").strip().lstrip("/")
+    return bool(normalized) and any(normalized.startswith(prefix) for prefix in PUBLIC_FILE_PREFIXES)
+
+
+def _resolve_public_storage_path_or_404(relative_path: str) -> Path:
+    normalized = (relative_path or "").strip().lstrip("/")
+    if not _is_allowed_public_file_path(normalized):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Arquivo nao encontrado.")
+    file_path = (settings.storage_root / normalized).resolve()
+    try:
+        file_path.relative_to(settings.storage_root)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Arquivo nao encontrado.") from exc
+    if not file_path.exists() or not file_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Arquivo nao encontrado.")
+    return file_path
+
+
+def _build_export_download_signature(export_id: int, expires_at: int) -> str:
+    payload = f"{export_id}:{expires_at}".encode("utf-8")
+    secret = settings.export_signing_secret.encode("utf-8")
+    return hmac.new(secret, payload, hashlib.sha256).hexdigest()
+
+
+def _build_export_download_path(export_id: int, *, ttl_seconds: int = EXPORT_DOWNLOAD_TTL_SECONDS) -> str:
+    expires_at = int(time.time()) + max(60, ttl_seconds)
+    token = _build_export_download_signature(export_id, expires_at)
+    return f"/exports/{export_id}/download?expires={expires_at}&token={token}"
+
+
+def _validate_export_download_token_or_403(export_id: int, expires_at: int, token: str) -> None:
+    if expires_at < int(time.time()):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Link de download expirado.")
+    expected = _build_export_download_signature(export_id, expires_at)
+    if not hmac.compare_digest(expected, (token or "").strip()):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Link de download invalido.")
+
+
+class AdminSessionStore:
+    def __init__(self) -> None:
+        self._sessions: dict[str, float] = {}
+        self._lock = Lock()
+
+    def _cleanup_locked(self) -> None:
+        now = time.time()
+        expired = [token for token, expires_at in self._sessions.items() if expires_at <= now]
+        for token in expired:
+            self._sessions.pop(token, None)
+
+    def create(self, *, ttl_hours: int) -> tuple[str, datetime]:
+        token = uuid.uuid4().hex + uuid.uuid4().hex
+        expires_at = datetime.now(UTC) + timedelta(hours=max(1, ttl_hours))
+        with self._lock:
+            self._cleanup_locked()
+            self._sessions[token] = expires_at.timestamp()
+        return token, expires_at
+
+    def validate(self, token: str | None) -> bool:
+        normalized = (token or "").strip()
+        if not normalized:
+            return False
+        with self._lock:
+            self._cleanup_locked()
+            return normalized in self._sessions
+
+    def revoke(self, token: str | None) -> None:
+        normalized = (token or "").strip()
+        if not normalized:
+            return
+        with self._lock:
+            self._sessions.pop(normalized, None)
+
+
+class AdminLoginThrottle:
+    def __init__(self) -> None:
+        self._attempts: dict[str, list[float]] = {}
+        self._blocked_until: dict[str, float] = {}
+        self._lock = Lock()
+
+    def _cleanup_locked(self, *, now: float, window_seconds: int) -> None:
+        stale_keys = []
+        for key, attempts in self._attempts.items():
+            fresh = [stamp for stamp in attempts if stamp >= now - window_seconds]
+            if fresh:
+                self._attempts[key] = fresh
+            else:
+                stale_keys.append(key)
+        for key in stale_keys:
+            self._attempts.pop(key, None)
+        expired_blocks = [key for key, blocked_until in self._blocked_until.items() if blocked_until <= now]
+        for key in expired_blocks:
+            self._blocked_until.pop(key, None)
+
+    def check_or_raise(self, key: str) -> None:
+        now = time.time()
+        window_seconds = max(60, settings.admin_login_attempt_window_minutes * 60)
+        with self._lock:
+            self._cleanup_locked(now=now, window_seconds=window_seconds)
+            blocked_until = self._blocked_until.get(key)
+            if blocked_until and blocked_until > now:
+                wait_seconds = int(blocked_until - now)
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=f"Muitas tentativas de login. Tente novamente em {max(1, wait_seconds)} segundo(s).",
+                )
+
+    def register_failure(self, key: str) -> None:
+        now = time.time()
+        window_seconds = max(60, settings.admin_login_attempt_window_minutes * 60)
+        with self._lock:
+            self._cleanup_locked(now=now, window_seconds=window_seconds)
+            attempts = self._attempts.setdefault(key, [])
+            attempts.append(now)
+            if len(attempts) >= max(1, settings.admin_login_max_attempts):
+                self._blocked_until[key] = now + max(60, settings.admin_login_block_minutes * 60)
+                self._attempts.pop(key, None)
+
+    def reset(self, key: str) -> None:
+        with self._lock:
+            self._attempts.pop(key, None)
+            self._blocked_until.pop(key, None)
+
+
+admin_sessions = AdminSessionStore()
+admin_login_throttle = AdminLoginThrottle()
+
+
+class PublicRateLimiter:
+    def __init__(self) -> None:
+        self._hits: dict[str, list[float]] = {}
+        self._lock = Lock()
+
+    def _cleanup_locked(self, *, now: float, window_seconds: int) -> None:
+        stale_keys = []
+        for key, hits in self._hits.items():
+            fresh = [stamp for stamp in hits if stamp >= now - window_seconds]
+            if fresh:
+                self._hits[key] = fresh
+            else:
+                stale_keys.append(key)
+        for key in stale_keys:
+            self._hits.pop(key, None)
+
+    def enforce(self, *, bucket: str, subject: str, limit: int, window_seconds: int) -> None:
+        if limit <= 0:
+            return
+        now = time.time()
+        storage_key = f"{bucket}:{subject}"
+        with self._lock:
+            self._cleanup_locked(now=now, window_seconds=window_seconds)
+            hits = self._hits.setdefault(storage_key, [])
+            if len(hits) >= limit:
+                retry_after = max(1, int(window_seconds - (now - hits[0])))
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=f"Muitas requisicoes para esta operacao. Tente novamente em {retry_after} segundo(s).",
+                )
+            hits.append(now)
+
+
+public_rate_limiter = PublicRateLimiter()
 
 
 def _job_response(job) -> dict:
@@ -616,10 +797,29 @@ def ensure_runtime_schema() -> None:
                 )
 
 
+def ensure_runtime_indexes() -> None:
+    index_statements = (
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_collections_public_catalog ON figurinhas_collections (status, is_system, display_group_order, display_item_order, sort_order, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_collections_album_catalog ON figurinhas_collections (album_id, status, is_system, sort_order, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_stickers_collection_active_catalog ON figurinhas_stickers (collection_id, active, sort_order, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_stickers_collection_category_active ON figurinhas_stickers (collection_id, category, active, sort_order, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_documents_album_status ON figurinhas_source_documents (album_id, status, created_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_document_pages_document_page_number ON figurinhas_source_document_pages (document_id, page_number, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_detected_stickers_document_page_status ON figurinhas_source_detected_stickers (document_id, page_id, status, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_detected_stickers_assigned_status ON figurinhas_source_detected_stickers (assigned_collection_id, status, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_album_session_type_status ON figurinhas_custom_sticker_unlocks (album_id, session_token, unlock_type, status, created_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_print_orders_album_created ON figurinhas_print_orders (album_id, created_at, id)",
+    )
+    with engine.begin() as connection:
+        for statement in index_statements:
+            connection.exec_driver_sql(statement)
+
+
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_runtime_schema()
+    ensure_runtime_indexes()
     with OrmSession(engine) as db:
         ensure_default_album_assignments(db)
         ensure_default_custom_template_assignments(db)
@@ -632,9 +832,86 @@ def startup() -> None:
         db.commit()
 
 
-def require_admin(x_admin_token: str | None = Header(default=None, alias="X-Admin-Token")) -> None:
-    if x_admin_token != settings.admin_token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token administrativo invalido.")
+def _admin_login_client_key(request: Request) -> str:
+    forwarded_for = (request.headers.get("x-forwarded-for") or "").split(",")[0].strip()
+    if forwarded_for:
+        return forwarded_for
+    return request.client.host if request.client else "unknown"
+
+
+def _public_client_key(request: Request) -> str:
+    forwarded_for = (request.headers.get("x-forwarded-for") or "").split(",")[0].strip()
+    if forwarded_for:
+        return forwarded_for
+    return request.client.host if request.client else "unknown"
+
+
+def _session_subject(session_token: str | None) -> str | None:
+    normalized = (session_token or "").strip()
+    return normalized or None
+
+
+def _enforce_public_rate_limit(
+    *,
+    request: Request,
+    bucket: str,
+    limit: int,
+    session_token: str | None = None,
+) -> None:
+    window_seconds = max(10, settings.public_rate_limit_window_seconds)
+    public_rate_limiter.enforce(
+        bucket=bucket,
+        subject=f"ip:{_public_client_key(request)}",
+        limit=limit,
+        window_seconds=window_seconds,
+    )
+    session_subject = _session_subject(session_token)
+    if session_subject:
+        public_rate_limiter.enforce(
+            bucket=bucket,
+            subject=f"session:{session_subject}",
+            limit=limit,
+            window_seconds=window_seconds,
+        )
+
+
+def _verify_admin_password(password: str) -> bool:
+    candidate = (password or "").strip()
+    if not candidate:
+        return False
+    configured_hash = settings.admin_password_hash
+    if configured_hash:
+        try:
+            algorithm, iterations_text, salt, expected = configured_hash.split("$", 3)
+            if algorithm != "pbkdf2_sha256":
+                return False
+            derived = hashlib.pbkdf2_hmac(
+                "sha256",
+                candidate.encode("utf-8"),
+                salt.encode("utf-8"),
+                int(iterations_text),
+            ).hex()
+            return hmac.compare_digest(derived, expected)
+        except Exception:
+            return False
+    return hmac.compare_digest(candidate, settings.admin_token)
+
+
+def _extract_admin_session_token(authorization: str | None, x_admin_token: str | None) -> str:
+    normalized_auth = (authorization or "").strip()
+    if normalized_auth.lower().startswith("bearer "):
+        return normalized_auth[7:].strip()
+    return (x_admin_token or "").strip()
+
+
+def require_admin(
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_admin_token: str | None = Header(default=None, alias="X-Admin-Token"),
+) -> None:
+    session_token = _extract_admin_session_token(authorization, x_admin_token)
+    if admin_sessions.validate(session_token):
+        return
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sessao administrativa invalida ou expirada.")
 
 
 def load_custom_template_or_404(db: Session, template_id: int) -> CustomStickerTemplate:
@@ -764,17 +1041,37 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.get("/service-config", response_model=ServiceConfigResponse)
+@app.get("/files/{relative_path:path}")
+def download_public_file(relative_path: str) -> FileResponse:
+    file_path = _resolve_public_storage_path_or_404(relative_path)
+    return FileResponse(path=file_path, filename=file_path.name)
+
+
+@app.get("/service-config", response_model=PublicServiceConfigResponse)
 def get_public_service_config(db: Session = Depends(get_db)) -> dict:
     service_settings = get_or_create_service_settings(db)
-    return service_settings_to_response(service_settings)
+    return service_settings_to_response(service_settings, include_sensitive=False)
 
 
-@app.post("/admin/session")
-def admin_login(payload: AdminLoginRequest) -> dict[str, str]:
-    if payload.password != settings.admin_token:
+@app.post("/admin/session", response_model=AdminSessionResponse)
+def admin_login(payload: AdminLoginRequest, request: Request) -> dict:
+    client_key = _admin_login_client_key(request)
+    admin_login_throttle.check_or_raise(client_key)
+    if not _verify_admin_password(payload.password):
+        admin_login_throttle.register_failure(client_key)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Senha invalida.")
-    return {"token": payload.password}
+    admin_login_throttle.reset(client_key)
+    token, expires_at = admin_sessions.create(ttl_hours=settings.admin_session_ttl_hours)
+    return {"token": token, "expires_at": expires_at}
+
+
+@app.delete("/admin/session", status_code=status.HTTP_204_NO_CONTENT)
+def admin_logout(
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_admin_token: str | None = Header(default=None, alias="X-Admin-Token"),
+) -> Response:
+    admin_sessions.revoke(_extract_admin_session_token(authorization, x_admin_token))
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.get("/albums", response_model=list[AlbumResponse])
@@ -812,30 +1109,43 @@ def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
             key=collection_sort_key,
         )
         collection_payload = [
-            collection_to_response(collection, collection_stats_map.get(collection.id, {})) for collection in published_collections
+            collection_to_response(
+                collection,
+                collection_stats_map.get(collection.id, {}),
+                include_sensitive=False,
+            )
+            for collection in published_collections
         ]
         responses.append(album_to_response(album, album_stats_map.get(album.id, {}), collection_payload))
     return responses
 
 
 @app.get("/collections", response_model=list[CollectionResponse])
-def list_public_collections(db: Session = Depends(get_db)) -> list[dict]:
+def list_public_collections(
+    limit: int = Query(default=settings.public_collection_limit, ge=1, le=settings.public_collection_limit_max),
+    offset: int = Query(default=0, ge=0, le=5000),
+    db: Session = Depends(get_db),
+) -> list[dict]:
     collections = db.execute(
         select(Collection)
         .options(selectinload(Collection.album))
         .where(Collection.status == CollectionStatus.PUBLICADA, Collection.is_system.is_(False))
         .order_by(Collection.sort_order.asc(), Collection.name.asc(), Collection.id.asc())
-        .limit(settings.public_collection_limit)
+        .limit(limit)
+        .offset(offset)
     ).scalars().all()
     stats = collection_stats(db, [collection.id for collection in collections])
-    return [collection_to_response(collection, stats.get(collection.id, {})) for collection in collections]
+    return [
+        collection_to_response(collection, stats.get(collection.id, {}), include_sensitive=False)
+        for collection in collections
+    ]
 
 
 @app.get("/collections/{slug}", response_model=CollectionResponse)
 def get_public_collection(slug: str, db: Session = Depends(get_db)) -> dict:
     collection = load_collection_by_slug_or_fail(db, slug, public_only=True)
     stats = collection_stats(db, [collection.id])
-    return collection_to_response(collection, stats.get(collection.id, {}))
+    return collection_to_response(collection, stats.get(collection.id, {}), include_sensitive=False)
 
 
 @app.get("/collections/{slug}/stickers", response_model=list[StickerResponse])
@@ -843,6 +1153,8 @@ def list_public_stickers(
     slug: str,
     search: str | None = Query(default=None, max_length=120),
     category: StickerCategory | None = None,
+    limit: int = Query(default=settings.public_sticker_limit, ge=1, le=settings.public_sticker_limit_max),
+    offset: int = Query(default=0, ge=0, le=10000),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     collection = load_collection_by_slug_or_fail(db, slug, public_only=True)
@@ -856,8 +1168,9 @@ def list_public_stickers(
         statement = statement.where(Sticker.category == category)
     if search:
         statement = statement.where(Sticker.name.ilike(f"%{search.strip()}%"))
+    statement = statement.limit(limit).offset(offset)
     stickers = db.execute(statement).scalars().all()
-    return [sticker_to_response(sticker) for sticker in stickers]
+    return [sticker_to_response(sticker, include_sensitive=False) for sticker in stickers]
 
 
 @app.get("/custom-templates", response_model=list[CustomTemplatePublicOption])
@@ -889,16 +1202,23 @@ def get_my_sticker(
 ) -> dict | None:
     album = load_album_by_slug_or_fail(db, album_slug)
     sticker = load_generated_sticker_for_session(db, album.id, session_token)
-    return sticker_to_response(sticker) if sticker else None
+    return sticker_to_response(sticker, include_sensitive=False) if sticker else None
 
 
 @app.post("/albums/{album_slug}/my-sticker-cutout-jobs", response_model=PublicProgressJobResponse)
 async def create_my_sticker_cutout_job(
+    request: Request,
     album_slug: str,
     session_token: str = Form(..., min_length=12, max_length=120),
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="my_sticker_cutout_job",
+        limit=settings.public_cutout_job_limit,
+        session_token=session_token,
+    )
     album = load_album_by_slug_or_fail(db, album_slug)
     if not photo.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para remover o fundo.")
@@ -961,12 +1281,18 @@ async def create_my_sticker_cutout_job(
                 message=str(err),
             )
 
-    public_progress_jobs.run(job.id, worker)
+    if not public_progress_jobs.run(job.id, worker):
+        public_progress_jobs.discard(job.id)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="A fila de processamento esta cheia agora. Tente novamente em instantes.",
+        )
     return _job_response(job)
 
 
 @app.post("/albums/{album_slug}/my-sticker-jobs", response_model=PublicProgressJobResponse)
 async def create_or_replace_my_sticker_job(
+    request: Request,
     album_slug: str,
     session_token: str = Form(..., min_length=12, max_length=120),
     name: str = Form(..., min_length=2, max_length=150),
@@ -988,6 +1314,12 @@ async def create_or_replace_my_sticker_job(
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="my_sticker_job",
+        limit=settings.public_my_sticker_job_limit,
+        session_token=session_token,
+    )
     load_album_by_slug_or_fail(db, album_slug)
     if not photo.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para criar a figurinha.")
@@ -1087,7 +1419,7 @@ async def create_or_replace_my_sticker_job(
                 progress=100,
                 step_index=len(steps) - 1,
                 message="Sua figurinha ficou pronta.",
-                result=sticker_to_response(sticker),
+                result=sticker_to_response(sticker, include_sensitive=False),
             )
         except ValueError as err:
             public_progress_jobs.update(
@@ -1108,12 +1440,18 @@ async def create_or_replace_my_sticker_job(
         finally:
             worker_db.close()
 
-    public_progress_jobs.run(job.id, worker)
+    if not public_progress_jobs.run(job.id, worker):
+        public_progress_jobs.discard(job.id)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="A fila de processamento esta cheia agora. Tente novamente em instantes.",
+        )
     return _job_response(job)
 
 
 @app.post("/albums/{album_slug}/my-sticker", response_model=StickerResponse)
 async def create_or_replace_my_sticker(
+    request: Request,
     album_slug: str,
     session_token: str = Form(..., min_length=12, max_length=120),
     name: str = Form(..., min_length=2, max_length=150),
@@ -1135,6 +1473,12 @@ async def create_or_replace_my_sticker(
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="my_sticker_job",
+        limit=settings.public_my_sticker_job_limit,
+        session_token=session_token,
+    )
     album = load_album_by_slug_or_fail(db, album_slug)
     if not photo.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para criar a figurinha.")
@@ -1202,16 +1546,23 @@ async def create_or_replace_my_sticker(
 
     db.commit()
     sticker = load_sticker_or_fail(db, sticker.id)
-    return sticker_to_response(sticker)
+    return sticker_to_response(sticker, include_sensitive=False)
 
 
 @app.post("/albums/{album_slug}/my-sticker-cutout", response_model=MyStickerCutoutResponse)
 async def create_my_sticker_cutout(
+    request: Request,
     album_slug: str,
     session_token: str = Form(..., min_length=12, max_length=120),
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="my_sticker_cutout_job",
+        limit=settings.public_cutout_job_limit,
+        session_token=session_token,
+    )
     album = load_album_by_slug_or_fail(db, album_slug)
     if not photo.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Envie uma foto valida para remover o fundo.")
@@ -1358,10 +1709,17 @@ def get_my_sticker_unlock(
 
 @app.post("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse)
 def create_my_sticker_unlock(
+    request: Request,
     album_slug: str,
     payload: CustomStickerUnlockRequest,
     db: Session = Depends(get_db),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="unlock_create",
+        limit=settings.public_unlock_limit,
+        session_token=payload.session_token,
+    )
     return _create_my_sticker_unlock_by_type(
         album_slug=album_slug,
         payload=payload,
@@ -1386,10 +1744,17 @@ def get_my_sticker_manual_unlock(
 
 @app.post("/albums/{album_slug}/my-sticker/manual-unlock", response_model=CustomStickerUnlockResponse)
 def create_my_sticker_manual_unlock(
+    request: Request,
     album_slug: str,
     payload: CustomStickerUnlockRequest,
     db: Session = Depends(get_db),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="unlock_create",
+        limit=settings.public_unlock_limit,
+        session_token=payload.session_token,
+    )
     return _create_my_sticker_unlock_by_type(
         album_slug=album_slug,
         payload=payload,
@@ -1414,10 +1779,17 @@ def get_my_sticker_ai_unlock(
 
 @app.post("/albums/{album_slug}/my-sticker/ai-unlock", response_model=CustomStickerUnlockResponse)
 def create_my_sticker_ai_unlock(
+    request: Request,
     album_slug: str,
     payload: CustomStickerUnlockRequest,
     db: Session = Depends(get_db),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="unlock_create",
+        limit=settings.public_unlock_limit,
+        session_token=payload.session_token,
+    )
     return _create_my_sticker_unlock_by_type(
         album_slug=album_slug,
         payload=payload,
@@ -1427,7 +1799,13 @@ def create_my_sticker_ai_unlock(
 
 
 @app.post("/exports/jobs", response_model=PublicProgressJobResponse)
-def create_export_job(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
+def create_export_job(payload: ExportRequest, request: Request, db: Session = Depends(get_db)) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="export_create",
+        limit=settings.public_export_limit,
+        session_token=payload.session_token,
+    )
     album = load_album_by_slug_or_fail(db, payload.album_slug)
     steps = [
         "Separando suas figurinhas...",
@@ -1484,7 +1862,7 @@ def create_export_job(payload: ExportRequest, db: Session = Depends(get_db)) -> 
                 result={
                     "export_id": export_record.id,
                     "item_count": export_record.item_count,
-                    "download_path": f"/exports/{export_record.id}/download",
+                    "download_path": _build_export_download_path(export_record.id),
                     "file_name": Path(export_record.file_path).name,
                 },
             )
@@ -1505,12 +1883,23 @@ def create_export_job(payload: ExportRequest, db: Session = Depends(get_db)) -> 
         finally:
             worker_db.close()
 
-    public_progress_jobs.run(job.id, worker)
+    if not public_progress_jobs.run(job.id, worker):
+        public_progress_jobs.discard(job.id)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="A fila de processamento esta cheia agora. Tente novamente em instantes.",
+        )
     return _job_response(job)
 
 
 @app.post("/exports", response_model=ExportResponse)
-def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict:
+def create_export(payload: ExportRequest, request: Request, db: Session = Depends(get_db)) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="export_create",
+        limit=settings.public_export_limit,
+        session_token=payload.session_token,
+    )
     album = load_album_by_slug_or_fail(db, payload.album_slug)
     stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     service_settings = get_or_create_service_settings(db)
@@ -1541,13 +1930,19 @@ def create_export(payload: ExportRequest, db: Session = Depends(get_db)) -> dict
     return {
         "export_id": export_record.id,
         "item_count": export_record.item_count,
-        "download_path": f"/exports/{export_record.id}/download",
+        "download_path": _build_export_download_path(export_record.id),
         "file_name": Path(export_record.file_path).name,
     }
 
 
 @app.post("/orders/quote", response_model=OrderQuoteResponse)
-def quote_print_order(payload: OrderQuoteRequest, db: Session = Depends(get_db)) -> dict:
+def quote_print_order(payload: OrderQuoteRequest, request: Request, db: Session = Depends(get_db)) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="quote_order",
+        limit=settings.public_quote_limit,
+        session_token=payload.session_token,
+    )
     album = load_album_by_slug_or_fail(db, payload.album_slug)
     stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     service_settings = get_or_create_service_settings(db)
@@ -1563,7 +1958,13 @@ def quote_print_order(payload: OrderQuoteRequest, db: Session = Depends(get_db))
 
 
 @app.post("/orders", response_model=PrintOrderResponse)
-def create_public_print_order(payload: PrintOrderCreate, db: Session = Depends(get_db)) -> dict:
+def create_public_print_order(payload: PrintOrderCreate, request: Request, db: Session = Depends(get_db)) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="create_order",
+        limit=settings.public_order_limit,
+        session_token=payload.session_token,
+    )
     album = load_album_by_slug_or_fail(db, payload.album_slug)
     stickers = selected_stickers_for_album_or_400(db, album, payload.sticker_ids, payload.session_token)
     service_settings = get_or_create_service_settings(db)
@@ -1588,9 +1989,15 @@ def create_public_print_order(payload: PrintOrderCreate, db: Session = Depends(g
 
 
 @app.get("/exports/{export_id}/download")
-def download_export(export_id: int, db: Session = Depends(get_db)) -> FileResponse:
+def download_export(
+    export_id: int,
+    expires: int = Query(...),
+    token: str = Query(..., min_length=32, max_length=128),
+    db: Session = Depends(get_db),
+) -> FileResponse:
     from .models import Export
 
+    _validate_export_download_token_or_403(export_id, expires, token)
     export_record = db.get(Export, export_id)
     if not export_record:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exportacao nao encontrada.")

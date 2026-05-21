@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import siteLogo from './assets/logo-topo-cutout.png'
 
@@ -108,15 +108,49 @@ const sourceDetectedStatusLabels = {
 }
 
 function useAdminToken() {
-  const [token, setToken] = useState(() => window.localStorage.getItem('figurinhas_admin_token') || '')
-
-  useEffect(() => {
-    if (token) {
-      window.localStorage.setItem('figurinhas_admin_token', token)
-    } else {
-      window.localStorage.removeItem('figurinhas_admin_token')
+  const [token, setTokenState] = useState(() => {
+    const raw = window.localStorage.getItem('figurinhas_admin_session')
+    if (!raw) return ''
+    try {
+      const parsed = JSON.parse(raw)
+      if (!parsed?.token) return ''
+      if (parsed.expires_at && new Date(parsed.expires_at).getTime() <= Date.now()) {
+        window.localStorage.removeItem('figurinhas_admin_session')
+        return ''
+      }
+      return parsed.token
+    } catch {
+      window.localStorage.removeItem('figurinhas_admin_session')
+      return ''
     }
-  }, [token])
+  })
+
+  const setToken = useCallback(value => {
+    if (!value) {
+      window.localStorage.removeItem('figurinhas_admin_session')
+      setTokenState('')
+      return
+    }
+    if (typeof value === 'string') {
+      window.localStorage.setItem('figurinhas_admin_session', JSON.stringify({ token: value }))
+      setTokenState(value)
+      return
+    }
+    const nextToken = value.token || ''
+    if (!nextToken) {
+      window.localStorage.removeItem('figurinhas_admin_session')
+      setTokenState('')
+      return
+    }
+    window.localStorage.setItem(
+      'figurinhas_admin_session',
+      JSON.stringify({
+        token: nextToken,
+        expires_at: value.expires_at || null
+      })
+    )
+    setTokenState(nextToken)
+  }, [])
 
   return [token, setToken]
 }
@@ -144,7 +178,9 @@ async function apiFetch(path, options = {}) {
     } catch {
       // ignore
     }
-    throw new Error(detail)
+    const error = new Error(detail)
+    error.status = response.status
+    throw error
   }
 
   if (response.status === 204) {
@@ -164,7 +200,7 @@ function apiFileUrl(relativePath) {
 
 function buildAdminHeaders(token, extra = {}) {
   return {
-    'X-Admin-Token': token,
+    Authorization: `Bearer ${token}`,
     ...extra
   }
 }
@@ -1190,7 +1226,7 @@ function PublicPage() {
         !selectedCollection ||
         (selectedCollection.collection_type || 'SELECAO') !== 'OUTROS' ||
         selectedCollection.export_mode !== 'APPEND_FULL_PDF' ||
-        !selectedCollection.source_pdf_path
+        !(selectedCollection.page_count > 0 || selectedCollection.preview_image_path)
       ) {
         return []
       }
@@ -4159,6 +4195,13 @@ function AdminPage() {
   const [savingOrder, setSavingOrder] = useState(false)
   const [savingCollectionEdit, setSavingCollectionEdit] = useState(false)
   const [deletingCollection, setDeletingCollection] = useState(false)
+  useEffect(() => {
+    if (!error || !/Sessao administrativa/i.test(error)) return
+    setToken('')
+    setAuthError('Sua sessao expirou. Entre novamente.')
+    setError('')
+  }, [error, setToken])
+
   const selectedSourceDocumentSummary =
     sourceDocuments.find(document => document.id === selectedSourceDocumentId) || null
   const selectedSourceDocumentPage =
@@ -5228,10 +5271,25 @@ function AdminPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password })
       })
-      setToken(data.token)
+      setToken(data)
       setPassword('')
     } catch (err) {
       setAuthError(err.message)
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      if (token) {
+        await apiFetch('/admin/session', {
+          method: 'DELETE',
+          headers: buildAdminHeaders(token)
+        })
+      }
+    } catch {
+      // ignore logout failures and clear local session anyway
+    } finally {
+      setToken('')
     }
   }
 
@@ -6633,7 +6691,7 @@ function AdminPage() {
             ) : null}
           </div>
           <div className="fig-hero-actions">
-            <button type="button" className="fig-secondary-button" onClick={() => setToken('')}>
+            <button type="button" className="fig-secondary-button" onClick={handleLogout}>
               Sair
             </button>
           </div>
