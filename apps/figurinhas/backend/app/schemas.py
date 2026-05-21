@@ -720,6 +720,10 @@ class CustomStickerUnlockResponse(BaseModel):
     status: str
     amount_cents: int
     payment_required: bool
+    access_granted: bool
+    total_uses: int = 0
+    remaining_uses: int = 0
+    uses_consumed: int = 0
     qr_code_base64: str | None = None
     qr_code: str | None = None
     ticket_url: str | None = None

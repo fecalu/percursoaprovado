@@ -586,6 +586,8 @@ class CustomStickerUnlock(Base):
         Enum(CustomStickerUnlockType), default=CustomStickerUnlockType.MANUAL_PDF, nullable=False, index=True
     )
     amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_uses: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    remaining_uses: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     status: Mapped[CustomStickerUnlockStatus] = mapped_column(
         Enum(CustomStickerUnlockStatus), default=CustomStickerUnlockStatus.PENDENTE, nullable=False
     )

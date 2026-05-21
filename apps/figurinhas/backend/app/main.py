@@ -113,6 +113,7 @@ from .services import (
     build_order_quote_with_extras,
     collection_stats,
     collection_sort_key,
+    consume_custom_sticker_unlock_use,
     collection_to_response,
     create_page_layout_template_from_source_page,
     custom_template_to_detail_response,
@@ -652,6 +653,8 @@ def ensure_runtime_schema() -> None:
                         session_token VARCHAR(120) NOT NULL,
                         unlock_type VARCHAR(20) NOT NULL DEFAULT 'MANUAL_PDF',
                         amount_cents INTEGER NOT NULL,
+                        total_uses INTEGER NOT NULL DEFAULT 0,
+                        remaining_uses INTEGER NOT NULL DEFAULT 0,
                         status VARCHAR(20) NOT NULL,
                         mp_payment_id VARCHAR(80),
                         mp_external_reference VARCHAR(120),
@@ -678,6 +681,8 @@ def ensure_runtime_schema() -> None:
                         session_token,
                         unlock_type,
                         amount_cents,
+                        total_uses,
+                        remaining_uses,
                         status,
                         mp_payment_id,
                         mp_external_reference,
@@ -698,6 +703,8 @@ def ensure_runtime_schema() -> None:
                         session_token,
                         'MANUAL_PDF',
                         amount_cents,
+                        0,
+                        0,
                         status,
                         mp_payment_id,
                         mp_external_reference,
@@ -741,6 +748,14 @@ def ensure_runtime_schema() -> None:
                 if "unlock_type" not in unlock_columns:
                     connection.exec_driver_sql(
                         "ALTER TABLE figurinhas_custom_sticker_unlocks ADD COLUMN unlock_type VARCHAR(20) NOT NULL DEFAULT 'MANUAL_PDF'"
+                    )
+                if "total_uses" not in unlock_columns:
+                    connection.exec_driver_sql(
+                        "ALTER TABLE figurinhas_custom_sticker_unlocks ADD COLUMN total_uses INTEGER NOT NULL DEFAULT 0"
+                    )
+                if "remaining_uses" not in unlock_columns:
+                    connection.exec_driver_sql(
+                        "ALTER TABLE figurinhas_custom_sticker_unlocks ADD COLUMN remaining_uses INTEGER NOT NULL DEFAULT 0"
                     )
 
         custom_templates_table_exists = connection.exec_driver_sql(
@@ -1925,6 +1940,13 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
                 extra_selections=[item.model_dump() for item in payload.extras],
                 progress_callback=reporter,
             )
+            if generated_sticker_requires_manual_unlock(generated_sticker, service_settings):
+                consume_custom_sticker_unlock_use(
+                    worker_db,
+                    album_id=worker_album.id,
+                    session_token=(payload.session_token or ""),
+                    unlock_type=CustomStickerUnlockType.MANUAL_PDF,
+                )
             worker_db.commit()
             public_progress_jobs.update(
                 job.id,
@@ -1999,6 +2021,13 @@ def create_export(payload: ExportRequest, request: Request, db: Session = Depend
         db,
         extra_selections=[item.model_dump() for item in payload.extras],
     )
+    if generated_sticker_requires_manual_unlock(generated_sticker, service_settings):
+        consume_custom_sticker_unlock_use(
+            db,
+            album_id=album.id,
+            session_token=(payload.session_token or ""),
+            unlock_type=CustomStickerUnlockType.MANUAL_PDF,
+        )
     db.commit()
     return {
         "export_id": export_record.id,

@@ -723,7 +723,7 @@ def generated_sticker_has_export_access(
     if sticker.composition_mode_used == CustomTemplateCompositionMode.AI_OPTIONAL:
         if not service_settings.custom_ai_unlock_enabled:
             return True
-        return is_custom_sticker_unlocked(
+        return has_paid_custom_sticker_unlock(
             db,
             album_id=album_id,
             session_token=session_token,
@@ -2233,7 +2233,66 @@ def is_custom_sticker_unlocked(
         session_token=session_token,
         unlock_type=unlock_type,
     )
-    return bool(unlock and unlock.status == CustomStickerUnlockStatus.PAGO)
+    return bool(unlock and custom_sticker_unlock_has_available_uses(unlock))
+
+
+def _custom_sticker_unlock_use_limit(unlock_type: CustomStickerUnlockType) -> int:
+    if unlock_type == CustomStickerUnlockType.AI_CREATE:
+        return 2
+    return 5
+
+
+def ensure_custom_sticker_unlock_use_counters(unlock: CustomStickerUnlock | None) -> CustomStickerUnlock | None:
+    if not unlock or unlock.status != CustomStickerUnlockStatus.PAGO:
+        return unlock
+    expected_total = _custom_sticker_unlock_use_limit(unlock.unlock_type)
+    if (unlock.total_uses or 0) <= 0:
+        unlock.total_uses = expected_total
+    if unlock.remaining_uses is None:
+        unlock.remaining_uses = unlock.total_uses
+    if unlock.remaining_uses < 0:
+        unlock.remaining_uses = 0
+    return unlock
+
+
+def custom_sticker_unlock_has_available_uses(unlock: CustomStickerUnlock | None) -> bool:
+    unlock = ensure_custom_sticker_unlock_use_counters(unlock)
+    return bool(unlock and unlock.status == CustomStickerUnlockStatus.PAGO and (unlock.remaining_uses or 0) > 0)
+
+
+def has_paid_custom_sticker_unlock(
+    db: Session,
+    *,
+    album_id: int,
+    session_token: str,
+    unlock_type: CustomStickerUnlockType = CustomStickerUnlockType.MANUAL_PDF,
+) -> bool:
+    unlock = load_latest_custom_sticker_unlock(
+        db,
+        album_id=album_id,
+        session_token=session_token,
+        unlock_type=unlock_type,
+    )
+    if unlock and unlock.status == CustomStickerUnlockStatus.PAGO:
+        return True
+    normalized = session_token.strip()
+    if not normalized:
+        return False
+    paid_unlock = (
+        db.execute(
+            select(CustomStickerUnlock)
+            .where(
+                CustomStickerUnlock.album_id == album_id,
+                CustomStickerUnlock.session_token == normalized,
+                CustomStickerUnlock.unlock_type == unlock_type,
+                CustomStickerUnlock.status == CustomStickerUnlockStatus.PAGO,
+            )
+            .order_by(CustomStickerUnlock.paid_at.desc(), CustomStickerUnlock.updated_at.desc(), CustomStickerUnlock.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+    return paid_unlock is not None
 
 
 def _custom_sticker_unlock_settings(
@@ -2299,6 +2358,7 @@ def sync_custom_sticker_unlock_status(unlock: CustomStickerUnlock) -> CustomStic
     unlock.expires_at = payment.expires_at or unlock.expires_at
     if unlock.status == CustomStickerUnlockStatus.PAGO:
         unlock.paid_at = payment.paid_at or unlock.paid_at or datetime.now(UTC)
+        ensure_custom_sticker_unlock_use_counters(unlock)
     return unlock
 
 
@@ -2348,7 +2408,9 @@ def get_or_create_custom_sticker_unlock(
             current.status = CustomStickerUnlockStatus.EXPIRADO
             current.mp_status_detail = "price_changed"
     if current and current.status == CustomStickerUnlockStatus.PAGO:
-        return current
+        ensure_custom_sticker_unlock_use_counters(current)
+        if custom_sticker_unlock_has_available_uses(current):
+            return current
 
     payment = _mercadopago_client().create_pix_payment(
         amount_cents=amount_cents,
@@ -2369,6 +2431,8 @@ def get_or_create_custom_sticker_unlock(
         session_token=normalized_session,
         unlock_type=unlock_type,
         amount_cents=amount_cents,
+        total_uses=_custom_sticker_unlock_use_limit(unlock_type),
+        remaining_uses=0,
         status=_map_unlock_status(payment.status, payment.status_detail),
         mp_payment_id=payment.payment_id or None,
         mp_external_reference=payment.external_reference or None,
@@ -2380,7 +2444,30 @@ def get_or_create_custom_sticker_unlock(
         expires_at=payment.expires_at,
         paid_at=payment.paid_at,
     )
+    ensure_custom_sticker_unlock_use_counters(unlock)
     db.add(unlock)
+    db.flush()
+    return unlock
+
+
+def consume_custom_sticker_unlock_use(
+    db: Session,
+    *,
+    album_id: int,
+    session_token: str,
+    unlock_type: CustomStickerUnlockType,
+) -> CustomStickerUnlock:
+    unlock = load_latest_custom_sticker_unlock(
+        db,
+        album_id=album_id,
+        session_token=session_token,
+        unlock_type=unlock_type,
+    )
+    if not custom_sticker_unlock_has_available_uses(unlock):
+        if unlock_type == CustomStickerUnlockType.AI_CREATE:
+            raise ValueError("Seu saldo da criacao com IA acabou. Pague novamente para gerar outra figurinha.")
+        raise ValueError("Seu saldo da Minha Figurinha acabou. Pague novamente para liberar outro PDF.")
+    unlock.remaining_uses = max((unlock.remaining_uses or 0) - 1, 0)
     db.flush()
     return unlock
 
@@ -2713,6 +2800,16 @@ def upsert_generated_sticker(
     )
     db.add(sticker)
     db.flush()
+    if (
+        resolved_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
+        and service_settings.custom_ai_unlock_enabled
+    ):
+        consume_custom_sticker_unlock_use(
+            db,
+            album_id=album.id,
+            session_token=session_token,
+            unlock_type=CustomStickerUnlockType.AI_CREATE,
+        )
     return sticker
 def _resolve_export_extra_documents(
     album: Album,
@@ -4333,6 +4430,9 @@ def custom_sticker_unlock_to_response(unlock: CustomStickerUnlock, service_setti
     payment_required = True
     if service_settings and not _custom_sticker_unlock_settings(service_settings, unlock.unlock_type)[0]:
         payment_required = False
+    ensure_custom_sticker_unlock_use_counters(unlock)
+    remaining_uses = max(int(unlock.remaining_uses or 0), 0)
+    total_uses = max(int(unlock.total_uses or 0), 0)
     return {
         "id": unlock.id,
         "album_id": unlock.album_id,
@@ -4341,6 +4441,10 @@ def custom_sticker_unlock_to_response(unlock: CustomStickerUnlock, service_setti
         "status": unlock.status.value,
         "amount_cents": unlock.amount_cents,
         "payment_required": payment_required,
+        "access_granted": custom_sticker_unlock_has_available_uses(unlock),
+        "total_uses": total_uses,
+        "remaining_uses": remaining_uses,
+        "uses_consumed": max(total_uses - remaining_uses, 0),
         "qr_code_base64": unlock.qr_code_base64,
         "qr_code": unlock.qr_code,
         "ticket_url": unlock.ticket_url,

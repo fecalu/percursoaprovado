@@ -1214,7 +1214,7 @@ a {
 }
 
 .fig-modal-shell--donation {
-  width: min(500px, 100%);
+  width: min(680px, calc(100vw - 2rem));
   margin: auto;
 }
 
@@ -3763,13 +3763,17 @@ a {
     gap: 0.65rem;
   }
 
-  .fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile .fig-primary-button,
-  .fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile .fig-secondary-button {
-    min-height: 48px;
-    white-space: normal;
-    line-height: 1.2;
-    min-width: 0;
-  }
+.fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile .fig-primary-button,
+.fig-modal-shell--public-flow .fig-hero-actions--sticky-mobile .fig-secondary-button {
+  min-height: 48px;
+  white-space: normal;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.fig-modal-shell--public-flow .fig-hero-actions--single {
+  grid-template-columns: 1fr;
+}
 
   .fig-modal-shell--public-flow .fig-order-choice-grid {
     grid-template-columns: 1fr;
@@ -3879,6 +3883,19 @@ a {
     max-height: calc(100vh - 1rem);
     padding: 0.6rem;
     border-radius: 20px;
+  }
+
+  .fig-modal-shell--donation.fig-modal-shell--public-flow {
+    width: calc(100vw - 0.45rem);
+    min-height: 0;
+    max-height: calc(100vh - 0.45rem);
+    padding: 0.58rem 0.58rem 0.68rem;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .fig-modal-shell--donation.fig-modal-shell--public-flow .fig-form-card {
+    padding: 0.68rem;
+    border-radius: 18px;
   }
 
   .fig-modal-shell--my-sticker {
@@ -4216,6 +4233,129 @@ a {
   line-height: 1.45;
 }
 
+.fig-unlock-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.42rem;
+}
+
+.fig-unlock-summary-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+  padding: 0.56rem 0.62rem;
+  border-radius: 16px;
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(246, 249, 252, 0.97));
+}
+
+.fig-unlock-summary-pill span {
+  color: #607286;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.fig-unlock-summary-pill strong {
+  color: #132538;
+  font-size: 0.84rem;
+  line-height: 1.15;
+}
+
+.fig-unlock-summary-pill--status strong {
+  color: #16714a;
+}
+
+.fig-service-notes--unlock-ai {
+  gap: 0.28rem;
+}
+
+.fig-service-notes--unlock-ai p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.fig-service-notes--unlock-ai small {
+  color: #607286;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.fig-payment-qr-card--ai {
+  padding: 0.72rem;
+  border-radius: 20px;
+}
+
+.fig-payment-qr-card--ai img {
+  width: min(100%, 148px);
+}
+
+.fig-payment-focus-note--ai {
+  padding: 0.64rem 0.74rem;
+}
+
+.fig-payment-focus-note--ai span {
+  display: none;
+}
+
+.fig-unlock-layout-grid--ai {
+  display: grid;
+  grid-template-columns: minmax(148px, 176px) minmax(0, 1fr);
+  gap: 0.72rem;
+  align-items: start;
+}
+
+.fig-unlock-layout-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.62rem;
+  min-width: 0;
+}
+
+.fig-helper-strip--unlock-ai {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.62rem;
+  padding: 0.78rem 0.82rem;
+}
+
+.fig-helper-strip--unlock-ai > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.fig-helper-strip--unlock-ai .fig-code-block {
+  display: block;
+  max-height: 4.8rem;
+  overflow: auto;
+  padding: 0.5rem 0.58rem;
+  border-radius: 14px;
+  background: rgba(17, 34, 53, 0.05);
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  font-size: 0.68rem !important;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.fig-helper-strip--unlock-ai .fig-secondary-button {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.72rem 0.9rem;
+}
+
+.fig-donation-modal-card--unlock-ai {
+  gap: 0.72rem;
+}
+
+.fig-donation-modal-card--unlock-ai .fig-hero-actions--sticky-mobile {
+  gap: 0.52rem;
+}
+
 @media (max-width: 820px) {
   .fig-order-choice-grid {
     grid-template-columns: 1fr;
@@ -4223,5 +4363,42 @@ a {
 
   .fig-unlock-hero-card {
     grid-template-columns: 1fr;
+  }
+
+  .fig-unlock-summary-pill {
+    padding: 0.5rem 0.52rem;
+  }
+
+  .fig-unlock-summary-pill span {
+    font-size: 0.58rem;
+  }
+
+  .fig-unlock-summary-pill strong {
+    font-size: 0.78rem;
+  }
+
+  .fig-payment-qr-card--ai img {
+    width: min(100%, 124px);
+  }
+
+  .fig-unlock-layout-grid--ai {
+    grid-template-columns: 1fr;
+    gap: 0.56rem;
+  }
+
+  .fig-donation-modal-card--unlock-ai {
+    gap: 0.5rem;
+  }
+
+  .fig-donation-modal-card--unlock-ai .fig-hero-actions--sticky-mobile {
+    margin-top: 0;
+  }
+
+  .fig-helper-strip--unlock-ai {
+    padding: 0.6rem 0.64rem;
+  }
+
+  .fig-helper-strip--unlock-ai .fig-secondary-button {
+    min-height: 38px;
   }
 }

@@ -1352,7 +1352,8 @@ function PublicPage() {
       ),
     [customSticker, serviceConfig?.custom_ai_unlock_enabled]
   )
-  const customAiUnlockPaid = aiUnlockData?.status === 'PAGO'
+  const customAiUnlockAvailable = Boolean(aiUnlockData?.access_granted)
+  const customManualUnlockAvailable = Boolean(customUnlockData?.access_granted)
   const activeUnlockData = customUnlockContext === 'AI_CREATE' ? aiUnlockData : customUnlockData
   const activeUnlockPriceCents =
     customUnlockContext === 'AI_CREATE'
@@ -1366,6 +1367,24 @@ function PublicPage() {
         'Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00.'
   const manualUnlockPriceLabel = formatCurrency(serviceConfig?.custom_sticker_unlock_price_cents || 0)
   const aiUnlockPriceLabel = formatCurrency(serviceConfig?.custom_ai_unlock_price_cents || 0)
+  const activeUnlockRemainingUses = Math.max(Number(activeUnlockData?.remaining_uses || 0), 0)
+  const activeUnlockTotalUses = Math.max(Number(activeUnlockData?.total_uses || 0), 0)
+  const activeUnlockUsageLabel =
+    customUnlockContext === 'AI_CREATE'
+      ? `${activeUnlockRemainingUses} tentativa${activeUnlockRemainingUses === 1 ? '' : 's'} restante${activeUnlockRemainingUses === 1 ? '' : 's'}`
+      : `${activeUnlockRemainingUses} uso${activeUnlockRemainingUses === 1 ? '' : 's'} restante${activeUnlockRemainingUses === 1 ? '' : 's'}`
+  const activeUnlockCompactUsageLabel =
+    customUnlockContext === 'AI_CREATE'
+      ? activeUnlockData?.status === 'PAGO'
+        ? String(activeUnlockRemainingUses)
+        : activeUnlockTotalUses > 0
+          ? String(activeUnlockTotalUses)
+          : '2'
+      : activeUnlockData?.status === 'PAGO'
+        ? String(activeUnlockRemainingUses)
+        : activeUnlockTotalUses > 0
+          ? String(activeUnlockTotalUses)
+          : '5'
   const freeSelectedIds = useMemo(
     () => selectedStickers.filter(sticker => sticker.source_type !== 'GENERATED').map(sticker => sticker.id),
     [selectedStickers]
@@ -2133,7 +2152,7 @@ function PublicPage() {
 
   async function handleChooseMyStickerMode(mode) {
     if (mode === 'AI_OPTIONAL' && serviceConfig?.custom_ai_unlock_enabled) {
-      if (customAiUnlockPaid) {
+      if (customAiUnlockAvailable) {
         activateMyStickerMode(mode)
         return
       }
@@ -2220,7 +2239,7 @@ function PublicPage() {
     if (
       myStickerForm.requested_composition_mode === 'AI_OPTIONAL' &&
       serviceConfig?.custom_ai_unlock_enabled &&
-      !customAiUnlockPaid
+      !customAiUnlockAvailable
     ) {
       await handleStartCustomUnlock('AI_CREATE')
       return
@@ -2325,12 +2344,8 @@ function PublicPage() {
 
   async function handleExport() {
     if (!selectedAlbumSlug || !hasExportSelection) return
-    if (customStickerSelected && customStickerNeedsAiUnlock && aiUnlockData?.status !== 'PAGO') {
-      await handleStartCustomUnlock('AI_CREATE')
-      return
-    }
     if (customStickerSelected && customStickerNeedsManualUnlock) {
-      if (customUnlockData?.status === 'PAGO') {
+      if (customManualUnlockAvailable) {
         await runExportFlow(selectedIds)
         return
       }
@@ -2370,7 +2385,7 @@ function PublicPage() {
         setCustomUnlockData(data)
       }
       setCustomUnlockStep('payment')
-      if (data.status === 'PAGO') {
+      if (data.access_granted) {
         if (unlockType === 'AI_CREATE') {
           setCustomUnlockModalOpen(false)
           activateMyStickerMode('AI_OPTIONAL')
@@ -2402,7 +2417,7 @@ function PublicPage() {
       } else {
         setCustomUnlockData(data)
       }
-      if (data?.status === 'PAGO') {
+      if (data?.access_granted) {
         if (unlockType === 'AI_CREATE') {
           setCustomUnlockModalOpen(false)
           activateMyStickerMode('AI_OPTIONAL')
@@ -3207,7 +3222,7 @@ function PublicPage() {
                               ? manualCreationAvailable
                                 ? manualUnlockPriceLabel
                                 : 'Em preparo'
-                              : customAiUnlockPaid
+                              : customAiUnlockAvailable
                                 ? 'IA liberada'
                                 : aiUnlockPriceLabel}
                           </div>
@@ -3222,9 +3237,9 @@ function PublicPage() {
                             </span>
                           ) : (
                             <span>
-                                {customAiUnlockPaid
-                                  ? 'Sua criacao com IA ja esta liberada. Agora e so continuar sem novo pagamento.'
-                                  : 'Libere a criacao com IA primeiro. Depois disso, voce continua normalmente e usa no PDF sem nova cobranca.'}
+                                {customAiUnlockAvailable
+                                  ? `Sua criacao com IA esta liberada. Voce ainda tem ${aiUnlockData?.remaining_uses || 0} tentativa(s) nesta compra.`
+                                  : 'Libere a criacao com IA primeiro. Cada pagamento libera 1 geracao e 1 retry.'}
                             </span>
                           )}
                         </div>
@@ -3850,7 +3865,7 @@ function PublicPage() {
                 </h3>
                 <p className="fig-modal-subtitle">
                   {customUnlockContext === 'AI_CREATE'
-                    ? 'Pague uma vez para continuar com a versao premium da sua figurinha.'
+                    ? 'Pague e libere sua criacao com IA.'
                     : customUnlockStep === 'payment'
                       ? 'Pague o Pix para manter sua figurinha no arquivo.'
                       : 'Escolha como quer baixar.'}
@@ -3861,7 +3876,11 @@ function PublicPage() {
               </button>
             </div>
 
-            <section className="fig-form-card fig-donation-modal-card">
+            <section
+              className={`fig-form-card fig-donation-modal-card ${
+                customUnlockContext === 'AI_CREATE' ? 'fig-donation-modal-card--unlock-ai' : ''
+              }`}
+            >
               {customUnlockContext === 'MANUAL_PDF' && customUnlockStep === 'choice' ? (
                 <>
                   <div className="fig-flow-step-row">
@@ -3919,90 +3938,141 @@ function PublicPage() {
                 </>
               ) : (
                 <>
-                  <div className="fig-flow-step-row">
-                    <span className="fig-flow-step is-active">{customUnlockContext === 'AI_CREATE' ? '1. Pix' : '1. Escolha'}</span>
-                    <span className="fig-flow-step is-active">2. Pix</span>
-                    <span className="fig-flow-step">{customUnlockContext === 'AI_CREATE' ? '3. Criar' : '3. Baixar'}</span>
-                  </div>
-                  <div className="fig-service-notes">
-                    <p>
-                      {customUnlockContext === 'AI_CREATE'
-                        ? activeUnlockMessage
-                        : 'Escaneie o Pix para liberar sua figurinha no PDF.'}
-                    </p>
-                  </div>
+                  {customUnlockContext === 'AI_CREATE' ? (
+                    <>
+                      <div className="fig-unlock-summary-strip fig-unlock-summary-strip--ai">
+                        <div className="fig-unlock-summary-pill">
+                          <span>Pix</span>
+                          <strong>{formatCurrency(activeUnlockData?.amount_cents || activeUnlockPriceCents)}</strong>
+                        </div>
+                        <div className="fig-unlock-summary-pill">
+                          <span>Saldo</span>
+                          <strong>
+                            {activeUnlockCompactUsageLabel}
+                          </strong>
+                        </div>
+                        <div className="fig-unlock-summary-pill fig-unlock-summary-pill--status">
+                          <span>Status</span>
+                          <strong>
+                            {activeUnlockData?.status === 'PAGO'
+                              ? 'Pago'
+                              : activeUnlockData?.status === 'EXPIRADO'
+                                ? 'Expirado'
+                                : activeUnlockData?.status === 'FALHOU'
+                                  ? 'Falhou'
+                                  : 'Aguardando'}
+                          </strong>
+                        </div>
+                      </div>
+                      <div className="fig-service-notes fig-service-notes--unlock-ai">
+                        <p>{activeUnlockMessage}</p>
+                        <small>1 geracao + 1 retry nesta sessao.</small>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="fig-flow-step-row">
+                        <span className="fig-flow-step is-active">1. Escolha</span>
+                        <span className="fig-flow-step is-active">2. Pix</span>
+                        <span className="fig-flow-step">3. Baixar</span>
+                      </div>
+                      <div className="fig-service-notes">
+                        <p>Escaneie o Pix para liberar sua figurinha no PDF.</p>
+                      </div>
 
-                  <div className="fig-unlock-hero-card">
-                    <div>
-                      <span className="fig-unlock-hero-label">
-                        {customUnlockContext === 'AI_CREATE' ? 'Criacao com IA' : 'Liberacao'}
-                      </span>
-                      <strong>{formatCurrency(activeUnlockData?.amount_cents || activeUnlockPriceCents)}</strong>
-                    </div>
-                    <div>
-                      <span className="fig-unlock-hero-label">
-                        {customUnlockContext === 'AI_CREATE' ? 'Seu acesso' : 'Seu PDF'}
-                      </span>
-                      <strong>
-                        {customUnlockContext === 'AI_CREATE' ? 'IA liberada' : `${selectedIds.length} figurinhas`}
-                      </strong>
-                    </div>
-                    <div>
-                      <span className="fig-unlock-hero-label">Status</span>
-                      <strong>
-                        {activeUnlockData?.status === 'PAGO'
-                          ? 'Pago'
-                          : activeUnlockData?.status === 'EXPIRADO'
-                            ? 'Expirado'
-                            : activeUnlockData?.status === 'FALHOU'
-                              ? 'Falhou'
-                              : 'Aguardando'}
-                      </strong>
-                    </div>
-                  </div>
+                      <div className="fig-unlock-hero-card">
+                        <div>
+                          <span className="fig-unlock-hero-label">Liberacao</span>
+                          <strong>{formatCurrency(activeUnlockData?.amount_cents || activeUnlockPriceCents)}</strong>
+                        </div>
+                        <div>
+                          <span className="fig-unlock-hero-label">Seu saldo</span>
+                          <strong>
+                            {activeUnlockData?.status === 'PAGO'
+                              ? activeUnlockUsageLabel
+                              : activeUnlockTotalUses > 0
+                                ? `Ate ${activeUnlockTotalUses} usos`
+                                : 'Ate 5 usos'}
+                          </strong>
+                        </div>
+                        <div>
+                          <span className="fig-unlock-hero-label">Status</span>
+                          <strong>
+                            {activeUnlockData?.status === 'PAGO'
+                              ? 'Pago'
+                              : activeUnlockData?.status === 'EXPIRADO'
+                                ? 'Expirado'
+                                : activeUnlockData?.status === 'FALHOU'
+                                  ? 'Falhou'
+                                  : 'Aguardando'}
+                          </strong>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
-                  {activeUnlockData?.qr_code_base64 ? (
-                    <div className="fig-payment-qr-card">
-                      <img
-                        src={`data:image/png;base64,${activeUnlockData.qr_code_base64}`}
-                        alt={customUnlockContext === 'AI_CREATE' ? 'QR Code Pix para liberar criacao com IA' : 'QR Code Pix para liberar Minha Figurinha'}
-                      />
+                  {customUnlockContext === 'AI_CREATE' ? (
+                    <div className="fig-unlock-layout-grid fig-unlock-layout-grid--ai">
+                      {activeUnlockData?.qr_code_base64 ? (
+                        <div className="fig-payment-qr-card fig-payment-qr-card--ai">
+                          <img
+                            src={`data:image/png;base64,${activeUnlockData.qr_code_base64}`}
+                            alt="QR Code Pix para liberar criacao com IA"
+                          />
+                        </div>
+                      ) : null}
+                      <div className="fig-unlock-layout-side">
+                        <div className="fig-payment-focus-note fig-payment-focus-note--ai">
+                          <strong>Assim que o Pix confirmar, a criacao com IA fica liberada.</strong>
+                        </div>
+
+                        <div className="fig-helper-strip fig-helper-strip--donation fig-helper-strip--unlock-ai">
+                          <div>
+                            <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
+                          </div>
+                          <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
+                            {customUnlockCopied ? 'Codigo copiado' : 'Copiar Codigo Pix'}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  ) : null}
+                  ) : (
+                    <>
+                      {activeUnlockData?.qr_code_base64 ? (
+                        <div className="fig-payment-qr-card">
+                          <img
+                            src={`data:image/png;base64,${activeUnlockData.qr_code_base64}`}
+                            alt="QR Code Pix para liberar Minha Figurinha"
+                          />
+                        </div>
+                      ) : null}
 
-                  <div className="fig-payment-focus-note">
-                    <strong>
-                      {customUnlockContext === 'AI_CREATE'
-                        ? 'Depois do Pix confirmado, a criacao com IA fica liberada na hora.'
-                        : 'Sua Minha Figurinha entra no PDF assim que o Pix confirmar.'}
-                    </strong>
-                    <span>
-                      {customUnlockContext === 'AI_CREATE'
-                        ? 'Esse pagamento vale para esta sessao e nao sera cobrado de novo quando ela entrar no PDF.'
-                        : 'Se preferir, voce ainda pode voltar e baixar gratis sem ela.'}
-                    </span>
-                  </div>
+                      <div className="fig-payment-focus-note">
+                        <strong>Sua Minha Figurinha entra no PDF assim que o Pix confirmar.</strong>
+                        <span>Se preferir, voce ainda pode voltar e baixar gratis sem ela.</span>
+                      </div>
 
-                  <div className="fig-helper-strip fig-helper-strip--donation">
-                    <div>
-                      <strong>Pix copia e cola</strong>
-                      <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
-                    </div>
-                    <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
-                      {customUnlockCopied ? 'Codigo copiado' : 'Copiar codigo Pix'}
-                    </button>
-                  </div>
+                      <div className="fig-helper-strip fig-helper-strip--donation">
+                        <div>
+                          <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
+                        </div>
+                        <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
+                          {customUnlockCopied ? 'Codigo copiado' : 'Copiar Codigo Pix'}
+                        </button>
+                      </div>
+                    </>
+                  )}
 
-                  <div className="fig-hero-actions fig-hero-actions--sticky-mobile">
+                  <div
+                    className={`fig-hero-actions fig-hero-actions--sticky-mobile ${
+                      customUnlockContext === 'AI_CREATE' ? 'fig-hero-actions--single' : ''
+                    }`}
+                  >
                     {customUnlockContext === 'MANUAL_PDF' ? (
                       <button type="button" className="fig-secondary-button" onClick={() => setCustomUnlockStep('choice')}>
                         Voltar
                       </button>
-                    ) : (
-                      <button type="button" className="fig-secondary-button" onClick={() => setCustomUnlockModalOpen(false)}>
-                        Cancelar
-                      </button>
-                    )}
+                    ) : null}
                     <button
                       type="button"
                       className="fig-primary-button"
@@ -4013,7 +4083,9 @@ function PublicPage() {
                         ? customUnlockContext === 'AI_CREATE'
                           ? 'IA liberada'
                           : 'Liberado'
-                        : 'Ja paguei, verificar agora'}
+                        : customUnlockContext === 'AI_CREATE'
+                          ? 'Verificar pagamento'
+                          : 'Ja paguei, verificar agora'}
                     </button>
                   </div>
                 </>
