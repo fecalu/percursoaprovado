@@ -1042,13 +1042,23 @@ def health() -> dict[str, str]:
 
 
 @app.get("/files/{relative_path:path}")
-def download_public_file(relative_path: str) -> FileResponse:
+def download_public_file(request: Request, relative_path: str) -> FileResponse:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_files",
+        limit=settings.public_public_file_limit,
+    )
     file_path = _resolve_public_storage_path_or_404(relative_path)
     return FileResponse(path=file_path, filename=file_path.name)
 
 
 @app.get("/service-config", response_model=PublicServiceConfigResponse)
-def get_public_service_config(db: Session = Depends(get_db)) -> dict:
+def get_public_service_config(request: Request, db: Session = Depends(get_db)) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="service_config_read",
+        limit=settings.public_service_config_limit,
+    )
     service_settings = get_or_create_service_settings(db)
     return service_settings_to_response(service_settings, include_sensitive=False)
 
@@ -1075,7 +1085,12 @@ def admin_logout(
 
 
 @app.get("/albums", response_model=list[AlbumResponse])
-def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
+def list_public_albums(request: Request, db: Session = Depends(get_db)) -> list[dict]:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="catalog_read",
+        limit=settings.public_catalog_limit,
+    )
     albums = db.execute(
         select(Album)
         .options(selectinload(Album.collections).selectinload(Collection.album))
@@ -1122,10 +1137,16 @@ def list_public_albums(db: Session = Depends(get_db)) -> list[dict]:
 
 @app.get("/collections", response_model=list[CollectionResponse])
 def list_public_collections(
+    request: Request,
     limit: int = Query(default=settings.public_collection_limit, ge=1, le=settings.public_collection_limit_max),
     offset: int = Query(default=0, ge=0, le=5000),
     db: Session = Depends(get_db),
 ) -> list[dict]:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="catalog_read",
+        limit=settings.public_catalog_limit,
+    )
     collections = db.execute(
         select(Collection)
         .options(selectinload(Collection.album))
@@ -1142,7 +1163,12 @@ def list_public_collections(
 
 
 @app.get("/collections/{slug}", response_model=CollectionResponse)
-def get_public_collection(slug: str, db: Session = Depends(get_db)) -> dict:
+def get_public_collection(slug: str, request: Request, db: Session = Depends(get_db)) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="catalog_read",
+        limit=settings.public_catalog_limit,
+    )
     collection = load_collection_by_slug_or_fail(db, slug, public_only=True)
     stats = collection_stats(db, [collection.id])
     return collection_to_response(collection, stats.get(collection.id, {}), include_sensitive=False)
@@ -1151,12 +1177,18 @@ def get_public_collection(slug: str, db: Session = Depends(get_db)) -> dict:
 @app.get("/collections/{slug}/stickers", response_model=list[StickerResponse])
 def list_public_stickers(
     slug: str,
+    request: Request,
     search: str | None = Query(default=None, max_length=120),
     category: StickerCategory | None = None,
     limit: int = Query(default=settings.public_sticker_limit, ge=1, le=settings.public_sticker_limit_max),
     offset: int = Query(default=0, ge=0, le=10000),
     db: Session = Depends(get_db),
 ) -> list[dict]:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="catalog_read",
+        limit=settings.public_catalog_limit,
+    )
     collection = load_collection_by_slug_or_fail(db, slug, public_only=True)
     statement = (
         select(Sticker)
@@ -1175,9 +1207,15 @@ def list_public_stickers(
 
 @app.get("/custom-templates", response_model=list[CustomTemplatePublicOption])
 def list_public_custom_templates(
+    request: Request,
     album_slug: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> list[dict]:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="catalog_read",
+        limit=settings.public_catalog_limit,
+    )
     album_id = load_album_by_slug_or_fail(db, album_slug).id if album_slug else None
     templates = load_active_custom_templates(db, album_id=album_id)
     return [custom_template_to_public_option(template) for template in templates]
@@ -1185,9 +1223,16 @@ def list_public_custom_templates(
 
 @app.get("/public-jobs/{job_id}", response_model=PublicProgressJobResponse)
 def get_public_job_status(
+    request: Request,
     job_id: str,
     session_token: str = Query(..., min_length=12, max_length=120),
 ) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_job_status",
+        limit=settings.public_public_job_status_limit,
+        session_token=session_token,
+    )
     job = public_progress_jobs.get(job_id, session_token=session_token)
     if not job:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Processo nao encontrado para essa sessao.")
@@ -1196,10 +1241,17 @@ def get_public_job_status(
 
 @app.get("/albums/{album_slug}/my-sticker", response_model=StickerResponse | None)
 def get_my_sticker(
+    request: Request,
     album_slug: str,
     session_token: str = Query(..., min_length=12, max_length=120),
     db: Session = Depends(get_db),
 ) -> dict | None:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="my_sticker_read",
+        limit=settings.public_unlock_read_limit,
+        session_token=session_token,
+    )
     album = load_album_by_slug_or_fail(db, album_slug)
     sticker = load_generated_sticker_for_session(db, album.id, session_token)
     return sticker_to_response(sticker, include_sensitive=False) if sticker else None
@@ -1695,10 +1747,17 @@ def _create_my_sticker_unlock_by_type(
 
 @app.get("/albums/{album_slug}/my-sticker-unlock", response_model=CustomStickerUnlockResponse | None)
 def get_my_sticker_unlock(
+    request: Request,
     album_slug: str,
     session_token: str = Query(..., min_length=12, max_length=120),
     db: Session = Depends(get_db),
 ) -> dict | None:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="unlock_read",
+        limit=settings.public_unlock_read_limit,
+        session_token=session_token,
+    )
     return _get_my_sticker_unlock_by_type(
         album_slug=album_slug,
         session_token=session_token,
@@ -1730,10 +1789,17 @@ def create_my_sticker_unlock(
 
 @app.get("/albums/{album_slug}/my-sticker/manual-unlock", response_model=CustomStickerUnlockResponse | None)
 def get_my_sticker_manual_unlock(
+    request: Request,
     album_slug: str,
     session_token: str = Query(..., min_length=12, max_length=120),
     db: Session = Depends(get_db),
 ) -> dict | None:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="unlock_read",
+        limit=settings.public_unlock_read_limit,
+        session_token=session_token,
+    )
     return _get_my_sticker_unlock_by_type(
         album_slug=album_slug,
         session_token=session_token,
@@ -1765,10 +1831,17 @@ def create_my_sticker_manual_unlock(
 
 @app.get("/albums/{album_slug}/my-sticker/ai-unlock", response_model=CustomStickerUnlockResponse | None)
 def get_my_sticker_ai_unlock(
+    request: Request,
     album_slug: str,
     session_token: str = Query(..., min_length=12, max_length=120),
     db: Session = Depends(get_db),
 ) -> dict | None:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="unlock_read",
+        limit=settings.public_unlock_read_limit,
+        session_token=session_token,
+    )
     return _get_my_sticker_unlock_by_type(
         album_slug=album_slug,
         session_token=session_token,
@@ -1990,6 +2063,7 @@ def create_public_print_order(payload: PrintOrderCreate, request: Request, db: S
 
 @app.get("/exports/{export_id}/download")
 def download_export(
+    request: Request,
     export_id: int,
     expires: int = Query(...),
     token: str = Query(..., min_length=32, max_length=128),
@@ -1997,6 +2071,11 @@ def download_export(
 ) -> FileResponse:
     from .models import Export
 
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="export_download",
+        limit=settings.public_download_limit,
+    )
     _validate_export_download_token_or_403(export_id, expires, token)
     export_record = db.get(Export, export_id)
     if not export_record:
