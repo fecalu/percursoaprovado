@@ -155,17 +155,142 @@ function useAdminToken() {
   return [token, setToken]
 }
 
+function readCookie(name) {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const match = document.cookie.match(new RegExp(`(?:^|; )${escapedName}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : ''
+}
+
+function writeCookie(name, value, days = 180) {
+  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString()
+  const secure = window.location?.protocol === 'https:' ? '; Secure' : ''
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secure}`
+}
+
 function usePublicSessionToken() {
   const [sessionToken] = useState(() => {
     const storageKey = 'figurinhas_public_session_token'
+    const cookieKey = 'figurinhas_public_session_token'
     const current = window.localStorage.getItem(storageKey)
-    if (current) return current
+    if (current) {
+      if (!readCookie(cookieKey)) {
+        writeCookie(cookieKey, current)
+      }
+      return current
+    }
+    const cookieValue = readCookie(cookieKey)
+    if (cookieValue) {
+      window.localStorage.setItem(storageKey, cookieValue)
+      return cookieValue
+    }
     const generated = window.crypto?.randomUUID?.() || `sessao-${Math.random().toString(36).slice(2)}${Date.now()}`
     window.localStorage.setItem(storageKey, generated)
+    writeCookie(cookieKey, generated)
     return generated
   })
 
   return sessionToken
+}
+
+const MY_STICKER_DRAFT_DB_NAME = 'figurinhas-public-drafts'
+const MY_STICKER_DRAFT_STORE_NAME = 'assets'
+
+function createMyStickerDraftStorageKey(sessionToken, albumSlug) {
+  if (!sessionToken || !albumSlug) return ''
+  return `figurinhas_my_sticker_draft:${sessionToken}:${albumSlug}`
+}
+
+function createMyStickerDraftAssetKey(sessionToken, albumSlug, assetName) {
+  if (!sessionToken || !albumSlug || !assetName) return ''
+  return `${sessionToken}:${albumSlug}:${assetName}`
+}
+
+function openMyStickerDraftDb() {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !window.indexedDB) {
+      resolve(null)
+      return
+    }
+    const request = window.indexedDB.open(MY_STICKER_DRAFT_DB_NAME, 1)
+    request.onerror = () => reject(request.error || new Error('Nao foi possivel abrir o armazenamento local.'))
+    request.onupgradeneeded = () => {
+      const database = request.result
+      if (!database.objectStoreNames.contains(MY_STICKER_DRAFT_STORE_NAME)) {
+        database.createObjectStore(MY_STICKER_DRAFT_STORE_NAME)
+      }
+    }
+    request.onsuccess = () => resolve(request.result)
+  })
+}
+
+async function saveMyStickerDraftAsset(assetKey, file) {
+  if (!assetKey) return
+  const database = await openMyStickerDraftDb()
+  if (!database) return
+  await new Promise((resolve, reject) => {
+    const transaction = database.transaction(MY_STICKER_DRAFT_STORE_NAME, 'readwrite')
+    const store = transaction.objectStore(MY_STICKER_DRAFT_STORE_NAME)
+    if (file) {
+      store.put(
+        {
+          blob: file,
+          name: file.name || 'arquivo.png',
+          type: file.type || 'application/octet-stream',
+          lastModified: file.lastModified || Date.now()
+        },
+        assetKey
+      )
+    } else {
+      store.delete(assetKey)
+    }
+    transaction.oncomplete = () => resolve()
+    transaction.onerror = () => reject(transaction.error || new Error('Nao foi possivel salvar o rascunho local.'))
+    transaction.onabort = () => reject(transaction.error || new Error('Nao foi possivel salvar o rascunho local.'))
+  })
+  database.close()
+}
+
+async function loadMyStickerDraftAsset(assetKey) {
+  if (!assetKey) return null
+  const database = await openMyStickerDraftDb()
+  if (!database) return null
+  const record = await new Promise((resolve, reject) => {
+    const transaction = database.transaction(MY_STICKER_DRAFT_STORE_NAME, 'readonly')
+    const request = transaction.objectStore(MY_STICKER_DRAFT_STORE_NAME).get(assetKey)
+    request.onsuccess = () => resolve(request.result || null)
+    request.onerror = () => reject(request.error || new Error('Nao foi possivel ler o rascunho local.'))
+  })
+  database.close()
+  if (!record?.blob) return null
+  try {
+    return new File([record.blob], record.name || 'arquivo.png', {
+      type: record.type || record.blob.type || 'application/octet-stream',
+      lastModified: record.lastModified || Date.now()
+    })
+  } catch {
+    return null
+  }
+}
+
+async function deleteMyStickerDraftAsset(assetKey) {
+  if (!assetKey) return
+  const database = await openMyStickerDraftDb()
+  if (!database) return
+  await new Promise((resolve, reject) => {
+    const transaction = database.transaction(MY_STICKER_DRAFT_STORE_NAME, 'readwrite')
+    transaction.objectStore(MY_STICKER_DRAFT_STORE_NAME).delete(assetKey)
+    transaction.oncomplete = () => resolve()
+    transaction.onerror = () => reject(transaction.error || new Error('Nao foi possivel limpar o rascunho local.'))
+    transaction.onabort = () => reject(transaction.error || new Error('Nao foi possivel limpar o rascunho local.'))
+  })
+  database.close()
+}
+
+async function clearMyStickerDraftAssets(sessionToken, albumSlug) {
+  await Promise.all([
+    deleteMyStickerDraftAsset(createMyStickerDraftAssetKey(sessionToken, albumSlug, 'photo')),
+    deleteMyStickerDraftAsset(createMyStickerDraftAssetKey(sessionToken, albumSlug, 'edited-portrait'))
+  ])
 }
 
 async function apiFetch(path, options = {}) {
@@ -1179,6 +1304,8 @@ function PublicPage() {
   const [publicFlowProgress, setPublicFlowProgress] = useState(null)
   const [manualStageElement, setManualStageElement] = useState(null)
   const [manualStageScale, setManualStageScale] = useState(MANUAL_STICKER_PREVIEW_FALLBACK_SCALE)
+  const [myStickerDraftHydrated, setMyStickerDraftHydrated] = useState(false)
+  const [pendingAiResume, setPendingAiResume] = useState(false)
   const myStickerCameraInputRef = useRef(null)
   const myStickerGalleryInputRef = useRef(null)
   const [orderForm, setOrderForm] = useState({
@@ -1187,6 +1314,55 @@ function PublicPage() {
     customer_whatsapp: '',
     notes: ''
   })
+
+  const patchMyStickerDraftStorage = useCallback(
+    patch => {
+      const draftStorageKey = createMyStickerDraftStorageKey(sessionToken, selectedAlbumSlug)
+      if (!draftStorageKey) return
+      let currentDraft = {}
+      try {
+        currentDraft = JSON.parse(window.localStorage.getItem(draftStorageKey) || '{}') || {}
+      } catch {
+        currentDraft = {}
+      }
+      window.localStorage.setItem(
+        draftStorageKey,
+        JSON.stringify({
+          ...currentDraft,
+          ...patch,
+          updated_at: Date.now()
+        })
+      )
+    },
+    [sessionToken, selectedAlbumSlug]
+  )
+
+  const setAiResumeIntent = useCallback(
+    (enabled, extraPatch = {}) => {
+      setPendingAiResume(enabled)
+      patchMyStickerDraftStorage({
+        pending_ai_resume: enabled,
+        ...extraPatch
+      })
+    },
+    [patchMyStickerDraftStorage]
+  )
+
+  const persistAiUnlockedDraft = useCallback(() => {
+    patchMyStickerDraftStorage({
+      custom_unlock_context: 'AI_CREATE',
+      custom_unlock_modal_open: false,
+      custom_unlock_step: 'choice',
+      my_sticker_modal_open: true,
+      mode_confirmed: true,
+      form: {
+        ...myStickerForm,
+        photo: null,
+        requested_composition_mode: 'AI_OPTIONAL'
+      }
+    })
+  }, [patchMyStickerDraftStorage, myStickerForm])
+
   function toCustomSelectionItem(sticker) {
     return {
       ...sticker,
@@ -1562,7 +1738,9 @@ function PublicPage() {
         ])
         if (ignore) return
         setAlbums(collectionsData)
-        setSelectedAlbumSlug(current => current || collectionsData[0]?.slug || '')
+        setSelectedAlbumSlug(current =>
+          collectionsData.some(album => album.slug === current) ? current : collectionsData[0]?.slug || ''
+        )
         setServiceConfig(serviceData)
       } catch (err) {
         if (!ignore) {
@@ -1744,6 +1922,134 @@ function PublicPage() {
   }, [selectedAlbumSlug, serviceConfig?.custom_ai_unlock_enabled, sessionToken])
 
   useEffect(() => {
+    const draftStorageKey = createMyStickerDraftStorageKey(sessionToken, selectedAlbumSlug)
+    if (!draftStorageKey) {
+      setMyStickerDraftHydrated(true)
+      return
+    }
+
+    let cancelled = false
+    async function restoreMyStickerDraft() {
+      setMyStickerDraftHydrated(false)
+      try {
+        const rawDraft = window.localStorage.getItem(draftStorageKey)
+        if (!rawDraft) {
+          if (!cancelled) setMyStickerDraftHydrated(true)
+          return
+        }
+        const parsed = JSON.parse(rawDraft)
+        const restoredForm = {
+          ...createEmptyMyStickerForm(),
+          ...(parsed.form || {}),
+          photo: null
+        }
+        const [restoredPhoto, restoredEditedPortrait] = await Promise.all([
+          loadMyStickerDraftAsset(createMyStickerDraftAssetKey(sessionToken, selectedAlbumSlug, 'photo')),
+          loadMyStickerDraftAsset(createMyStickerDraftAssetKey(sessionToken, selectedAlbumSlug, 'edited-portrait'))
+        ])
+        if (cancelled) return
+        setMyStickerForm(current => ({
+          ...current,
+          ...restoredForm,
+          photo: restoredPhoto || null
+        }))
+        setMyStickerModeConfirmed(Boolean(parsed.mode_confirmed))
+        setManualCutoutDataUrl(parsed.manual_cutout_data_url || '')
+        setManualCutoutOriginalDataUrl(parsed.manual_cutout_original_data_url || '')
+        setManualCutoutAssetToken(parsed.manual_cutout_asset_token || '')
+        setManualEditedPortraitFile(restoredEditedPortrait || null)
+        setCustomUnlockContext(parsed.custom_unlock_context || 'MANUAL_PDF')
+        setCustomUnlockStep(parsed.custom_unlock_step || 'choice')
+        setPendingAiResume(Boolean(parsed.pending_ai_resume))
+        const shouldResumeAiAfterReturn = Boolean(parsed.pending_ai_resume)
+        if ((parsed.my_sticker_modal_open || shouldResumeAiAfterReturn) && !customSticker) {
+          setMyStickerModalOpen(true)
+        }
+        if (parsed.custom_unlock_modal_open && !shouldResumeAiAfterReturn) {
+          setCustomUnlockModalOpen(true)
+        }
+      } catch {
+        window.localStorage.removeItem(draftStorageKey)
+      } finally {
+        if (!cancelled) {
+          setMyStickerDraftHydrated(true)
+        }
+      }
+    }
+    restoreMyStickerDraft()
+    return () => {
+      cancelled = true
+    }
+  }, [selectedAlbumSlug, sessionToken])
+
+  useEffect(() => {
+    if (!myStickerDraftHydrated) return
+    const draftStorageKey = createMyStickerDraftStorageKey(sessionToken, selectedAlbumSlug)
+    if (!draftStorageKey) return
+
+    const hasMeaningfulDraft =
+      Boolean(myStickerForm.photo) ||
+      Boolean(manualCutoutAssetToken) ||
+      Boolean(myStickerForm.name?.trim()) ||
+      Boolean(myStickerModalOpen) ||
+      Boolean(customUnlockModalOpen)
+
+    if (!hasMeaningfulDraft) {
+      window.localStorage.removeItem(draftStorageKey)
+      clearMyStickerDraftAssets(sessionToken, selectedAlbumSlug).catch(() => {})
+      return
+    }
+
+    const payload = {
+      form: {
+        ...myStickerForm,
+        photo: null
+      },
+      mode_confirmed: myStickerModeConfirmed,
+      my_sticker_modal_open: myStickerModalOpen,
+      custom_unlock_modal_open: customUnlockModalOpen,
+      custom_unlock_context: customUnlockContext,
+      custom_unlock_step: customUnlockStep,
+      pending_ai_resume: pendingAiResume,
+      manual_cutout_data_url: manualCutoutDataUrl,
+      manual_cutout_original_data_url: manualCutoutOriginalDataUrl,
+      manual_cutout_asset_token: manualCutoutAssetToken,
+      updated_at: Date.now()
+    }
+    window.localStorage.setItem(draftStorageKey, JSON.stringify(payload))
+  }, [
+    myStickerDraftHydrated,
+    sessionToken,
+    selectedAlbumSlug,
+    myStickerForm,
+    myStickerModeConfirmed,
+    myStickerModalOpen,
+    customUnlockModalOpen,
+    customUnlockContext,
+    customUnlockStep,
+    pendingAiResume,
+    manualCutoutDataUrl,
+    manualCutoutOriginalDataUrl,
+    manualCutoutAssetToken
+  ])
+
+  useEffect(() => {
+    if (!myStickerDraftHydrated || !selectedAlbumSlug) return
+    saveMyStickerDraftAsset(
+      createMyStickerDraftAssetKey(sessionToken, selectedAlbumSlug, 'photo'),
+      myStickerForm.photo || null
+    ).catch(() => {})
+  }, [myStickerDraftHydrated, sessionToken, selectedAlbumSlug, myStickerForm.photo])
+
+  useEffect(() => {
+    if (!myStickerDraftHydrated || !selectedAlbumSlug) return
+    saveMyStickerDraftAsset(
+      createMyStickerDraftAssetKey(sessionToken, selectedAlbumSlug, 'edited-portrait'),
+      manualEditedPortraitFile || null
+    ).catch(() => {})
+  }, [myStickerDraftHydrated, sessionToken, selectedAlbumSlug, manualEditedPortraitFile])
+
+  useEffect(() => {
     setMyStickerForm(current => {
       const enabledModeOptions = currentGenerationModeOptions.filter(option => !option.disabled)
       const nextMode = enabledModeOptions.some(option => option.value === current.requested_composition_mode)
@@ -1884,7 +2190,7 @@ function PublicPage() {
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
-        setCustomUnlockModalOpen(false)
+        handleCloseCustomUnlockModal()
       }
     }
 
@@ -1959,35 +2265,133 @@ function PublicPage() {
     if (!customUnlockModalOpen) {
       setCustomUnlockCopied(false)
       setCustomUnlockStep('choice')
-      setCustomUnlockContext('MANUAL_PDF')
     }
   }, [customUnlockModalOpen])
 
   useEffect(() => {
-    if (!myStickerModalOpen) return
+    if (!myStickerModalOpen || !customSticker) return
     setManualCutoutDataUrl('')
     setManualCutoutOriginalDataUrl('')
     setManualCutoutAssetToken('')
     setManualEditedPortraitFile(null)
     setManualMaskEditorOpen(false)
-    setMyStickerModeConfirmed(Boolean(customSticker))
+    setMyStickerModeConfirmed(true)
     setMyStickerForm(current => ({
-      name: customSticker?.name || current.name || '',
-      profile_type: normalizeCustomProfileValue(customSticker?.profile_type) || current.profile_type || 'HOMEM',
-      category_type: customSticker?.custom_category_type || current.category_type || 'JOGADOR',
-      position_type: customSticker?.custom_position_type || current.position_type || 'ATACANTE',
-      template_id: customSticker?.template_id ? String(customSticker.template_id) : current.template_id || '',
-      photo_offset_x: String(customSticker?.photo_offset_x ?? current.photo_offset_x ?? 0),
-      photo_offset_y: String(customSticker?.photo_offset_y ?? current.photo_offset_y ?? 0),
-      photo_scale: String(customSticker?.photo_scale ?? current.photo_scale ?? 1),
-      photo_rotation: String(customSticker?.photo_rotation ?? current.photo_rotation ?? 0),
-      birth_date_text: normalizeDateInput(customSticker?.birth_date_text || ''),
-      height_text: stripHeightUnit(customSticker?.height_text || ''),
-      weight_text: stripWeightUnit(customSticker?.weight_text || ''),
-      city_or_team: customSticker?.city_or_team || '',
+      name: customSticker.name || current.name || '',
+      profile_type: normalizeCustomProfileValue(customSticker.profile_type) || current.profile_type || 'HOMEM',
+      category_type: customSticker.custom_category_type || current.category_type || 'JOGADOR',
+      position_type: customSticker.custom_position_type || current.position_type || 'ATACANTE',
+      template_id: customSticker.template_id ? String(customSticker.template_id) : current.template_id || '',
+      photo_offset_x: String(customSticker.photo_offset_x ?? current.photo_offset_x ?? 0),
+      photo_offset_y: String(customSticker.photo_offset_y ?? current.photo_offset_y ?? 0),
+      photo_scale: String(customSticker.photo_scale ?? current.photo_scale ?? 1),
+      photo_rotation: String(customSticker.photo_rotation ?? current.photo_rotation ?? 0),
+      birth_date_text: normalizeDateInput(customSticker.birth_date_text || ''),
+      height_text: stripHeightUnit(customSticker.height_text || ''),
+      weight_text: stripWeightUnit(customSticker.weight_text || ''),
+      city_or_team: customSticker.city_or_team || '',
       photo: null
     }))
   }, [myStickerModalOpen, customSticker])
+
+  useEffect(() => {
+    if (!customUnlockModalOpen || customUnlockContext !== 'AI_CREATE' || !aiUnlockData?.access_granted) return
+    persistAiUnlockedDraft()
+    setCustomUnlockModalOpen(false)
+    setMyStickerModalOpen(true)
+    activateMyStickerMode('AI_OPTIONAL')
+  }, [customUnlockModalOpen, customUnlockContext, aiUnlockData?.access_granted, persistAiUnlockedDraft])
+
+  useEffect(() => {
+    if (!myStickerDraftHydrated || !aiUnlockData?.access_granted || customSticker) return
+    const shouldResumeAiFlow =
+      pendingAiResume ||
+      customUnlockContext === 'AI_CREATE' ||
+      customUnlockModalOpen ||
+      myStickerForm.requested_composition_mode === 'AI_OPTIONAL'
+    if (!shouldResumeAiFlow) return
+    persistAiUnlockedDraft()
+    setCustomUnlockModalOpen(false)
+    setMyStickerModalOpen(true)
+    if (!myStickerModeConfirmed || myStickerForm.requested_composition_mode !== 'AI_OPTIONAL') {
+      setMyStickerModeConfirmed(true)
+      setMyStickerForm(current => ({
+        ...current,
+        requested_composition_mode: 'AI_OPTIONAL',
+        template_id: current.requested_composition_mode === 'AI_OPTIONAL' ? current.template_id : ''
+      }))
+    }
+  }, [
+    myStickerDraftHydrated,
+    aiUnlockData?.access_granted,
+    customSticker,
+    pendingAiResume,
+    customUnlockContext,
+    customUnlockModalOpen,
+    myStickerForm.requested_composition_mode,
+    myStickerModeConfirmed,
+    persistAiUnlockedDraft
+  ])
+
+  useEffect(() => {
+    if (
+      !pendingAiResume ||
+      !myStickerModalOpen ||
+      !customAiUnlockAvailable ||
+      !myStickerModeConfirmed ||
+      myStickerForm.requested_composition_mode !== 'AI_OPTIONAL'
+    ) {
+      return
+    }
+    setAiResumeIntent(false, {
+      custom_unlock_context: 'AI_CREATE',
+      custom_unlock_modal_open: false,
+      custom_unlock_step: 'choice',
+      my_sticker_modal_open: true,
+      mode_confirmed: true
+    })
+  }, [
+    pendingAiResume,
+    myStickerModalOpen,
+    customAiUnlockAvailable,
+    myStickerModeConfirmed,
+    myStickerForm.requested_composition_mode,
+    setAiResumeIntent
+  ])
+
+  useEffect(() => {
+    if (!pendingAiResume || !selectedAlbumSlug) return undefined
+
+    let timer = null
+    function handleWake() {
+      if (document.visibilityState === 'hidden') return
+      if (timer) {
+        window.clearTimeout(timer)
+      }
+      timer = window.setTimeout(() => {
+        refreshCustomUnlock(false, 'AI_CREATE')
+      }, 300)
+    }
+
+    window.addEventListener('focus', handleWake)
+    document.addEventListener('visibilitychange', handleWake)
+    return () => {
+      if (timer) {
+        window.clearTimeout(timer)
+      }
+      window.removeEventListener('focus', handleWake)
+      document.removeEventListener('visibilitychange', handleWake)
+    }
+  }, [pendingAiResume, selectedAlbumSlug, sessionToken])
+
+  useEffect(() => {
+    if (!customSticker?.id || !selectedAlbumSlug) return
+    const draftStorageKey = createMyStickerDraftStorageKey(sessionToken, selectedAlbumSlug)
+    if (draftStorageKey) {
+      window.localStorage.removeItem(draftStorageKey)
+    }
+    clearMyStickerDraftAssets(sessionToken, selectedAlbumSlug).catch(() => {})
+  }, [customSticker?.id, selectedAlbumSlug, sessionToken])
 
   useEffect(() => {
     setPreviewPage(current => Math.min(current, previewPageCount - 1))
@@ -2137,6 +2541,13 @@ function PublicPage() {
   }
 
   function activateMyStickerMode(mode) {
+    if (mode !== 'AI_OPTIONAL') {
+      setAiResumeIntent(false, {
+        custom_unlock_context: 'MANUAL_PDF',
+        custom_unlock_modal_open: false,
+        custom_unlock_step: 'choice'
+      })
+    }
     setMyStickerModeConfirmed(true)
     setManualCutoutDataUrl('')
     setManualCutoutOriginalDataUrl('')
@@ -2147,6 +2558,30 @@ function PublicPage() {
       ...current,
       requested_composition_mode: mode,
       template_id: ''
+      }))
+  }
+
+  function handleCloseCustomUnlockModal() {
+    const shouldClearAiIntent = customUnlockContext === 'AI_CREATE' && !aiUnlockData?.access_granted
+    if (shouldClearAiIntent) {
+      setAiResumeIntent(false, {
+        custom_unlock_context: 'MANUAL_PDF',
+        custom_unlock_modal_open: false,
+        custom_unlock_step: 'choice'
+      })
+    }
+    setCustomUnlockModalOpen(false)
+  }
+
+  function continueUnlockedAiFlow() {
+    persistAiUnlockedDraft()
+    setCustomUnlockModalOpen(false)
+    setMyStickerModalOpen(true)
+    setMyStickerModeConfirmed(true)
+    setMyStickerForm(current => ({
+      ...current,
+      requested_composition_mode: 'AI_OPTIONAL',
+      template_id: current.requested_composition_mode === 'AI_OPTIONAL' ? current.template_id : ''
     }))
   }
 
@@ -2238,11 +2673,30 @@ function PublicPage() {
     }
     if (
       myStickerForm.requested_composition_mode === 'AI_OPTIONAL' &&
-      serviceConfig?.custom_ai_unlock_enabled &&
-      !customAiUnlockAvailable
+      serviceConfig?.custom_ai_unlock_enabled
     ) {
-      await handleStartCustomUnlock('AI_CREATE')
-      return
+      if (!customAiUnlockAvailable) {
+        try {
+          const latestAiUnlock = await apiFetch(
+            `/albums/${selectedAlbumSlug}/my-sticker/ai-unlock?session_token=${encodeURIComponent(sessionToken)}`
+          )
+          setAiUnlockData(latestAiUnlock)
+          if (!latestAiUnlock?.access_granted) {
+            if (latestAiUnlock?.status === 'PAGO') {
+              setError('Seu saldo da criacao com IA acabou. Gere um novo Pix para continuar.')
+              setCustomUnlockContext('AI_CREATE')
+              setCustomUnlockStep('payment')
+              setCustomUnlockModalOpen(true)
+              return
+            }
+            await handleStartCustomUnlock('AI_CREATE')
+            return
+          }
+        } catch {
+          await handleStartCustomUnlock('AI_CREATE')
+          return
+        }
+      }
     }
 
     setMyStickerSubmitting(true)
@@ -2366,6 +2820,20 @@ function PublicPage() {
 
   async function handleStartCustomUnlock(unlockType = 'MANUAL_PDF') {
     if (!selectedAlbumSlug) return
+    if (unlockType === 'AI_CREATE') {
+      setAiResumeIntent(true, {
+        custom_unlock_context: 'AI_CREATE',
+        custom_unlock_step: 'payment',
+        custom_unlock_modal_open: true,
+        my_sticker_modal_open: true,
+        mode_confirmed: false,
+        form: {
+          ...myStickerForm,
+          photo: null,
+          requested_composition_mode: 'AI_OPTIONAL'
+        }
+      })
+    }
     setCustomUnlockBusy(true)
     setError('')
     try {
@@ -2387,7 +2855,9 @@ function PublicPage() {
       setCustomUnlockStep('payment')
       if (data.access_granted) {
         if (unlockType === 'AI_CREATE') {
+          persistAiUnlockedDraft()
           setCustomUnlockModalOpen(false)
+          setMyStickerModalOpen(true)
           activateMyStickerMode('AI_OPTIONAL')
         } else {
           setCustomUnlockModalOpen(false)
@@ -2397,6 +2867,13 @@ function PublicPage() {
         setCustomUnlockModalOpen(true)
       }
     } catch (err) {
+      if (unlockType === 'AI_CREATE') {
+        setAiResumeIntent(false, {
+          custom_unlock_context: 'MANUAL_PDF',
+          custom_unlock_modal_open: false,
+          custom_unlock_step: 'choice'
+        })
+      }
       setError(err.message)
     } finally {
       setCustomUnlockBusy(false)
@@ -2419,7 +2896,9 @@ function PublicPage() {
       }
       if (data?.access_granted) {
         if (unlockType === 'AI_CREATE') {
+          persistAiUnlockedDraft()
           setCustomUnlockModalOpen(false)
+          setMyStickerModalOpen(true)
           activateMyStickerMode('AI_OPTIONAL')
         } else {
           setCustomUnlockModalOpen(false)
@@ -3029,7 +3508,10 @@ function PublicPage() {
 
       {mobilePrintGuideOpen ? (
         <div className="fig-modal-backdrop" onClick={() => setMobilePrintGuideOpen(false)}>
-          <div className="fig-modal-shell fig-modal-shell--mobile" onClick={event => event.stopPropagation()}>
+          <div
+            className="fig-modal-shell fig-modal-shell--mobile fig-modal-shell--print-guide"
+            onClick={event => event.stopPropagation()}
+          >
             <div className="fig-modal-header">
               <div>
                 <p className="fig-kicker">Impressao</p>
@@ -3039,9 +3521,12 @@ function PublicPage() {
                 Fechar
               </button>
             </div>
-            <div className="fig-print-guide-placeholder">
-              <strong>Guia de impressao</strong>
-              <p>Vamos colocar aqui uma arte explicando como imprimir da forma correta.</p>
+            <div className="fig-print-guide-card">
+              <img
+                className="fig-print-guide-image"
+                src="/como-imprimir.png"
+                alt="Guia de impressao com instrucoes para imprimir as figurinhas corretamente"
+              />
             </div>
           </div>
         </div>
@@ -3258,12 +3743,24 @@ function PublicPage() {
                 </div>
               ) : null}
 
-              {!myStickerModeConfirmed && (manualCreationAvailable || aiCreationAvailable) ? (
+                  {!myStickerModeConfirmed && (manualCreationAvailable || aiCreationAvailable) ? (
                 <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
                   <div>
                     <strong>Escolha primeiro como quer criar sua figurinha.</strong>
                     <span>Depois disso aparecem os campos, a foto e o passo certo para esse tipo de criacao.</span>
                   </div>
+                </div>
+              ) : null}
+
+              {!myStickerModeConfirmed && customAiUnlockAvailable ? (
+                <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
+                  <div>
+                    <strong>Sua IA ja esta liberada.</strong>
+                    <span>Toque em continuar para abrir os campos da criacao com IA.</span>
+                  </div>
+                  <button type="button" className="fig-primary-button" onClick={continueUnlockedAiFlow}>
+                    Continuar com IA
+                  </button>
                 </div>
               ) : null}
 
@@ -3851,7 +4348,7 @@ function PublicPage() {
       ) : null}
 
       {customUnlockModalOpen && serviceConfig ? (
-        <div className="fig-modal-backdrop" onClick={() => setCustomUnlockModalOpen(false)}>
+        <div className="fig-modal-backdrop" onClick={handleCloseCustomUnlockModal}>
           <div className="fig-modal-shell fig-modal-shell--donation fig-modal-shell--public-flow" onClick={event => event.stopPropagation()}>
             <div className="fig-modal-header">
               <div>
@@ -3871,7 +4368,7 @@ function PublicPage() {
                       : 'Escolha como quer baixar.'}
                 </p>
               </div>
-              <button type="button" className="fig-modal-close" onClick={() => setCustomUnlockModalOpen(false)}>
+              <button type="button" className="fig-modal-close" onClick={handleCloseCustomUnlockModal}>
                 Fechar
               </button>
             </div>
@@ -4076,15 +4573,27 @@ function PublicPage() {
                     <button
                       type="button"
                       className="fig-primary-button"
-                      onClick={() => refreshCustomUnlock(true, customUnlockContext)}
+                      onClick={() => {
+                        if (customUnlockContext === 'AI_CREATE' && activeUnlockData?.access_granted) {
+                          continueUnlockedAiFlow()
+                          return
+                        }
+                        if (customUnlockContext === 'AI_CREATE' && activeUnlockData?.status === 'PAGO' && !activeUnlockData?.access_granted) {
+                          handleStartCustomUnlock('AI_CREATE')
+                          return
+                        }
+                        refreshCustomUnlock(true, customUnlockContext)
+                      }}
                       disabled={customUnlockBusy}
                     >
-                      {activeUnlockData?.status === 'PAGO'
-                        ? customUnlockContext === 'AI_CREATE'
-                          ? 'IA liberada'
-                          : 'Liberado'
-                        : customUnlockContext === 'AI_CREATE'
-                          ? 'Verificar pagamento'
+                      {customUnlockContext === 'AI_CREATE'
+                        ? activeUnlockData?.access_granted
+                          ? 'Continuar com IA'
+                          : activeUnlockData?.status === 'PAGO'
+                            ? 'Gerar novo Pix'
+                            : 'Verificar pagamento'
+                        : activeUnlockData?.status === 'PAGO'
+                          ? 'Liberado'
                           : 'Ja paguei, verificar agora'}
                     </button>
                   </div>
@@ -4252,6 +4761,12 @@ function AdminPage() {
     custom_base_homem_path: '',
     custom_base_mulher_path: '',
     custom_base_crianca_path: ''
+  })
+  const [accessSummary, setAccessSummary] = useState({
+    visits_today: 0,
+    unique_today: 0,
+    visits_last_7_days: 0,
+    unique_last_7_days: 0
   })
   const [savingService, setSavingService] = useState(false)
   const [sourceDocuments, setSourceDocuments] = useState([])
@@ -4477,6 +4992,14 @@ function AdminPage() {
     setServiceForm(serviceConfigToForm(data))
   }
 
+  async function fetchAccessSummary() {
+    if (!token) return
+    const data = await apiFetch('/admin/access-summary', {
+      headers: buildAdminHeaders(token)
+    })
+    setAccessSummary(data)
+  }
+
   async function fetchSourceDocuments(activeDocumentId = selectedSourceDocumentId, shouldApply = () => true) {
     if (!token || !selectedAlbumId) {
       setSourceDocuments([])
@@ -4600,7 +5123,7 @@ function AdminPage() {
     async function bootstrap() {
       setError('')
       try {
-        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchOrders()])
+        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchOrders(), fetchAccessSummary()])
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -8080,6 +8603,30 @@ function AdminPage() {
         {adminView === 'atendimento' ? (
         <section className="fig-admin-summary-grid fig-admin-summary-grid--single">
           <div className="fig-admin-stack">
+            <section className="fig-form-card fig-form-card--supporting">
+              <div className="fig-panel-header">
+                <p className="fig-kicker">Acessos</p>
+                <h3>Resumo do site</h3>
+              </div>
+              <div className="fig-admin-access-grid">
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Visitas hoje</span>
+                  <strong>{accessSummary.visits_today ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Unicos hoje</span>
+                  <strong>{accessSummary.unique_today ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Visitas 7 dias</span>
+                  <strong>{accessSummary.visits_last_7_days ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Unicos 7 dias</span>
+                  <strong>{accessSummary.unique_last_7_days ?? 0}</strong>
+                </article>
+              </div>
+            </section>
             <details className="fig-admin-advanced fig-admin-accordion">
               <summary>
                 <div className="fig-admin-accordion-summary">

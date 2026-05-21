@@ -9,11 +9,12 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from threading import Lock
+from zoneinfo import ZoneInfo
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Query, Request, Response, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, distinct, func, or_, select
 from sqlalchemy.orm import Session as OrmSession
 from sqlalchemy.orm import Session, selectinload
 
@@ -45,6 +46,7 @@ from .models import (
     PageSelectionBlock,
     PrintOrder,
     PrintOrderStatus,
+    PublicAccessEvent,
     SourceDocument,
     SourceDocumentPage,
     Sticker,
@@ -53,6 +55,7 @@ from .models import (
 )
 from .schemas import (
     AdminLoginRequest,
+    AdminAccessSummaryResponse,
     AdminSessionResponse,
     AlbumCreate,
     AlbumResponse,
@@ -148,6 +151,7 @@ from .services import (
     load_collection_by_slug_or_fail,
     load_collection_or_fail,
     load_generated_sticker_for_session,
+    load_available_custom_sticker_unlock,
     load_latest_custom_sticker_unlock,
     load_active_custom_templates,
     load_page_layout_template_or_fail,
@@ -204,6 +208,7 @@ PUBLIC_FILE_PREFIXES = (
     "source_detected/",
 )
 EXPORT_DOWNLOAD_TTL_SECONDS = 600
+PUBLIC_ANALYTICS_TZ = ZoneInfo("America/Sao_Paulo")
 
 app = FastAPI(title="Figurinhas API")
 app.add_middleware(
@@ -824,6 +829,8 @@ def ensure_runtime_indexes() -> None:
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_detected_stickers_assigned_status ON figurinhas_source_detected_stickers (assigned_collection_id, status, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_album_session_type_status ON figurinhas_custom_sticker_unlocks (album_id, session_token, unlock_type, status, created_at, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_print_orders_album_created ON figurinhas_print_orders (album_id, created_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_access_events_date_route ON figurinhas_public_access_events (event_date, route_key, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_access_events_subject_date ON figurinhas_public_access_events (subject_hash, event_date, id)",
     )
     with engine.begin() as connection:
         for statement in index_statements:
@@ -864,6 +871,56 @@ def _public_client_key(request: Request) -> str:
 def _session_subject(session_token: str | None) -> str | None:
     normalized = (session_token or "").strip()
     return normalized or None
+
+
+def _public_visitor_subject_hash(request: Request) -> str:
+    client_key = _public_client_key(request)
+    user_agent = (request.headers.get("user-agent") or "").strip().lower()
+    subject = f"{client_key}|{user_agent}"
+    return hashlib.sha256(subject.encode("utf-8")).hexdigest()
+
+
+def _track_public_catalog_access(request: Request) -> None:
+    event_date = datetime.now(PUBLIC_ANALYTICS_TZ).date()
+    try:
+        with SessionLocal() as tracking_db:
+            tracking_db.add(
+                PublicAccessEvent(
+                    event_date=event_date,
+                    route_key="CATALOG_HOME",
+                    subject_hash=_public_visitor_subject_hash(request),
+                )
+            )
+            tracking_db.commit()
+    except Exception:
+        traceback.print_exc()
+
+
+def _build_admin_access_summary(db: Session) -> dict:
+    today = datetime.now(PUBLIC_ANALYTICS_TZ).date()
+    last_7_start = today - timedelta(days=6)
+
+    def _counts(date_from, date_to):
+        row = db.execute(
+            select(
+                func.count(PublicAccessEvent.id),
+                func.count(distinct(PublicAccessEvent.subject_hash)),
+            ).where(
+                PublicAccessEvent.route_key == "CATALOG_HOME",
+                PublicAccessEvent.event_date >= date_from,
+                PublicAccessEvent.event_date <= date_to,
+            )
+        ).one()
+        return int(row[0] or 0), int(row[1] or 0)
+
+    visits_today, unique_today = _counts(today, today)
+    visits_last_7_days, unique_last_7_days = _counts(last_7_start, today)
+    return {
+        "visits_today": visits_today,
+        "unique_today": unique_today,
+        "visits_last_7_days": visits_last_7_days,
+        "unique_last_7_days": unique_last_7_days,
+    }
 
 
 def _enforce_public_rate_limit(
@@ -1106,6 +1163,7 @@ def list_public_albums(request: Request, db: Session = Depends(get_db)) -> list[
         bucket="catalog_read",
         limit=settings.public_catalog_limit,
     )
+    _track_public_catalog_access(request)
     albums = db.execute(
         select(Album)
         .options(selectinload(Album.collections).selectinload(Collection.album))
@@ -1695,7 +1753,10 @@ def _get_my_sticker_unlock_by_type(
     unlock_type: CustomStickerUnlockType,
     db: Session,
 ) -> dict | None:
-    album = load_album_by_slug_or_fail(db, album_slug)
+    try:
+        album = load_album_by_slug_or_fail(db, album_slug)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     service_settings = get_or_create_service_settings(db)
     unlock = load_latest_custom_sticker_unlock(
         db,
@@ -1718,6 +1779,14 @@ def _get_my_sticker_unlock_by_type(
         db.refresh(unlock)
         if unlock.status == CustomStickerUnlockStatus.EXPIRADO and unlock.mp_status_detail == "price_changed":
             return None
+    available_unlock = load_available_custom_sticker_unlock(
+        db,
+        album_id=album.id,
+        session_token=session_token,
+        unlock_type=unlock_type,
+    )
+    if available_unlock:
+        return custom_sticker_unlock_to_response(available_unlock, service_settings)
     return custom_sticker_unlock_to_response(unlock, service_settings)
 
 
@@ -1728,7 +1797,10 @@ def _create_my_sticker_unlock_by_type(
     unlock_type: CustomStickerUnlockType,
     db: Session,
 ) -> dict:
-    album = load_album_by_slug_or_fail(db, album_slug)
+    try:
+        album = load_album_by_slug_or_fail(db, album_slug)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     service_settings = get_or_create_service_settings(db)
     sticker = load_generated_sticker_for_session(db, album.id, payload.session_token)
     if unlock_type == CustomStickerUnlockType.MANUAL_PDF:
@@ -2916,6 +2988,15 @@ def list_admin_orders(
         statement = statement.where(PrintOrder.status == status_filter)
     orders = db.execute(statement).scalars().all()
     return [print_order_to_response(order) for order in orders]
+
+
+@app.get(
+    "/admin/access-summary",
+    response_model=AdminAccessSummaryResponse,
+    dependencies=[Depends(require_admin)],
+)
+def get_admin_access_summary(db: Session = Depends(get_db)) -> dict:
+    return _build_admin_access_summary(db)
 
 
 @app.put("/admin/orders/{order_id}", response_model=PrintOrderResponse, dependencies=[Depends(require_admin)])

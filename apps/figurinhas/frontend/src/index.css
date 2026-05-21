@@ -1282,25 +1282,26 @@ a {
   white-space: nowrap;
 }
 
-.fig-print-guide-placeholder {
+.fig-modal-shell--print-guide {
+  width: min(560px, calc(100vw - 2rem));
+  padding: 0.8rem;
+}
+
+.fig-print-guide-card {
   display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  padding: 1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0 0;
+}
+
+.fig-print-guide-image {
+  width: 100%;
+  height: auto;
+  display: block;
   border-radius: 22px;
-  background: rgba(17, 34, 53, 0.04);
-  border: 1px dashed rgba(17, 34, 53, 0.18);
-}
-
-.fig-print-guide-placeholder strong {
-  color: #112235;
-  font-size: 1rem;
-}
-
-.fig-print-guide-placeholder p {
-  margin: 0;
-  color: #5a6c82;
-  line-height: 1.5;
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  box-shadow: 0 16px 38px rgba(17, 34, 53, 0.1);
+  background: #fff;
 }
 
 .fig-public-progress-backdrop {
@@ -2140,6 +2141,35 @@ a {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.fig-admin-access-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.fig-admin-access-card {
+  border: 1px solid rgba(17, 34, 53, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.fig-admin-access-card strong {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #0f5a42;
+}
+
+.fig-admin-access-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #6f8091;
 }
 
 .fig-admin-panel-grid {
@@ -3079,6 +3109,10 @@ a {
     grid-template-columns: 1fr;
   }
 
+  .fig-admin-access-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .fig-manual-editor {
     gap: 0.55rem;
   }
@@ -3907,6 +3941,24 @@ a {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     box-shadow: 0 -16px 40px rgba(17, 34, 53, 0.18);
+  }
+
+  .fig-modal-shell--print-guide {
+    width: calc(100vw - 0.75rem);
+    max-height: calc(100vh - 0.75rem);
+    padding: 0.7rem 0.7rem 0.8rem;
+    border-radius: 24px 24px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .fig-print-guide-card {
+    padding-top: 0.1rem;
+  }
+
+  .fig-print-guide-image {
+    border-radius: 18px;
+    box-shadow: 0 12px 26px rgba(17, 34, 53, 0.09);
   }
 
   .fig-modal-shell--my-sticker .fig-form-card {

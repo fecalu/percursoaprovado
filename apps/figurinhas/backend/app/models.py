@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import enum
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import Boolean, DateTime, Enum, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Enum, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -643,3 +643,13 @@ class PrintOrder(Base):
 
     album: Mapped[Album | None] = relationship(back_populates="print_orders")
     collection: Mapped[Collection] = relationship(back_populates="print_orders")
+
+
+class PublicAccessEvent(Base):
+    __tablename__ = "figurinhas_public_access_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    event_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    route_key: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
+    subject_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False, index=True)

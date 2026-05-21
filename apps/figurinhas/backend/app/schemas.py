@@ -557,6 +557,13 @@ class AdminSessionResponse(BaseModel):
     expires_at: datetime
 
 
+class AdminAccessSummaryResponse(BaseModel):
+    visits_today: int
+    unique_today: int
+    visits_last_7_days: int
+    unique_last_7_days: int
+
+
 class ExportRequest(BaseModel):
     album_slug: str
     sticker_ids: list[int] = Field(default_factory=list)
