@@ -2076,6 +2076,17 @@ function PublicPage() {
     }
   }
 
+  async function handleDownloadMySticker() {
+    if (!customSticker?.preview_path) return
+    setError('')
+    try {
+      const blob = await apiFetch(`/files/${customSticker.preview_path}`)
+      downloadBlob(blob, `${buildSlug(customSticker.name || 'minha-figurinha') || 'minha-figurinha'}.png`)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   function handleMyStickerPhotoChange(file) {
     setMyStickerForm(current => ({
       ...current,
@@ -2406,12 +2417,12 @@ function PublicPage() {
   }
 
   async function handleCopyPixKey() {
-    if (!serviceConfig?.pix_key) return
+    if (!serviceConfig?.donation_qr_code && !serviceConfig?.pix_key) return
     try {
-      await navigator.clipboard.writeText(serviceConfig.pix_key)
+      await navigator.clipboard.writeText(serviceConfig.donation_qr_code || serviceConfig.pix_key)
       setPixCopied(true)
     } catch {
-      setError('Nao foi possivel copiar a chave Pix automaticamente.')
+      setError('Nao foi possivel copiar o codigo Pix automaticamente.')
     }
   }
 
@@ -2876,6 +2887,15 @@ function PublicPage() {
 
             {customSticker ? (
               <div className={`fig-custom-preview${customStickerSelected ? ' is-selected' : ''}`}>
+                {customStickerSelected ? (
+                  <button
+                    type="button"
+                    className="fig-custom-preview-download"
+                    onClick={handleDownloadMySticker}
+                  >
+                    Baixar
+                  </button>
+                ) : null}
                 <img src={apiFileUrl(customSticker.preview_path)} alt={customSticker.name} />
                 <div className="fig-custom-preview-body">
                   <strong>{customSticker.name}</strong>
@@ -3058,7 +3078,7 @@ function PublicPage() {
 
       {myStickerModalOpen ? (
         <div className="fig-modal-backdrop" onClick={() => setMyStickerModalOpen(false)}>
-          <div className="fig-modal-shell fig-modal-shell--donation fig-modal-shell--public-flow" onClick={event => event.stopPropagation()}>
+          <div className="fig-modal-shell fig-modal-shell--my-sticker fig-modal-shell--public-flow" onClick={event => event.stopPropagation()}>
             <div className="fig-modal-header">
               <div>
                 <p className="fig-kicker">Minha Figurinha</p>
@@ -4016,42 +4036,36 @@ function PublicPage() {
               </button>
             </div>
 
-            <section className="fig-form-card fig-donation-modal-card">
+            <section className="fig-form-card fig-support-donation-modal-card">
               <div className="fig-service-notes">
                 <p>{serviceConfig.donation_message || 'O download continua gratuito mesmo sem doacao.'}</p>
               </div>
 
-              <div className="fig-quote-grid fig-quote-grid--donation">
-                <div className="fig-quote-item">
-                  <strong>{selectedIds.length}</strong>
-                  <span>figurinhas no arquivo</span>
+              {serviceConfig.donation_qr_code_base64 ? (
+                <div className="fig-support-payment-qr-card">
+                  <img
+                    src={`data:image/png;base64,${serviceConfig.donation_qr_code_base64}`}
+                    alt="QR Code Pix para apoio opcional"
+                  />
                 </div>
-                <div className="fig-quote-item">
-                  <strong>{quote?.sheet_count || previewSheets.length || 1}</strong>
-                  <span>folha(s) gerada(s)</span>
-                </div>
-                <div className="fig-quote-item">
-                  <strong>Pix</strong>
-                  <span>apoio opcional</span>
-                </div>
-              </div>
+              ) : null}
 
-              <div className="fig-helper-strip fig-helper-strip--donation">
+              <div className="fig-helper-strip fig-support-helper-strip">
                 <div>
-                  <strong>Chave Pix</strong>
-                  <span>{serviceConfig.pix_key || 'a configurar'}{serviceConfig.pix_holder ? ` · ${serviceConfig.pix_holder}` : ''}</span>
+                  <strong>{serviceConfig.donation_qr_code ? 'Pix copia e cola' : 'Chave Pix'}</strong>
+                  <span className={serviceConfig.donation_qr_code ? 'fig-support-code-block' : ''}>
+                    {serviceConfig.donation_qr_code || serviceConfig.pix_key || 'a configurar'}
+                    {!serviceConfig.donation_qr_code && serviceConfig.pix_holder ? ` · ${serviceConfig.pix_holder}` : ''}
+                  </span>
                 </div>
                 <button type="button" className="fig-secondary-button" onClick={handleCopyPixKey}>
-                  {pixCopied ? 'Chave copiada' : 'Copiar chave Pix'}
+                  {pixCopied ? 'Codigo copiado' : serviceConfig.donation_qr_code ? 'Copiar codigo Pix' : 'Copiar chave Pix'}
                 </button>
               </div>
 
               <div className="fig-hero-actions">
-                <button type="button" className="fig-secondary-button" onClick={() => setDonationModalOpen(false)}>
-                  Agora nao
-                </button>
                 <button type="button" className="fig-primary-button" onClick={handleDonationDownload}>
-                  {pendingDownloadFileName ? `Baixar ${pendingDownloadFileName}` : 'Baixar PDF agora'}
+                  Baixar PDF agora
                 </button>
               </div>
             </section>
@@ -6280,6 +6294,12 @@ function AdminPage() {
 
   async function handleSaveServiceConfig(event) {
     event.preventDefault()
+    const normalizedPixKey = String(serviceForm.pix_key || '').trim()
+    if (serviceForm.donation_enabled && !normalizedPixKey) {
+      setError('Preencha a chave Pix para ativar o apoio opcional apos o PDF gratis.')
+      setMessage('')
+      return
+    }
     setSavingService(true)
     setError('')
     setMessage('')
@@ -6300,7 +6320,7 @@ function AdminPage() {
           pack_size: Number(serviceForm.pack_size || 7),
           print_price_cents: centsFromInput(serviceForm.print_price),
           pack_price_cents: centsFromInput(serviceForm.pack_price),
-          pix_key: serviceForm.pix_key,
+          pix_key: normalizedPixKey,
           pix_holder: serviceForm.pix_holder,
           donation_message: serviceForm.donation_message,
           pickup_note: serviceForm.pickup_note,
@@ -8010,6 +8030,7 @@ function AdminPage() {
                 />
                 <span>Mostrar apoio opcional via Pix apos gerar o PDF gratis</span>
               </label>
+              <p className="fig-inline-note">Para esse apoio aparecer no publico, a Chave Pix precisa estar preenchida.</p>
 
               <label className="fig-checkbox">
                 <input

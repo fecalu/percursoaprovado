@@ -594,6 +594,8 @@ class PublicServiceConfigResponse(BaseModel):
     pix_holder: str | None
     donation_message: str | None
     pickup_note: str | None
+    donation_qr_code: str | None = None
+    donation_qr_code_base64: str | None = None
     custom_base_homem_path: str | None = None
     custom_base_mulher_path: str | None = None
     custom_base_crianca_path: str | None = None

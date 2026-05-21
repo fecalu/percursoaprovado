@@ -809,6 +809,7 @@ a {
 }
 
 .fig-custom-preview {
+  position: relative;
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr);
   gap: 0.85rem;
@@ -825,6 +826,27 @@ a {
   box-shadow:
     0 16px 30px rgba(31, 122, 77, 0.12),
     0 0 0 1px rgba(31, 122, 77, 0.08);
+}
+
+.fig-custom-preview-download {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  min-height: 28px;
+  padding: 0.18rem 0.58rem;
+  border: 1px solid rgba(31, 122, 77, 0.22);
+  border-radius: 999px;
+  background: rgba(239, 251, 245, 0.96);
+  color: #16714a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(17, 34, 53, 0.08);
+}
+
+.fig-custom-preview-download:hover {
+  background: rgba(31, 122, 77, 0.12);
 }
 
 .fig-custom-preview img {
@@ -1158,8 +1180,11 @@ a {
   margin-bottom: 0;
 }
 
-.fig-donation-modal-card {
+.fig-support-donation-modal-card {
   margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 .fig-order-form--modal {
@@ -1189,7 +1214,72 @@ a {
 }
 
 .fig-modal-shell--donation {
-  width: min(620px, 100%);
+  width: min(500px, 100%);
+  margin: auto;
+}
+
+.fig-modal-shell--my-sticker {
+  width: min(1120px, calc(100vw - 2.5rem));
+  margin: auto;
+}
+
+.fig-modal-shell--my-sticker .fig-form-card {
+  padding: 1rem 1.05rem;
+}
+
+.fig-modal-shell--my-sticker .fig-modal-header {
+  margin-bottom: 0.75rem;
+}
+
+.fig-modal-shell--my-sticker .fig-section-block {
+  gap: 0.85rem;
+}
+
+.fig-modal-shell--my-sticker .fig-manual-editor {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.fig-modal-shell--my-sticker .fig-manual-editor-preview {
+  position: sticky;
+  top: 0;
+}
+
+.fig-modal-shell--my-sticker .fig-photo-adjust-grid--editor {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-content: start;
+}
+
+.fig-modal-shell--donation .fig-modal-header {
+  margin-bottom: 0.55rem;
+}
+
+.fig-modal-shell--donation .fig-modal-close {
+  padding: 0.48rem 0.8rem;
+}
+
+.fig-modal-shell--donation .fig-service-notes p {
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.fig-modal-shell--donation .fig-support-helper-strip {
+  margin-top: 0;
+}
+
+.fig-modal-shell--donation .fig-support-code-block {
+  max-width: 100%;
+}
+
+.fig-modal-shell--donation .fig-hero-actions {
+  justify-content: center;
+}
+
+.fig-modal-shell--donation .fig-hero-actions .fig-primary-button {
+  white-space: nowrap;
 }
 
 .fig-print-guide-placeholder {
@@ -1924,6 +2014,10 @@ a {
 .fig-helper-strip--donation strong,
 .fig-helper-strip--donation span {
   display: block;
+}
+
+.fig-support-helper-strip .fig-secondary-button {
+  flex-shrink: 0;
 }
 
 .fig-sheet-preview-section {
@@ -3774,6 +3868,142 @@ a {
 
   .fig-modal-shell--public-flow .fig-payment-qr-card img {
     width: min(100%, 250px);
+  }
+
+  .fig-modal-backdrop {
+    padding: 0.75rem;
+  }
+
+  .fig-modal-shell--donation {
+    width: min(304px, calc(100vw - 1rem));
+    max-height: calc(100vh - 1rem);
+    padding: 0.6rem;
+    border-radius: 20px;
+  }
+
+  .fig-modal-shell--my-sticker {
+    width: 100%;
+    max-height: 94vh;
+    min-height: 72vh;
+    padding: 0.82rem 0.82rem 0.92rem;
+    border-radius: 28px 28px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 -16px 40px rgba(17, 34, 53, 0.18);
+  }
+
+  .fig-modal-shell--my-sticker .fig-form-card {
+    padding: 0.82rem;
+    border-radius: 20px;
+  }
+
+  .fig-modal-shell--my-sticker .fig-modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding-bottom: 0.5rem;
+    background: linear-gradient(180deg, #f8fbff 78%, rgba(248, 251, 255, 0.88));
+    backdrop-filter: blur(12px);
+    gap: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .fig-modal-shell--my-sticker .fig-modal-header h3 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .fig-modal-shell--my-sticker .fig-modal-close {
+    padding: 0.42rem 0.72rem;
+    font-size: 0.76rem;
+  }
+
+  .fig-modal-shell--my-sticker .fig-manual-editor {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .fig-modal-shell--my-sticker .fig-manual-editor-preview {
+    position: relative;
+    top: auto;
+    gap: 0.42rem;
+  }
+
+  .fig-modal-shell--my-sticker .fig-manual-sticker-stage {
+    width: min(100%, 248px);
+    border-radius: 22px;
+  }
+
+  .fig-modal-shell--my-sticker .fig-photo-adjust-grid--editor {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-top: 0;
+    padding: 0.65rem;
+    border-radius: 14px;
+  }
+
+  .fig-modal-shell--donation .fig-modal-header {
+    gap: 0.6rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .fig-modal-shell--donation .fig-modal-header h3 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .fig-modal-shell--donation .fig-modal-close {
+    padding: 0.42rem 0.72rem;
+    font-size: 0.76rem;
+  }
+
+  .fig-support-donation-modal-card {
+    gap: 0.58rem;
+    padding: 0.72rem 0.74rem;
+    border-radius: 16px;
+  }
+
+  .fig-modal-shell--donation .fig-service-notes p {
+    font-size: 0.74rem;
+    line-height: 1.34;
+  }
+
+  .fig-modal-shell--donation .fig-support-payment-qr-card {
+    padding: 0.5rem;
+    border-radius: 16px;
+  }
+
+  .fig-modal-shell--donation .fig-support-payment-qr-card img {
+    width: min(100%, 168px);
+    border-radius: 12px;
+  }
+
+  .fig-modal-shell--donation .fig-support-helper-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.58rem;
+  }
+
+  .fig-modal-shell--donation .fig-support-helper-strip .fig-secondary-button {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .fig-modal-shell--donation .fig-support-code-block {
+    font-size: 0.68rem !important;
+    line-height: 1.42;
+  }
+
+  .fig-modal-shell--donation .fig-hero-actions {
+    gap: 0.4rem;
+  }
+
+  .fig-modal-shell--donation .fig-hero-actions .fig-primary-button {
+    width: 100%;
+    min-height: 40px;
+    padding: 0.64rem 0.7rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
   }
 
   .fig-modal-shell--mobile {

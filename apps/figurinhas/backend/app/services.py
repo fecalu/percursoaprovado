@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import base64
 import json
 import shutil
 import tempfile
@@ -14,6 +15,7 @@ from typing import Callable
 
 import fitz
 from PIL import Image, ImageOps
+import qrcode
 from reportlab.lib.colors import HexColor
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
@@ -133,6 +135,66 @@ CUSTOM_BASE_FIELD_BY_PROFILE: dict[CustomProfileType, str] = {
     CustomProfileType.MENINO: "custom_base_menino_path",
     CustomProfileType.MENINA: "custom_base_menino_path",
 }
+
+
+def _sanitize_pix_field(value: str | None, *, max_length: int, fallback: str) -> str:
+    normalized = unicodedata.normalize("NFD", (value or "").strip())
+    ascii_only = "".join(char for char in normalized if unicodedata.category(char) != "Mn")
+    cleaned = "".join(char for char in ascii_only.upper() if char.isalnum() or char in {" ", "-", "."}).strip()
+    compacted = " ".join(cleaned.split())
+    return (compacted or fallback)[:max_length]
+
+
+def _pix_crc16(payload: str) -> str:
+    polynomial = 0x1021
+    crc = 0xFFFF
+    data = (payload + "6304").encode("utf-8")
+    for byte in data:
+        crc ^= byte << 8
+        for _ in range(8):
+            if crc & 0x8000:
+                crc = ((crc << 1) ^ polynomial) & 0xFFFF
+            else:
+                crc = (crc << 1) & 0xFFFF
+    return f"{crc:04X}"
+
+
+def _pix_field(field_id: str, value: str) -> str:
+    return f"{field_id}{len(value):02d}{value}"
+
+
+def build_static_pix_payload(pix_key: str | None, pix_holder: str | None) -> str | None:
+    normalized_key = (pix_key or "").strip()
+    if not normalized_key:
+        return None
+    merchant_name = _sanitize_pix_field(pix_holder, max_length=25, fallback="APOIO FIGURINHAS")
+    merchant_city = "SAO LUIS"
+    merchant_account = _pix_field("00", "BR.GOV.BCB.PIX") + _pix_field("01", normalized_key)
+    payload = "".join(
+        [
+            _pix_field("00", "01"),
+            _pix_field("26", merchant_account),
+            _pix_field("52", "0000"),
+            _pix_field("53", "986"),
+            _pix_field("58", "BR"),
+            _pix_field("59", merchant_name),
+            _pix_field("60", merchant_city),
+            _pix_field("62", _pix_field("05", "***")),
+        ]
+    )
+    return f"{payload}6304{_pix_crc16(payload)}"
+
+
+def build_static_pix_qr_base64(pix_payload: str | None) -> str | None:
+    if not pix_payload:
+        return None
+    qr = qrcode.QRCode(box_size=8, border=2)
+    qr.add_data(pix_payload)
+    qr.make(fit=True)
+    image = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    return base64.b64encode(buffer.getvalue()).decode("ascii")
 
 
 def slugify(value: str) -> str:
@@ -3879,6 +3941,7 @@ def sticker_to_response(sticker: Sticker, *, include_sensitive: bool = True) -> 
 
 
 def service_settings_to_response(service_settings: ServiceSettings, *, include_sensitive: bool = True) -> dict:
+    donation_qr_code = build_static_pix_payload(service_settings.pix_key, service_settings.pix_holder)
     response = {
         "service_enabled": service_settings.service_enabled,
         "donation_enabled": service_settings.donation_enabled,
@@ -3896,6 +3959,8 @@ def service_settings_to_response(service_settings: ServiceSettings, *, include_s
         "pix_holder": service_settings.pix_holder,
         "donation_message": service_settings.donation_message,
         "pickup_note": service_settings.pickup_note,
+        "donation_qr_code": donation_qr_code,
+        "donation_qr_code_base64": build_static_pix_qr_base64(donation_qr_code),
         # Public flow uses these base previews to show the available AI model.
         "custom_base_homem_path": service_settings.custom_base_homem_path,
         "custom_base_mulher_path": service_settings.custom_base_mulher_path,
