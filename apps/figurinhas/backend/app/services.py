@@ -3429,6 +3429,8 @@ def build_export_pdf(
         collection=primary_collection,
         file_path=str(export_path.relative_to(settings.storage_root).as_posix()),
         item_count=len(stickers),
+        sheet_count=int(plan.get("sheet_count", 0) or 0) or None,
+        extra_page_count=int(plan.get("append_page_count", 0) or 0) + int(plan.get("interleaved_page_count", 0) or 0),
     )
     db.add(export_record)
     db.flush()

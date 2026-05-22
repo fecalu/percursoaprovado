@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import math
 import time
 import traceback
 import uuid
@@ -40,6 +41,7 @@ from .models import (
     CustomStickerUnlock,
     CustomStickerUnlockStatus,
     CustomStickerUnlockType,
+    Export,
     Page,
     PageLayoutTemplate,
     PageLayoutTemplateBlock,
@@ -56,6 +58,7 @@ from .models import (
 from .schemas import (
     AdminLoginRequest,
     AdminAccessSummaryResponse,
+    AdminExportSummaryResponse,
     AdminSessionResponse,
     AlbumCreate,
     AlbumResponse,
@@ -635,6 +638,32 @@ def ensure_runtime_schema() -> None:
             if "album_name" not in order_columns:
                 connection.exec_driver_sql("ALTER TABLE figurinhas_print_orders ADD COLUMN album_name VARCHAR(150)")
 
+        exports_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_exports'"
+        ).fetchone()
+        if exports_table_exists:
+            export_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_exports)").fetchall()
+            }
+            if "sheet_count" not in export_columns:
+                connection.exec_driver_sql("ALTER TABLE figurinhas_exports ADD COLUMN sheet_count INTEGER")
+            if "extra_page_count" not in export_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_exports ADD COLUMN extra_page_count INTEGER NOT NULL DEFAULT 0"
+                )
+            if "download_count" not in export_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_exports ADD COLUMN download_count INTEGER NOT NULL DEFAULT 0"
+                )
+            if "first_downloaded_at" not in export_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_exports ADD COLUMN first_downloaded_at DATETIME"
+                )
+            if "last_downloaded_at" not in export_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_exports ADD COLUMN last_downloaded_at DATETIME"
+                )
+
         unlocks_table_exists = connection.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_custom_sticker_unlocks'"
         ).fetchone()
@@ -922,6 +951,61 @@ def _build_admin_access_summary(db: Session) -> dict:
         "unique_today": unique_today,
         "visits_last_7_days": visits_last_7_days,
         "unique_last_7_days": unique_last_7_days,
+    }
+
+
+def _effective_export_sheet_count(export_record: Export) -> int:
+    if export_record.sheet_count and export_record.sheet_count > 0:
+        return int(export_record.sheet_count)
+    base_sheet_count = max(1, math.ceil(max(int(export_record.item_count or 0), 0) / 16)) if export_record.item_count else 1
+    return base_sheet_count + int(export_record.extra_page_count or 0)
+
+
+def _build_admin_export_summary(db: Session) -> dict:
+    exports = db.execute(select(Export)).scalars().all()
+
+    generated_total = len(exports)
+    downloaded_total = 0
+    downloaded_unique_exports = 0
+    generated_above_1_sheet = 0
+    generated_above_2_sheets = 0
+    generated_above_4_sheets = 0
+    downloaded_above_1_sheet = 0
+    downloaded_above_2_sheets = 0
+    downloaded_above_4_sheets = 0
+
+    for export_record in exports:
+        effective_sheet_count = _effective_export_sheet_count(export_record)
+        if effective_sheet_count > 1:
+            generated_above_1_sheet += 1
+        if effective_sheet_count > 2:
+            generated_above_2_sheets += 1
+        if effective_sheet_count > 4:
+            generated_above_4_sheets += 1
+
+        export_download_count = max(int(export_record.download_count or 0), 0)
+        if export_download_count <= 0:
+            continue
+
+        downloaded_total += export_download_count
+        downloaded_unique_exports += 1
+        if effective_sheet_count > 1:
+            downloaded_above_1_sheet += export_download_count
+        if effective_sheet_count > 2:
+            downloaded_above_2_sheets += export_download_count
+        if effective_sheet_count > 4:
+            downloaded_above_4_sheets += export_download_count
+
+    return {
+        "generated_total": generated_total,
+        "downloaded_total": downloaded_total,
+        "downloaded_unique_exports": downloaded_unique_exports,
+        "generated_above_1_sheet": generated_above_1_sheet,
+        "generated_above_2_sheets": generated_above_2_sheets,
+        "generated_above_4_sheets": generated_above_4_sheets,
+        "downloaded_above_1_sheet": downloaded_above_1_sheet,
+        "downloaded_above_2_sheets": downloaded_above_2_sheets,
+        "downloaded_above_4_sheets": downloaded_above_4_sheets,
     }
 
 
@@ -2172,8 +2256,6 @@ def download_export(
     token: str = Query(..., min_length=32, max_length=128),
     db: Session = Depends(get_db),
 ) -> FileResponse:
-    from .models import Export
-
     _enforce_public_rate_limit(
         request=request,
         bucket="export_download",
@@ -2186,6 +2268,12 @@ def download_export(
     file_path = settings.storage_root / export_record.file_path
     if not file_path.exists():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Arquivo da exportacao nao encontrado.")
+    download_now = datetime.utcnow()
+    export_record.download_count = max(int(export_record.download_count or 0), 0) + 1
+    if export_record.first_downloaded_at is None:
+        export_record.first_downloaded_at = download_now
+    export_record.last_downloaded_at = download_now
+    db.commit()
     return FileResponse(path=file_path, filename=file_path.name, media_type="application/pdf")
 
 
@@ -2999,6 +3087,15 @@ def list_admin_orders(
 )
 def get_admin_access_summary(db: Session = Depends(get_db)) -> dict:
     return _build_admin_access_summary(db)
+
+
+@app.get(
+    "/admin/export-summary",
+    response_model=AdminExportSummaryResponse,
+    dependencies=[Depends(require_admin)],
+)
+def get_admin_export_summary(db: Session = Depends(get_db)) -> dict:
+    return _build_admin_export_summary(db)
 
 
 @app.put("/admin/orders/{order_id}", response_model=PrintOrderResponse, dependencies=[Depends(require_admin)])

@@ -564,6 +564,18 @@ class AdminAccessSummaryResponse(BaseModel):
     unique_last_7_days: int
 
 
+class AdminExportSummaryResponse(BaseModel):
+    generated_total: int
+    downloaded_total: int
+    downloaded_unique_exports: int
+    generated_above_1_sheet: int
+    generated_above_2_sheets: int
+    generated_above_4_sheets: int
+    downloaded_above_1_sheet: int
+    downloaded_above_2_sheets: int
+    downloaded_above_4_sheets: int
+
+
 class ExportRequest(BaseModel):
     album_slug: str
     sticker_ids: list[int] = Field(default_factory=list)

@@ -537,6 +537,11 @@ class Export(Base):
     collection_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_collections.id"), nullable=False, index=True)
     file_path: Mapped[str] = mapped_column(String(255), nullable=False)
     item_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    sheet_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    extra_page_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    download_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    first_downloaded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_downloaded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
     collection: Mapped[Collection] = relationship(back_populates="exports")

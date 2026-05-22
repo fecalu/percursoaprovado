@@ -1732,19 +1732,36 @@ function PublicPage() {
       setBusy(true)
       setError('')
       try {
-        const [collectionsData, serviceData] = await Promise.all([
+        const [collectionsResult, serviceResult] = await Promise.allSettled([
           apiFetch('/albums'),
           apiFetch('/service-config')
         ])
         if (ignore) return
-        setAlbums(collectionsData)
-        setSelectedAlbumSlug(current =>
-          collectionsData.some(album => album.slug === current) ? current : collectionsData[0]?.slug || ''
-        )
-        setServiceConfig(serviceData)
-      } catch (err) {
-        if (!ignore) {
-          setError(err.message)
+
+        let bootstrapError = ''
+
+        if (collectionsResult.status === 'fulfilled') {
+          const collectionsData = collectionsResult.value
+          setAlbums(collectionsData)
+          setSelectedAlbumSlug(current =>
+            collectionsData.some(album => album.slug === current) ? current : collectionsData[0]?.slug || ''
+          )
+        } else {
+          setAlbums([])
+          bootstrapError = collectionsResult.reason?.message || 'Nao foi possivel carregar os albuns publicados.'
+        }
+
+        if (serviceResult.status === 'fulfilled') {
+          setServiceConfig(serviceResult.value)
+        } else {
+          bootstrapError =
+            bootstrapError ||
+            serviceResult.reason?.message ||
+            'Nao foi possivel carregar as configuracoes publicas agora.'
+        }
+
+        if (bootstrapError) {
+          setError(bootstrapError)
         }
       } finally {
         if (!ignore) {
@@ -4769,6 +4786,17 @@ function AdminPage() {
     visits_last_7_days: 0,
     unique_last_7_days: 0
   })
+  const [exportSummary, setExportSummary] = useState({
+    generated_total: 0,
+    downloaded_total: 0,
+    downloaded_unique_exports: 0,
+    generated_above_1_sheet: 0,
+    generated_above_2_sheets: 0,
+    generated_above_4_sheets: 0,
+    downloaded_above_1_sheet: 0,
+    downloaded_above_2_sheets: 0,
+    downloaded_above_4_sheets: 0
+  })
   const [savingService, setSavingService] = useState(false)
   const [sourceDocuments, setSourceDocuments] = useState([])
   const [selectedSourceDocumentId, setSelectedSourceDocumentId] = useState(null)
@@ -5001,6 +5029,14 @@ function AdminPage() {
     setAccessSummary(data)
   }
 
+  async function fetchExportSummary() {
+    if (!token) return
+    const data = await apiFetch('/admin/export-summary', {
+      headers: buildAdminHeaders(token)
+    })
+    setExportSummary(data)
+  }
+
   async function fetchSourceDocuments(activeDocumentId = selectedSourceDocumentId, shouldApply = () => true) {
     if (!token || !selectedAlbumId) {
       setSourceDocuments([])
@@ -5124,7 +5160,14 @@ function AdminPage() {
     async function bootstrap() {
       setError('')
       try {
-        await Promise.all([fetchAlbums(), fetchCollections(), fetchServiceConfig(), fetchOrders(), fetchAccessSummary()])
+        await Promise.all([
+          fetchAlbums(),
+          fetchCollections(),
+          fetchServiceConfig(),
+          fetchOrders(),
+          fetchAccessSummary(),
+          fetchExportSummary()
+        ])
       } catch (err) {
         if (!ignore) {
           setError(err.message)
@@ -8656,6 +8699,49 @@ function AdminPage() {
                   <strong>{accessSummary.unique_last_7_days ?? 0}</strong>
                 </article>
               </div>
+            </section>
+            <section className="fig-form-card fig-form-card--supporting">
+              <div className="fig-panel-header">
+                <p className="fig-kicker">PDFs</p>
+                <h3>Resumo de exportacao</h3>
+              </div>
+              <div className="fig-admin-access-grid">
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">PDFs gerados</span>
+                  <strong>{exportSummary.generated_total ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Downloads</span>
+                  <strong>{exportSummary.downloaded_total ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Arquivos baixados</span>
+                  <strong>{exportSummary.downloaded_unique_exports ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Gerados com 2+ folhas</span>
+                  <strong>{exportSummary.generated_above_1_sheet ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Downloads com 2+ folhas</span>
+                  <strong>{exportSummary.downloaded_above_1_sheet ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Gerados com 3+ folhas</span>
+                  <strong>{exportSummary.generated_above_2_sheets ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Downloads com 3+ folhas</span>
+                  <strong>{exportSummary.downloaded_above_2_sheets ?? 0}</strong>
+                </article>
+                <article className="fig-admin-access-card">
+                  <span className="fig-admin-access-label">Downloads com 5+ folhas</span>
+                  <strong>{exportSummary.downloaded_above_4_sheets ?? 0}</strong>
+                </article>
+              </div>
+              <p className="fig-empty-note">
+                Para exports antigos sem folhas salvas, o sistema estima o total pela quantidade de figurinhas quando necessario.
+              </p>
             </section>
             <details className="fig-admin-advanced fig-admin-accordion">
               <summary>
