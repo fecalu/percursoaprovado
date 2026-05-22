@@ -64,6 +64,7 @@ from .schemas import (
     BlockDetectResponse,
     CollectionAlbumAssign,
     CollectionCreate,
+    CollectionGridNormalizationResponse,
     CollectionResponse,
     CollectionUpdate,
     CustomTemplateCreate,
@@ -185,6 +186,7 @@ from .services import (
     normalize_collection_metadata,
     normalize_collection_export_settings,
     normalize_legacy_custom_template_text_layouts,
+    normalize_collection_stickers_to_reference_grid,
     normalize_custom_profile_type,
     normalize_template_text_slots,
     cleanup_orphaned_source_document_artifacts,
@@ -3211,6 +3213,24 @@ def auto_detect_stickers(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pagina nao encontrada nessa colecao.")
 
     response = auto_detect_collection_pages(db, collection, pages, replace_existing=replace_existing)
+    db.commit()
+    return response
+
+
+@app.post(
+    "/admin/collections/{collection_id}/normalize-grid",
+    response_model=CollectionGridNormalizationResponse,
+    dependencies=[Depends(require_admin)],
+)
+def normalize_collection_grid(collection_id: int, db: Session = Depends(get_db)) -> dict:
+    try:
+        collection = load_collection_or_fail(db, collection_id)
+        response = normalize_collection_stickers_to_reference_grid(db, collection)
+    except LookupError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
     db.commit()
     return response
 

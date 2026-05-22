@@ -1536,6 +1536,150 @@ def auto_detect_collection_pages(
     }
 
 
+def normalize_collection_stickers_to_reference_grid(db: Session, collection: Collection) -> dict:
+    pages = db.execute(
+        select(Page)
+        .options(selectinload(Page.stickers))
+        .where(Page.collection_id == collection.id)
+        .order_by(Page.page_number.asc(), Page.id.asc())
+    ).scalars().all()
+    if not pages:
+        raise ValueError("Suba um PDF e cadastre figurinhas antes de normalizar a grade.")
+
+    rendered_page = any((page.image_path or "").startswith("source_document_pages/") for page in pages)
+    page_sizes_by_collection = {
+        collection.id: {
+            page.page_number: _page_dimensions_for_export(page.width, page.height, rendered_page=rendered_page)
+            for page in pages
+        }
+    }
+
+    stickers_by_page: dict[int, list[Sticker]] = {}
+    all_stickers: list[Sticker] = []
+    for page in pages:
+        page_stickers = [
+            sticker
+            for sticker in page.stickers
+            if sticker.source_type == StickerSourceType.PDF
+        ]
+        page_stickers.sort(
+            key=lambda current: (
+                round(current.y_ratio, 6),
+                round(current.x_ratio, 6),
+                current.sort_order,
+                current.id,
+            )
+        )
+        if page_stickers:
+            stickers_by_page[page.id] = page_stickers
+            all_stickers.extend(page_stickers)
+
+    if not all_stickers:
+        raise ValueError("Essa colecao ainda nao tem figurinhas em PDF para normalizar.")
+
+    stickers_by_size: dict[tuple[float, float], list[Sticker]] = defaultdict(list)
+    for sticker in all_stickers:
+        stickers_by_size[_sticker_size_key(sticker, page_sizes_by_collection)].append(sticker)
+
+    dominant_size_key, dominant_group = max(
+        stickers_by_size.items(),
+        key=lambda item: (len(item[1]), -item[0][1], -item[0][0]),
+    )
+
+    stickers_by_reference_page: dict[int, list[Sticker]] = defaultdict(list)
+    for sticker in dominant_group:
+        stickers_by_reference_page[sticker.page_id].append(sticker)
+
+    pages_by_id = {page.id: page for page in pages}
+    reference_page_id, reference_page_stickers = max(
+        stickers_by_reference_page.items(),
+        key=lambda item: (
+            len(item[1]),
+            -pages_by_id[item[0]].page_number,
+            -pages_by_id[item[0]].id,
+        ),
+    )
+    reference_page = pages_by_id[reference_page_id]
+    normalized_width_ratio = float(median([float(sticker.width_ratio) for sticker in dominant_group]))
+    normalized_height_ratio = float(median([float(sticker.height_ratio) for sticker in dominant_group]))
+    reference_slots = []
+    for sticker in sorted(
+        reference_page_stickers,
+        key=lambda current: (
+            round(current.y_ratio, 6),
+            round(current.x_ratio, 6),
+            current.sort_order,
+            current.id,
+        ),
+    ):
+        center_x = float(sticker.x_ratio + (sticker.width_ratio / 2))
+        center_y = float(sticker.y_ratio + (sticker.height_ratio / 2))
+        x_ratio = min(max(center_x - (normalized_width_ratio / 2), 0.0), 1.0 - normalized_width_ratio)
+        y_ratio = min(max(center_y - (normalized_height_ratio / 2), 0.0), 1.0 - normalized_height_ratio)
+        reference_slots.append(
+            {
+                "x_ratio": x_ratio,
+                "y_ratio": y_ratio,
+                "width_ratio": normalized_width_ratio,
+                "height_ratio": normalized_height_ratio,
+                "center_x": center_x,
+                "center_y": center_y,
+            }
+        )
+    if not reference_slots:
+        raise ValueError("Nao foi possivel determinar uma grade de referencia para essa colecao.")
+
+    normalized_count = 0
+    changed_page_ids: set[int] = set()
+
+    for page in pages:
+        page_stickers = stickers_by_page.get(page.id, [])
+        if not page_stickers:
+            continue
+        if len(page_stickers) > len(reference_slots):
+            raise ValueError(f"A pagina {page.page_number} tem mais figurinhas do que a grade de referencia suporta.")
+
+        available_slots = [dict(slot) for slot in reference_slots]
+        for sticker in page_stickers:
+            sticker_center_x = float(sticker.x_ratio + (sticker.width_ratio / 2))
+            sticker_center_y = float(sticker.y_ratio + (sticker.height_ratio / 2))
+            slot_index = min(
+                range(len(available_slots)),
+                key=lambda index: (
+                    (available_slots[index]["center_y"] - sticker_center_y) ** 2
+                    + (available_slots[index]["center_x"] - sticker_center_x) ** 2,
+                    index,
+                ),
+            )
+            slot = available_slots.pop(slot_index)
+            changed = any(
+                abs(float(getattr(sticker, field)) - float(slot[field])) > 0.000001
+                for field in ("x_ratio", "y_ratio", "width_ratio", "height_ratio")
+            )
+            if not changed:
+                continue
+
+            sticker.x_ratio = float(slot["x_ratio"])
+            sticker.y_ratio = float(slot["y_ratio"])
+            sticker.width_ratio = float(slot["width_ratio"])
+            sticker.height_ratio = float(slot["height_ratio"])
+            sticker.detected_automatically = False
+            crop_sticker_image(sticker)
+            normalized_count += 1
+            changed_page_ids.add(page.id)
+
+    return {
+        "collection_id": collection.id,
+        "reference_page_id": reference_page.id,
+        "reference_page_number": reference_page.page_number,
+        "reference_slot_count": len(reference_slots),
+        "page_count": len(stickers_by_page),
+        "sticker_count": len(all_stickers),
+        "normalized_count": normalized_count,
+        "changed_page_count": len(changed_page_ids),
+    }
+
+
 def crop_source_detected_sticker_image(
     detected_sticker: SourceDetectedSticker,
     *,

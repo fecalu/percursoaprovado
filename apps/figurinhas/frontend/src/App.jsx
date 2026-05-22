@@ -4725,6 +4725,7 @@ function AdminPage() {
   const [deletingAlbum, setDeletingAlbum] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [processingAuto, setProcessingAuto] = useState(false)
+  const [normalizingGrid, setNormalizingGrid] = useState(false)
   const [editingStickerId, setEditingStickerId] = useState(null)
   const [stickerForm, setStickerForm] = useState({
     name: '',
@@ -7028,6 +7029,35 @@ function AdminPage() {
       setError(err.message)
     } finally {
       setProcessingAuto(false)
+    }
+  }
+
+  async function handleNormalizeGrid() {
+    if (!selectedCollectionId || !selectedCollection) return
+    const confirmed = window.confirm(
+      `Normalizar a grade da colecao "${selectedCollection.name}" usando a propria colecao como referencia?\n\nIsso vai alinhar as figurinhas da selecao aos slots padrao e regenerar os recortes.`
+    )
+    if (!confirmed) return
+
+    setNormalizingGrid(true)
+    setError('')
+    setMessage('')
+    try {
+      const data = await apiFetch(`/admin/collections/${selectedCollectionId}/normalize-grid`, {
+        method: 'POST',
+        headers: buildAdminHeaders(token)
+      })
+      setMessage(
+        data.normalized_count > 0
+          ? `Grade normalizada em ${data.normalized_count} figurinha(s), com referencia na pagina ${data.reference_page_number}.`
+          : `A grade ja estava consistente com a pagina ${data.reference_page_number}.`
+      )
+      await Promise.all([fetchCollections(selectedCollectionId), fetchCollectionWorkspace(selectedCollectionId, currentPageId)])
+      resetStickerForm()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setNormalizingGrid(false)
     }
   }
 
@@ -9909,7 +9939,7 @@ function AdminPage() {
                   <button
                     type="button"
                     className="fig-secondary-button"
-                    disabled={!currentPageId || processingAuto}
+                    disabled={!currentPageId || processingAuto || normalizingGrid}
                     onClick={() => handleAutoDetect('current')}
                   >
                     {processingAuto ? 'Processando...' : 'Processar pagina atual'}
@@ -9917,10 +9947,18 @@ function AdminPage() {
                   <button
                     type="button"
                     className="fig-primary-button"
-                    disabled={pages.length === 0 || processingAuto}
+                    disabled={pages.length === 0 || processingAuto || normalizingGrid}
                     onClick={() => handleAutoDetect('all')}
                   >
                     {processingAuto ? 'Processando...' : 'Processar todas as paginas'}
+                  </button>
+                  <button
+                    type="button"
+                    className="fig-secondary-button"
+                    disabled={pages.length === 0 || processingAuto || normalizingGrid}
+                    onClick={handleNormalizeGrid}
+                  >
+                    {normalizingGrid ? 'Normalizando grade...' : 'Normalizar grade da colecao'}
                   </button>
                 </div>
               </div>

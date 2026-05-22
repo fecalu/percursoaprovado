@@ -767,3 +767,14 @@ class BlockDetectResponse(BaseModel):
     reason: str | None
     detected_count: int
     replaced_count: int
+
+
+class CollectionGridNormalizationResponse(BaseModel):
+    collection_id: int
+    reference_page_id: int
+    reference_page_number: int
+    reference_slot_count: int
+    page_count: int
+    sticker_count: int
+    normalized_count: int
+    changed_page_count: int
