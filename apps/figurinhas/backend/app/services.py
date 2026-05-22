@@ -75,6 +75,10 @@ _template_export_layout_cache_lock = Lock()
 _template_export_layout_cache: dict[int, dict] = {}
 _source_document_layout_cache_lock = Lock()
 _source_document_layout_cache: dict[int, dict] = {}
+_collection_page_sizes_cache_lock = Lock()
+_collection_page_sizes_cache: dict[int, dict] = {}
+_extra_pdf_page_count_cache_lock = Lock()
+_extra_pdf_page_count_cache: dict[int, dict] = {}
 
 
 def _log_export_plan_performance(event: str, **fields) -> None:
@@ -3028,9 +3032,9 @@ def _resolve_export_extra_documents(
     album: Album,
     extra_selections: list[dict] | None,
     db: Session,
-) -> tuple[list[dict], list[dict]]:
+) -> tuple[list[dict], list[dict], dict[str, int]]:
     if not extra_selections:
-        return [], []
+        return [], [], {"page_count_cache_hits": 0, "page_count_cache_misses": 0}
 
     normalized_quantities: dict[int, int] = defaultdict(int)
     interleaved_collection_ids: set[int] = set()
@@ -3060,6 +3064,8 @@ def _resolve_export_extra_documents(
 
     append_documents: list[dict] = []
     interleaved_documents: list[dict] = []
+    page_count_cache_hits = 0
+    page_count_cache_misses = 0
 
     def supports_interleaved_back(collection: Collection) -> bool:
         slug = (collection.slug or "").strip().lower()
@@ -3090,8 +3096,16 @@ def _resolve_export_extra_documents(
         if quantity <= 0:
             continue
 
-        with fitz.open(source_pdf_path) as document:
-            page_count = int(document.page_count)
+        page_count_signature = _extra_pdf_page_count_signature(collection, source_pdf_path)
+        cached_page_count = _get_cached_extra_pdf_page_count(collection, page_count_signature)
+        if cached_page_count is not None:
+            page_count_cache_hits += 1
+            page_count = cached_page_count
+        else:
+            page_count_cache_misses += 1
+            with fitz.open(source_pdf_path) as document:
+                page_count = int(document.page_count)
+            _store_cached_extra_pdf_page_count(collection, page_count_signature, page_count)
         if page_count <= 0:
             raise ValueError(f"O PDF completo da colecao {collection.name} nao possui paginas validas.")
 
@@ -3125,8 +3139,16 @@ def _resolve_export_extra_documents(
         if not source_pdf_path.exists():
             raise FileNotFoundError(f"PDF completo da colecao {collection.name} nao encontrado.")
 
-        with fitz.open(source_pdf_path) as document:
-            page_count = int(document.page_count)
+        page_count_signature = _extra_pdf_page_count_signature(collection, source_pdf_path)
+        cached_page_count = _get_cached_extra_pdf_page_count(collection, page_count_signature)
+        if cached_page_count is not None:
+            page_count_cache_hits += 1
+            page_count = cached_page_count
+        else:
+            page_count_cache_misses += 1
+            with fitz.open(source_pdf_path) as document:
+                page_count = int(document.page_count)
+            _store_cached_extra_pdf_page_count(collection, page_count_signature, page_count)
         if page_count <= 0:
             raise ValueError(f"O PDF completo da colecao {collection.name} nao possui paginas validas.")
 
@@ -3140,7 +3162,10 @@ def _resolve_export_extra_documents(
             }
         )
 
-    return append_documents, interleaved_documents
+    return append_documents, interleaved_documents, {
+        "page_count_cache_hits": page_count_cache_hits,
+        "page_count_cache_misses": page_count_cache_misses,
+    }
 
 
 def prepare_export_plan(
@@ -3156,7 +3181,11 @@ def prepare_export_plan(
         stage_timings_ms[stage_name] = round((time.perf_counter() - started_at) * 1000)
 
     stage_started_at = time.perf_counter()
-    append_documents, interleaved_documents = _resolve_export_extra_documents(album, extra_selections, db)
+    append_documents, interleaved_documents, extra_document_stats = _resolve_export_extra_documents(
+        album,
+        extra_selections,
+        db,
+    )
     mark_stage("extras", stage_started_at)
     if not stickers and not append_documents:
         raise ValueError("Selecione pelo menos uma figurinha ou extra para exportar.")
@@ -3199,26 +3228,43 @@ def prepare_export_plan(
     mark_stage("source_document_layouts", stage_started_at)
     template_layout_cache_hits = 0
     template_layout_cache_misses = 0
+    page_size_cache_hits = 0
+    page_size_cache_misses = 0
 
     def resolve_page_sizes(collection: Collection) -> dict[int, tuple[float, float]]:
+        nonlocal page_size_cache_hits, page_size_cache_misses
+        source_pdf_path: Path | None = None
         if collection.source_pdf_path:
             source_pdf_path = settings.storage_root / collection.source_pdf_path
             if not source_pdf_path.exists():
                 raise FileNotFoundError(f"PDF de origem da colecao {collection.name} nao encontrado.")
             source_pdf_paths[collection.id] = source_pdf_path
+
+        page_sizes_signature = _collection_page_sizes_signature(collection, source_pdf_path)
+        cached_page_sizes = _get_cached_collection_page_sizes(collection, page_sizes_signature)
+        if cached_page_sizes is not None:
+            page_size_cache_hits += 1
+            return cached_page_sizes
+
+        page_size_cache_misses += 1
+        if source_pdf_path is not None:
             with fitz.open(source_pdf_path) as document:
-                return {
+                page_sizes = {
                     page_index + 1: (
                         float(document.load_page(page_index).rect.width),
                         float(document.load_page(page_index).rect.height),
                     )
                     for page_index in range(document.page_count)
                 }
+            _store_cached_collection_page_sizes(collection, page_sizes_signature, page_sizes)
+            return page_sizes
         rendered_page = any((page.image_path or "").startswith("source_document_pages/") for page in collection.pages)
-        return {
+        page_sizes = {
             page.page_number: _page_dimensions_for_export(page.width, page.height, rendered_page=rendered_page)
             for page in collection.pages
         }
+        _store_cached_collection_page_sizes(collection, page_sizes_signature, page_sizes)
+        return page_sizes
 
     stage_started_at = time.perf_counter()
     for collection in collections:
@@ -3356,9 +3402,13 @@ def prepare_export_plan(
         source_document_layouts_ms=stage_timings_ms.get("source_document_layouts", 0),
         source_document_layout_cache_hit=int(source_document_layout_cache_hit),
         selected_page_sizes_ms=stage_timings_ms.get("selected_page_sizes", 0),
+        page_size_cache_hits=page_size_cache_hits,
+        page_size_cache_misses=page_size_cache_misses,
         template_layouts_ms=stage_timings_ms.get("template_layouts", 0),
         template_layout_cache_hits=template_layout_cache_hits,
         template_layout_cache_misses=template_layout_cache_misses,
+        extra_page_count_cache_hits=int(extra_document_stats.get("page_count_cache_hits", 0)),
+        extra_page_count_cache_misses=int(extra_document_stats.get("page_count_cache_misses", 0)),
         validate_selected_stickers_ms=stage_timings_ms.get("validate_selected_stickers", 0),
         group_selected_stickers_ms=stage_timings_ms.get("group_selected_stickers", 0),
         build_batches_ms=stage_timings_ms.get("build_batches", 0),
@@ -3978,6 +4028,13 @@ def _timestamp_cache_part(value: datetime | None) -> str:
     return value.isoformat(timespec="seconds")
 
 
+def _path_cache_stamp(path: Path | None) -> tuple[int, int]:
+    if path is None or not path.exists():
+        return (0, 0)
+    stat = path.stat()
+    return (int(getattr(stat, "st_mtime_ns", 0)), int(stat.st_size))
+
+
 def _collection_pages_cache_signature(collection: Collection) -> tuple:
     return tuple(
         (
@@ -3988,6 +4045,36 @@ def _collection_pages_cache_signature(collection: Collection) -> tuple:
         )
         for page in sorted(collection.pages, key=lambda current: (current.page_number, current.id))
     )
+
+
+def _collection_page_sizes_signature(collection: Collection, source_pdf_path: Path | None) -> tuple:
+    return (
+        int(collection.id),
+        _timestamp_cache_part(collection.updated_at),
+        (collection.source_pdf_path or "").strip(),
+        _path_cache_stamp(source_pdf_path),
+        _collection_pages_cache_signature(collection),
+    )
+
+
+def _get_cached_collection_page_sizes(collection: Collection, signature: tuple) -> dict[int, tuple[float, float]] | None:
+    with _collection_page_sizes_cache_lock:
+        cached = _collection_page_sizes_cache.get(collection.id)
+        if not cached or cached.get("signature") != signature:
+            return None
+        return cached.get("page_sizes")
+
+
+def _store_cached_collection_page_sizes(
+    collection: Collection,
+    signature: tuple,
+    page_sizes: dict[int, tuple[float, float]],
+) -> None:
+    with _collection_page_sizes_cache_lock:
+        _collection_page_sizes_cache[collection.id] = {
+            "signature": signature,
+            "page_sizes": page_sizes,
+        }
 
 
 def _source_document_layout_signature(album_id: int, db: Session) -> tuple:
@@ -4078,6 +4165,31 @@ def _store_cached_source_document_layouts(
         _source_document_layout_cache[album_id] = {
             "signature": signature,
             "layouts": layouts,
+        }
+
+
+def _extra_pdf_page_count_signature(collection: Collection, source_pdf_path: Path) -> tuple:
+    return (
+        int(collection.id),
+        _timestamp_cache_part(collection.updated_at),
+        (collection.source_pdf_path or "").strip(),
+        _path_cache_stamp(source_pdf_path),
+    )
+
+
+def _get_cached_extra_pdf_page_count(collection: Collection, signature: tuple) -> int | None:
+    with _extra_pdf_page_count_cache_lock:
+        cached = _extra_pdf_page_count_cache.get(collection.id)
+        if not cached or cached.get("signature") != signature:
+            return None
+        return cached.get("page_count")
+
+
+def _store_cached_extra_pdf_page_count(collection: Collection, signature: tuple, page_count: int) -> None:
+    with _extra_pdf_page_count_cache_lock:
+        _extra_pdf_page_count_cache[collection.id] = {
+            "signature": signature,
+            "page_count": int(page_count),
         }
 
 
