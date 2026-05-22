@@ -4,6 +4,10 @@ import siteLogo from './assets/logo-topo-cutout.png'
 
 const normalizedBase = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL.replace(/\/$/, '')
 const apiBase = `${normalizedBase}/api`
+const PUBLIC_JOB_POLL_INITIAL_DELAY_MS = 1200
+const PUBLIC_JOB_POLL_MEDIUM_DELAY_MS = 1800
+const PUBLIC_JOB_POLL_SLOW_DELAY_MS = 2500
+const QUOTE_REQUEST_DEBOUNCE_MS = 900
 
 const categoryOptions = [
   { value: 'JOGADOR', label: 'Jogador' },
@@ -1308,6 +1312,7 @@ function PublicPage() {
   const [pendingAiResume, setPendingAiResume] = useState(false)
   const myStickerCameraInputRef = useRef(null)
   const myStickerGalleryInputRef = useRef(null)
+  const lastQuoteRequestKeyRef = useRef('')
   const [orderForm, setOrderForm] = useState({
     service_type: 'IMPRESSAO',
     customer_name: '',
@@ -1702,9 +1707,17 @@ function PublicPage() {
   async function waitForPublicJob(path, options = {}) {
     let job = await apiFetch(path, options)
     syncPublicFlowProgress(job)
+    let pollAttempt = 0
 
     while (job && (job.status === 'PENDENTE' || job.status === 'PROCESSANDO')) {
-      await new Promise(resolve => window.setTimeout(resolve, 700))
+      pollAttempt += 1
+      const pollDelay =
+        pollAttempt >= 12
+          ? PUBLIC_JOB_POLL_SLOW_DELAY_MS
+          : pollAttempt >= 5
+            ? PUBLIC_JOB_POLL_MEDIUM_DELAY_MS
+            : PUBLIC_JOB_POLL_INITIAL_DELAY_MS
+      await new Promise(resolve => window.setTimeout(resolve, pollDelay))
       job = await apiFetch(
         `/public-jobs/${encodeURIComponent(job.job_id)}?session_token=${encodeURIComponent(sessionToken)}`
       )
@@ -2106,10 +2119,17 @@ function PublicPage() {
     if (!selectedAlbumSlug || !hasExportSelection) {
       setQuote(null)
       setOrderFormOpen(false)
+      lastQuoteRequestKeyRef.current = ''
       return
     }
 
     let ignore = false
+    const quoteRequestKey = JSON.stringify({
+      album_slug: selectedAlbumSlug,
+      sticker_ids: selectedIds,
+      session_token: sessionToken,
+      extras: normalizedSelectedExportExtras
+    })
     async function loadQuote() {
       setQuoteBusy(true)
       try {
@@ -2136,9 +2156,19 @@ function PublicPage() {
         }
       }
     }
-    loadQuote()
+    const timer = window.setTimeout(() => {
+      if (ignore || lastQuoteRequestKeyRef.current === quoteRequestKey) {
+        if (!ignore) {
+          setQuoteBusy(false)
+        }
+        return
+      }
+      lastQuoteRequestKeyRef.current = quoteRequestKey
+      loadQuote()
+    }, QUOTE_REQUEST_DEBOUNCE_MS)
     return () => {
       ignore = true
+      window.clearTimeout(timer)
     }
   }, [selectedAlbumSlug, hasExportSelection, selectedIds, sessionToken, normalizedSelectedExportExtras])
 

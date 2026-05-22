@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import logging
 import math
 import time
 import traceback
@@ -214,6 +215,7 @@ PUBLIC_FILE_PREFIXES = (
 )
 EXPORT_DOWNLOAD_TTL_SECONDS = 600
 PUBLIC_ANALYTICS_TZ = ZoneInfo("America/Sao_Paulo")
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI(title="Figurinhas API")
 app.add_middleware(
@@ -223,6 +225,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _log_public_performance(event: str, **fields) -> None:
+    normalized_fields = " ".join(f"{key}={value}" for key, value in fields.items())
+    logger.info("perf event=%s %s", event, normalized_fields)
 
 
 def _is_allowed_public_file_path(relative_path: str) -> bool:
@@ -1424,6 +1431,7 @@ async def create_my_sticker_cutout_job(
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
+    request_started_at = time.perf_counter()
     _enforce_public_rate_limit(
         request=request,
         bucket="my_sticker_cutout_job",
@@ -1463,6 +1471,7 @@ async def create_my_sticker_cutout_job(
 
     def worker() -> None:
         reporter = _build_job_reporter(job.id, steps)
+        worker_started_at = time.perf_counter()
         try:
             cutout_assets = build_manual_cutout_assets(uploaded_photo_bytes, progress_callback=reporter)
             asset_token = save_prepared_cutout_assets(
@@ -1484,12 +1493,24 @@ async def create_my_sticker_cutout_job(
                     "asset_token": asset_token,
                 },
             )
+            _log_public_performance(
+                "cutout_job_completed",
+                album=album_slug,
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                queued=public_progress_jobs.queued_count(),
+            )
         except Exception as err:
             public_progress_jobs.update(
                 job.id,
                 status="FALHOU",
                 error="Nao foi possivel remover o fundo da foto para a montagem manual.",
                 message=str(err),
+            )
+            _log_public_performance(
+                "cutout_job_failed",
+                album=album_slug,
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                error=type(err).__name__,
             )
 
     if not public_progress_jobs.run(job.id, worker):
@@ -1498,6 +1519,13 @@ async def create_my_sticker_cutout_job(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="A fila de processamento esta cheia agora. Tente novamente em instantes.",
         )
+    _log_public_performance(
+        "cutout_job_enqueued",
+        album=album_slug,
+        queued=public_progress_jobs.queued_count(),
+        wait_ms=round((time.perf_counter() - request_started_at) * 1000),
+        photo_kb=round(len(uploaded_photo_bytes) / 1024),
+    )
     return _job_response(job)
 
 
@@ -1525,6 +1553,7 @@ async def create_or_replace_my_sticker_job(
     photo: UploadFile = File(...),
     db: Session = Depends(get_db),
 ) -> dict:
+    request_started_at = time.perf_counter()
     _enforce_public_rate_limit(
         request=request,
         bucket="my_sticker_job",
@@ -1592,6 +1621,7 @@ async def create_or_replace_my_sticker_job(
 
     def worker() -> None:
         worker_db = SessionLocal()
+        worker_started_at = time.perf_counter()
         try:
             album = load_album_by_slug_or_fail(worker_db, album_slug)
             resolved_prepared_portrait_bytes = prepared_portrait_bytes or load_prepared_portrait_bytes(
@@ -1632,12 +1662,26 @@ async def create_or_replace_my_sticker_job(
                 message="Sua figurinha ficou pronta.",
                 result=sticker_to_response(sticker, include_sensitive=False),
             )
+            _log_public_performance(
+                "my_sticker_job_completed",
+                album=album_slug,
+                mode="ai" if is_ai_job else "manual",
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                queued=public_progress_jobs.queued_count(),
+            )
         except ValueError as err:
             public_progress_jobs.update(
                 job.id,
                 status="FALHOU",
                 error=str(err),
                 message=str(err),
+            )
+            _log_public_performance(
+                "my_sticker_job_failed",
+                album=album_slug,
+                mode="ai" if is_ai_job else "manual",
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                error=type(err).__name__,
             )
         except Exception as err:
             traceback.print_exc()
@@ -1648,6 +1692,13 @@ async def create_or_replace_my_sticker_job(
                 error=error_message,
                 message=error_message,
             )
+            _log_public_performance(
+                "my_sticker_job_failed",
+                album=album_slug,
+                mode="ai" if is_ai_job else "manual",
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                error=type(err).__name__,
+            )
         finally:
             worker_db.close()
 
@@ -1657,6 +1708,14 @@ async def create_or_replace_my_sticker_job(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="A fila de processamento esta cheia agora. Tente novamente em instantes.",
         )
+    _log_public_performance(
+        "my_sticker_job_enqueued",
+        album=album_slug,
+        mode="ai" if is_ai_job else "manual",
+        queued=public_progress_jobs.queued_count(),
+        wait_ms=round((time.perf_counter() - request_started_at) * 1000),
+        photo_kb=round(len(uploaded_photo_bytes) / 1024),
+    )
     return _job_response(job)
 
 
@@ -2046,6 +2105,7 @@ def create_my_sticker_ai_unlock(
 
 @app.post("/exports/jobs", response_model=PublicProgressJobResponse)
 def create_export_job(payload: ExportRequest, request: Request, db: Session = Depends(get_db)) -> dict:
+    request_started_at = time.perf_counter()
     _enforce_public_rate_limit(
         request=request,
         bucket="export_create",
@@ -2070,6 +2130,7 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
 
     def worker() -> None:
         worker_db = SessionLocal()
+        worker_started_at = time.perf_counter()
         try:
             worker_album = load_album_by_slug_or_fail(worker_db, payload.album_slug)
             stickers = selected_stickers_for_album_or_400(
@@ -2119,6 +2180,15 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
                     "file_name": Path(export_record.file_path).name,
                 },
             )
+            _log_public_performance(
+                "export_job_completed",
+                album=payload.album_slug,
+                stickers=len(payload.sticker_ids),
+                extras=len(payload.extras),
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                queued=public_progress_jobs.queued_count(),
+                sheets=export_record.sheet_count or 0,
+            )
         except ValueError as err:
             public_progress_jobs.update(
                 job.id,
@@ -2126,12 +2196,28 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
                 error=str(err),
                 message=str(err),
             )
+            _log_public_performance(
+                "export_job_failed",
+                album=payload.album_slug,
+                stickers=len(payload.sticker_ids),
+                extras=len(payload.extras),
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                error=type(err).__name__,
+            )
         except Exception as err:
             public_progress_jobs.update(
                 job.id,
                 status="FALHOU",
                 error="Nao foi possivel gerar o PDF agora.",
                 message=str(err),
+            )
+            _log_public_performance(
+                "export_job_failed",
+                album=payload.album_slug,
+                stickers=len(payload.sticker_ids),
+                extras=len(payload.extras),
+                duration_ms=round((time.perf_counter() - worker_started_at) * 1000),
+                error=type(err).__name__,
             )
         finally:
             worker_db.close()
@@ -2142,6 +2228,14 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="A fila de processamento esta cheia agora. Tente novamente em instantes.",
         )
+    _log_public_performance(
+        "export_job_enqueued",
+        album=payload.album_slug,
+        stickers=len(payload.sticker_ids),
+        extras=len(payload.extras),
+        queued=public_progress_jobs.queued_count(),
+        wait_ms=round((time.perf_counter() - request_started_at) * 1000),
+    )
     return _job_response(job)
 
 
@@ -2197,6 +2291,7 @@ def create_export(payload: ExportRequest, request: Request, db: Session = Depend
 
 @app.post("/orders/quote", response_model=OrderQuoteResponse)
 def quote_print_order(payload: OrderQuoteRequest, request: Request, db: Session = Depends(get_db)) -> dict:
+    request_started_at = time.perf_counter()
     _enforce_public_rate_limit(
         request=request,
         bucket="quote_order",
@@ -2214,6 +2309,14 @@ def quote_print_order(payload: OrderQuoteRequest, request: Request, db: Session 
         service_settings,
     )
     quote.pop("plan", None)
+    _log_public_performance(
+        "quote_completed",
+        album=payload.album_slug,
+        stickers=len(payload.sticker_ids),
+        extras=len(payload.extras),
+        duration_ms=round((time.perf_counter() - request_started_at) * 1000),
+        sheets=quote.get("sheet_count", 0),
+    )
     return quote
 
 

@@ -3,14 +3,17 @@ from __future__ import annotations
 import io
 import base64
 import json
+import logging
 import shutil
 import tempfile
+import time
 import unicodedata
 import uuid
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 from statistics import median
+from threading import Lock
 from typing import Callable
 
 import fitz
@@ -67,6 +70,16 @@ from .name_ocr import detect_sticker_name
 
 
 settings = get_settings()
+logger = logging.getLogger("uvicorn.error")
+_template_export_layout_cache_lock = Lock()
+_template_export_layout_cache: dict[int, dict] = {}
+_source_document_layout_cache_lock = Lock()
+_source_document_layout_cache: dict[int, dict] = {}
+
+
+def _log_export_plan_performance(event: str, **fields) -> None:
+    normalized_fields = " ".join(f"{key}={value}" for key, value in fields.items())
+    logger.info("perf event=%s %s", event, normalized_fields)
 
 CUSTOM_TEMPLATE_IMPORT_RULES: list[dict] = [
     {"keywords": ("fundo", "background", "bg", "base"), "layer_type": CustomTemplateLayerType.BACKGROUND, "label": "Fundo", "z_index": 0, "singleton": True},
@@ -3136,19 +3149,30 @@ def prepare_export_plan(
     db: Session,
     extra_selections: list[dict] | None = None,
 ) -> dict:
+    plan_started_at = time.perf_counter()
+    stage_timings_ms: dict[str, int] = {}
+
+    def mark_stage(stage_name: str, started_at: float) -> None:
+        stage_timings_ms[stage_name] = round((time.perf_counter() - started_at) * 1000)
+
+    stage_started_at = time.perf_counter()
     append_documents, interleaved_documents = _resolve_export_extra_documents(album, extra_selections, db)
+    mark_stage("extras", stage_started_at)
     if not stickers and not append_documents:
         raise ValueError("Selecione pelo menos uma figurinha ou extra para exportar.")
 
     selected_collection_ids = sorted({sticker.collection_id for sticker in stickers})
     collections = []
     if selected_collection_ids:
+        stage_started_at = time.perf_counter()
         collections = db.execute(
             select(Collection)
             .options(selectinload(Collection.pages))
             .where(Collection.id.in_(selected_collection_ids))
         ).scalars().all()
+        mark_stage("selected_collections", stage_started_at)
     collections_by_id = {collection.id: collection for collection in collections}
+    stage_started_at = time.perf_counter()
     template_collections = db.execute(
         select(Collection)
         .options(selectinload(Collection.pages))
@@ -3158,10 +3182,23 @@ def prepare_export_plan(
             Collection.status == CollectionStatus.PUBLICADA,
         )
     ).scalars().all()
+    mark_stage("template_collections", stage_started_at)
 
     source_pdf_paths: dict[int, Path] = {}
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]] = {}
-    template_layouts: dict[tuple[float, float], dict] = _build_source_document_export_layouts(album, db)
+    stage_started_at = time.perf_counter()
+    source_document_layout_signature = _source_document_layout_signature(album.id, db)
+    cached_source_document_layouts = _get_cached_source_document_layouts(album.id, source_document_layout_signature)
+    if cached_source_document_layouts is not None:
+        source_document_layout_cache_hit = True
+        template_layouts: dict[tuple[float, float], dict] = cached_source_document_layouts
+    else:
+        source_document_layout_cache_hit = False
+        template_layouts = _build_source_document_export_layouts(album, db)
+        _store_cached_source_document_layouts(album.id, source_document_layout_signature, template_layouts)
+    mark_stage("source_document_layouts", stage_started_at)
+    template_layout_cache_hits = 0
+    template_layout_cache_misses = 0
 
     def resolve_page_sizes(collection: Collection) -> dict[int, tuple[float, float]]:
         if collection.source_pdf_path:
@@ -3183,12 +3220,51 @@ def prepare_export_plan(
             for page in collection.pages
         }
 
+    stage_started_at = time.perf_counter()
     for collection in collections:
         if collection.album_id != album.id:
             raise ValueError("Nao e possivel misturar figurinhas de albuns diferentes.")
         page_sizes_by_collection[collection.id] = resolve_page_sizes(collection)
+    mark_stage("selected_page_sizes", stage_started_at)
 
+    stage_started_at = time.perf_counter()
+    template_collection_ids = [collection.id for collection in template_collections]
+    template_sticker_aggregates: dict[int, dict[str, int | datetime | None]] = {}
+    if template_collection_ids:
+        template_sticker_aggregates = {
+            collection_id: {
+                "count": sticker_count,
+                "latest_updated_at": latest_updated_at,
+            }
+            for collection_id, sticker_count, latest_updated_at in db.execute(
+                select(
+                    Sticker.collection_id,
+                    func.count(Sticker.id),
+                    func.max(Sticker.updated_at),
+                )
+                .where(
+                    Sticker.collection_id.in_(template_collection_ids),
+                    Sticker.active.is_(True),
+                    Sticker.source_type == StickerSourceType.PDF,
+                )
+                .group_by(Sticker.collection_id)
+            ).all()
+        }
     for collection in template_collections:
+        aggregate = template_sticker_aggregates.get(collection.id, {})
+        layout_signature = _template_collection_layout_signature(
+            collection,
+            int(aggregate.get("count") or 0),
+            aggregate.get("latest_updated_at"),
+        )
+        cached_layouts = _get_cached_template_export_layouts(collection, layout_signature)
+        if cached_layouts is not None:
+            template_layout_cache_hits += 1
+            for size_key, layout in cached_layouts.items():
+                template_layouts.setdefault(size_key, layout)
+            continue
+
+        template_layout_cache_misses += 1
         page_sizes = resolve_page_sizes(collection)
         template_stickers = db.execute(
             select(Sticker)
@@ -3201,12 +3277,16 @@ def prepare_export_plan(
             .order_by(Sticker.sort_order.asc(), Sticker.id.asc())
         ).scalars().all()
 
-        for size_key, layout in _build_template_export_layouts(template_stickers, page_sizes).items():
+        collection_layouts = _build_template_export_layouts(template_stickers, page_sizes)
+        _store_cached_template_export_layouts(collection, layout_signature, collection_layouts)
+        for size_key, layout in collection_layouts.items():
             template_layouts.setdefault(size_key, layout)
+    mark_stage("template_layouts", stage_started_at)
 
     if not template_layouts:
         raise ValueError("Nao foi encontrada uma grade valida de exportacao para esse album.")
 
+    stage_started_at = time.perf_counter()
     for sticker in stickers:
         if sticker.source_type != StickerSourceType.PDF:
             continue
@@ -3214,11 +3294,15 @@ def prepare_export_plan(
             continue
         if sticker.collection_id not in source_pdf_paths:
             raise ValueError(f"A colecao {sticker.collection.name} nao possui PDF de origem para exportacao.")
+    mark_stage("validate_selected_stickers", stage_started_at)
 
+    stage_started_at = time.perf_counter()
     selected_groups: dict[tuple[float, float], list[Sticker]] = defaultdict(list)
     for sticker in stickers:
         selected_groups[_sticker_size_key(sticker, page_sizes_by_collection)].append(sticker)
+    mark_stage("group_selected_stickers", stage_started_at)
 
+    stage_started_at = time.perf_counter()
     batches: list[dict] = []
     for group_key, group_stickers in selected_groups.items():
         layout = template_layouts.get(group_key)
@@ -3249,9 +3333,36 @@ def prepare_export_plan(
                     "placements": list(zip(slots, batch, strict=False)),
                 }
             )
+    mark_stage("build_batches", stage_started_at)
 
     append_page_count = sum(int(item["page_count"]) * int(item["quantity"]) for item in append_documents)
     interleaved_page_count = len(batches) * len(interleaved_documents)
+    total_duration_ms = round((time.perf_counter() - plan_started_at) * 1000)
+    _log_export_plan_performance(
+        "prepare_export_plan_completed",
+        album=album.slug,
+        stickers=len(stickers),
+        extras=len(extra_selections or []),
+        selected_collections=len(selected_collection_ids),
+        template_collections=len(template_collections),
+        size_groups=len(selected_groups),
+        batches=len(batches),
+        append_docs=len(append_documents),
+        interleaved_docs=len(interleaved_documents),
+        total_ms=total_duration_ms,
+        extras_ms=stage_timings_ms.get("extras", 0),
+        selected_collections_ms=stage_timings_ms.get("selected_collections", 0),
+        template_collections_ms=stage_timings_ms.get("template_collections", 0),
+        source_document_layouts_ms=stage_timings_ms.get("source_document_layouts", 0),
+        source_document_layout_cache_hit=int(source_document_layout_cache_hit),
+        selected_page_sizes_ms=stage_timings_ms.get("selected_page_sizes", 0),
+        template_layouts_ms=stage_timings_ms.get("template_layouts", 0),
+        template_layout_cache_hits=template_layout_cache_hits,
+        template_layout_cache_misses=template_layout_cache_misses,
+        validate_selected_stickers_ms=stage_timings_ms.get("validate_selected_stickers", 0),
+        group_selected_stickers_ms=stage_timings_ms.get("group_selected_stickers", 0),
+        build_batches_ms=stage_timings_ms.get("build_batches", 0),
+    )
 
     return {
         "source_pdf_paths": source_pdf_paths,
@@ -3859,6 +3970,152 @@ def _build_template_export_layouts(
         }
 
     return templates
+
+
+def _timestamp_cache_part(value: datetime | None) -> str:
+    if value is None:
+        return "none"
+    return value.isoformat(timespec="seconds")
+
+
+def _collection_pages_cache_signature(collection: Collection) -> tuple:
+    return tuple(
+        (
+            int(page.page_number),
+            int(page.width),
+            int(page.height),
+            (page.image_path or "").strip(),
+        )
+        for page in sorted(collection.pages, key=lambda current: (current.page_number, current.id))
+    )
+
+
+def _source_document_layout_signature(album_id: int, db: Session) -> tuple:
+    rows = db.execute(
+        select(
+            SourceDocument.id,
+            SourceDocument.pdf_path,
+            SourceDocument.page_count,
+            SourceDocument.status,
+            SourceDocument.updated_at,
+            SourceDocumentPage.id,
+            SourceDocumentPage.page_number,
+            SourceDocumentPage.image_path,
+            SourceDocumentPage.width,
+            SourceDocumentPage.height,
+            func.count(SourceDetectedSticker.id),
+            func.max(SourceDetectedSticker.updated_at),
+        )
+        .join(SourceDocumentPage, SourceDocumentPage.document_id == SourceDocument.id)
+        .outerjoin(
+            SourceDetectedSticker,
+            and_(
+                SourceDetectedSticker.page_id == SourceDocumentPage.id,
+                SourceDetectedSticker.status != SourceDetectedStickerStatus.DESCARTADA,
+            ),
+        )
+        .where(SourceDocument.album_id == album_id)
+        .group_by(
+            SourceDocument.id,
+            SourceDocument.pdf_path,
+            SourceDocument.page_count,
+            SourceDocument.status,
+            SourceDocument.updated_at,
+            SourceDocumentPage.id,
+            SourceDocumentPage.page_number,
+            SourceDocumentPage.image_path,
+            SourceDocumentPage.width,
+            SourceDocumentPage.height,
+        )
+        .order_by(SourceDocument.id.asc(), SourceDocumentPage.page_number.asc(), SourceDocumentPage.id.asc())
+    ).all()
+    return tuple(
+        (
+            int(document_id),
+            (pdf_path or "").strip(),
+            int(page_count or 0),
+            str(status.value if hasattr(status, "value") else status),
+            _timestamp_cache_part(updated_at),
+            int(page_id),
+            int(page_number),
+            (image_path or "").strip(),
+            int(width or 0),
+            int(height or 0),
+            int(detected_count or 0),
+            _timestamp_cache_part(latest_detected_updated_at),
+        )
+        for (
+            document_id,
+            pdf_path,
+            page_count,
+            status,
+            updated_at,
+            page_id,
+            page_number,
+            image_path,
+            width,
+            height,
+            detected_count,
+            latest_detected_updated_at,
+        ) in rows
+    )
+
+
+def _get_cached_source_document_layouts(album_id: int, signature: tuple) -> dict[tuple[float, float], dict] | None:
+    with _source_document_layout_cache_lock:
+        cached = _source_document_layout_cache.get(album_id)
+        if not cached or cached.get("signature") != signature:
+            return None
+        return cached.get("layouts")
+
+
+def _store_cached_source_document_layouts(
+    album_id: int,
+    signature: tuple,
+    layouts: dict[tuple[float, float], dict],
+) -> None:
+    with _source_document_layout_cache_lock:
+        _source_document_layout_cache[album_id] = {
+            "signature": signature,
+            "layouts": layouts,
+        }
+
+
+def _template_collection_layout_signature(
+    collection: Collection,
+    sticker_count: int,
+    latest_sticker_update: datetime | None,
+) -> tuple:
+    return (
+        int(collection.id),
+        _timestamp_cache_part(collection.updated_at),
+        (collection.source_pdf_path or "").strip(),
+        int(collection.status == CollectionStatus.PUBLICADA),
+        int(collection.sort_order or 0),
+        _collection_pages_cache_signature(collection),
+        int(sticker_count),
+        _timestamp_cache_part(latest_sticker_update),
+    )
+
+
+def _get_cached_template_export_layouts(collection: Collection, signature: tuple) -> dict[tuple[float, float], dict] | None:
+    with _template_export_layout_cache_lock:
+        cached = _template_export_layout_cache.get(collection.id)
+        if not cached or cached.get("signature") != signature:
+            return None
+        return cached.get("layouts")
+
+
+def _store_cached_template_export_layouts(
+    collection: Collection,
+    signature: tuple,
+    layouts: dict[tuple[float, float], dict],
+) -> None:
+    with _template_export_layout_cache_lock:
+        _template_export_layout_cache[collection.id] = {
+            "signature": signature,
+            "layouts": layouts,
+        }
 
 
 def _render_sticker_export_image(
