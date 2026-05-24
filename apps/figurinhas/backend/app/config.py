@@ -38,6 +38,20 @@ class Settings:
     public_download_limit = int(os.getenv("FIGURINHAS_PUBLIC_DOWNLOAD_RATE_LIMIT", "20"))
     public_job_worker_count = int(os.getenv("FIGURINHAS_PUBLIC_JOB_WORKER_COUNT", "3"))
     public_job_queue_limit = int(os.getenv("FIGURINHAS_PUBLIC_JOB_QUEUE_LIMIT", "20"))
+    public_access_enabled = os.getenv("FIGURINHAS_PUBLIC_ACCESS_ENABLED", "false").lower() == "true"
+    public_access_price_cents = int(os.getenv("FIGURINHAS_PUBLIC_ACCESS_PRICE_CENTS", "300"))
+    public_access_ai_credits = int(os.getenv("FIGURINHAS_PUBLIC_ACCESS_AI_CREDITS", "5"))
+    public_magic_link_ttl_minutes = int(os.getenv("FIGURINHAS_PUBLIC_MAGIC_LINK_TTL_MINUTES", "30"))
+    public_user_session_ttl_hours = int(os.getenv("FIGURINHAS_PUBLIC_USER_SESSION_TTL_HOURS", "720"))
+    public_magic_link_base_url = os.getenv("FIGURINHAS_PUBLIC_MAGIC_LINK_BASE_URL", "").strip()
+    public_auth_debug_return_link = os.getenv("FIGURINHAS_PUBLIC_AUTH_DEBUG_RETURN_LINK", "false").lower() == "true"
+    public_email_from = os.getenv("FIGURINHAS_PUBLIC_EMAIL_FROM", "").strip()
+    public_smtp_host = os.getenv("FIGURINHAS_PUBLIC_SMTP_HOST", "").strip()
+    public_smtp_port = int(os.getenv("FIGURINHAS_PUBLIC_SMTP_PORT", "587"))
+    public_smtp_username = os.getenv("FIGURINHAS_PUBLIC_SMTP_USERNAME", "").strip()
+    public_smtp_password = os.getenv("FIGURINHAS_PUBLIC_SMTP_PASSWORD", "").strip()
+    public_smtp_use_tls = os.getenv("FIGURINHAS_PUBLIC_SMTP_USE_TLS", "true").lower() == "true"
+    public_smtp_use_ssl = os.getenv("FIGURINHAS_PUBLIC_SMTP_USE_SSL", "false").lower() == "true"
     render_scale = float(os.getenv("FIGURINHAS_PAGE_RENDER_SCALE", "4.0"))
     export_render_scale = float(os.getenv("FIGURINHAS_EXPORT_RENDER_SCALE", "6.0"))
     public_collection_limit = int(os.getenv("FIGURINHAS_PUBLIC_COLLECTION_LIMIT", "50"))
@@ -53,7 +67,7 @@ class Settings:
     default_donation_enabled = os.getenv("FIGURINHAS_DONATION_ENABLED", "false").lower() == "true"
     default_donation_message = os.getenv(
         "FIGURINHAS_DONATION_MESSAGE",
-        "Se este material te ajudou, voce pode apoiar o projeto com uma doacao via Pix. O download continua gratuito.",
+        "Nao estamos conseguindo manter o Figurinhas no ar sozinhos. Se ele te ajudou, apoie com qualquer valor via Pix para o projeto continuar existindo.",
     )
     default_pickup_note = os.getenv(
         "FIGURINHAS_PICKUP_NOTE",

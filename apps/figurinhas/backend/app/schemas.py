@@ -19,6 +19,8 @@ from .models import (
     CustomStickerUnlockType,
     PrintOrderStatus,
     PrintServiceType,
+    PublicAccessPaymentStatus,
+    SupportPaymentStatus,
     SourceDetectedStickerStatus,
     SourceDocumentStatus,
     StickerCategory,
@@ -592,13 +594,133 @@ class ExportExtraSelection(BaseModel):
 class ExportResponse(BaseModel):
     export_id: int
     item_count: int
+    sheet_count: int
     download_path: str
     file_name: str
+
+
+class SupportStatusResponse(BaseModel):
+    should_prompt_support: bool
+    supported_recently: bool
+    supported_until: datetime | None = None
+    last_paid_at: datetime | None = None
+    last_paid_amount_cents: int | None = None
+    allowed_amounts_cents: list[int] = Field(default_factory=list)
+    recommended_amount_cents: int | None = None
+
+
+class SupportPaymentCreateRequest(BaseModel):
+    session_token: str = Field(min_length=12, max_length=120)
+    visitor_token: str = Field(min_length=12, max_length=120)
+    export_id: int | None = Field(default=None, ge=1)
+    amount_cents: int = Field(ge=1, le=100000)
+
+
+class SupportPaymentResponse(BaseModel):
+    id: int
+    export_id: int | None
+    amount_cents: int
+    paid_amount_cents: int | None = None
+    status: SupportPaymentStatus
+    qr_code_base64: str | None = None
+    qr_code: str | None = None
+    ticket_url: str | None = None
+    expires_at: datetime | None = None
+    paid_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class PublicAccessStartRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+    confirm_email: str = Field(min_length=5, max_length=255)
+    password: str = Field(min_length=6, max_length=255)
+    confirm_password: str = Field(min_length=6, max_length=255)
+
+
+class PublicAccessPaymentResponse(BaseModel):
+    id: int | None = None
+    email: str
+    amount_cents: int
+    status: PublicAccessPaymentStatus
+    access_granted: bool = False
+    already_active: bool = False
+    qr_code_base64: str | None = None
+    qr_code: str | None = None
+    ticket_url: str | None = None
+    expires_at: datetime | None = None
+    paid_at: datetime | None = None
+
+
+class PublicAuthSendLinkRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+
+
+class PublicAuthSendLinkResponse(BaseModel):
+    email: str
+    sent: bool
+    expires_at: datetime
+    debug_magic_link: str | None = None
+
+
+class PublicAuthConsumeLinkResponse(BaseModel):
+    token: str
+    expires_at: datetime
+    email: str
+    is_active: bool
+    has_access: bool
+
+
+class PublicAuthLoginRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+    password: str = Field(min_length=6, max_length=255)
+
+
+class PublicAuthForgotPasswordRequest(BaseModel):
+    email: str = Field(min_length=5, max_length=255)
+
+
+class PublicAuthForgotPasswordResponse(BaseModel):
+    email: str
+    sent: bool
+    expires_at: datetime
+    debug_reset_link: str | None = None
+
+
+class PublicAuthResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=20, max_length=160)
+    password: str = Field(min_length=6, max_length=255)
+    confirm_password: str = Field(min_length=6, max_length=255)
+
+
+class PublicMeResponse(BaseModel):
+    email: str
+    is_active: bool
+    has_access: bool
+    created_at: datetime
+    activated_at: datetime | None = None
+    ai_credits_total: int = 0
+    ai_credits_remaining: int = 0
+    last_export_id: int | None = None
+    last_export_file_name: str | None = None
+    last_export_sheet_count: int | None = None
+    last_export_created_at: datetime | None = None
+
+
+class PublicLastExportResponse(BaseModel):
+    export_id: int
+    file_name: str
+    sheet_count: int
+    created_at: datetime
+    download_path: str
 
 
 class PublicServiceConfigResponse(BaseModel):
     service_enabled: bool
     donation_enabled: bool
+    public_access_enabled: bool
+    public_access_price_cents: int
+    public_access_ai_credits: int
     custom_generation_mode: CustomTemplateCompositionMode
     custom_sticker_unlock_enabled: bool
     custom_sticker_unlock_price_cents: int

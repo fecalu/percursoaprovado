@@ -2,19 +2,25 @@ from __future__ import annotations
 
 import io
 import base64
+import hashlib
+import hmac
 import json
 import logging
+import smtplib
+import ssl
 import shutil
 import tempfile
 import time
 import unicodedata
 import uuid
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+from email.message import EmailMessage
 from pathlib import Path
 from statistics import median
 from threading import Lock
 from typing import Callable
+from urllib.parse import quote_plus
 
 import fitz
 from PIL import Image, ImageOps
@@ -56,7 +62,17 @@ from .models import (
     PrintOrder,
     PrintOrderStatus,
     PrintServiceType,
+    PublicAccessPayment,
+    PublicAccessPaymentStatus,
+    PublicMagicLink,
+    PublicPasswordResetToken,
+    PublicUser,
+    PublicUserCredit,
+    PublicUserLastExport,
+    PublicUserSession,
     ServiceSettings,
+    SupportPayment,
+    SupportPaymentStatus,
     SourceDetectedSticker,
     SourceDetectedStickerStatus,
     SourceDocument,
@@ -79,6 +95,9 @@ _collection_page_sizes_cache_lock = Lock()
 _collection_page_sizes_cache: dict[int, dict] = {}
 _extra_pdf_page_count_cache_lock = Lock()
 _extra_pdf_page_count_cache: dict[int, dict] = {}
+SUPPORT_PROMPT_HIDE_DAYS = 90
+SUPPORT_PAYMENT_ALLOWED_AMOUNTS = (100, 300, 500, 1000, 2000, 5000)
+SUPPORT_PAYMENT_RECOMMENDED_AMOUNT = 500
 
 
 def _log_export_plan_performance(event: str, **fields) -> None:
@@ -721,6 +740,8 @@ def generated_sticker_requires_manual_unlock(
 ) -> bool:
     if not sticker or sticker.source_type != StickerSourceType.GENERATED:
         return False
+    if settings.public_access_enabled:
+        return False
     return (
         sticker.composition_mode_used != CustomTemplateCompositionMode.AI_OPTIONAL
         and service_settings.custom_sticker_unlock_enabled
@@ -736,6 +757,8 @@ def generated_sticker_has_export_access(
     service_settings: ServiceSettings,
 ) -> bool:
     if not sticker or sticker.source_type != StickerSourceType.GENERATED:
+        return True
+    if settings.public_access_enabled:
         return True
     if sticker.composition_mode_used == CustomTemplateCompositionMode.AI_OPTIONAL:
         if not service_settings.custom_ai_unlock_enabled:
@@ -2339,6 +2362,28 @@ def load_generated_sticker_for_session(db: Session, album_id: int, session_token
     )
 
 
+def load_generated_sticker_for_public_user(db: Session, album_id: int, public_user_id: int) -> Sticker | None:
+    if public_user_id <= 0:
+        return None
+    return (
+        db.execute(
+            select(Sticker)
+            .join(Collection, Sticker.collection_id == Collection.id)
+            .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+            .where(
+                Collection.album_id == album_id,
+                Collection.is_system.is_(True),
+                Sticker.source_type == StickerSourceType.GENERATED,
+                Sticker.public_user_id == public_user_id,
+                Sticker.active.is_(True),
+            )
+            .order_by(Sticker.updated_at.desc(), Sticker.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+
+
 def delete_generated_stickers_for_session(db: Session, album_id: int, session_token: str) -> None:
     stickers = db.execute(
         select(Sticker)
@@ -2349,6 +2394,25 @@ def delete_generated_stickers_for_session(db: Session, album_id: int, session_to
             Collection.is_system.is_(True),
             Sticker.source_type == StickerSourceType.GENERATED,
             Sticker.session_token == session_token.strip(),
+        )
+    ).scalars().all()
+    for sticker in stickers:
+        delete_sticker_record(db, sticker)
+    db.flush()
+
+
+def delete_generated_stickers_for_public_user(db: Session, album_id: int, public_user_id: int) -> None:
+    if public_user_id <= 0:
+        return
+    stickers = db.execute(
+        select(Sticker)
+        .join(Collection, Sticker.collection_id == Collection.id)
+        .options(selectinload(Sticker.collection), selectinload(Sticker.page))
+        .where(
+            Collection.album_id == album_id,
+            Collection.is_system.is_(True),
+            Sticker.source_type == StickerSourceType.GENERATED,
+            Sticker.public_user_id == public_user_id,
         )
     ).scalars().all()
     for sticker in stickers:
@@ -2533,6 +2597,11 @@ def _mercadopago_payer_email(session_token: str, album: Album) -> str:
     return f"figurinhas+{safe_album}{safe_session}@figurinhas.tech"
 
 
+def _mercadopago_support_payer_email(session_token: str) -> str:
+    safe_session = "".join(char for char in session_token.lower() if char.isalnum())[:24] or uuid.uuid4().hex[:12]
+    return f"figurinhas+support{safe_session}@figurinhas.tech"
+
+
 def _map_unlock_status(mp_status: str | None, mp_status_detail: str | None) -> CustomStickerUnlockStatus:
     normalized = (mp_status or "").lower()
     detail = (mp_status_detail or "").lower()
@@ -2563,6 +2632,763 @@ def sync_custom_sticker_unlock_status(unlock: CustomStickerUnlock) -> CustomStic
             seed_custom_sticker_unlock_use_counters(unlock)
         ensure_custom_sticker_unlock_use_counters(unlock)
     return unlock
+
+
+def support_prompt_allowed_amounts() -> list[int]:
+    return list(SUPPORT_PAYMENT_ALLOWED_AMOUNTS)
+
+
+def support_prompt_recommended_amount() -> int:
+    return SUPPORT_PAYMENT_RECOMMENDED_AMOUNT
+
+
+def support_payments_enabled(service_settings: ServiceSettings | None) -> bool:
+    return bool(service_settings and service_settings.donation_enabled and settings.mercadopago_access_token.strip())
+
+
+def _normalize_support_identity_token(value: str | None) -> str:
+    return (value or "").strip()
+
+
+def _support_identity_conditions(session_token: str | None, visitor_token: str | None) -> list:
+    conditions = []
+    normalized_session = _normalize_support_identity_token(session_token)
+    normalized_visitor = _normalize_support_identity_token(visitor_token)
+    if normalized_session:
+        conditions.append(SupportPayment.session_token == normalized_session)
+    if normalized_visitor:
+        conditions.append(SupportPayment.visitor_token == normalized_visitor)
+    return conditions
+
+
+def _map_support_status(mp_status: str | None, mp_status_detail: str | None) -> SupportPaymentStatus:
+    normalized = (mp_status or "").lower()
+    detail = (mp_status_detail or "").lower()
+    if normalized == "approved":
+        return SupportPaymentStatus.PAGO
+    if normalized in {"rejected", "cancelled"}:
+        return SupportPaymentStatus.FALHOU
+    if normalized == "expired" or "expired" in detail:
+        return SupportPaymentStatus.EXPIRADO
+    return SupportPaymentStatus.PENDENTE
+
+
+def load_recent_paid_support(
+    db: Session,
+    *,
+    session_token: str | None,
+    visitor_token: str | None,
+    within_days: int = SUPPORT_PROMPT_HIDE_DAYS,
+) -> SupportPayment | None:
+    identity_conditions = _support_identity_conditions(session_token, visitor_token)
+    if not identity_conditions:
+        return None
+    threshold = datetime.utcnow() - timedelta(days=within_days)
+    return (
+        db.execute(
+            select(SupportPayment)
+            .where(
+                or_(*identity_conditions),
+                SupportPayment.status == SupportPaymentStatus.PAGO,
+                SupportPayment.paid_at.is_not(None),
+                SupportPayment.paid_at >= threshold,
+            )
+            .order_by(SupportPayment.paid_at.desc(), SupportPayment.updated_at.desc(), SupportPayment.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+
+
+def should_prompt_support(
+    db: Session,
+    *,
+    service_settings: ServiceSettings | None,
+    session_token: str | None,
+    visitor_token: str | None,
+) -> tuple[bool, SupportPayment | None]:
+    if not support_payments_enabled(service_settings):
+        return False, None
+    recent_payment = load_recent_paid_support(
+        db,
+        session_token=session_token,
+        visitor_token=visitor_token,
+    )
+    return recent_payment is None, recent_payment
+
+
+def sync_support_payment_status(payment: SupportPayment) -> SupportPayment:
+    if not payment.mp_payment_id:
+        return payment
+    mp_payment = _mercadopago_client().get_payment(payment.mp_payment_id)
+    payment.mp_status = mp_payment.status or None
+    payment.mp_status_detail = mp_payment.status_detail or None
+    payment.status = _map_support_status(mp_payment.status, mp_payment.status_detail)
+    payment.qr_code_base64 = mp_payment.qr_code_base64 or payment.qr_code_base64
+    payment.qr_code = mp_payment.qr_code or payment.qr_code
+    payment.ticket_url = mp_payment.ticket_url or payment.ticket_url
+    payment.expires_at = mp_payment.expires_at or payment.expires_at
+    if mp_payment.amount_cents is not None:
+        payment.paid_amount_cents = mp_payment.amount_cents
+    if payment.status == SupportPaymentStatus.PAGO:
+        payment.paid_at = mp_payment.paid_at or payment.paid_at or datetime.now(UTC)
+        if payment.paid_amount_cents is None:
+            payment.paid_amount_cents = payment.amount_cents
+    return payment
+
+
+def create_support_payment(
+    db: Session,
+    *,
+    export_record: Export | None,
+    session_token: str,
+    visitor_token: str,
+    amount_cents: int,
+    service_settings: ServiceSettings,
+) -> SupportPayment:
+    normalized_session = _normalize_support_identity_token(session_token)
+    normalized_visitor = _normalize_support_identity_token(visitor_token)
+    if not normalized_session:
+        raise ValueError("Sessao invalida para registrar o apoio.")
+    if not normalized_visitor:
+        raise ValueError("Visitante invalido para registrar o apoio.")
+    if amount_cents not in SUPPORT_PAYMENT_ALLOWED_AMOUNTS:
+        raise ValueError("Escolha um valor de apoio valido.")
+    if not support_payments_enabled(service_settings):
+        raise ValueError("O apoio via Pix nao esta ativo no momento.")
+    recent_payment = load_recent_paid_support(
+        db,
+        session_token=normalized_session,
+        visitor_token=normalized_visitor,
+    )
+    if recent_payment:
+        return recent_payment
+
+    pending_payment = (
+        db.execute(
+            select(SupportPayment)
+            .where(
+                or_(
+                    SupportPayment.session_token == normalized_session,
+                    SupportPayment.visitor_token == normalized_visitor,
+                ),
+                SupportPayment.amount_cents == amount_cents,
+                SupportPayment.status == SupportPaymentStatus.PENDENTE,
+            )
+            .order_by(SupportPayment.created_at.desc(), SupportPayment.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+    if pending_payment:
+        pending_payment = sync_support_payment_status(pending_payment)
+        if pending_payment.status == SupportPaymentStatus.PENDENTE:
+            return pending_payment
+
+    payment = _mercadopago_client().create_pix_payment(
+        amount_cents=amount_cents,
+        description="Apoio ao projeto Figurinhas",
+        payer_email=_mercadopago_support_payer_email(normalized_session),
+        external_reference=(
+            f"fig-support-{export_record.id if export_record else 'direct'}-"
+            f"{normalized_session[:24]}-{uuid.uuid4().hex[:8]}"
+        ),
+    )
+
+    support_payment = SupportPayment(
+        session_token=normalized_session,
+        visitor_token=normalized_visitor,
+        export_id=export_record.id if export_record else None,
+        amount_cents=amount_cents,
+        paid_amount_cents=payment.amount_cents,
+        status=_map_support_status(payment.status, payment.status_detail),
+        mp_payment_id=payment.payment_id or None,
+        mp_external_reference=payment.external_reference or None,
+        mp_status=payment.status or None,
+        mp_status_detail=payment.status_detail or None,
+        qr_code_base64=payment.qr_code_base64,
+        qr_code=payment.qr_code,
+        ticket_url=payment.ticket_url,
+        expires_at=payment.expires_at,
+        paid_at=payment.paid_at,
+    )
+    if support_payment.status == SupportPaymentStatus.PAGO and support_payment.paid_amount_cents is None:
+        support_payment.paid_amount_cents = amount_cents
+    db.add(support_payment)
+    db.flush()
+    return support_payment
+
+
+def support_payment_to_response(payment: SupportPayment) -> dict:
+    return {
+        "id": payment.id,
+        "export_id": payment.export_id,
+        "amount_cents": payment.amount_cents,
+        "paid_amount_cents": payment.paid_amount_cents,
+        "status": payment.status,
+        "qr_code_base64": payment.qr_code_base64,
+        "qr_code": payment.qr_code,
+        "ticket_url": payment.ticket_url,
+        "expires_at": payment.expires_at,
+        "paid_at": payment.paid_at,
+        "created_at": payment.created_at,
+        "updated_at": payment.updated_at,
+    }
+
+
+def public_access_payments_enabled() -> bool:
+    return bool(settings.public_access_enabled and settings.mercadopago_access_token.strip())
+
+
+def normalize_public_email(email: str) -> str:
+    normalized = (email or "").strip().lower()
+    if not normalized or "@" not in normalized or normalized.startswith("@") or normalized.endswith("@"):
+        raise ValueError("Informe um email valido para liberar seu acesso.")
+    local_part, domain = normalized.rsplit("@", 1)
+    if "." not in domain or not local_part.strip():
+        raise ValueError("Informe um email valido para liberar seu acesso.")
+    return normalized
+
+
+def normalize_public_password(password: str) -> str:
+    normalized = password or ""
+    if len(normalized) < 6:
+        raise ValueError("Crie uma senha com pelo menos 6 caracteres.")
+    if len(normalized) > 255:
+        raise ValueError("Sua senha ficou grande demais. Tente uma senha menor.")
+    return normalized
+
+
+def _hash_public_password(password: str) -> str:
+    normalized_password = normalize_public_password(password)
+    iterations = 390000
+    salt = uuid.uuid4().hex
+    derived = hashlib.pbkdf2_hmac(
+        "sha256",
+        normalized_password.encode("utf-8"),
+        salt.encode("utf-8"),
+        iterations,
+    ).hex()
+    return f"pbkdf2_sha256${iterations}${salt}${derived}"
+
+
+def _verify_public_password(password: str, password_hash: str | None) -> bool:
+    normalized_password = password or ""
+    configured_hash = (password_hash or "").strip()
+    if not normalized_password or not configured_hash:
+        return False
+    try:
+        algorithm, iterations_text, salt, expected = configured_hash.split("$", 3)
+        if algorithm != "pbkdf2_sha256":
+            return False
+        derived = hashlib.pbkdf2_hmac(
+            "sha256",
+            normalized_password.encode("utf-8"),
+            salt.encode("utf-8"),
+            int(iterations_text),
+        ).hex()
+        return hmac.compare_digest(derived, expected)
+    except Exception:
+        return False
+
+
+def get_or_create_public_user_by_email(db: Session, email: str) -> PublicUser:
+    normalized_email = normalize_public_email(email)
+    user = db.execute(select(PublicUser).where(PublicUser.email == normalized_email)).scalars().first()
+    if user:
+        return user
+    user = PublicUser(email=normalized_email)
+    db.add(user)
+    db.flush()
+    return user
+
+
+def register_public_access_user(
+    db: Session,
+    *,
+    email: str,
+    confirm_email: str,
+    password: str,
+    confirm_password: str,
+) -> PublicUser:
+    normalized_email = normalize_public_email(email)
+    normalized_confirm_email = normalize_public_email(confirm_email)
+    if normalized_email != normalized_confirm_email:
+        raise ValueError("Confirme o mesmo email nos dois campos.")
+
+    normalized_password = normalize_public_password(password)
+    if normalized_password != (confirm_password or ""):
+        raise ValueError("A confirmacao de senha nao confere.")
+
+    user = get_or_create_public_user_by_email(db, normalized_email)
+    if user.is_active:
+        if user.password_hash and not _verify_public_password(normalized_password, user.password_hash):
+            raise ValueError("Esse email ja possui acesso. Entre com sua senha.")
+        if not user.password_hash:
+            user.password_hash = _hash_public_password(normalized_password)
+        return user
+
+    user.password_hash = _hash_public_password(normalized_password)
+    return user
+
+
+def ensure_public_user_credit_balance(user: PublicUser) -> PublicUserCredit:
+    balance = user.credit_balance
+    if balance is not None:
+        return balance
+
+    starting_credits = max(0, int(settings.public_access_ai_credits))
+    balance = PublicUserCredit(
+        user=user,
+        ai_credits_total=starting_credits,
+        ai_credits_remaining=starting_credits,
+    )
+    session = object_session(user)
+    if session is not None:
+        session.add(balance)
+        session.flush()
+    user.credit_balance = balance
+    return balance
+
+
+def consume_public_user_ai_credit(
+    db: Session,
+    user: PublicUser,
+    *,
+    amount: int = 1,
+) -> PublicUserCredit:
+    if amount <= 0:
+        return ensure_public_user_credit_balance(user)
+    if not user.is_active:
+        raise ValueError("Seu acesso pago ainda nao foi confirmado.")
+
+    balance = ensure_public_user_credit_balance(user)
+    if balance.ai_credits_remaining < amount:
+        raise ValueError("Seus creditos de IA acabaram. Continue com a montagem manual ou aguarde novos creditos.")
+
+    balance.ai_credits_remaining -= amount
+    db.flush()
+    return balance
+
+
+def _mercadopago_public_access_payer_email(user: PublicUser) -> str:
+    normalized = normalize_public_email(user.email)
+    return normalized
+
+
+def _map_public_access_status(mp_status: str | None, mp_status_detail: str | None) -> PublicAccessPaymentStatus:
+    normalized = (mp_status or "").lower()
+    detail = (mp_status_detail or "").lower()
+    if normalized == "approved":
+        return PublicAccessPaymentStatus.PAGO
+    if normalized in {"rejected", "cancelled"}:
+        return PublicAccessPaymentStatus.FALHOU
+    if normalized == "expired" or "expired" in detail:
+        return PublicAccessPaymentStatus.EXPIRADO
+    return PublicAccessPaymentStatus.PENDENTE
+
+
+def activate_public_user_from_payment(user: PublicUser, payment: PublicAccessPayment | None = None) -> PublicUser:
+    user.is_active = True
+    if payment and payment.paid_at and user.activated_at is None:
+        user.activated_at = payment.paid_at
+    elif user.activated_at is None:
+        user.activated_at = datetime.utcnow()
+    ensure_public_user_credit_balance(user)
+    return user
+
+
+def load_latest_public_access_payment(db: Session, user_id: int) -> PublicAccessPayment | None:
+    return (
+        db.execute(
+            select(PublicAccessPayment)
+            .where(PublicAccessPayment.user_id == user_id)
+            .order_by(PublicAccessPayment.created_at.desc(), PublicAccessPayment.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+
+
+def sync_public_access_payment_status(payment: PublicAccessPayment) -> PublicAccessPayment:
+    if not payment.mp_payment_id:
+        return payment
+    mp_payment = _mercadopago_client().get_payment(payment.mp_payment_id)
+    payment.mp_status = mp_payment.status or None
+    payment.mp_status_detail = mp_payment.status_detail or None
+    payment.status = _map_public_access_status(mp_payment.status, mp_payment.status_detail)
+    payment.qr_code_base64 = mp_payment.qr_code_base64 or payment.qr_code_base64
+    payment.qr_code = mp_payment.qr_code or payment.qr_code
+    payment.ticket_url = mp_payment.ticket_url or payment.ticket_url
+    payment.expires_at = mp_payment.expires_at or payment.expires_at
+    if payment.status == PublicAccessPaymentStatus.PAGO:
+        payment.paid_at = mp_payment.paid_at or payment.paid_at or datetime.now(UTC)
+        activate_public_user_from_payment(payment.user, payment)
+    return payment
+
+
+def create_public_access_payment(db: Session, user: PublicUser) -> PublicAccessPayment:
+    if user.is_active:
+        raise ValueError("Esse email ja possui acesso liberado.")
+    if not public_access_payments_enabled():
+        raise ValueError("O acesso pago nao esta habilitado no momento.")
+
+    pending_payment = (
+        db.execute(
+            select(PublicAccessPayment)
+            .where(
+                PublicAccessPayment.user_id == user.id,
+                PublicAccessPayment.amount_cents == settings.public_access_price_cents,
+                PublicAccessPayment.status == PublicAccessPaymentStatus.PENDENTE,
+            )
+            .order_by(PublicAccessPayment.created_at.desc(), PublicAccessPayment.id.desc())
+        )
+        .scalars()
+        .first()
+    )
+    if pending_payment:
+        pending_payment = sync_public_access_payment_status(pending_payment)
+        if pending_payment.status == PublicAccessPaymentStatus.PENDENTE:
+            return pending_payment
+        if pending_payment.status == PublicAccessPaymentStatus.PAGO:
+            return pending_payment
+
+    mp_payment = _mercadopago_client().create_pix_payment(
+        amount_cents=settings.public_access_price_cents,
+        description="Acesso completo - Figurinhas",
+        payer_email=_mercadopago_public_access_payer_email(user),
+        external_reference=f"fig-public-access-{user.id}-{uuid.uuid4().hex[:8]}",
+    )
+
+    payment = PublicAccessPayment(
+        user_id=user.id,
+        amount_cents=settings.public_access_price_cents,
+        status=_map_public_access_status(mp_payment.status, mp_payment.status_detail),
+        mp_payment_id=mp_payment.payment_id or None,
+        mp_external_reference=mp_payment.external_reference or None,
+        mp_status=mp_payment.status or None,
+        mp_status_detail=mp_payment.status_detail or None,
+        qr_code_base64=mp_payment.qr_code_base64,
+        qr_code=mp_payment.qr_code,
+        ticket_url=mp_payment.ticket_url,
+        expires_at=mp_payment.expires_at,
+        paid_at=mp_payment.paid_at,
+    )
+    if payment.status == PublicAccessPaymentStatus.PAGO:
+        activate_public_user_from_payment(user, payment)
+    db.add(payment)
+    db.flush()
+    return payment
+
+
+def public_access_payment_to_response(
+    user: PublicUser,
+    payment: PublicAccessPayment | None,
+    *,
+    already_active: bool = False,
+) -> dict:
+    return {
+        "id": payment.id if payment else None,
+        "email": user.email,
+        "amount_cents": payment.amount_cents if payment else settings.public_access_price_cents,
+        "status": payment.status if payment else PublicAccessPaymentStatus.PAGO,
+        "access_granted": bool(user.is_active),
+        "already_active": already_active,
+        "qr_code_base64": payment.qr_code_base64 if payment else None,
+        "qr_code": payment.qr_code if payment else None,
+        "ticket_url": payment.ticket_url if payment else None,
+        "expires_at": payment.expires_at if payment else None,
+        "paid_at": payment.paid_at if payment else user.activated_at,
+    }
+
+
+def create_public_magic_link(db: Session, user: PublicUser) -> PublicMagicLink:
+    if not user.is_active:
+        raise ValueError("Esse email ainda nao tem acesso liberado.")
+    token = uuid.uuid4().hex + uuid.uuid4().hex
+    magic_link = PublicMagicLink(
+        user_id=user.id,
+        token=token,
+        expires_at=datetime.utcnow() + timedelta(minutes=max(5, settings.public_magic_link_ttl_minutes)),
+    )
+    db.add(magic_link)
+    db.flush()
+    return magic_link
+
+
+def create_public_password_reset_token(db: Session, user: PublicUser) -> PublicPasswordResetToken:
+    if not user.is_active:
+        raise ValueError("Esse email ainda nao tem acesso liberado.")
+    token = uuid.uuid4().hex + uuid.uuid4().hex
+    reset_token = PublicPasswordResetToken(
+        user_id=user.id,
+        token=token,
+        expires_at=datetime.utcnow() + timedelta(minutes=max(5, settings.public_magic_link_ttl_minutes)),
+    )
+    db.add(reset_token)
+    db.flush()
+    return reset_token
+
+
+def build_public_magic_link_url(base_url: str, token: str) -> str:
+    root_url = (settings.public_magic_link_base_url or base_url or "").strip()
+    normalized_root = root_url.rstrip("/") or "http://localhost:5173"
+    return f"{normalized_root}/?public_magic_link={quote_plus(token)}"
+
+
+def build_public_password_reset_url(base_url: str, token: str) -> str:
+    root_url = (settings.public_magic_link_base_url or base_url or "").strip()
+    normalized_root = root_url.rstrip("/") or "http://localhost:5173"
+    return f"{normalized_root}/?public_reset_token={quote_plus(token)}"
+
+
+def _send_public_email(*, recipient_email: str, subject: str, lines: list[str]) -> bool:
+    sender = settings.public_email_from or settings.public_smtp_username
+    if not sender:
+        raise ValueError("Configure um email remetente para enviar acessos por email.")
+    if not settings.public_smtp_host:
+        raise ValueError("Configure o SMTP antes de enviar emails do Figurinhas.")
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = sender
+    message["To"] = recipient_email
+    message.set_content("\n".join(lines))
+
+    context = ssl.create_default_context()
+    if settings.public_smtp_use_ssl:
+        with smtplib.SMTP_SSL(settings.public_smtp_host, settings.public_smtp_port, context=context, timeout=25) as client:
+            if settings.public_smtp_username:
+                client.login(settings.public_smtp_username, settings.public_smtp_password)
+            client.send_message(message)
+        return True
+
+    with smtplib.SMTP(settings.public_smtp_host, settings.public_smtp_port, timeout=25) as client:
+        client.ehlo()
+        if settings.public_smtp_use_tls:
+            client.starttls(context=context)
+            client.ehlo()
+        if settings.public_smtp_username:
+            client.login(settings.public_smtp_username, settings.public_smtp_password)
+        client.send_message(message)
+    return True
+
+
+def send_public_magic_link_email(*, recipient_email: str, magic_link_url: str) -> bool:
+    return _send_public_email(
+        recipient_email=recipient_email,
+        subject="Seu link de acesso ao Figurinhas",
+        lines=[
+            "Seu acesso ao Figurinhas foi liberado.",
+            "",
+            "Use o link abaixo para entrar na plataforma:",
+            magic_link_url,
+            "",
+            f"Esse link expira em {max(5, settings.public_magic_link_ttl_minutes)} minuto(s).",
+        ],
+    )
+
+
+def send_public_password_reset_email(*, recipient_email: str, reset_url: str) -> bool:
+    return _send_public_email(
+        recipient_email=recipient_email,
+        subject="Recuperacao de senha - Figurinhas",
+        lines=[
+            "Recebemos um pedido para redefinir sua senha do Figurinhas.",
+            "",
+            "Use o link abaixo para criar uma nova senha:",
+            reset_url,
+            "",
+            f"Esse link expira em {max(5, settings.public_magic_link_ttl_minutes)} minuto(s).",
+        ],
+    )
+
+
+def issue_public_user_session(db: Session, user: PublicUser) -> PublicUserSession:
+    session = PublicUserSession(
+        user_id=user.id,
+        token=uuid.uuid4().hex + uuid.uuid4().hex,
+        expires_at=datetime.utcnow() + timedelta(hours=max(1, settings.public_user_session_ttl_hours)),
+        last_used_at=datetime.utcnow(),
+    )
+    db.add(session)
+    db.flush()
+    return session
+
+
+def authenticate_public_user(db: Session, *, email: str, password: str) -> tuple[PublicUser, PublicUserSession]:
+    normalized_email = normalize_public_email(email)
+    user = db.execute(select(PublicUser).where(PublicUser.email == normalized_email)).scalars().first()
+    if not user or not _verify_public_password(password, user.password_hash):
+        raise ValueError("Email ou senha invalidos.")
+    if not user.is_active:
+        raise ValueError("Seu pagamento ainda nao foi confirmado.")
+    ensure_public_user_credit_balance(user)
+    session = issue_public_user_session(db, user)
+    return user, session
+
+
+def reset_public_user_password(
+    db: Session,
+    *,
+    token: str,
+    password: str,
+    confirm_password: str,
+) -> tuple[PublicUser, PublicUserSession]:
+    normalized_token = (token or "").strip()
+    if not normalized_token:
+        raise ValueError("Token de redefinicao invalido.")
+    normalized_password = normalize_public_password(password)
+    if normalized_password != (confirm_password or ""):
+        raise ValueError("A confirmacao de senha nao confere.")
+
+    reset_token = (
+        db.execute(
+            select(PublicPasswordResetToken)
+            .options(selectinload(PublicPasswordResetToken.user))
+            .where(PublicPasswordResetToken.token == normalized_token)
+        )
+        .scalars()
+        .first()
+    )
+    if not reset_token or not reset_token.user:
+        raise ValueError("Token de redefinicao invalido.")
+    if reset_token.used_at is not None:
+        raise ValueError("Esse link de redefinicao ja foi utilizado.")
+    if reset_token.expires_at < datetime.utcnow():
+        raise ValueError("Esse link de redefinicao expirou.")
+    if not reset_token.user.is_active:
+        raise ValueError("Esse email ainda nao tem acesso liberado.")
+
+    reset_token.user.password_hash = _hash_public_password(normalized_password)
+    reset_token.used_at = datetime.utcnow()
+    session = issue_public_user_session(db, reset_token.user)
+    return reset_token.user, session
+
+
+def consume_public_magic_link(db: Session, token: str) -> tuple[PublicUser, PublicUserSession]:
+    normalized_token = (token or "").strip()
+    if not normalized_token:
+        raise ValueError("Link de acesso invalido.")
+    magic_link = (
+        db.execute(
+            select(PublicMagicLink)
+            .options(selectinload(PublicMagicLink.user))
+            .where(PublicMagicLink.token == normalized_token)
+        )
+        .scalars()
+        .first()
+    )
+    if not magic_link or not magic_link.user:
+        raise ValueError("Link de acesso invalido.")
+    if magic_link.used_at is not None:
+        raise ValueError("Esse link de acesso ja foi utilizado.")
+    if magic_link.expires_at < datetime.utcnow():
+        raise ValueError("Esse link de acesso expirou.")
+    if not magic_link.user.is_active:
+        raise ValueError("Esse email ainda nao tem acesso liberado.")
+    magic_link.used_at = datetime.utcnow()
+    session = issue_public_user_session(db, magic_link.user)
+    return magic_link.user, session
+
+
+def load_public_user_from_session(db: Session, session_token: str) -> PublicUser | None:
+    normalized_token = (session_token or "").strip()
+    if not normalized_token:
+        return None
+    session = (
+        db.execute(
+            select(PublicUserSession)
+            .options(selectinload(PublicUserSession.user))
+            .where(PublicUserSession.token == normalized_token)
+        )
+        .scalars()
+        .first()
+    )
+    if not session or not session.user:
+        return None
+    if session.expires_at < datetime.utcnow():
+        return None
+    session.last_used_at = datetime.utcnow()
+    if session.user.is_active:
+        ensure_public_user_credit_balance(session.user)
+    return session.user
+
+
+def revoke_public_user_session(db: Session, session_token: str) -> None:
+    normalized_token = (session_token or "").strip()
+    if not normalized_token:
+        return
+    session = db.execute(select(PublicUserSession).where(PublicUserSession.token == normalized_token)).scalars().first()
+    if session:
+        db.delete(session)
+
+
+def save_public_user_last_export(db: Session, user: PublicUser, export_record: Export) -> PublicUserLastExport:
+    if not user.is_active:
+        raise ValueError("O usuario precisa estar com o acesso ativo para guardar o ultimo PDF.")
+
+    last_export = user.last_export
+    previous_file_path = (last_export.file_path if last_export else "").strip()
+
+    if last_export is None:
+        last_export = PublicUserLastExport(
+            user=user,
+            export_id=export_record.id,
+            file_path=export_record.file_path,
+            sheet_count=max(int(export_record.sheet_count or 1), 1),
+        )
+        db.add(last_export)
+    else:
+        last_export.export_id = export_record.id
+        last_export.file_path = export_record.file_path
+        last_export.sheet_count = max(int(export_record.sheet_count or 1), 1)
+
+    db.flush()
+
+    normalized_previous = previous_file_path
+    normalized_current = (export_record.file_path or "").strip()
+    if normalized_previous and normalized_previous != normalized_current:
+        previous_file = settings.storage_root / normalized_previous
+        try:
+            if previous_file.exists() and previous_file.is_file():
+                previous_file.unlink()
+        except OSError:
+            logger.warning("Nao foi possivel apagar o export antigo da conta: %s", previous_file)
+
+    return last_export
+
+
+def public_user_to_response(user: PublicUser) -> dict:
+    balance = ensure_public_user_credit_balance(user) if user.is_active else user.credit_balance
+    last_export = user.last_export
+    if last_export:
+        export_file = settings.storage_root / last_export.file_path
+        if not export_file.exists() or not export_file.is_file():
+            last_export = None
+    return {
+        "email": user.email,
+        "is_active": user.is_active,
+        "has_access": user.is_active,
+        "created_at": user.created_at,
+        "activated_at": user.activated_at,
+        "ai_credits_total": balance.ai_credits_total if balance else 0,
+        "ai_credits_remaining": balance.ai_credits_remaining if balance else 0,
+        "last_export_id": last_export.export_id if last_export else None,
+        "last_export_file_name": Path(last_export.file_path).name if last_export and last_export.file_path else None,
+        "last_export_sheet_count": last_export.sheet_count if last_export else None,
+        "last_export_created_at": last_export.updated_at if last_export else None,
+    }
+
+
+def public_user_session_to_response(user: PublicUser, session: PublicUserSession) -> dict:
+    return {
+        "token": session.token,
+        "expires_at": session.expires_at,
+        "email": user.email,
+        "is_active": user.is_active,
+        "has_access": user.is_active,
+    }
 
 
 def get_or_create_custom_sticker_unlock(
@@ -2771,6 +3597,7 @@ def upsert_generated_sticker(
     *,
     album: Album,
     session_token: str,
+    public_user_id: int | None,
     template_id: int | None,
     requested_composition_mode: CustomTemplateCompositionMode | None,
     name: str,
@@ -2821,8 +3648,20 @@ def upsert_generated_sticker(
         requested_composition_mode
         or (selected_template.composition_mode if selected_template else service_settings.custom_generation_mode)
     )
+    public_user: PublicUser | None = None
+    public_credit_balance: PublicUserCredit | None = None
+    if resolved_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL and settings.public_access_enabled:
+        if not public_user_id:
+            raise ValueError("Entre na sua conta paga para usar a criacao com IA.")
+        public_user = db.execute(select(PublicUser).where(PublicUser.id == public_user_id)).scalars().first()
+        if not public_user or not public_user.is_active:
+            raise ValueError("Seu acesso pago nao foi encontrado. Entre novamente para continuar.")
+        public_credit_balance = ensure_public_user_credit_balance(public_user)
+        if public_credit_balance.ai_credits_remaining <= 0:
+            raise ValueError("Seus creditos de IA acabaram. Continue com a montagem manual ou aguarde novos creditos.")
     if (
         resolved_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
+        and not settings.public_access_enabled
         and service_settings.custom_ai_unlock_enabled
         and not is_custom_sticker_unlocked(
             db,
@@ -2849,6 +3688,8 @@ def upsert_generated_sticker(
             raise ValueError("Ainda nao ha um modelo manual pronto para esse perfil e posicao.")
     report(22, "Preparando o modelo...")
     collection, page = ensure_generated_collection_page(db, album, template_sticker)
+    if public_user_id:
+        delete_generated_stickers_for_public_user(db, album.id, public_user_id)
     delete_generated_stickers_for_session(db, album.id, session_token)
 
     width_px: int | None = None
@@ -2989,6 +3830,7 @@ def upsert_generated_sticker(
         source_type=StickerSourceType.GENERATED,
         template=selected_template,
         session_token=session_token,
+        public_user_id=public_user_id,
         profile_type=profile_type,
         custom_category_type=category_type,
         custom_position_type=position_type,
@@ -3019,6 +3861,12 @@ def upsert_generated_sticker(
     db.flush()
     if (
         resolved_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
+        and settings.public_access_enabled
+        and public_user is not None
+    ):
+        consume_public_user_ai_credit(db, public_user)
+    elif (
+        resolved_composition_mode == CustomTemplateCompositionMode.AI_OPTIONAL
         and service_settings.custom_ai_unlock_enabled
     ):
         consume_custom_sticker_unlock_use(
@@ -3028,6 +3876,8 @@ def upsert_generated_sticker(
             unlock_type=CustomStickerUnlockType.AI_CREATE,
         )
     return sticker
+
+
 def _resolve_export_extra_documents(
     album: Album,
     extra_selections: list[dict] | None,
@@ -4613,6 +5463,9 @@ def service_settings_to_response(service_settings: ServiceSettings, *, include_s
     response = {
         "service_enabled": service_settings.service_enabled,
         "donation_enabled": service_settings.donation_enabled,
+        "public_access_enabled": settings.public_access_enabled,
+        "public_access_price_cents": settings.public_access_price_cents,
+        "public_access_ai_credits": settings.public_access_ai_credits,
         "custom_generation_mode": service_settings.custom_generation_mode,
         "custom_sticker_unlock_enabled": service_settings.custom_sticker_unlock_enabled,
         "custom_sticker_unlock_price_cents": service_settings.custom_sticker_unlock_price_cents,

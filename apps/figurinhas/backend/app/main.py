@@ -49,7 +49,12 @@ from .models import (
     PageSelectionBlock,
     PrintOrder,
     PrintOrderStatus,
+    PublicAccessPayment,
+    PublicAccessPaymentStatus,
     PublicAccessEvent,
+    PublicUser,
+    SupportPayment,
+    SupportPaymentStatus,
     SourceDocument,
     SourceDocumentPage,
     Sticker,
@@ -91,6 +96,17 @@ from .schemas import (
     PublicProgressJobResponse,
     PublicServiceConfigResponse,
     PageResponse,
+    PublicAccessPaymentResponse,
+    PublicAccessStartRequest,
+    PublicAuthConsumeLinkResponse,
+    PublicAuthForgotPasswordRequest,
+    PublicAuthForgotPasswordResponse,
+    PublicAuthLoginRequest,
+    PublicAuthResetPasswordRequest,
+    PublicAuthSendLinkRequest,
+    PublicAuthSendLinkResponse,
+    PublicLastExportResponse,
+    PublicMeResponse,
     SourceDetectedStickerBulkActionRequest,
     SourceDetectedStickerBulkActionResponse,
     SourceDetectedStickerAssignRequest,
@@ -107,6 +123,9 @@ from .schemas import (
     StickerCreate,
     StickerResponse,
     StickerUpdate,
+    SupportPaymentCreateRequest,
+    SupportPaymentResponse,
+    SupportStatusResponse,
 )
 from .services import (
     album_stats,
@@ -121,8 +140,13 @@ from .services import (
     build_order_quote_with_extras,
     collection_stats,
     collection_sort_key,
+    authenticate_public_user,
+    build_public_password_reset_url,
     consume_custom_sticker_unlock_use,
     collection_to_response,
+    create_public_access_payment,
+    create_public_magic_link,
+    create_public_password_reset_token,
     create_page_layout_template_from_source_page,
     custom_template_to_detail_response,
     custom_template_to_public_option,
@@ -139,12 +163,14 @@ from .services import (
     delete_album_record,
     delete_collection_record,
     delete_custom_template_layer_image,
+    delete_generated_stickers_for_public_user,
     delete_generated_stickers_for_session,
     ensure_album_slug_unique,
     ensure_default_album_assignments,
     ensure_default_custom_template_assignments,
     generated_sticker_for_selection,
     get_or_create_service_settings,
+    get_or_create_public_user_by_email,
     get_or_create_custom_sticker_unlock,
     generated_sticker_has_export_access,
     generated_sticker_requires_manual_unlock,
@@ -155,6 +181,7 @@ from .services import (
     load_album_or_fail,
     load_collection_by_slug_or_fail,
     load_collection_or_fail,
+    load_generated_sticker_for_public_user,
     load_generated_sticker_for_session,
     load_available_custom_sticker_unlock,
     load_latest_custom_sticker_unlock,
@@ -162,6 +189,7 @@ from .services import (
     load_page_layout_template_or_fail,
     load_page_selection_block_or_fail,
     load_print_order_or_fail,
+    load_public_user_from_session,
     load_source_detected_sticker_or_fail,
     load_source_document_page_or_fail,
     load_source_document_or_fail,
@@ -170,19 +198,35 @@ from .services import (
     page_to_response,
     page_layout_template_to_response,
     pending_custom_sticker_unlock_matches_settings,
+    public_user_session_to_response,
     source_document_page_to_response,
     source_detected_sticker_to_response,
     source_document_to_detail_response,
     source_document_to_summary_response,
     print_order_to_response,
+    public_access_payment_to_response,
+    public_user_to_response,
     refresh_sticker_ocr,
+    revoke_public_user_session,
+    save_public_user_last_export,
     save_prepared_cutout_assets,
     save_custom_base_image,
     save_custom_template_layer_image,
     save_pdf_and_render_pages,
     save_source_document_and_render_pages,
     service_settings_to_response,
+    send_public_magic_link_email,
+    send_public_password_reset_email,
+    should_prompt_support,
     slugify,
+    support_payment_to_response,
+    support_prompt_allowed_amounts,
+    support_prompt_recommended_amount,
+    sync_public_access_payment_status,
+    sync_support_payment_status,
+    build_public_magic_link_url,
+    consume_public_magic_link,
+    create_support_payment,
     sync_custom_sticker_unlock_status,
     sticker_to_response,
     normalize_legacy_custom_template_photo_visibility,
@@ -192,6 +236,9 @@ from .services import (
     normalize_legacy_custom_template_text_layouts,
     normalize_collection_stickers_to_reference_grid,
     normalize_custom_profile_type,
+    normalize_public_email,
+    reset_public_user_password,
+    register_public_access_user,
     normalize_template_text_slots,
     cleanup_orphaned_source_document_artifacts,
     assign_source_detected_stickers,
@@ -470,6 +517,7 @@ def ensure_runtime_schema() -> None:
             "ocr_processed_at": "DATETIME",
             "source_type": "VARCHAR(20) NOT NULL DEFAULT 'PDF'",
             "session_token": "VARCHAR(120)",
+            "public_user_id": "INTEGER",
             "profile_type": "VARCHAR(20)",
             "birth_date_text": "VARCHAR(40)",
             "height_text": "VARCHAR(40)",
@@ -671,6 +719,18 @@ def ensure_runtime_schema() -> None:
                     "ALTER TABLE figurinhas_exports ADD COLUMN last_downloaded_at DATETIME"
                 )
 
+        public_users_table_exists = connection.exec_driver_sql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_public_users'"
+        ).fetchone()
+        if public_users_table_exists:
+            public_user_columns = {
+                row[1] for row in connection.exec_driver_sql("PRAGMA table_info(figurinhas_public_users)").fetchall()
+            }
+            if "password_hash" not in public_user_columns:
+                connection.exec_driver_sql(
+                    "ALTER TABLE figurinhas_public_users ADD COLUMN password_hash VARCHAR(255)"
+                )
+
         unlocks_table_exists = connection.exec_driver_sql(
             "SELECT name FROM sqlite_master WHERE type='table' AND name='figurinhas_custom_sticker_unlocks'"
         ).fetchone()
@@ -861,11 +921,21 @@ def ensure_runtime_indexes() -> None:
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_collections_album_catalog ON figurinhas_collections (album_id, status, is_system, sort_order, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_stickers_collection_active_catalog ON figurinhas_stickers (collection_id, active, sort_order, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_stickers_collection_category_active ON figurinhas_stickers (collection_id, category, active, sort_order, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_stickers_public_user_active_updated ON figurinhas_stickers (public_user_id, active, updated_at, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_documents_album_status ON figurinhas_source_documents (album_id, status, created_at, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_document_pages_document_page_number ON figurinhas_source_document_pages (document_id, page_number, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_detected_stickers_document_page_status ON figurinhas_source_detected_stickers (document_id, page_id, status, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_source_detected_stickers_assigned_status ON figurinhas_source_detected_stickers (assigned_collection_id, status, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_custom_sticker_unlocks_album_session_type_status ON figurinhas_custom_sticker_unlocks (album_id, session_token, unlock_type, status, created_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_support_payments_session_status_created ON figurinhas_support_payments (session_token, status, created_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_support_payments_visitor_status_paid ON figurinhas_support_payments (visitor_token, status, paid_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_support_payments_export_created ON figurinhas_support_payments (export_id, created_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_users_email_active ON figurinhas_public_users (email, is_active, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_user_sessions_token_expires ON figurinhas_public_user_sessions (token, expires_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_magic_links_token_expires ON figurinhas_public_magic_links (token, expires_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_password_reset_tokens_token_expires ON figurinhas_public_password_reset_tokens (token, expires_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_access_payments_user_status_created ON figurinhas_public_access_payments (user_id, status, created_at, id)",
+        "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_access_payments_mp_payment_id ON figurinhas_public_access_payments (mp_payment_id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_print_orders_album_created ON figurinhas_print_orders (album_id, created_at, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_access_events_date_route ON figurinhas_public_access_events (event_date, route_key, id)",
         "CREATE INDEX IF NOT EXISTS ix_figurinhas_public_access_events_subject_date ON figurinhas_public_access_events (subject_hash, event_date, id)",
@@ -1077,6 +1147,66 @@ def require_admin(
     if admin_sessions.validate(session_token):
         return
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sessao administrativa invalida ou expirada.")
+
+
+def require_public_user(
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
+    db: Session = Depends(get_db),
+) -> PublicUser:
+    normalized_auth = (authorization or "").strip()
+    if normalized_auth.lower().startswith("bearer "):
+        session_token = normalized_auth[7:].strip()
+    else:
+        session_token = (x_public_session or "").strip()
+    user = load_public_user_from_session(db, session_token)
+    if user:
+        db.commit()
+        return user
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Sessao publica invalida ou expirada.")
+
+
+def _extract_public_session_token(authorization: str | None, x_public_session: str | None) -> str:
+    normalized_auth = (authorization or "").strip()
+    if normalized_auth.lower().startswith("bearer "):
+        return normalized_auth[7:].strip()
+    return (x_public_session or "").strip()
+
+
+def _load_optional_public_user(
+    *,
+    authorization: str | None,
+    x_public_session: str | None,
+    db: Session,
+) -> PublicUser | None:
+    session_token = _extract_public_session_token(authorization, x_public_session)
+    if not session_token:
+        return None
+    user = load_public_user_from_session(db, session_token)
+    if user:
+        db.commit()
+    return user
+
+
+def _require_public_access_if_enabled(
+    *,
+    authorization: str | None,
+    x_public_session: str | None,
+    db: Session,
+) -> PublicUser | None:
+    if not settings.public_access_enabled:
+        return None
+    user = _load_optional_public_user(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
+    if user and user.is_active:
+        return user
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Entre na sua conta paga para continuar.",
+    )
 
 
 def load_custom_template_or_404(db: Session, template_id: int) -> CustomStickerTemplate:
@@ -1410,8 +1540,15 @@ def get_my_sticker(
     request: Request,
     album_slug: str,
     session_token: str = Query(..., min_length=12, max_length=120),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
     db: Session = Depends(get_db),
 ) -> dict | None:
+    public_user = _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
     _enforce_public_rate_limit(
         request=request,
         bucket="my_sticker_read",
@@ -1419,7 +1556,10 @@ def get_my_sticker(
         session_token=session_token,
     )
     album = load_album_by_slug_or_fail(db, album_slug)
-    sticker = load_generated_sticker_for_session(db, album.id, session_token)
+    if public_user:
+        sticker = load_generated_sticker_for_public_user(db, album.id, public_user.id)
+    else:
+        sticker = load_generated_sticker_for_session(db, album.id, session_token)
     return sticker_to_response(sticker, include_sensitive=False) if sticker else None
 
 
@@ -1429,9 +1569,16 @@ async def create_my_sticker_cutout_job(
     album_slug: str,
     session_token: str = Form(..., min_length=12, max_length=120),
     photo: UploadFile = File(...),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
     db: Session = Depends(get_db),
 ) -> dict:
     request_started_at = time.perf_counter()
+    _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
     _enforce_public_rate_limit(
         request=request,
         bucket="my_sticker_cutout_job",
@@ -1551,9 +1698,17 @@ async def create_or_replace_my_sticker_job(
     photo_scale: float | None = Form(default=1.0),
     photo_rotation: float | None = Form(default=0.0),
     photo: UploadFile = File(...),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
     db: Session = Depends(get_db),
 ) -> dict:
     request_started_at = time.perf_counter()
+    public_user = _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
+    public_user_id = public_user.id if public_user else None
     _enforce_public_rate_limit(
         request=request,
         bucket="my_sticker_job",
@@ -1634,6 +1789,7 @@ async def create_or_replace_my_sticker_job(
                 worker_db,
                 album=album,
                 session_token=session_token,
+                public_user_id=public_user.id if public_user else None,
                 template_id=template_id,
                 requested_composition_mode=requested_composition_mode,
                 name=name,
@@ -1741,8 +1897,15 @@ async def create_or_replace_my_sticker(
     photo_scale: float | None = Form(default=1.0),
     photo_rotation: float | None = Form(default=0.0),
     photo: UploadFile = File(...),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
     db: Session = Depends(get_db),
 ) -> dict:
+    public_user = _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
     _enforce_public_rate_limit(
         request=request,
         bucket="my_sticker_job",
@@ -1789,6 +1952,7 @@ async def create_or_replace_my_sticker(
             db,
             album=album,
             session_token=session_token,
+            public_user_id=public_user.id if public_user else None,
             template_id=template_id,
             requested_composition_mode=requested_composition_mode,
             name=name,
@@ -1825,8 +1989,15 @@ async def create_my_sticker_cutout(
     album_slug: str,
     session_token: str = Form(..., min_length=12, max_length=120),
     photo: UploadFile = File(...),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
     db: Session = Depends(get_db),
 ) -> dict:
+    _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
     _enforce_public_rate_limit(
         request=request,
         bucket="my_sticker_cutout_job",
@@ -1875,18 +2046,28 @@ def delete_my_sticker(
     album_slug: str,
     sticker_id: int,
     session_token: str = Query(..., min_length=12, max_length=120),
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
     db: Session = Depends(get_db),
 ) -> Response:
+    public_user = _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
     album = load_album_by_slug_or_fail(db, album_slug)
     sticker = load_sticker_or_fail(db, sticker_id)
-    if (
-        sticker.collection.album_id != album.id
-        or sticker.source_type != StickerSourceType.GENERATED
-        or sticker.session_token != session_token.strip()
-    ):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Minha Figurinha nao encontrada para essa sessao.")
-
-    delete_generated_stickers_for_session(db, album.id, session_token)
+    normalized_session = session_token.strip()
+    if sticker.collection.album_id != album.id or sticker.source_type != StickerSourceType.GENERATED:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Minha Figurinha nao encontrada.")
+    if public_user:
+        if sticker.public_user_id != public_user.id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Minha Figurinha nao encontrada para essa conta.")
+        delete_generated_stickers_for_public_user(db, album.id, public_user.id)
+    else:
+        if sticker.session_token != normalized_session:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Minha Figurinha nao encontrada para essa sessao.")
+        delete_generated_stickers_for_session(db, album.id, normalized_session)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -1898,6 +2079,11 @@ def _get_my_sticker_unlock_by_type(
     unlock_type: CustomStickerUnlockType,
     db: Session,
 ) -> dict | None:
+    if settings.public_access_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Esse desbloqueio antigo nao esta disponivel enquanto o acesso completo por conta estiver ativo.",
+        )
     try:
         album = load_album_by_slug_or_fail(db, album_slug)
     except LookupError as exc:
@@ -1942,6 +2128,11 @@ def _create_my_sticker_unlock_by_type(
     unlock_type: CustomStickerUnlockType,
     db: Session,
 ) -> dict:
+    if settings.public_access_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Esse desbloqueio antigo nao esta disponivel enquanto o acesso completo por conta estiver ativo.",
+        )
     try:
         album = load_album_by_slug_or_fail(db, album_slug)
     except LookupError as exc:
@@ -2104,8 +2295,20 @@ def create_my_sticker_ai_unlock(
 
 
 @app.post("/exports/jobs", response_model=PublicProgressJobResponse)
-def create_export_job(payload: ExportRequest, request: Request, db: Session = Depends(get_db)) -> dict:
+def create_export_job(
+    payload: ExportRequest,
+    request: Request,
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
+    db: Session = Depends(get_db),
+) -> dict:
     request_started_at = time.perf_counter()
+    public_user = _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
+    public_user_id = public_user.id if public_user else None
     _enforce_public_rate_limit(
         request=request,
         bucket="export_create",
@@ -2159,6 +2362,10 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
                 extra_selections=[item.model_dump() for item in payload.extras],
                 progress_callback=reporter,
             )
+            if public_user_id:
+                worker_user = worker_db.get(PublicUser, public_user_id)
+                if worker_user:
+                    save_public_user_last_export(worker_db, worker_user, export_record)
             if generated_sticker_requires_manual_unlock(generated_sticker, service_settings):
                 consume_custom_sticker_unlock_use(
                     worker_db,
@@ -2176,6 +2383,7 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
                 result={
                     "export_id": export_record.id,
                     "item_count": export_record.item_count,
+                    "sheet_count": export_record.sheet_count or 1,
                     "download_path": _build_export_download_path(export_record.id),
                     "file_name": Path(export_record.file_path).name,
                 },
@@ -2240,7 +2448,18 @@ def create_export_job(payload: ExportRequest, request: Request, db: Session = De
 
 
 @app.post("/exports", response_model=ExportResponse)
-def create_export(payload: ExportRequest, request: Request, db: Session = Depends(get_db)) -> dict:
+def create_export(
+    payload: ExportRequest,
+    request: Request,
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
+    db: Session = Depends(get_db),
+) -> dict:
+    public_user = _require_public_access_if_enabled(
+        authorization=authorization,
+        x_public_session=x_public_session,
+        db=db,
+    )
     _enforce_public_rate_limit(
         request=request,
         bucket="export_create",
@@ -2273,6 +2492,8 @@ def create_export(payload: ExportRequest, request: Request, db: Session = Depend
         db,
         extra_selections=[item.model_dump() for item in payload.extras],
     )
+    if public_user:
+        save_public_user_last_export(db, public_user, export_record)
     if generated_sticker_requires_manual_unlock(generated_sticker, service_settings):
         consume_custom_sticker_unlock_use(
             db,
@@ -2284,6 +2505,7 @@ def create_export(payload: ExportRequest, request: Request, db: Session = Depend
     return {
         "export_id": export_record.id,
         "item_count": export_record.item_count,
+        "sheet_count": export_record.sheet_count or 1,
         "download_path": _build_export_download_path(export_record.id),
         "file_name": Path(export_record.file_path).name,
     }
@@ -2378,6 +2600,378 @@ def download_export(
     export_record.last_downloaded_at = download_now
     db.commit()
     return FileResponse(path=file_path, filename=file_path.name, media_type="application/pdf")
+
+
+@app.post("/public/access/start", response_model=PublicAccessPaymentResponse)
+def start_public_access(
+    payload: PublicAccessStartRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_access_start",
+        limit=settings.public_unlock_limit,
+    )
+    if not settings.public_access_enabled:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="O acesso pago ainda nao esta ativo.")
+    try:
+        user = register_public_access_user(
+            db,
+            email=payload.email,
+            confirm_email=payload.confirm_email,
+            password=payload.password,
+            confirm_password=payload.confirm_password,
+        )
+        if user.is_active:
+            db.commit()
+            return public_access_payment_to_response(user, None, already_active=True)
+        payment = create_public_access_payment(db, user)
+    except MercadoPagoError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err)) from err
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    db.refresh(user)
+    db.refresh(payment)
+    return public_access_payment_to_response(user, payment)
+
+
+@app.get("/public/access/payments/{payment_id}", response_model=PublicAccessPaymentResponse)
+def get_public_access_payment(
+    payment_id: int,
+    request: Request,
+    email: str = Query(..., min_length=5, max_length=255),
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_access_read",
+        limit=settings.public_unlock_read_limit,
+    )
+    payment = (
+        db.execute(
+            select(PublicAccessPayment)
+            .options(selectinload(PublicAccessPayment.user))
+            .where(PublicAccessPayment.id == payment_id)
+        )
+        .scalars()
+        .first()
+    )
+    if not payment or not payment.user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pagamento de acesso nao encontrado.")
+    try:
+        normalized_email = normalize_public_email(email)
+        if payment.user.email != normalized_email:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Pagamento de acesso nao encontrado.")
+        if payment.status == PublicAccessPaymentStatus.PENDENTE:
+            sync_public_access_payment_status(payment)
+        db.commit()
+        db.refresh(payment)
+        db.refresh(payment.user)
+    except MercadoPagoError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err)) from err
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    return public_access_payment_to_response(payment.user, payment)
+
+
+@app.post("/public/auth/login", response_model=PublicAuthConsumeLinkResponse)
+def login_public_user(
+    payload: PublicAuthLoginRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_auth_login",
+        limit=settings.public_unlock_limit,
+    )
+    try:
+        user, session = authenticate_public_user(db, email=payload.email, password=payload.password)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    db.refresh(session)
+    db.refresh(user)
+    return public_user_session_to_response(user, session)
+
+
+@app.post("/public/auth/forgot-password", response_model=PublicAuthForgotPasswordResponse)
+def forgot_public_user_password(
+    payload: PublicAuthForgotPasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_auth_forgot_password",
+        limit=settings.public_unlock_limit,
+    )
+    try:
+        normalized_email = normalize_public_email(payload.email)
+        user = db.execute(select(PublicUser).where(PublicUser.email == normalized_email)).scalars().first()
+        if not user:
+            raise ValueError("Nao encontramos uma conta com esse email.")
+        reset_token = create_public_password_reset_token(db, user)
+        reset_url = build_public_password_reset_url(str(request.base_url).rstrip("/"), reset_token.token)
+        debug_reset_link = None
+        sent = False
+        try:
+            sent = send_public_password_reset_email(recipient_email=user.email, reset_url=reset_url)
+        except ValueError:
+            if settings.public_auth_debug_return_link:
+                debug_reset_link = reset_url
+            else:
+                raise
+        except Exception as err:
+            if settings.public_auth_debug_return_link:
+                debug_reset_link = reset_url
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Nao foi possivel enviar o email de redefinicao agora.",
+                ) from err
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    return {
+        "email": user.email,
+        "sent": sent,
+        "expires_at": reset_token.expires_at,
+        "debug_reset_link": debug_reset_link,
+    }
+
+
+@app.post("/public/auth/reset-password", response_model=PublicAuthConsumeLinkResponse)
+def reset_public_user_password_endpoint(
+    payload: PublicAuthResetPasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_auth_reset_password",
+        limit=settings.public_unlock_limit,
+    )
+    try:
+        user, session = reset_public_user_password(
+            db,
+            token=payload.token,
+            password=payload.password,
+            confirm_password=payload.confirm_password,
+        )
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    db.refresh(session)
+    db.refresh(user)
+    return public_user_session_to_response(user, session)
+
+
+@app.post("/public/auth/send-link", response_model=PublicAuthSendLinkResponse)
+def send_public_auth_link(
+    payload: PublicAuthSendLinkRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="public_auth_send_link",
+        limit=settings.public_unlock_limit,
+    )
+    try:
+        user = get_or_create_public_user_by_email(db, payload.email)
+        if not user.is_active:
+            raise ValueError("Esse email ainda nao tem acesso liberado.")
+        magic_link = create_public_magic_link(db, user)
+        magic_link_url = build_public_magic_link_url(str(request.base_url).rstrip("/"), magic_link.token)
+        debug_magic_link = None
+        sent = False
+        try:
+            sent = send_public_magic_link_email(recipient_email=user.email, magic_link_url=magic_link_url)
+        except ValueError:
+            if settings.public_auth_debug_return_link:
+                debug_magic_link = magic_link_url
+            else:
+                raise
+        except Exception as err:
+            if settings.public_auth_debug_return_link:
+                debug_magic_link = magic_link_url
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Nao foi possivel enviar o email de acesso agora.",
+                ) from err
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    return {
+        "email": user.email,
+        "sent": sent,
+        "expires_at": magic_link.expires_at,
+        "debug_magic_link": debug_magic_link,
+    }
+
+
+@app.get("/public/auth/consume-link", response_model=PublicAuthConsumeLinkResponse)
+def consume_public_auth_link(
+    token: str = Query(..., min_length=20, max_length=160),
+    db: Session = Depends(get_db),
+) -> dict:
+    try:
+        user, session = consume_public_magic_link(db, token)
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    db.refresh(session)
+    db.refresh(user)
+    return {
+        "token": session.token,
+        "expires_at": session.expires_at,
+        "email": user.email,
+        "is_active": user.is_active,
+        "has_access": user.is_active,
+    }
+
+
+@app.get("/public/me", response_model=PublicMeResponse)
+def get_public_me(user: PublicUser = Depends(require_public_user)) -> dict:
+    return public_user_to_response(user)
+
+
+@app.get("/public/last-export", response_model=PublicLastExportResponse | None)
+def get_public_last_export(user: PublicUser = Depends(require_public_user)) -> dict | None:
+    last_export = user.last_export
+    if not last_export:
+        return None
+
+    file_path = settings.storage_root / last_export.file_path
+    if not file_path.exists() or not file_path.is_file():
+        return None
+
+    return {
+        "export_id": last_export.export_id,
+        "file_name": Path(last_export.file_path).name,
+        "sheet_count": last_export.sheet_count,
+        "created_at": last_export.updated_at,
+        "download_path": _build_export_download_path(last_export.export_id),
+    }
+
+
+@app.post("/public/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout_public_user(
+    authorization: str | None = Header(default=None, alias="Authorization"),
+    x_public_session: str | None = Header(default=None, alias="X-Public-Session"),
+    _: PublicUser = Depends(require_public_user),
+    db: Session = Depends(get_db),
+) -> Response:
+    normalized_auth = (authorization or "").strip()
+    if normalized_auth.lower().startswith("bearer "):
+        session_token = normalized_auth[7:].strip()
+    else:
+        session_token = (x_public_session or "").strip()
+    revoke_public_user_session(db, session_token)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@app.get("/support/status", response_model=SupportStatusResponse)
+def get_support_status(
+    request: Request,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    visitor_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="support_read",
+        limit=settings.public_unlock_read_limit,
+    )
+    service_settings = get_or_create_service_settings(db)
+    should_prompt, recent_payment = should_prompt_support(
+        db,
+        service_settings=service_settings,
+        session_token=session_token,
+        visitor_token=visitor_token,
+    )
+    supported_until = None
+    if recent_payment and recent_payment.paid_at:
+        supported_until = recent_payment.paid_at + timedelta(days=90)
+    return {
+        "should_prompt_support": should_prompt,
+        "supported_recently": recent_payment is not None,
+        "supported_until": supported_until,
+        "last_paid_at": recent_payment.paid_at if recent_payment else None,
+        "last_paid_amount_cents": recent_payment.paid_amount_cents if recent_payment else None,
+        "allowed_amounts_cents": support_prompt_allowed_amounts(),
+        "recommended_amount_cents": support_prompt_recommended_amount(),
+    }
+
+
+@app.post("/support/payments", response_model=SupportPaymentResponse)
+def create_public_support_payment(
+    payload: SupportPaymentCreateRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="support_create",
+        limit=settings.public_unlock_limit,
+    )
+    export_record = None
+    if payload.export_id is not None:
+        export_record = db.get(Export, payload.export_id)
+        if not export_record:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exportacao nao encontrada.")
+    service_settings = get_or_create_service_settings(db)
+    try:
+        support_payment = create_support_payment(
+            db,
+            export_record=export_record,
+            session_token=payload.session_token,
+            visitor_token=payload.visitor_token,
+            amount_cents=payload.amount_cents,
+            service_settings=service_settings,
+        )
+    except MercadoPagoError as err:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err)) from err
+    except ValueError as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err)) from err
+    db.commit()
+    db.refresh(support_payment)
+    return support_payment_to_response(support_payment)
+
+
+@app.get("/support/payments/{payment_id}", response_model=SupportPaymentResponse)
+def get_public_support_payment(
+    payment_id: int,
+    request: Request,
+    session_token: str = Query(..., min_length=12, max_length=120),
+    visitor_token: str = Query(..., min_length=12, max_length=120),
+    db: Session = Depends(get_db),
+) -> dict:
+    _enforce_public_rate_limit(
+        request=request,
+        bucket="support_read",
+        limit=settings.public_unlock_read_limit,
+    )
+    payment = db.get(SupportPayment, payment_id)
+    if not payment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Apoio nao encontrado.")
+    normalized_session = (session_token or "").strip()
+    normalized_visitor = (visitor_token or "").strip()
+    if payment.session_token != normalized_session and payment.visitor_token != normalized_visitor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Apoio nao encontrado.")
+    if payment.status == SupportPaymentStatus.PENDENTE:
+        try:
+            sync_support_payment_status(payment)
+        except MercadoPagoError as err:
+            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(err)) from err
+        db.commit()
+        db.refresh(payment)
+    return support_payment_to_response(payment)
 
 
 @app.get("/admin/collections", response_model=list[CollectionResponse], dependencies=[Depends(require_admin)])

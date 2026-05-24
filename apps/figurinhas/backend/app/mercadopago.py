@@ -16,6 +16,7 @@ class MercadoPagoError(Exception):
 class PixPayment:
     payment_id: str
     external_reference: str
+    amount_cents: int | None
     status: str
     status_detail: str | None
     qr_code_base64: str | None
@@ -123,6 +124,7 @@ class MercadoPagoPixClient:
         return PixPayment(
             payment_id=str(payload.get("id") or ""),
             external_reference=str(payload.get("external_reference") or ""),
+            amount_cents=self._parse_amount_cents(payload.get("transaction_amount")),
             status=str(payload.get("status") or ""),
             status_detail=payload.get("status_detail"),
             qr_code_base64=qr_code_base64,
@@ -139,4 +141,12 @@ class MercadoPagoPixClient:
         try:
             return datetime.fromisoformat(normalized)
         except ValueError:
+            return None
+
+    def _parse_amount_cents(self, value) -> int | None:
+        if value is None:
+            return None
+        try:
+            return int(round(float(value) * 100))
+        except (TypeError, ValueError):
             return None

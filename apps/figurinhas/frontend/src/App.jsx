@@ -8,6 +8,9 @@ const PUBLIC_JOB_POLL_INITIAL_DELAY_MS = 1200
 const PUBLIC_JOB_POLL_MEDIUM_DELAY_MS = 1800
 const PUBLIC_JOB_POLL_SLOW_DELAY_MS = 2500
 const QUOTE_REQUEST_DEBOUNCE_MS = 900
+const SUPPORT_AMOUNT_OPTIONS = [100, 300, 500, 1000, 2000, 5000]
+const SUPPORT_RECOMMENDED_AMOUNT = 500
+const PUBLIC_ACCESS_CHANGE_NOTICE_STORAGE_KEY = 'figurinhas_public_access_change_notice_v1'
 
 const categoryOptions = [
   { value: 'JOGADOR', label: 'Jogador' },
@@ -196,6 +199,73 @@ function usePublicSessionToken() {
   return sessionToken
 }
 
+function usePublicSupportVisitorToken() {
+  const [visitorToken] = useState(() => {
+    const storageKey = 'figurinhas_support_visitor_token'
+    const cookieKey = 'figurinhas_support_visitor_token'
+    const current = window.localStorage.getItem(storageKey)
+    if (current) {
+      if (!readCookie(cookieKey)) {
+        writeCookie(cookieKey, current)
+      }
+      return current
+    }
+    const cookieValue = readCookie(cookieKey)
+    if (cookieValue) {
+      window.localStorage.setItem(storageKey, cookieValue)
+      return cookieValue
+    }
+    const generated = window.crypto?.randomUUID?.() || `support-${Math.random().toString(36).slice(2)}${Date.now()}`
+    window.localStorage.setItem(storageKey, generated)
+    writeCookie(cookieKey, generated)
+    return generated
+  })
+
+  return visitorToken
+}
+
+function clearCookie(name) {
+  const secure = window.location?.protocol === 'https:' ? '; Secure' : ''
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax${secure}`
+}
+
+function usePublicAccessToken() {
+  const [token, setTokenState] = useState(() => {
+    const storageKey = 'figurinhas_public_access_session'
+    const cookieKey = 'figurinhas_public_access_session'
+    const current = window.localStorage.getItem(storageKey)
+    if (current) {
+      if (!readCookie(cookieKey)) {
+        writeCookie(cookieKey, current, 30)
+      }
+      return current
+    }
+    const cookieValue = readCookie(cookieKey)
+    if (cookieValue) {
+      window.localStorage.setItem(storageKey, cookieValue)
+      return cookieValue
+    }
+    return ''
+  })
+
+  const setToken = useCallback(nextToken => {
+    const storageKey = 'figurinhas_public_access_session'
+    const cookieKey = 'figurinhas_public_access_session'
+    const normalized = (nextToken || '').trim()
+    if (!normalized) {
+      window.localStorage.removeItem(storageKey)
+      clearCookie(cookieKey)
+      setTokenState('')
+      return
+    }
+    window.localStorage.setItem(storageKey, normalized)
+    writeCookie(cookieKey, normalized, 30)
+    setTokenState(normalized)
+  }, [])
+
+  return [token, setToken]
+}
+
 const MY_STICKER_DRAFT_DB_NAME = 'figurinhas-public-drafts'
 const MY_STICKER_DRAFT_STORE_NAME = 'assets'
 
@@ -328,6 +398,13 @@ function apiFileUrl(relativePath) {
 }
 
 function buildAdminHeaders(token, extra = {}) {
+  return {
+    Authorization: `Bearer ${token}`,
+    ...extra
+  }
+}
+
+function buildPublicAuthHeaders(token, extra = {}) {
   return {
     Authorization: `Bearer ${token}`,
     ...extra
@@ -918,7 +995,14 @@ function downloadBlob(blob, fileName) {
 
 function triggerFileDownload(downloadPath) {
   if (!downloadPath) return
-  window.location.href = `${apiBase}${downloadPath}`
+  const anchor = document.createElement('a')
+  anchor.href = `${apiBase}${downloadPath}`
+  anchor.setAttribute('download', '')
+  anchor.rel = 'noopener'
+  anchor.style.display = 'none'
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
 }
 
 function Layout({ children }) {
@@ -1257,7 +1341,10 @@ function ManualMaskEditorModal({ open, imageDataUrl, originalImageDataUrl, onClo
 }
 
 function PublicPage() {
+  const navigate = useNavigate()
+  const location = useLocation()
   const sessionToken = usePublicSessionToken()
+  const [publicAccessToken, setPublicAccessToken] = usePublicAccessToken()
   const [albums, setAlbums] = useState([])
   const [selectedAlbumSlug, setSelectedAlbumSlug] = useState('')
   const [selectedCollectionSlug, setSelectedCollectionSlug] = useState('')
@@ -1281,7 +1368,13 @@ function PublicPage() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
   const [mobileCollectionTypeFilter, setMobileCollectionTypeFilter] = useState('SELECAO')
   const [desktopCollectionTypeFilter, setDesktopCollectionTypeFilter] = useState('SELECAO')
-  const [donationModalOpen, setDonationModalOpen] = useState(false)
+  const [supportModalOpen, setSupportModalOpen] = useState(false)
+  const [supportStep, setSupportStep] = useState('choose')
+  const [supportSelectedAmountCents, setSupportSelectedAmountCents] = useState(SUPPORT_RECOMMENDED_AMOUNT)
+  const [supportAllowedAmountsCents, setSupportAllowedAmountsCents] = useState(SUPPORT_AMOUNT_OPTIONS)
+  const [supportPaymentData, setSupportPaymentData] = useState(null)
+  const [supportPaymentBusy, setSupportPaymentBusy] = useState(false)
+  const [supportPromptExportId, setSupportPromptExportId] = useState(null)
   const [customUnlockModalOpen, setCustomUnlockModalOpen] = useState(false)
   const [customUnlockContext, setCustomUnlockContext] = useState('MANUAL_PDF')
   const [customUnlockStep, setCustomUnlockStep] = useState('choice')
@@ -1294,8 +1387,6 @@ function PublicPage() {
   const [orderSubmitting, setOrderSubmitting] = useState(false)
   const [myStickerSubmitting, setMyStickerSubmitting] = useState(false)
   const [orderResult, setOrderResult] = useState(null)
-  const [pendingDownloadPath, setPendingDownloadPath] = useState('')
-  const [pendingDownloadFileName, setPendingDownloadFileName] = useState('')
   const [pixCopied, setPixCopied] = useState(false)
   const [customUnlockCopied, setCustomUnlockCopied] = useState(false)
   const [myStickerForm, setMyStickerForm] = useState(createEmptyMyStickerForm)
@@ -1306,13 +1397,28 @@ function PublicPage() {
   const [manualCutoutBusy, setManualCutoutBusy] = useState(false)
   const [manualMaskEditorOpen, setManualMaskEditorOpen] = useState(false)
   const [publicFlowProgress, setPublicFlowProgress] = useState(null)
+  const [publicAccount, setPublicAccount] = useState(null)
+  const [publicAccessModalOpen, setPublicAccessModalOpen] = useState(false)
+  const [publicAccessAnnouncementOpen, setPublicAccessAnnouncementOpen] = useState(false)
+  const [publicAccessStep, setPublicAccessStep] = useState('register')
+  const [publicAccessEmail, setPublicAccessEmail] = useState('')
+  const [publicAccessEmailConfirm, setPublicAccessEmailConfirm] = useState('')
+  const [publicAccessPassword, setPublicAccessPassword] = useState('')
+  const [publicAccessPasswordConfirm, setPublicAccessPasswordConfirm] = useState('')
+  const [publicAccessPayment, setPublicAccessPayment] = useState(null)
+  const [publicAccessBusy, setPublicAccessBusy] = useState(false)
+  const [publicAccessError, setPublicAccessError] = useState('')
+  const [publicAccessResetToken, setPublicAccessResetToken] = useState('')
+  const [publicAccessDebugResetLink, setPublicAccessDebugResetLink] = useState('')
   const [manualStageElement, setManualStageElement] = useState(null)
   const [manualStageScale, setManualStageScale] = useState(MANUAL_STICKER_PREVIEW_FALLBACK_SCALE)
   const [myStickerDraftHydrated, setMyStickerDraftHydrated] = useState(false)
   const [pendingAiResume, setPendingAiResume] = useState(false)
+  const supportVisitorToken = usePublicSupportVisitorToken()
   const myStickerCameraInputRef = useRef(null)
   const myStickerGalleryInputRef = useRef(null)
   const lastQuoteRequestKeyRef = useRef('')
+  const lastSupportSelectionPromptKeyRef = useRef('')
   const [orderForm, setOrderForm] = useState({
     service_type: 'IMPRESSAO',
     customer_name: '',
@@ -1519,22 +1625,32 @@ function PublicPage() {
     () =>
       Boolean(
         customSticker &&
+          !serviceConfig?.public_access_enabled &&
           customSticker.composition_mode_used !== 'AI_OPTIONAL' &&
           serviceConfig?.custom_sticker_unlock_enabled
       ),
-    [customSticker, serviceConfig?.custom_sticker_unlock_enabled]
+    [customSticker, serviceConfig?.custom_sticker_unlock_enabled, serviceConfig?.public_access_enabled]
   )
   const customStickerNeedsAiUnlock = useMemo(
     () =>
       Boolean(
         customSticker &&
+          !serviceConfig?.public_access_enabled &&
           customSticker.composition_mode_used === 'AI_OPTIONAL' &&
           serviceConfig?.custom_ai_unlock_enabled
       ),
-    [customSticker, serviceConfig?.custom_ai_unlock_enabled]
+    [customSticker, serviceConfig?.custom_ai_unlock_enabled, serviceConfig?.public_access_enabled]
   )
-  const customAiUnlockAvailable = Boolean(aiUnlockData?.access_granted)
-  const customManualUnlockAvailable = Boolean(customUnlockData?.access_granted)
+  const publicAccessAiCreditsTotal = Math.max(
+    Number(publicAccount?.ai_credits_total ?? serviceConfig?.public_access_ai_credits ?? 0),
+    0
+  )
+  const publicAccessAiCreditsRemaining = Math.max(Number(publicAccount?.ai_credits_remaining ?? 0), 0)
+  const publicAccessBenefitsActive = Boolean(serviceConfig?.public_access_enabled && publicAccount?.has_access)
+  const customAiUnlockAvailable = publicAccessBenefitsActive
+    ? publicAccessAiCreditsRemaining > 0
+    : Boolean(aiUnlockData?.access_granted)
+  const customManualUnlockAvailable = publicAccessBenefitsActive || Boolean(customUnlockData?.access_granted)
   const activeUnlockData = customUnlockContext === 'AI_CREATE' ? aiUnlockData : customUnlockData
   const activeUnlockPriceCents =
     customUnlockContext === 'AI_CREATE'
@@ -1545,7 +1661,7 @@ function PublicPage() {
       ? serviceConfig?.custom_ai_unlock_message ||
         'A criacao com IA e um recurso premium. Pague primeiro para liberar a geracao da sua figurinha.'
       : serviceConfig?.custom_sticker_unlock_message ||
-        'Sua figurinha personalizada e um recurso especial. Voce pode baixar gratis sem ela ou liberar o PDF completo por R$ 5,00.'
+        'Sua figurinha personalizada é um recurso especial. Você pode baixar grátis sem ela ou liberar o PDF completo por R$ 5,00.'
   const manualUnlockPriceLabel = formatCurrency(serviceConfig?.custom_sticker_unlock_price_cents || 0)
   const aiUnlockPriceLabel = formatCurrency(serviceConfig?.custom_ai_unlock_price_cents || 0)
   const activeUnlockRemainingUses = Math.max(Number(activeUnlockData?.remaining_uses || 0), 0)
@@ -1601,7 +1717,7 @@ function PublicPage() {
           ? 'Monte gratis agora e decida no final se quer baixar com ela no PDF.'
           : manualTemplateExists
             ? 'Esse modelo ainda esta em preparo. Finalize as camadas no administrador.'
-            : 'Ainda nao existe um modelo manual cadastrado para esse perfil e posicao.'
+            : 'Ainda não existe um modelo manual cadastrado para esse perfil e posição.'
       })
     }
     if (aiCreationAvailable) {
@@ -1788,6 +1904,78 @@ function PublicPage() {
     }
   }, [])
 
+  const publicAccessPriceLabel = formatCurrency(serviceConfig?.public_access_price_cents || 0)
+  const publicAccessEntryLabel =
+    serviceConfig?.public_access_enabled && !publicAccount?.has_access ? 'Liberar PDF completo' : 'Gerar PDF'
+
+  function dismissPublicAccessAnnouncement() {
+    setPublicAccessAnnouncementOpen(false)
+    try {
+      window.localStorage.setItem(PUBLIC_ACCESS_CHANGE_NOTICE_STORAGE_KEY, '1')
+    } catch {}
+  }
+
+  async function refreshPublicAccount(activeToken = publicAccessToken, { silent = false } = {}) {
+    const normalizedToken = (activeToken || '').trim()
+    if (!normalizedToken) {
+      setPublicAccount(null)
+      return null
+    }
+    try {
+      const data = await apiFetch('/public/me', {
+        headers: buildPublicAuthHeaders(normalizedToken)
+      })
+      setPublicAccount(data)
+      return data
+    } catch (err) {
+      if (err?.status === 401) {
+        setPublicAccessToken('')
+        setPublicAccount(null)
+        return null
+      }
+      if (!silent) {
+        setError(err.message)
+      }
+      return null
+    }
+  }
+
+  useEffect(() => {
+    refreshPublicAccount(publicAccessToken, { silent: true }).catch(() => {})
+  }, [publicAccessToken])
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const resetToken = params.get('public_reset_token')
+    if (!resetToken) return
+    setPublicAccessError('')
+    setPublicAccessResetToken(resetToken)
+    setPublicAccessPassword('')
+    setPublicAccessPasswordConfirm('')
+    setPublicAccessStep('reset-password')
+    setPublicAccessModalOpen(true)
+  }, [location.search])
+
+  useEffect(() => {
+    if (!serviceConfig?.public_access_enabled || publicAccount?.has_access || publicAccessToken) {
+      setPublicAccessAnnouncementOpen(false)
+      return
+    }
+    if (publicAccessModalOpen) return
+    try {
+      if (window.localStorage.getItem(PUBLIC_ACCESS_CHANGE_NOTICE_STORAGE_KEY) === '1') {
+        return
+      }
+    } catch {}
+    setPublicAccessAnnouncementOpen(true)
+  }, [serviceConfig?.public_access_enabled, publicAccount?.has_access, publicAccessModalOpen, publicAccessToken])
+
+  useEffect(() => {
+    if (!serviceConfig?.public_access_enabled || !myStickerModalOpen || publicAccount?.has_access) return
+    setMyStickerModalOpen(false)
+    openPublicAccessModal()
+  }, [serviceConfig?.public_access_enabled, myStickerModalOpen, publicAccount?.has_access])
+
   useEffect(() => {
     if (!selectedAlbumSlug) {
       setCustomTemplateOptions([])
@@ -1858,11 +2046,17 @@ function PublicPage() {
       setAiUnlockData(null)
       return
     }
+    if (serviceConfig?.public_access_enabled && !publicAccessToken) {
+      setCustomSticker(null)
+      return
+    }
 
     let ignore = false
     async function loadMySticker() {
       try {
-        const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker?session_token=${encodeURIComponent(sessionToken)}`)
+        const data = await apiFetch(`/albums/${selectedAlbumSlug}/my-sticker?session_token=${encodeURIComponent(sessionToken)}`, {
+          headers: publicAccessToken ? buildPublicAuthHeaders(publicAccessToken) : undefined
+        })
         if (ignore) return
         setCustomSticker(data)
         if (data) {
@@ -1895,10 +2089,10 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedAlbumSlug, sessionToken])
+  }, [selectedAlbumSlug, sessionToken, publicAccessToken, serviceConfig?.public_access_enabled])
 
   useEffect(() => {
-    if (!selectedAlbumSlug || !customSticker || !customStickerNeedsManualUnlock) {
+    if (!selectedAlbumSlug || !customSticker || !customStickerNeedsManualUnlock || serviceConfig?.public_access_enabled) {
       setCustomUnlockData(null)
       return
     }
@@ -1922,10 +2116,10 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedAlbumSlug, customSticker, customStickerNeedsManualUnlock, sessionToken])
+  }, [selectedAlbumSlug, customSticker, customStickerNeedsManualUnlock, sessionToken, serviceConfig?.public_access_enabled])
 
   useEffect(() => {
-    if (!selectedAlbumSlug || !serviceConfig?.custom_ai_unlock_enabled) {
+    if (!selectedAlbumSlug || !serviceConfig?.custom_ai_unlock_enabled || serviceConfig?.public_access_enabled) {
       setAiUnlockData(null)
       return
     }
@@ -1949,7 +2143,7 @@ function PublicPage() {
     return () => {
       ignore = true
     }
-  }, [selectedAlbumSlug, serviceConfig?.custom_ai_unlock_enabled, sessionToken])
+  }, [selectedAlbumSlug, serviceConfig?.custom_ai_unlock_enabled, serviceConfig?.public_access_enabled, sessionToken])
 
   useEffect(() => {
     const draftStorageKey = createMyStickerDraftStorageKey(sessionToken, selectedAlbumSlug)
@@ -2010,7 +2204,7 @@ function PublicPage() {
     return () => {
       cancelled = true
     }
-  }, [selectedAlbumSlug, sessionToken])
+  }, [selectedAlbumSlug, sessionToken, publicAccessToken])
 
   useEffect(() => {
     if (!myStickerDraftHydrated) return
@@ -2116,6 +2310,26 @@ function PublicPage() {
   }, [customUnlockModalOpen, customUnlockStep, activeUnlockData?.status, customUnlockContext, selectedAlbumSlug, sessionToken, selectedIds, customStickerSelected])
 
   useEffect(() => {
+    if (!supportModalOpen || supportStep !== 'payment' || supportPaymentData?.status !== 'PENDENTE') {
+      return undefined
+    }
+    const timer = window.setInterval(async () => {
+      try {
+        const refreshedPayment = await apiFetch(
+          `/support/payments/${supportPaymentData.id}?session_token=${encodeURIComponent(sessionToken)}&visitor_token=${encodeURIComponent(supportVisitorToken)}`
+        )
+        setSupportPaymentData(refreshedPayment)
+        if (refreshedPayment?.status === 'PAGO') {
+          setSupportStep('paid')
+        }
+      } catch {
+        // O download ja foi liberado; falha no polling nao deve quebrar o fluxo publico.
+      }
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [supportModalOpen, supportPaymentData?.id, supportPaymentData?.status, supportStep, sessionToken, supportVisitorToken])
+
+  useEffect(() => {
     if (!selectedAlbumSlug || !hasExportSelection) {
       setQuote(null)
       setOrderFormOpen(false)
@@ -2207,6 +2421,43 @@ function PublicPage() {
   }, [quote, orderForm.service_type])
 
   useEffect(() => {
+    if (!serviceConfig?.donation_enabled || !quote || !hasExportSelection) {
+      if (!quote || Number(quote?.sheet_count || 0) <= 1) {
+        lastSupportSelectionPromptKeyRef.current = ''
+      }
+      return
+    }
+    if (Number(quote.sheet_count || 0) <= 1) {
+      lastSupportSelectionPromptKeyRef.current = ''
+      return
+    }
+    if (supportModalOpen || quoteBusy || exporting) {
+      return
+    }
+    const promptKey = JSON.stringify({
+      album_slug: selectedAlbumSlug,
+      sticker_ids: selectedIds,
+      extras: normalizedSelectedExportExtras,
+      sheet_count: quote.sheet_count,
+    })
+    if (lastSupportSelectionPromptKeyRef.current === promptKey) {
+      return
+    }
+    lastSupportSelectionPromptKeyRef.current = promptKey
+    maybePromptSupport().catch(() => {})
+  }, [
+    serviceConfig?.donation_enabled,
+    quote,
+    hasExportSelection,
+    supportModalOpen,
+    quoteBusy,
+    exporting,
+    selectedAlbumSlug,
+    selectedIds,
+    normalizedSelectedExportExtras,
+  ])
+
+  useEffect(() => {
     if (!orderFormOpen) return undefined
 
     function handleEscape(event) {
@@ -2220,17 +2471,17 @@ function PublicPage() {
   }, [orderFormOpen])
 
   useEffect(() => {
-    if (!donationModalOpen) return undefined
+    if (!supportModalOpen) return undefined
 
     function handleEscape(event) {
       if (event.key === 'Escape') {
-        setDonationModalOpen(false)
+        setSupportModalOpen(false)
       }
     }
 
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [donationModalOpen])
+  }, [supportModalOpen])
 
   useEffect(() => {
     if (!customUnlockModalOpen) return undefined
@@ -2303,10 +2554,13 @@ function PublicPage() {
   }, [orderFormOpen])
 
   useEffect(() => {
-    if (!donationModalOpen) {
+    if (!supportModalOpen) {
       setPixCopied(false)
+      setSupportStep('choose')
+      setSupportPaymentData(null)
+      setSupportPromptExportId(null)
     }
-  }, [donationModalOpen])
+  }, [supportModalOpen])
 
   useEffect(() => {
     if (!customUnlockModalOpen) {
@@ -2314,6 +2568,17 @@ function PublicPage() {
       setCustomUnlockStep('choice')
     }
   }, [customUnlockModalOpen])
+
+  useEffect(() => {
+    if (!serviceConfig?.public_access_enabled) return
+    setCustomUnlockModalOpen(false)
+    setCustomUnlockBusy(false)
+    setCustomUnlockCopied(false)
+    setCustomUnlockContext('MANUAL_PDF')
+    setCustomUnlockStep('choice')
+    setCustomUnlockData(null)
+    setAiUnlockData(null)
+  }, [serviceConfig?.public_access_enabled])
 
   useEffect(() => {
     if (!myStickerModalOpen || !customSticker) return
@@ -2536,7 +2801,10 @@ function PublicPage() {
     try {
       await apiFetch(
         `/albums/${selectedAlbumSlug}/my-sticker/${customSticker.id}?session_token=${encodeURIComponent(sessionToken)}`,
-        { method: 'DELETE' }
+        {
+          method: 'DELETE',
+          headers: publicAccessToken ? buildPublicAuthHeaders(publicAccessToken) : undefined
+        }
       )
       setCustomSticker(null)
       setSelectedStickers(current => current.filter(sticker => sticker.id !== customSticker.id))
@@ -2633,6 +2901,14 @@ function PublicPage() {
   }
 
   async function handleChooseMyStickerMode(mode) {
+    if (mode === 'AI_OPTIONAL' && serviceConfig?.public_access_enabled) {
+      if (publicAccessAiCreditsRemaining <= 0) {
+        setError('Seus créditos de IA acabaram. Continue com a montagem manual.')
+        return
+      }
+      activateMyStickerMode(mode)
+      return
+    }
     if (mode === 'AI_OPTIONAL' && serviceConfig?.custom_ai_unlock_enabled) {
       if (customAiUnlockAvailable) {
         activateMyStickerMode(mode)
@@ -2657,6 +2933,7 @@ function PublicPage() {
       formData.append('photo', myStickerForm.photo)
       const data = await waitForPublicJob(`/albums/${selectedAlbumSlug}/my-sticker-cutout-jobs`, {
         method: 'POST',
+        headers: publicAccessToken ? buildPublicAuthHeaders(publicAccessToken) : undefined,
         body: formData
       })
       setMyStickerForm(current => ({
@@ -2703,7 +2980,7 @@ function PublicPage() {
       return
     }
     if (myStickerForm.requested_composition_mode === 'LAYERS' && !manualCreationAvailable) {
-      setError('Ainda nao existe um modelo manual pronto para esse perfil e posicao.')
+      setError('Ainda não existe um modelo manual pronto para esse perfil e posição.')
       return
     }
     if (
@@ -2715,11 +2992,20 @@ function PublicPage() {
       return
     }
     if (myStickerForm.requested_composition_mode === 'LAYERS' && !manualCutoutDataUrl) {
-      setError('Prepare a foto e ajuste a montagem manual antes de incluir no album.')
+      setError('Prepare a foto e ajuste a montagem manual antes de incluir no álbum.')
       return
     }
     if (
       myStickerForm.requested_composition_mode === 'AI_OPTIONAL' &&
+      serviceConfig?.public_access_enabled &&
+      publicAccessAiCreditsRemaining <= 0
+    ) {
+      setError('Seus créditos de IA acabaram. Continue com a montagem manual.')
+      return
+    }
+    if (
+      myStickerForm.requested_composition_mode === 'AI_OPTIONAL' &&
+      !serviceConfig?.public_access_enabled &&
       serviceConfig?.custom_ai_unlock_enabled
     ) {
       if (!customAiUnlockAvailable) {
@@ -2777,6 +3063,7 @@ function PublicPage() {
 
       const data = await waitForPublicJob(`/albums/${selectedAlbumSlug}/my-sticker-jobs`, {
         method: 'POST',
+        headers: publicAccessToken ? buildPublicAuthHeaders(publicAccessToken) : undefined,
         body: formData
       })
       setCustomSticker(data)
@@ -2804,6 +3091,9 @@ function PublicPage() {
       setManualEditedPortraitFile(null)
       setManualMaskEditorOpen(false)
       setMyStickerModalOpen(false)
+      if (data?.composition_mode_used === 'AI_OPTIONAL' && publicAccessToken) {
+        refreshPublicAccount(publicAccessToken, { silent: true }).catch(() => {})
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -2811,10 +3101,257 @@ function PublicPage() {
     }
   }
 
+  function openPublicAccessModal({ email = publicAccount?.email || publicAccessEmail || '', step = null } = {}) {
+    setPublicAccessAnnouncementOpen(false)
+    setPublicAccessError('')
+    setPublicAccessPayment(null)
+    setPublicAccessEmail(email)
+    setPublicAccessEmailConfirm(email)
+    setPublicAccessResetToken('')
+    setPublicAccessDebugResetLink('')
+    setPublicAccessStep(step || (publicAccount?.has_access ? 'active' : 'register'))
+    setPublicAccessModalOpen(true)
+  }
+
+  async function ensurePublicAccessOrPrompt() {
+    if (!serviceConfig?.public_access_enabled) return true
+    if (publicAccount?.has_access) return true
+    openPublicAccessModal()
+    return false
+  }
+
+  async function handleStartPublicAccess() {
+    setPublicAccessBusy(true)
+    setPublicAccessError('')
+    try {
+      const data = await apiFetch('/public/access/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: publicAccessEmail,
+          confirm_email: publicAccessEmailConfirm,
+          password: publicAccessPassword,
+          confirm_password: publicAccessPasswordConfirm
+        })
+      })
+      setPublicAccessEmail(data.email || publicAccessEmail)
+      setPublicAccessEmailConfirm(data.email || publicAccessEmailConfirm)
+      setPublicAccessPayment(data.id ? data : null)
+      setPublicAccessStep(data.access_granted || data.already_active ? 'login' : 'payment')
+      setPublicAccessModalOpen(true)
+    } catch (err) {
+      setPublicAccessError(err.message)
+    } finally {
+      setPublicAccessBusy(false)
+    }
+  }
+
+  async function handleCheckPublicAccessPayment() {
+    if (!publicAccessPayment?.id) return
+    setPublicAccessBusy(true)
+    setPublicAccessError('')
+    try {
+      const data = await apiFetch(
+        `/public/access/payments/${publicAccessPayment.id}?email=${encodeURIComponent(publicAccessEmail)}`
+      )
+      setPublicAccessPayment(data)
+      if (data.access_granted) {
+        setPublicAccessStep('login')
+      }
+    } catch (err) {
+      setPublicAccessError(err.message)
+    } finally {
+      setPublicAccessBusy(false)
+    }
+  }
+
+  async function handlePublicLogin() {
+    setPublicAccessBusy(true)
+    setPublicAccessError('')
+    try {
+      const data = await apiFetch('/public/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: publicAccessEmail,
+          password: publicAccessPassword
+        })
+      })
+      setPublicAccessToken(data.token)
+      setPublicAccount({
+        email: data.email,
+        is_active: data.is_active,
+        has_access: data.has_access,
+        ai_credits_total: publicAccessAiCreditsTotal,
+        ai_credits_remaining: publicAccessAiCreditsRemaining
+      })
+      setPublicAccessEmail(data.email || publicAccessEmail)
+      setPublicAccessModalOpen(false)
+      setPublicAccessStep('active')
+      setPublicAccessPayment(null)
+      refreshPublicAccount(data.token, { silent: true }).catch(() => {})
+    } catch (err) {
+      setPublicAccessError(err.message)
+    } finally {
+      setPublicAccessBusy(false)
+    }
+  }
+
+  async function handleForgotPublicPassword() {
+    setPublicAccessBusy(true)
+    setPublicAccessError('')
+    setPublicAccessDebugResetLink('')
+    try {
+      const data = await apiFetch('/public/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: publicAccessEmail
+        })
+      })
+      setPublicAccessEmail(data.email || publicAccessEmail)
+      setPublicAccessDebugResetLink(data.debug_reset_link || '')
+      setPublicAccessStep('reset-sent')
+    } catch (err) {
+      setPublicAccessError(err.message)
+    } finally {
+      setPublicAccessBusy(false)
+    }
+  }
+
+  async function handleResetPublicPassword() {
+    if (!publicAccessResetToken) {
+      setPublicAccessError('Link de redefinição inválido.')
+      return
+    }
+    setPublicAccessBusy(true)
+    setPublicAccessError('')
+    try {
+      const data = await apiFetch('/public/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: publicAccessResetToken,
+          password: publicAccessPassword,
+          confirm_password: publicAccessPasswordConfirm
+        })
+      })
+      setPublicAccessToken(data.token)
+      setPublicAccount({
+        email: data.email,
+        is_active: data.is_active,
+        has_access: data.has_access,
+        ai_credits_total: publicAccessAiCreditsTotal,
+        ai_credits_remaining: publicAccessAiCreditsRemaining
+      })
+      setPublicAccessEmail(data.email || publicAccessEmail)
+      setPublicAccessModalOpen(false)
+      setPublicAccessStep('active')
+      setPublicAccessResetToken('')
+      setPublicAccessDebugResetLink('')
+      setPublicAccessPassword('')
+      setPublicAccessPasswordConfirm('')
+      refreshPublicAccount(data.token, { silent: true }).catch(() => {})
+      const nextParams = new URLSearchParams(location.search)
+      nextParams.delete('public_reset_token')
+      const nextSearch = nextParams.toString()
+      navigate(`${location.pathname}${nextSearch ? `?${nextSearch}` : ''}`, { replace: true })
+    } catch (err) {
+      setPublicAccessError(err.message)
+    } finally {
+      setPublicAccessBusy(false)
+    }
+  }
+
+  async function handlePublicLogout() {
+    try {
+      if (publicAccessToken) {
+        await apiFetch('/public/logout', {
+          method: 'POST',
+          headers: buildPublicAuthHeaders(publicAccessToken)
+        })
+      }
+    } catch {
+      // ignore logout failures and clear local session anyway
+    } finally {
+      setPublicAccessToken('')
+      setPublicAccount(null)
+      setPublicAccessModalOpen(false)
+      setPublicAccessStep('register')
+      setPublicAccessPayment(null)
+      setPublicAccessEmailConfirm('')
+      setPublicAccessPassword('')
+      setPublicAccessPasswordConfirm('')
+      setPublicAccessResetToken('')
+      setPublicAccessDebugResetLink('')
+    }
+  }
+
+  async function handleDownloadLastPublicExport() {
+    if (!publicAccessToken) return
+    setPublicAccessBusy(true)
+    setPublicAccessError('')
+    try {
+      const data = await apiFetch('/public/last-export', {
+        headers: buildPublicAuthHeaders(publicAccessToken)
+      })
+      if (!data?.download_path) {
+        setPublicAccessError('Você ainda não tem um PDF salvo na conta.')
+        await refreshPublicAccount(publicAccessToken, { silent: true })
+        return
+      }
+      triggerFileDownload(data.download_path)
+      await refreshPublicAccount(publicAccessToken, { silent: true })
+    } catch (err) {
+      setPublicAccessError(err.message)
+    } finally {
+      setPublicAccessBusy(false)
+    }
+  }
+
+  async function handleOpenMySticker() {
+    if (!(await ensurePublicAccessOrPrompt())) return
+    setMyStickerModalOpen(true)
+  }
+
+  async function maybePromptSupport({ exportId = null } = {}) {
+    if (!serviceConfig?.donation_enabled || serviceConfig?.public_access_enabled) return
+    setSupportAllowedAmountsCents(SUPPORT_AMOUNT_OPTIONS)
+    setSupportSelectedAmountCents(SUPPORT_RECOMMENDED_AMOUNT)
+    setSupportPromptExportId(exportId)
+    setSupportPaymentData(null)
+    setSupportStep('choose')
+    setSupportModalOpen(true)
+    try {
+      const supportStatus = await apiFetch(
+        `/support/status?session_token=${encodeURIComponent(sessionToken)}&visitor_token=${encodeURIComponent(supportVisitorToken)}`
+      )
+      if (!supportStatus?.should_prompt_support) {
+        setSupportModalOpen(false)
+        return
+      }
+      setSupportAllowedAmountsCents(
+        Array.isArray(supportStatus?.allowed_amounts_cents) && supportStatus.allowed_amounts_cents.length > 0
+          ? supportStatus.allowed_amounts_cents
+          : SUPPORT_AMOUNT_OPTIONS
+      )
+      setSupportSelectedAmountCents(supportStatus?.recommended_amount_cents || SUPPORT_RECOMMENDED_AMOUNT)
+    } catch {
+      // Se a verificacao falhar, mantemos o modal aberto para nao perder o gatilho pos-download.
+    }
+  }
+
+  async function maybePromptSupportAfterDownload(exportId) {
+    if (!exportId) return
+    await maybePromptSupport({ exportId })
+  }
+
   async function requestExport(stickerIds) {
     const data = await waitForPublicJob('/exports/jobs', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: publicAccessToken
+        ? buildPublicAuthHeaders(publicAccessToken, { 'Content-Type': 'application/json' })
+        : { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         album_slug: selectedAlbumSlug,
         sticker_ids: stickerIds,
@@ -2822,13 +3359,8 @@ function PublicPage() {
         extras: normalizedSelectedExportExtras
       })
     })
-    if (serviceConfig?.donation_enabled && serviceConfig?.pix_key) {
-      setPendingDownloadPath(data.download_path)
-      setPendingDownloadFileName(data.file_name)
-      setDonationModalOpen(true)
-    } else {
-      triggerFileDownload(data.download_path)
-    }
+    triggerFileDownload(data.download_path)
+    await maybePromptSupportAfterDownload(data.export_id)
   }
 
   async function runExportFlow(stickerIds) {
@@ -2845,6 +3377,7 @@ function PublicPage() {
 
   async function handleExport() {
     if (!selectedAlbumSlug || !hasExportSelection) return
+    if (!(await ensurePublicAccessOrPrompt())) return
     if (customStickerSelected && customStickerNeedsManualUnlock) {
       if (customManualUnlockAvailable) {
         await runExportFlow(selectedIds)
@@ -2861,6 +3394,7 @@ function PublicPage() {
 
   async function handleExportWithoutMySticker() {
     if (!selectedAlbumSlug || (freeSelectedIds.length === 0 && selectedExtraCopies === 0)) return
+    if (!(await ensurePublicAccessOrPrompt())) return
     setCustomUnlockModalOpen(false)
     await runExportFlow(freeSelectedIds)
   }
@@ -2957,13 +3491,37 @@ function PublicPage() {
     }
   }
 
-  async function handleCopyPixKey() {
-    if (!serviceConfig?.donation_qr_code && !serviceConfig?.pix_key) return
+  async function handleCopySupportPix() {
+    if (!supportPaymentData?.qr_code) return
     try {
-      await navigator.clipboard.writeText(serviceConfig.donation_qr_code || serviceConfig.pix_key)
+      await navigator.clipboard.writeText(supportPaymentData.qr_code)
       setPixCopied(true)
     } catch {
-      setError('Nao foi possivel copiar o codigo Pix automaticamente.')
+      setError('Não foi possível copiar o código Pix automaticamente.')
+    }
+  }
+
+  async function handleStartSupportPayment(amountCents) {
+    setSupportPaymentBusy(true)
+    setError('')
+    try {
+      const data = await apiFetch('/support/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_token: sessionToken,
+          visitor_token: supportVisitorToken,
+          export_id: supportPromptExportId || null,
+          amount_cents: amountCents
+        })
+      })
+      setSupportSelectedAmountCents(amountCents)
+      setSupportPaymentData(data)
+      setSupportStep(data?.status === 'PAGO' ? 'paid' : 'payment')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSupportPaymentBusy(false)
     }
   }
 
@@ -2973,16 +3531,8 @@ function PublicPage() {
       await navigator.clipboard.writeText(activeUnlockData.qr_code)
       setCustomUnlockCopied(true)
     } catch {
-      setError('Nao foi possivel copiar o codigo Pix automaticamente.')
+      setError('Não foi possível copiar o código Pix automaticamente.')
     }
-  }
-
-  function handleDonationDownload() {
-    const downloadPath = pendingDownloadPath
-    setDonationModalOpen(false)
-    setPendingDownloadPath('')
-    setPendingDownloadFileName('')
-    triggerFileDownload(downloadPath)
   }
 
   async function handleCreateOrder(event) {
@@ -3016,7 +3566,7 @@ function PublicPage() {
       <aside className="fig-sidebar-panel">
         <div className="fig-panel-header">
           <p className="fig-kicker">Albuns publicados</p>
-          <h2>Escolha a edicao</h2>
+          <h2>Escolha a edição</h2>
         </div>
         <div className="fig-collection-list">
           {albums.map(album => (
@@ -3034,16 +3584,16 @@ function PublicPage() {
               }}
             >
               <strong>{album.name}</strong>
-              <span>{album.published_collection_count} selecoes publicadas</span>
+              <span>{album.published_collection_count} seleções publicadas</span>
             </button>
           ))}
-          {!busy && albums.length === 0 ? <p className="fig-empty-note">Nenhum album publicado ainda.</p> : null}
+          {!busy && albums.length === 0 ? <p className="fig-empty-note">Nenhum álbum publicado ainda.</p> : null}
         </div>
 
         {selectedAlbum ? (
           <div className="fig-sidebar-subsection">
             <div className="fig-panel-header fig-panel-header--compact">
-              <p className="fig-kicker">Colecoes</p>
+              <p className="fig-kicker">Coleções</p>
               <h3>{selectedAlbum.name}</h3>
             </div>
             <div className="fig-sidebar-group-filter">
@@ -3103,7 +3653,7 @@ function PublicPage() {
               ))}
             </div>
           ) : (
-            <p className="fig-empty-note">Monte sua selecao misturando quantas selecoes quiser dentro do album.</p>
+            <p className="fig-empty-note">Monte sua seleção misturando quantas seleções quiser dentro do álbum.</p>
           )}
         </div>
       </aside>
@@ -3112,12 +3662,12 @@ function PublicPage() {
         <div className="fig-mobile-only fig-mobile-catalog-shell">
           <div className="fig-mobile-catalog-top">
             <div className="fig-mobile-catalog-copy">
-              <p className="fig-kicker">Catalogo</p>
-              <h2>{selectedCollection?.name || selectedAlbum?.name || 'Escolha um album'}</h2>
+              <p className="fig-kicker">Catálogo</p>
+              <h2>{selectedCollection?.name || selectedAlbum?.name || 'Escolha um álbum'}</h2>
               <p>
                 {selectedAlbum
                   ? `${selectedAlbum.name}${selectedCollection ? ` · ${selectedCollection.sticker_count} figurinhas` : ''}`
-                  : 'Escolha uma edicao e comece pelas figurinhas.'}
+                  : 'Escolha uma edição e comece pelas figurinhas.'}
               </p>
             </div>
             <button
@@ -3129,13 +3679,35 @@ function PublicPage() {
             </button>
           </div>
 
+          {serviceConfig?.public_access_enabled ? (
+            <div className="fig-public-access-inline-banner">
+              <div>
+                <strong>
+                  {publicAccount?.has_access ? 'Sua conta está ativa' : `Acesso permanente por ${publicAccessPriceLabel}`}
+                </strong>
+                <span>
+                  {publicAccount?.has_access
+                    ? 'Abra sua conta para ver seus créditos de IA e o último PDF.'
+                    : `Libere PDFs, Minha Figurinha manual e ${serviceConfig.public_access_ai_credits} créditos de IA por ${publicAccessPriceLabel}.`}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="fig-secondary-button"
+                onClick={publicAccount?.has_access ? () => openPublicAccessModal({ step: 'active' }) : () => openPublicAccessModal()}
+              >
+                {publicAccount?.has_access ? 'Minha conta' : 'Ativar acesso permanente'}
+              </button>
+            </div>
+          ) : null}
+
           {selectedAlbum ? (
             <div className="fig-mobile-collections-card">
               <div className="fig-mobile-collections-head">
                 <div className="fig-mobile-collections-copy">
-                  <span className="fig-mobile-collections-label">Colecoes</span>
-                  <strong>{selectedCollection?.name || 'Escolha uma colecao'}</strong>
-                  <small>{availableCollections.length} colecao(oes) disponivel(is)</small>
+                  <span className="fig-mobile-collections-label">Coleções</span>
+                  <strong>{selectedCollection?.name || 'Escolha uma coleção'}</strong>
+                  <small>{availableCollections.length} coleção(ões) disponível(is)</small>
                 </div>
               </div>
 
@@ -3192,12 +3764,12 @@ function PublicPage() {
               Selecionar todas
             </button>
             <button type="button" className="fig-inline-link" onClick={clearSelection}>
-              Limpar selecao
+              Limpar seleção
             </button>
             <button
               type="button"
               className="fig-inline-link"
-              onClick={() => setMyStickerModalOpen(true)}
+              onClick={handleOpenMySticker}
               disabled={!selectedAlbumSlug}
             >
               {customSticker ? 'Refazer minha figurinha' : 'Minha Figurinha'}
@@ -3207,21 +3779,37 @@ function PublicPage() {
 
         <div className="fig-hero fig-desktop-only">
           <div>
-            <p className="fig-kicker">Selecao rapida</p>
-            <h2>{selectedCollection?.name || selectedAlbum?.name || 'Selecione um album'}</h2>
+            <p className="fig-kicker">Seleção rápida</p>
+            <h2>{selectedCollection?.name || selectedAlbum?.name || 'Selecione um álbum'}</h2>
             <p>
               {selectedCollection
-                ? `Agora voce esta em ${selectedCollection.name}. Marque as figurinhas e misture selecoes desse album no mesmo PDF.`
-                : selectedAlbum?.description || 'Marque os jogadores que voce precisa e gere seu PDF.'}
+                ? `Agora você está em ${selectedCollection.name}. Marque as figurinhas e misture seleções desse álbum no mesmo PDF.`
+                : selectedAlbum?.description || 'Marque os jogadores que você precisa e gere seu PDF.'}
             </p>
             {selectedCollection ? (
               <div className="fig-hero-meta-row">
-                <span className="fig-mini-chip">Album: {selectedAlbum?.name}</span>
+                <span className="fig-mini-chip">Álbum: {selectedAlbum?.name}</span>
                 <span className="fig-mini-chip">{selectedCollection.sticker_count} figurinhas publicadas</span>
+                {serviceConfig?.public_access_enabled ? (
+                  <span className="fig-mini-chip">
+                    {publicAccount?.has_access
+                      ? 'Conta ativa'
+                      : `Acesso permanente por ${publicAccessPriceLabel}`}
+                  </span>
+                ) : null}
               </div>
             ) : null}
           </div>
-          <div className="fig-hero-actions">
+	          <div className="fig-hero-actions">
+            {serviceConfig?.public_access_enabled ? (
+              <button
+                type="button"
+                className="fig-secondary-button"
+                onClick={publicAccount?.has_access ? () => openPublicAccessModal({ step: 'active' }) : () => openPublicAccessModal()}
+              >
+                {publicAccount?.has_access ? 'Minha conta' : `Ativar acesso permanente por ${publicAccessPriceLabel}`}
+              </button>
+            ) : null}
             <button
               type="button"
               className="fig-secondary-button"
@@ -3230,12 +3818,12 @@ function PublicPage() {
               Selecionar todas
             </button>
             <button type="button" className="fig-secondary-button" onClick={clearSelection}>
-              Limpar selecao
+              Limpar seleção
             </button>
             <button
               type="button"
               className="fig-secondary-button"
-              onClick={() => setMyStickerModalOpen(true)}
+              onClick={handleOpenMySticker}
               disabled={!selectedAlbumSlug}
             >
               {customSticker ? 'Refazer minha figurinha' : 'Minha Figurinha'}
@@ -3247,7 +3835,7 @@ function PublicPage() {
                 disabled={!hasExportSelection || !(quote?.service_enabled ?? serviceConfig?.service_enabled)}
                 onClick={() => setOrderFormOpen(true)}
               >
-                Quero que voce prepare para mim
+                Quero que você prepare para mim
               </button>
             ) : null}
             <button
@@ -3260,7 +3848,7 @@ function PublicPage() {
                 'Gerando PDF...'
               ) : (
                 <>
-                  <span className="fig-button-main">Gerar PDF gratis ({exportSelectionCount})</span>
+                  <span className="fig-button-main">{publicAccessEntryLabel} ({exportSelectionCount})</span>
                   {quote ? <small className="fig-button-sub">Gera {quote.sheet_count} folha(s)</small> : null}
                 </>
               )}
@@ -3290,7 +3878,7 @@ function PublicPage() {
           <section className="fig-export-extras-panel">
             <div className="fig-section-block-head">
               <strong>Extras no final do PDF</strong>
-              <span>Esses itens entram inteiros no fim do arquivo e voce escolhe quantas copias quer.</span>
+              <span>Esses itens entram inteiros no fim do arquivo e você escolhe quantas cópias quer.</span>
             </div>
             <div className="fig-export-extras-list">
               {availablePdfExtras.map(collection => {
@@ -3353,7 +3941,7 @@ function PublicPage() {
             <div className="fig-quote-grid">
               <div className="fig-quote-item">
                 <strong>{serviceTypeLabels[orderResult.service_type]}</strong>
-                <span>servico escolhido</span>
+                <span>serviço escolhido</span>
               </div>
               <div className="fig-quote-item">
                 <strong>{formatCurrency(orderResult.total_price_cents)}</strong>
@@ -3369,7 +3957,7 @@ function PublicPage() {
               </div>
             </div>
             <p>
-              Envie o Pix e me passe o codigo <strong>{orderResult.reference_code}</strong>.
+              Envie o Pix e me passe o código <strong>{orderResult.reference_code}</strong>.
             </p>
             <p>
               Chave Pix: <strong>{orderResult.pix_key || 'a configurar'}</strong>
@@ -3382,7 +3970,7 @@ function PublicPage() {
         {error ? <p className="fig-error-banner">{error}</p> : null}
         {busy ? <p className="fig-empty-note">Carregando figurinhas...</p> : null}
         {serviceConfig?.service_enabled && quoteBusy && selectedIds.length > 0 ? (
-          <p className="fig-empty-note">Calculando folhas e servicos...</p>
+          <p className="fig-empty-note">Calculando folhas e serviços...</p>
         ) : null}
 
         {selectedAlbum ? (
@@ -3396,19 +3984,19 @@ function PublicPage() {
                   </span>
                 ) : null}
               </div>
-              <h3>{customSticker ? 'Sua figurinha ja esta pronta' : 'Leve voce junto no mesmo PDF'}</h3>
+              <h3>{customSticker ? 'Sua figurinha já está pronta' : 'Leve você junto no mesmo PDF'}</h3>
               <p>
                 {customSticker
                   ? customStickerSelected
-                    ? 'Ela ja vai junto com as outras no seu PDF.'
-                    : 'Ela esta pronta, mas ainda nao entra no PDF.'
+                    ? 'Ela já vai junto com as outras no seu PDF.'
+                    : 'Ela está pronta, mas ainda não entra no PDF.'
                   : 'Crie sua figurinha no mesmo padrao das outras.'}
               </p>
-              <div className="fig-hero-actions">
+	                    <div className="fig-hero-actions fig-public-access-account-actions">
                 <button
                   type="button"
                   className="fig-primary-button"
-                  onClick={() => setMyStickerModalOpen(true)}
+                  onClick={handleOpenMySticker}
                   disabled={!selectedAlbumSlug}
                 >
                   {customSticker ? 'Refazer minha figurinha' : 'Criar minha figurinha'}
@@ -3442,7 +4030,7 @@ function PublicPage() {
                   <strong>{customSticker.name}</strong>
                   <span>{customProfileLabel(customSticker.profile_type)}</span>
                   <em className={`fig-preview-selection-note${customStickerSelected ? ' is-active' : ''}`}>
-                    {customStickerSelected ? 'Ja incluida no PDF atual' : 'Toque em "Usar no PDF" para incluir'}
+                    {customStickerSelected ? 'Já incluída no PDF atual' : 'Toque em "Usar no PDF" para incluir'}
                   </em>
                   <small>
                     {[customSticker.birth_date_text, customSticker.height_text, customSticker.weight_text, customSticker.city_or_team]
@@ -3482,7 +4070,7 @@ function PublicPage() {
             <span>{selectedIds.length === 1 ? 'figurinha selecionada' : 'figurinhas selecionadas'}</span>
             {customSticker ? (
               <small className={`fig-mobile-bottom-accent${customStickerSelected ? ' is-active' : ''}`}>
-                {customStickerSelected ? 'Minha Figurinha incluida' : 'Minha Figurinha fora do PDF'}
+                {customStickerSelected ? 'Minha Figurinha incluída' : 'Minha Figurinha fora do PDF'}
               </small>
             ) : null}
           </div>
@@ -3507,7 +4095,7 @@ function PublicPage() {
                 'Gerando...'
               ) : (
                 <>
-                  <span className="fig-button-main">Gerar PDF ({exportSelectionCount})</span>
+                  <span className="fig-button-main">{publicAccessEntryLabel} ({exportSelectionCount})</span>
                   {quote ? <small className="fig-button-sub">Gera {quote.sheet_count} folha(s)</small> : null}
                 </>
               )}
@@ -3521,8 +4109,8 @@ function PublicPage() {
           <div className="fig-modal-shell fig-modal-shell--mobile" onClick={event => event.stopPropagation()}>
             <div className="fig-modal-header">
               <div>
-                <p className="fig-kicker">Albuns</p>
-                <h3>Escolha a edicao</h3>
+                <p className="fig-kicker">Álbuns</p>
+                <h3>Escolha a edição</h3>
               </div>
               <button type="button" className="fig-modal-close" onClick={() => setMobileAlbumPickerOpen(false)}>
                 Fechar
@@ -3545,7 +4133,7 @@ function PublicPage() {
                   }}
                 >
                   <strong>{album.name}</strong>
-                  <span>{album.published_collection_count} selecoes publicadas</span>
+                  <span>{album.published_collection_count} seleções publicadas</span>
                 </button>
               ))}
             </div>
@@ -3561,7 +4149,7 @@ function PublicPage() {
           >
             <div className="fig-modal-header">
               <div>
-                <p className="fig-kicker">Impressao</p>
+                <p className="fig-kicker">Impressão</p>
                 <h3>Como imprimir</h3>
               </div>
               <button type="button" className="fig-modal-close" onClick={() => setMobilePrintGuideOpen(false)}>
@@ -3572,7 +4160,7 @@ function PublicPage() {
               <img
                 className="fig-print-guide-image"
                 src="/como-imprimir.png"
-                alt="Guia de impressao com instrucoes para imprimir as figurinhas corretamente"
+                alt="Guia de impressão com instruções para imprimir as figurinhas corretamente"
               />
             </div>
           </div>
@@ -3604,10 +4192,10 @@ function PublicPage() {
                 </select>
               </label>
             </div>
-            <div className="fig-hero-actions">
-              <button
-                type="button"
-                className="fig-secondary-button"
+	                    <div className="fig-hero-actions fig-public-access-account-actions">
+	                      <button
+	                        type="button"
+	                        className="fig-secondary-button"
                 onClick={() => {
                   setCategory('')
                   setMobileFilterOpen(false)
@@ -3646,14 +4234,14 @@ function PublicPage() {
 
               <div className="fig-service-notes">
                 <p>
-                  Envie uma foto com o rosto visivel.
+                  Envie uma foto com o rosto visível.
                 </p>
               </div>
 
               <div className="fig-section-block">
                 <div className="fig-section-block-head">
                   <strong>Escolha o tipo da figurinha</strong>
-                  <span>Defina primeiro o perfil e a posicao. Isso decide quais modelos ficam disponiveis.</span>
+                  <span>Defina primeiro o perfil e a posição. Isso decide quais modelos ficam disponíveis.</span>
                 </div>
                 <div className="fig-form-grid">
                   <label className="fig-field">
@@ -3679,7 +4267,7 @@ function PublicPage() {
                     </select>
                   </label>
                   <label className="fig-field">
-                    <span>Posicao em campo</span>
+                    <span>Posição em campo</span>
                     <select
                       value={myStickerForm.position_type}
                       onChange={event => {
@@ -3706,11 +4294,11 @@ function PublicPage() {
               {currentGenerationModeOptions.length > 0 ? (
                 <div className="fig-section-block">
                   <div className="fig-section-block-head">
-                    <strong>Como sua figurinha sera criada</strong>
+                    <strong>Como sua figurinha será criada</strong>
                     <span>
                         {currentGenerationModeOptions.length > 1
                           ? 'Escolha como quer criar sua figurinha.'
-                          : 'O modo disponivel para esse perfil aparece logo abaixo.'}
+                          : 'O modo disponível para esse perfil aparece logo abaixo.'}
                     </span>
                   </div>
                   <div className="fig-order-choice-grid fig-order-choice-grid--single-mobile">
@@ -3752,11 +4340,17 @@ function PublicPage() {
                           <div className="fig-choice-card-price">
                             {option.value === 'LAYERS'
                               ? manualCreationAvailable
-                                ? manualUnlockPriceLabel
+                                ? publicAccessBenefitsActive
+                                  ? 'Incluída'
+                                  : manualUnlockPriceLabel
                                 : 'Em preparo'
-                              : customAiUnlockAvailable
-                                ? 'IA liberada'
-                                : aiUnlockPriceLabel}
+                              : publicAccessBenefitsActive
+                                ? publicAccessAiCreditsRemaining > 0
+                                  ? `${publicAccessAiCreditsRemaining} crédito(s)`
+                                  : 'Sem créditos'
+                                : customAiUnlockAvailable
+                                  ? 'IA liberada'
+                                  : aiUnlockPriceLabel}
                           </div>
                         </div>
                         <div className="fig-choice-card-copy">
@@ -3764,14 +4358,20 @@ function PublicPage() {
                           {option.value === 'LAYERS' ? (
                             <span>
                                 {manualCreationAvailable
-                                  ? 'Monte sua figurinha, ajuste sua foto com calma e decida depois se quer liberar no PDF.'
-                                  : 'Esse modelo manual ainda esta em preparo.'}
+                                  ? publicAccessBenefitsActive
+                                    ? 'Monte sua figurinha sem custo extra. A montagem manual já faz parte do seu acesso.'
+                                    : 'Monte sua figurinha, ajuste sua foto com calma e decida depois se quer liberar no PDF.'
+                                  : 'Esse modelo manual ainda está em preparo.'}
                             </span>
                           ) : (
                             <span>
-                                {customAiUnlockAvailable
-                                  ? `Sua criacao com IA esta liberada. Voce ainda tem ${aiUnlockData?.remaining_uses || 0} tentativa(s) nesta compra.`
-                                  : 'Libere a criacao com IA primeiro. Cada pagamento libera 1 geracao e 1 retry.'}
+                                {publicAccessBenefitsActive
+                                  ? publicAccessAiCreditsRemaining > 0
+                                    ? `Sua conta ainda tem ${publicAccessAiCreditsRemaining} crédito(s) de IA para usar.`
+                                    : 'Seus créditos de IA acabaram. Continue com a montagem manual por enquanto.'
+                                  : customAiUnlockAvailable
+                                    ? `Sua criação com IA está liberada. Você ainda tem ${aiUnlockData?.remaining_uses || 0} tentativa(s) nesta compra.`
+                                    : 'Libere a criação com IA primeiro. Cada pagamento libera 1 geração e 1 retry.'}
                             </span>
                           )}
                         </div>
@@ -3784,8 +4384,8 @@ function PublicPage() {
               {!manualCreationAvailable && !aiCreationAvailable ? (
                 <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
                   <div>
-                    <strong>Nenhum modo disponivel agora.</strong>
-                    <span>Cadastre um modelo manual ou reative a criacao por IA no administrador.</span>
+                    <strong>Nenhum modo disponível agora.</strong>
+                    <span>Cadastre um modelo manual ou reative a criação por IA no administrador.</span>
                   </div>
                 </div>
               ) : null}
@@ -3794,16 +4394,16 @@ function PublicPage() {
                 <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
                   <div>
                     <strong>Escolha primeiro como quer criar sua figurinha.</strong>
-                    <span>Depois disso aparecem os campos, a foto e o passo certo para esse tipo de criacao.</span>
+                    <span>Depois disso aparecem os campos, a foto e o passo certo para esse tipo de criação.</span>
                   </div>
                 </div>
               ) : null}
 
-              {!myStickerModeConfirmed && customAiUnlockAvailable ? (
+              {!myStickerModeConfirmed && customAiUnlockAvailable && !serviceConfig?.public_access_enabled ? (
                 <div className="fig-helper-strip fig-helper-strip--compact fig-helper-strip--tight">
                   <div>
-                    <strong>Sua IA ja esta liberada.</strong>
-                    <span>Toque em continuar para abrir os campos da criacao com IA.</span>
+                    <strong>Sua IA já está liberada.</strong>
+                    <span>Toque em continuar para abrir os campos da criação com IA.</span>
                   </div>
                   <button type="button" className="fig-primary-button" onClick={continueUnlockedAiFlow}>
                     Continuar com IA
@@ -4572,10 +5172,10 @@ function PublicPage() {
 
                         <div className="fig-helper-strip fig-helper-strip--donation fig-helper-strip--unlock-ai">
                           <div>
-                            <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
+                            <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando código Pix...'}</span>
                           </div>
                           <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
-                            {customUnlockCopied ? 'Codigo copiado' : 'Copiar Codigo Pix'}
+                            {customUnlockCopied ? 'Código copiado' : 'Copiar código Pix'}
                           </button>
                         </div>
                       </div>
@@ -4598,10 +5198,10 @@ function PublicPage() {
 
                       <div className="fig-helper-strip fig-helper-strip--donation">
                         <div>
-                          <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando codigo Pix...'}</span>
+                          <span className="fig-code-block">{activeUnlockData?.qr_code || 'Gerando código Pix...'}</span>
                         </div>
                         <button type="button" className="fig-secondary-button" onClick={handleCopyCustomUnlockPix}>
-                          {customUnlockCopied ? 'Codigo copiado' : 'Copiar Codigo Pix'}
+                          {customUnlockCopied ? 'Código copiado' : 'Copiar código Pix'}
                         </button>
                       </div>
                     </>
@@ -4651,33 +5251,503 @@ function PublicPage() {
         </div>
       ) : null}
 
-      {donationModalOpen && serviceConfig ? (
-        <div className="fig-modal-backdrop" onClick={() => setDonationModalOpen(false)}>
+      {publicAccessAnnouncementOpen && serviceConfig?.public_access_enabled ? (
+        <div className="fig-modal-backdrop" onClick={dismissPublicAccessAnnouncement}>
+          <div
+            className="fig-modal-shell fig-modal-shell--public-access fig-modal-shell--public-announcement"
+            onClick={event => event.stopPropagation()}
+          >
+	            <div className="fig-modal-header">
+	              <div>
+	                <p className="fig-kicker">Aviso importante</p>
+	              </div>
+	              <button
+                  type="button"
+                  className="fig-modal-close fig-modal-close--icon"
+                  onClick={dismissPublicAccessAnnouncement}
+                  aria-label="Fechar aviso"
+                >
+	                ×
+              </button>
+            </div>
+
+	            <section className="fig-form-card fig-public-access-card fig-public-announcement-card fig-public-announcement-card--simple">
+	              <p className="fig-public-announcement-text">
+                  Lamentamos, mas não conseguimos cobrir os custos para manter o Figurinhas gratuito. Para manter o site
+                  no ar, o acesso agora tem valor mínimo de R$ 3,00.
+                </p>
+            </section>
+          </div>
+        </div>
+      ) : null}
+
+      {publicAccessModalOpen && serviceConfig?.public_access_enabled ? (
+        <div className="fig-modal-backdrop" onClick={() => setPublicAccessModalOpen(false)}>
+          <div className="fig-modal-shell fig-modal-shell--public-access" onClick={event => event.stopPropagation()}>
+	            <div className="fig-modal-header">
+	              <div>
+	                <p className="fig-kicker">
+                    {publicAccessStep === 'active' && publicAccount?.has_access ? 'Minha conta' : 'Acesso completo'}
+                  </p>
+	                <h3>
+                    {publicAccessStep === 'active' && publicAccount?.has_access
+                      ? 'Acesso ativo'
+                      : `Acesso permanente por ${publicAccessPriceLabel}`}
+                  </h3>
+	              </div>
+	              <button type="button" className="fig-modal-close" onClick={() => setPublicAccessModalOpen(false)}>
+	                Fechar
+              </button>
+            </div>
+
+	            <section
+                className={`fig-form-card fig-public-access-card${
+                  publicAccessStep === 'active' && publicAccount?.has_access ? ' fig-public-access-card--active' : ''
+                }`}
+              >
+              {publicAccessStep === 'active' && publicAccount?.has_access ? (
+                <>
+                  {publicAccessError ? <p className="fig-error-banner">{publicAccessError}</p> : null}
+	                <div className="fig-public-access-stack fig-public-access-stack--active">
+	                  <div className="fig-public-access-account-hero">
+	                    <span className="fig-public-access-eyebrow">Conta ativa</span>
+	                    <strong>Sua conta está liberada</strong>
+	                    <p>Confira seus dados, seus créditos de IA e o último PDF salvo na conta.</p>
+	                  </div>
+	                  <div className="fig-public-access-account-grid">
+	                    <div className="fig-form-card fig-public-access-account-card fig-public-access-account-card--email">
+	                      <span>E-mail</span>
+	                      <strong>{publicAccount.email}</strong>
+	                    </div>
+	                    <div className="fig-form-card fig-public-access-account-card">
+	                      <span>Status</span>
+	                      <strong>Acesso ativo</strong>
+	                    </div>
+	                    <div className="fig-form-card fig-public-access-account-card">
+	                      <span>Créditos de IA</span>
+	                      <strong>{publicAccount.ai_credits_remaining} / {publicAccount.ai_credits_total}</strong>
+	                    </div>
+	                  </div>
+	                  <div className="fig-form-card fig-public-access-account-card fig-public-access-account-card--export">
+                      <span>Último PDF</span>
+                      {publicAccount.last_export_id ? (
+                        <>
+                          <strong>{publicAccount.last_export_file_name || 'PDF pronto para baixar'}</strong>
+                          <small>
+                            {publicAccount.last_export_sheet_count || 1} folha(s) ·{' '}
+                            {formatDateTime(publicAccount.last_export_created_at)}
+                          </small>
+                          <div className="fig-public-access-account-actions">
+                            <button
+                              type="button"
+                              className="fig-primary-button"
+                              onClick={handleDownloadLastPublicExport}
+                              disabled={publicAccessBusy}
+                            >
+                              {publicAccessBusy ? 'Preparando...' : 'Baixar novamente'}
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <small>Você ainda não gerou nenhum PDF nesta conta.</small>
+                      )}
+                    </div>
+                    <div className="fig-public-access-account-actions">
+                      <button
+                        type="button"
+                        className="fig-secondary-button"
+                        onClick={() => setPublicAccessModalOpen(false)}
+                      >
+                        Continuar na plataforma
+                      </button>
+                      <button type="button" className="fig-primary-button" onClick={handlePublicLogout}>
+                        Sair da conta
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+	                <div className="fig-public-access-hero">
+	                  <span className="fig-public-access-eyebrow">Pagamento único</span>
+	                  <strong>Sua conta recebe acesso permanente por {publicAccessPriceLabel}</strong>
+	                  <p>
+	                    Gere seus PDFs, use a Minha Figurinha manual sem taxa extra e receba {serviceConfig.public_access_ai_credits}{' '}
+	                    créditos de IA.
+	                  </p>
+	                </div>
+
+	                <div className="fig-public-access-note-list fig-public-access-note-list--compact">
+	                  <p>Você pode montar antes de pagar. O acesso só é solicitado quando for gerar o PDF ou usar os recursos.</p>
+	                  <p>Não se trata da liberação de um único PDF: o pagamento ativa o acesso permanente da sua conta.</p>
+	                </div>
+
+	                <div className="fig-public-access-feature-grid">
+	                  <div className="fig-public-access-feature-card">
+	                    <strong>Acesso permanente</strong>
+	                    <span>Entre na plataforma com e-mail e senha</span>
+	                  </div>
+	                  <div className="fig-public-access-feature-card">
+	                    <strong>PDF completo liberado</strong>
+	                    <span>Gere e baixe quando precisar</span>
+	                  </div>
+	                  <div className="fig-public-access-feature-card">
+	                    <strong>Minha Figurinha manual</strong>
+	                    <span>Já incluída no acesso</span>
+	                  </div>
+	                  <div className="fig-public-access-feature-card">
+	                    <strong>{serviceConfig.public_access_ai_credits} créditos de IA</strong>
+	                    <span>Para usar nas criações premium</span>
+	                  </div>
+	                </div>
+
+                {publicAccessError ? <p className="fig-error-banner">{publicAccessError}</p> : null}
+
+                {publicAccessStep === 'register' ? (
+                <div className="fig-public-access-stack">
+                  <label className="fig-field">
+                    <span>Seu melhor e-mail</span>
+                    <input
+                      type="email"
+                      value={publicAccessEmail}
+                      onChange={event => setPublicAccessEmail(event.target.value)}
+                      placeholder="voce@exemplo.com"
+                      autoComplete="email"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Confirme seu e-mail</span>
+                    <input
+                      type="email"
+                      value={publicAccessEmailConfirm}
+                      onChange={event => setPublicAccessEmailConfirm(event.target.value)}
+                      placeholder="repita seu email"
+                      autoComplete="email"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Crie uma senha</span>
+                    <input
+                      type="password"
+                      value={publicAccessPassword}
+                      onChange={event => setPublicAccessPassword(event.target.value)}
+                      placeholder="pelo menos 6 caracteres"
+                      autoComplete="new-password"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Confirme sua senha</span>
+                    <input
+                      type="password"
+                      value={publicAccessPasswordConfirm}
+                      onChange={event => setPublicAccessPasswordConfirm(event.target.value)}
+                      placeholder="repita sua senha"
+                      autoComplete="new-password"
+                    />
+                  </label>
+                  <div className="fig-hero-actions">
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      onClick={() => setPublicAccessStep('login')}
+                      disabled={publicAccessBusy}
+                    >
+                      Já tenho conta
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-primary-button"
+                      onClick={handleStartPublicAccess}
+                      disabled={
+                        publicAccessBusy ||
+                        !publicAccessEmail.trim() ||
+                        !publicAccessEmailConfirm.trim() ||
+                        !publicAccessPassword ||
+                        !publicAccessPasswordConfirm
+                      }
+                    >
+                        {publicAccessBusy ? 'Gerando Pix...' : `Liberar acesso por ${publicAccessPriceLabel}`}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {publicAccessStep === 'payment' && publicAccessPayment ? (
+                <div className="fig-public-access-stack">
+                  <div className="fig-quote-grid fig-quote-grid--donation">
+                    <div className="fig-form-card">
+                      <span>Email</span>
+                      <strong>{publicAccessEmail}</strong>
+                    </div>
+                    <div className="fig-form-card">
+                      <span>Status</span>
+                        <strong>{publicAccessPayment.status === 'PAGO' ? 'Confirmado' : 'Aguardando Pix'}</strong>
+                    </div>
+                  </div>
+
+                  {publicAccessPayment.qr_code_base64 ? (
+                    <div className="fig-support-payment-qr-card">
+                      <img src={`data:image/png;base64,${publicAccessPayment.qr_code_base64}`} alt="QR Code Pix de acesso" />
+                    </div>
+                  ) : null}
+
+                  <div className="fig-helper-strip fig-support-helper-strip">
+                    <div>
+                      <span className="fig-support-code-block">
+                        {publicAccessPayment.qr_code || 'Gerando código Pix...'}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      onClick={async () => {
+                        if (!publicAccessPayment?.qr_code) return
+                        try {
+                          await navigator.clipboard.writeText(publicAccessPayment.qr_code)
+                          setPixCopied(true)
+                        } catch {
+                          setPixCopied(false)
+                        }
+                      }}
+                    >
+                      {pixCopied ? 'Código copiado' : 'Copiar código Pix'}
+                    </button>
+                  </div>
+
+                  <div className="fig-hero-actions">
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      onClick={() => setPublicAccessStep('login')}
+                      disabled={publicAccessBusy}
+                    >
+                      Já paguei antes
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-primary-button"
+                      onClick={handleCheckPublicAccessPayment}
+                      disabled={publicAccessBusy}
+                    >
+                      {publicAccessBusy ? 'Verificando...' : 'Já paguei, verificar agora'}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {publicAccessStep === 'login' ? (
+                <div className="fig-public-access-stack">
+                  <div className="fig-service-notes">
+                    <p>Se você já pagou, entre com e-mail e senha para voltar e continuar de onde parou.</p>
+                  </div>
+                  <label className="fig-field">
+                    <span>Email</span>
+                    <input
+                      type="email"
+                      value={publicAccessEmail}
+                      onChange={event => setPublicAccessEmail(event.target.value)}
+                      placeholder="voce@exemplo.com"
+                      autoComplete="email"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Senha</span>
+                    <input
+                      type="password"
+                      value={publicAccessPassword}
+                      onChange={event => setPublicAccessPassword(event.target.value)}
+                      placeholder="sua senha"
+                      autoComplete="current-password"
+                    />
+                  </label>
+                  <div className="fig-hero-actions">
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      onClick={() => setPublicAccessStep('register')}
+                      disabled={publicAccessBusy}
+                    >
+                      Criar minha conta
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-primary-button"
+                      onClick={handlePublicLogin}
+                      disabled={publicAccessBusy || !publicAccessEmail.trim() || !publicAccessPassword}
+                    >
+                      {publicAccessBusy ? 'Entrando...' : 'Entrar agora'}
+                    </button>
+                  </div>
+                  <div className="fig-hero-actions">
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      onClick={() => setPublicAccessStep('forgot-password')}
+                      disabled={publicAccessBusy}
+                    >
+                      Esqueci minha senha
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {publicAccessStep === 'forgot-password' ? (
+                <div className="fig-public-access-stack">
+                  <div className="fig-service-notes">
+                    <p>Digite o e-mail da sua conta para receber o link de redefinição de senha.</p>
+                  </div>
+                  <label className="fig-field">
+                    <span>E-mail da conta</span>
+                    <input
+                      type="email"
+                      value={publicAccessEmail}
+                      onChange={event => setPublicAccessEmail(event.target.value)}
+                      placeholder="voce@exemplo.com"
+                      autoComplete="email"
+                    />
+                  </label>
+                  <div className="fig-hero-actions">
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      onClick={() => setPublicAccessStep('login')}
+                      disabled={publicAccessBusy}
+                    >
+                      Voltar para login
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-primary-button"
+                      onClick={handleForgotPublicPassword}
+                      disabled={publicAccessBusy || !publicAccessEmail.trim()}
+                    >
+                      {publicAccessBusy ? 'Enviando...' : 'Enviar link de redefinição'}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {publicAccessStep === 'reset-sent' ? (
+                <div className="fig-public-access-stack">
+                  <div className="fig-service-notes">
+                    <p>Se o e-mail estiver cadastrado, o link de redefinição foi enviado para {publicAccessEmail}.</p>
+                  </div>
+                  {publicAccessDebugResetLink ? (
+                    <div className="fig-public-access-debug-link">
+                      <strong>Link gerado localmente</strong>
+                      <a href={publicAccessDebugResetLink}>{publicAccessDebugResetLink}</a>
+                    </div>
+                  ) : null}
+                  <div className="fig-hero-actions">
+                    <button
+                      type="button"
+                      className="fig-secondary-button"
+                      onClick={() => setPublicAccessStep('login')}
+                    >
+                      Voltar para login
+                    </button>
+                    <button
+                      type="button"
+                      className="fig-primary-button"
+                      onClick={() => setPublicAccessModalOpen(false)}
+                    >
+                      Fechar
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+              {publicAccessStep === 'reset-password' ? (
+                <div className="fig-public-access-stack">
+                  <div className="fig-service-notes">
+                    <p>Crie sua nova senha para voltar a entrar na plataforma.</p>
+                  </div>
+                  <label className="fig-field">
+                    <span>Nova senha</span>
+                    <input
+                      type="password"
+                      value={publicAccessPassword}
+                      onChange={event => setPublicAccessPassword(event.target.value)}
+                      placeholder="pelo menos 6 caracteres"
+                      autoComplete="new-password"
+                    />
+                  </label>
+                  <label className="fig-field">
+                    <span>Confirme a nova senha</span>
+                    <input
+                      type="password"
+                      value={publicAccessPasswordConfirm}
+                      onChange={event => setPublicAccessPasswordConfirm(event.target.value)}
+                      placeholder="repita sua nova senha"
+                      autoComplete="new-password"
+                    />
+                  </label>
+                  <div className="fig-hero-actions">
+                    <button
+                      type="button"
+                      className="fig-primary-button"
+                      onClick={handleResetPublicPassword}
+                      disabled={publicAccessBusy || !publicAccessPassword || !publicAccessPasswordConfirm}
+                    >
+                      {publicAccessBusy ? 'Redefinindo...' : 'Salvar nova senha'}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+
+                </>
+              )}
+            </section>
+          </div>
+        </div>
+      ) : null}
+
+      {supportModalOpen && serviceConfig ? (
+        <div className="fig-modal-backdrop" onClick={() => setSupportModalOpen(false)}>
           <div className="fig-modal-shell fig-modal-shell--donation" onClick={event => event.stopPropagation()}>
             <div className="fig-modal-header">
               <div>
-                <p className="fig-kicker">Apoio opcional</p>
-                <h3>Se quiser, voce pode apoiar o projeto via Pix</h3>
+                <p className="fig-kicker">Apoie o projeto</p>
+                <h3>Se quiser, você pode apoiar via Pix</h3>
               </div>
-              <button type="button" className="fig-modal-close" onClick={() => setDonationModalOpen(false)}>
+              <button type="button" className="fig-modal-close" onClick={() => setSupportModalOpen(false)}>
                 Fechar
               </button>
             </div>
 
             <section className="fig-form-card fig-support-donation-modal-card">
               <div className="fig-service-notes">
-                <p>{serviceConfig.donation_message || 'O download continua gratuito mesmo sem doacao.'}</p>
+                <p>
+                  {serviceConfig.donation_message ||
+                    'Não estamos conseguindo manter o Figurinhas no ar sozinhos. Se ele te ajudou, apoie com qualquer valor via Pix para o projeto continuar existindo.'}
+                </p>
               </div>
 
-              {serviceConfig.donation_qr_code_base64 ? (
-                <div className="fig-support-payment-qr-card">
-                  <img
-                    src={`data:image/png;base64,${serviceConfig.donation_qr_code_base64}`}
-                    alt="QR Code Pix para apoio opcional"
-                  />
+              {supportStep === 'choose' ? (
+                <div className="fig-support-choice-layout">
+                  <div className="fig-support-pointer-figure" aria-hidden="true">
+                    <img src="/support-pointer-figurinha.png" alt="" />
+                  </div>
+                  <div className="fig-support-amount-grid">
+                    {supportAllowedAmountsCents.map(amountCents => (
+                      <button
+                        key={amountCents}
+                        type="button"
+                        className={`fig-support-amount-card${supportSelectedAmountCents === amountCents ? ' is-active' : ''}${
+                          amountCents === SUPPORT_RECOMMENDED_AMOUNT ? ' fig-support-amount-card--primary' : ''
+                        }`}
+                        onClick={() => handleStartSupportPayment(amountCents)}
+                        disabled={supportPaymentBusy}
+                      >
+                        <strong>{formatCurrency(amountCents)}</strong>
+                        <span>Apoiar</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : null}
 
+              {false ? (<>
               <div className="fig-helper-strip fig-support-helper-strip">
                 <div>
                   <strong>{serviceConfig.donation_qr_code ? 'Pix copia e cola' : 'Chave Pix'}</strong>
@@ -4687,7 +5757,7 @@ function PublicPage() {
                   </span>
                 </div>
                 <button type="button" className="fig-secondary-button" onClick={handleCopyPixKey}>
-                  {pixCopied ? 'Codigo copiado' : serviceConfig.donation_qr_code ? 'Copiar codigo Pix' : 'Copiar chave Pix'}
+                  {pixCopied ? 'Código copiado' : serviceConfig.donation_qr_code ? 'Copiar código Pix' : 'Copiar chave Pix'}
                 </button>
               </div>
 
@@ -4695,6 +5765,74 @@ function PublicPage() {
                 <button type="button" className="fig-primary-button" onClick={handleDonationDownload}>
                   Baixar PDF agora
                 </button>
+              </div>
+              </>) : null}
+
+              {supportStep === 'payment' && supportPaymentData ? (
+                <>
+                  <div className="fig-quote-grid fig-quote-grid--donation">
+                    <div className="fig-form-card">
+                      <span>Valor escolhido</span>
+                      <strong>{formatCurrency(supportSelectedAmountCents)}</strong>
+                    </div>
+                    <div className="fig-form-card">
+                      <span>Status</span>
+                      <strong>{supportPaymentData.status === 'PAGO' ? 'Confirmado' : 'Aguardando Pix'}</strong>
+                    </div>
+                  </div>
+
+                  {supportPaymentData.qr_code_base64 ? (
+                    <div className="fig-support-payment-qr-card">
+                      <img
+                        src={`data:image/png;base64,${supportPaymentData.qr_code_base64}`}
+                        alt="QR Code Pix para apoio"
+                      />
+                    </div>
+                  ) : null}
+
+                  <div className="fig-helper-strip fig-support-helper-strip">
+                    <div>
+                      <span className="fig-support-code-block">{supportPaymentData.qr_code || 'Gerando código Pix...'}</span>
+                    </div>
+                    <button type="button" className="fig-secondary-button" onClick={handleCopySupportPix}>
+                      {pixCopied ? 'Código copiado' : 'Copiar código Pix'}
+                    </button>
+                  </div>
+                </>
+              ) : null}
+
+              {supportStep === 'paid' ? (
+                <div className="fig-service-notes">
+                  <p>Obrigado pelo apoio. Isso ajuda a manter o projeto no ar.</p>
+                </div>
+              ) : null}
+
+              <div className="fig-hero-actions">
+                {supportStep === 'payment' ? (
+                  <button
+                    type="button"
+                    className="fig-primary-button"
+                    onClick={async () => {
+                      try {
+                        const refreshedPayment = await apiFetch(
+                          `/support/payments/${supportPaymentData.id}?session_token=${encodeURIComponent(sessionToken)}&visitor_token=${encodeURIComponent(supportVisitorToken)}`
+                        )
+                        setSupportPaymentData(refreshedPayment)
+                        if (refreshedPayment?.status === 'PAGO') {
+                          setSupportStep('paid')
+                        }
+                      } catch (err) {
+                        setError(err.message)
+                      }
+                    }}
+                  >
+                    Verificar pagamento
+                  </button>
+                ) : supportStep === 'paid' ? (
+                  <button type="button" className="fig-primary-button" onClick={() => setSupportModalOpen(false)}>
+                    Fechar
+                  </button>
+                ) : null}
               </div>
             </section>
           </div>

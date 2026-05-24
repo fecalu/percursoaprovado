@@ -123,6 +123,20 @@ class CustomStickerUnlockType(str, enum.Enum):
     AI_CREATE = "AI_CREATE"
 
 
+class SupportPaymentStatus(str, enum.Enum):
+    PENDENTE = "PENDENTE"
+    PAGO = "PAGO"
+    EXPIRADO = "EXPIRADO"
+    FALHOU = "FALHOU"
+
+
+class PublicAccessPaymentStatus(str, enum.Enum):
+    PENDENTE = "PENDENTE"
+    PAGO = "PAGO"
+    EXPIRADO = "EXPIRADO"
+    FALHOU = "FALHOU"
+
+
 class Album(Base):
     __tablename__ = "figurinhas_albums"
 
@@ -371,6 +385,9 @@ class Sticker(Base):
         ForeignKey("figurinhas_custom_sticker_templates.id"), nullable=True, index=True
     )
     session_token: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    public_user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("figurinhas_public_users.id"), nullable=True, index=True
+    )
     profile_type: Mapped[CustomProfileType | None] = mapped_column(Enum(CustomProfileType), nullable=True)
     custom_category_type: Mapped[CustomCategoryType | None] = mapped_column(Enum(CustomCategoryType), nullable=True)
     custom_position_type: Mapped[CustomPositionType | None] = mapped_column(Enum(CustomPositionType), nullable=True)
@@ -614,6 +631,35 @@ class CustomStickerUnlock(Base):
     sticker: Mapped[Sticker | None] = relationship()
 
 
+class SupportPayment(Base):
+    __tablename__ = "figurinhas_support_payments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    session_token: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    visitor_token: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
+    export_id: Mapped[int | None] = mapped_column(ForeignKey("figurinhas_exports.id"), nullable=True, index=True)
+    amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    paid_amount_cents: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    status: Mapped[SupportPaymentStatus] = mapped_column(
+        Enum(SupportPaymentStatus), default=SupportPaymentStatus.PENDENTE, nullable=False, index=True
+    )
+    mp_payment_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    mp_external_reference: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    mp_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    mp_status_detail: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    qr_code_base64: Mapped[str | None] = mapped_column(Text, nullable=True)
+    qr_code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ticket_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    export: Mapped[Export | None] = relationship()
+
+
 class PrintOrder(Base):
     __tablename__ = "figurinhas_print_orders"
 
@@ -658,3 +704,140 @@ class PublicAccessEvent(Base):
     route_key: Mapped[str] = mapped_column(String(40), nullable=False, index=True)
     subject_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+
+
+class PublicUser(Base):
+    __tablename__ = "figurinhas_public_users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False, index=True)
+    activated_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    sessions: Mapped[list["PublicUserSession"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", order_by="PublicUserSession.created_at.desc()"
+    )
+    magic_links: Mapped[list["PublicMagicLink"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", order_by="PublicMagicLink.created_at.desc()"
+    )
+    password_reset_tokens: Mapped[list["PublicPasswordResetToken"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        order_by="PublicPasswordResetToken.created_at.desc()",
+    )
+    credit_balance: Mapped["PublicUserCredit | None"] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+    last_export: Mapped["PublicUserLastExport | None"] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+    access_payments: Mapped[list["PublicAccessPayment"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan", order_by="PublicAccessPayment.created_at.desc()"
+    )
+
+
+class PublicUserSession(Base):
+    __tablename__ = "figurinhas_public_user_sessions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_public_users.id"), nullable=False, index=True)
+    token: Mapped[str] = mapped_column(String(80), unique=True, nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user: Mapped[PublicUser] = relationship(back_populates="sessions")
+
+
+class PublicMagicLink(Base):
+    __tablename__ = "figurinhas_public_magic_links"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_public_users.id"), nullable=False, index=True)
+    token: Mapped[str] = mapped_column(String(80), unique=True, nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user: Mapped[PublicUser] = relationship(back_populates="magic_links")
+
+
+class PublicPasswordResetToken(Base):
+    __tablename__ = "figurinhas_public_password_reset_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_public_users.id"), nullable=False, index=True)
+    token: Mapped[str] = mapped_column(String(80), unique=True, nullable=False, index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+
+    user: Mapped[PublicUser] = relationship(back_populates="password_reset_tokens")
+
+
+class PublicUserCredit(Base):
+    __tablename__ = "figurinhas_public_user_credits"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("figurinhas_public_users.id"), primary_key=True, nullable=False, index=True
+    )
+    ai_credits_total: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    ai_credits_remaining: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    user: Mapped[PublicUser] = relationship(back_populates="credit_balance")
+
+
+class PublicUserLastExport(Base):
+    __tablename__ = "figurinhas_public_user_last_exports"
+
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("figurinhas_public_users.id"), primary_key=True, nullable=False, index=True
+    )
+    export_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_exports.id"), nullable=False, index=True)
+    file_path: Mapped[str] = mapped_column(String(255), nullable=False)
+    sheet_count: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    user: Mapped[PublicUser] = relationship(back_populates="last_export")
+
+
+class PublicAccessPayment(Base):
+    __tablename__ = "figurinhas_public_access_payments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("figurinhas_public_users.id"), nullable=False, index=True)
+    amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[PublicAccessPaymentStatus] = mapped_column(
+        Enum(PublicAccessPaymentStatus), default=PublicAccessPaymentStatus.PENDENTE, nullable=False, index=True
+    )
+    mp_payment_id: Mapped[str | None] = mapped_column(String(80), nullable=True, index=True)
+    mp_external_reference: Mapped[str | None] = mapped_column(String(120), nullable=True, index=True)
+    mp_status: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    mp_status_detail: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    qr_code_base64: Mapped[str | None] = mapped_column(Text, nullable=True)
+    qr_code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ticket_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
+
+    user: Mapped[PublicUser] = relationship(back_populates="access_payments")
