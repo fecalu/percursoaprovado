@@ -25,9 +25,6 @@ from urllib.parse import quote_plus
 import fitz
 from PIL import Image, ImageOps
 import qrcode
-from reportlab.lib.colors import HexColor
-from reportlab.lib.utils import ImageReader
-from reportlab.pdfgen import canvas
 from sqlalchemy import and_, exists, func, or_, select
 from sqlalchemy.orm import Session, object_session, selectinload
 
@@ -4136,6 +4133,8 @@ def prepare_export_plan(
     mark_stage("template_collections", stage_started_at)
 
     source_pdf_paths: dict[int, Path] = {}
+    source_document_pdf_paths: dict[int, Path] = {}
+    source_document_page_numbers: dict[int, int] = {}
     page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]] = {}
     stage_started_at = time.perf_counter()
     source_document_layout_signature = _source_document_layout_signature(album.id, db)
@@ -4194,6 +4193,41 @@ def prepare_export_plan(
             raise ValueError("Nao e possivel misturar figurinhas de albuns diferentes.")
         page_sizes_by_collection[collection.id] = resolve_page_sizes(collection)
     mark_stage("selected_page_sizes", stage_started_at)
+
+    selected_source_document_ids = sorted(
+        {
+            int(sticker.source_document_id)
+            for sticker in stickers
+            if sticker.source_document_id is not None
+        }
+    )
+    selected_source_document_page_ids = sorted(
+        {
+            int(sticker.source_document_page_id)
+            for sticker in stickers
+            if sticker.source_document_page_id is not None
+        }
+    )
+    stage_started_at = time.perf_counter()
+    if selected_source_document_ids:
+        for document_id, pdf_path in db.execute(
+            select(SourceDocument.id, SourceDocument.pdf_path).where(SourceDocument.id.in_(selected_source_document_ids))
+        ).all():
+            if not pdf_path:
+                continue
+            candidate = settings.storage_root / pdf_path
+            if candidate.exists():
+                source_document_pdf_paths[int(document_id)] = candidate
+    if selected_source_document_page_ids:
+        source_document_page_numbers = {
+            int(page_id): int(page_number)
+            for page_id, page_number in db.execute(
+                select(SourceDocumentPage.id, SourceDocumentPage.page_number).where(
+                    SourceDocumentPage.id.in_(selected_source_document_page_ids)
+                )
+            ).all()
+        }
+    mark_stage("source_document_sources", stage_started_at)
 
     stage_started_at = time.perf_counter()
     template_collection_ids = [collection.id for collection in template_collections]
@@ -4260,8 +4294,17 @@ def prepare_export_plan(
             continue
         if _sticker_asset_path_for_export(sticker):
             continue
-        if sticker.collection_id not in source_pdf_paths:
-            raise ValueError(f"A colecao {sticker.collection.name} nao possui PDF de origem para exportacao.")
+        has_collection_pdf = sticker.collection_id in source_pdf_paths
+        has_source_document_pdf = (
+            sticker.source_document_id is not None
+            and sticker.source_document_page_id is not None
+            and int(sticker.source_document_id) in source_document_pdf_paths
+            and int(sticker.source_document_page_id) in source_document_page_numbers
+        )
+        if not has_collection_pdf and not has_source_document_pdf:
+            raise ValueError(
+                f"A colecao {sticker.collection.name} nao possui um PDF de origem valido para exportacao."
+            )
     mark_stage("validate_selected_stickers", stage_started_at)
 
     stage_started_at = time.perf_counter()
@@ -4338,6 +4381,8 @@ def prepare_export_plan(
 
     return {
         "source_pdf_paths": source_pdf_paths,
+        "source_document_pdf_paths": source_document_pdf_paths,
+        "source_document_page_numbers": source_document_page_numbers,
         "page_sizes_by_collection": page_sizes_by_collection,
         "batches": batches,
         "append_documents": append_documents,
@@ -4371,15 +4416,13 @@ def build_export_pdf(
     batches = plan["batches"]
     append_documents = plan.get("append_documents", [])
     interleaved_documents = plan.get("interleaved_documents", [])
-    initial_page_size = batches[0]["page_size"] if batches else (595.2756, 841.8898)
 
-    documents: dict[int, fitz.Document] = {}
+    documents: dict[tuple[str, int], fitz.Document] = {}
     extra_documents: dict[str, fitz.Document] = {}
+    pdf: fitz.Document | None = None
     try:
-        pdf = canvas.Canvas(str(export_path), pagesize=initial_page_size)
-        pdf.setTitle(f"{album.name} - figurinhas selecionadas")
-
-        is_first_page = True
+        pdf = fitz.open()
+        pdf.set_metadata({"title": f"{album.name} - figurinhas selecionadas"})
         total_pages = max(plan.get("sheet_count", len(batches)), 1)
         current_page_number = 0
         for batch_index, batch in enumerate(batches, start=1):
@@ -4389,38 +4432,21 @@ def build_export_pdf(
                 f"Montando pagina {current_page_number} de {total_pages}...",
             )
             page_width, page_height = batch["page_size"]
-            if not is_first_page:
-                pdf.showPage()
-            pdf.setPageSize((page_width, page_height))
+            export_page = pdf.new_page(width=page_width, height=page_height)
 
             for slot, sticker in batch["placements"]:
-                image_bytes = _render_sticker_export_image(
+                _draw_sticker_on_export_page(
+                    export_page,
                     documents,
                     plan["source_pdf_paths"],
+                    plan["source_document_pdf_paths"],
+                    plan["source_document_page_numbers"],
                     sticker,
+                    slot,
                     page_sizes_by_collection,
                 )
-                x_position = slot["x_pt"]
-                y_position = page_height - slot["y_pt"] - slot["height_pt"]
-                bleed_x = min(0.6, slot["width_pt"] * 0.01)
-                bleed_y = min(0.6, slot["height_pt"] * 0.01)
-                clip_path = pdf.beginPath()
-                clip_path.rect(x_position, y_position, slot["width_pt"], slot["height_pt"])
-                pdf.saveState()
-                pdf.clipPath(clip_path, stroke=0, fill=0)
-                pdf.drawImage(
-                    ImageReader(io.BytesIO(image_bytes)),
-                    x_position - bleed_x,
-                    y_position - bleed_y,
-                    width=slot["width_pt"] + (bleed_x * 2),
-                    height=slot["height_pt"] + (bleed_y * 2),
-                    preserveAspectRatio=False,
-                    mask="auto",
-                )
-                pdf.restoreState()
 
-            _draw_export_cut_reference_lines(pdf, batch["placements"], page_height)
-            is_first_page = False
+            _draw_export_cut_reference_lines(export_page, batch["placements"])
 
             for interleaved_document in interleaved_documents:
                 document_key = str(interleaved_document["file_path"])
@@ -4437,17 +4463,13 @@ def build_export_pdf(
                 page = document.load_page(0)
                 back_width = float(page.rect.width)
                 back_height = float(page.rect.height)
-                pdf.showPage()
-                pdf.setPageSize((back_width, back_height))
-                pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
-                pdf.drawImage(
-                    ImageReader(io.BytesIO(pixmap.tobytes("png"))),
+                export_page = pdf.new_page(width=back_width, height=back_height)
+                export_page.show_pdf_page(
+                    fitz.Rect(0, 0, back_width, back_height),
+                    document,
                     0,
-                    0,
-                    width=back_width,
-                    height=back_height,
-                    preserveAspectRatio=False,
-                    mask="auto",
+                    keep_proportion=False,
+                    overlay=True,
                 )
 
         for extra_document in append_documents:
@@ -4467,24 +4489,20 @@ def build_export_pdf(
                     page = document.load_page(page_index)
                     page_width = float(page.rect.width)
                     page_height = float(page.rect.height)
-                    if not is_first_page:
-                        pdf.showPage()
-                    pdf.setPageSize((page_width, page_height))
-                    pixmap = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False)
-                    pdf.drawImage(
-                        ImageReader(io.BytesIO(pixmap.tobytes("png"))),
-                        0,
-                        0,
-                        width=page_width,
-                        height=page_height,
-                        preserveAspectRatio=False,
-                        mask="auto",
+                    export_page = pdf.new_page(width=page_width, height=page_height)
+                    export_page.show_pdf_page(
+                        fitz.Rect(0, 0, page_width, page_height),
+                        document,
+                        page_index,
+                        keep_proportion=False,
+                        overlay=True,
                     )
-                    is_first_page = False
 
         report(88, "Gerando o PDF...")
-        pdf.save()
+        pdf.save(str(export_path), garbage=4, deflate=True)
     finally:
+        if pdf is not None:
+            pdf.close()
         for document in documents.values():
             document.close()
         for document in extra_documents.values():
@@ -4530,7 +4548,7 @@ def _sticker_asset_path_for_export(sticker: Sticker) -> Path | None:
     return None
 
 
-def _draw_export_cut_reference_lines(pdf: canvas.Canvas, placements: list[tuple[dict, Sticker]], page_height: float) -> None:
+def _draw_export_cut_reference_lines(page: fitz.Page, placements: list[tuple[dict, Sticker]]) -> None:
     if not placements:
         return
 
@@ -4558,26 +4576,30 @@ def _draw_export_cut_reference_lines(pdf: canvas.Canvas, placements: list[tuple[
     top_edge = min(y_edges)
     bottom_edge = max(y_edges)
 
-    pdf.saveState()
-    pdf.setStrokeColor(HexColor("#34373a"))
-    try:
-        pdf.setStrokeAlpha(0.6)
-    except AttributeError:
-        pass
-    pdf.setLineWidth(0.5)
-    pdf.setLineJoin(1)
-    pdf.setLineCap(1)
-
-    vertical_start = page_height - bottom_edge
-    vertical_end = page_height - top_edge
+    stroke_color = (52 / 255, 55 / 255, 58 / 255)
     for x_edge in x_edges:
-        pdf.line(x_edge, vertical_start, x_edge, vertical_end)
+        page.draw_line(
+            fitz.Point(x_edge, top_edge),
+            fitz.Point(x_edge, bottom_edge),
+            color=stroke_color,
+            width=0.5,
+            lineJoin=1,
+            lineCap=1,
+            stroke_opacity=0.6,
+            overlay=True,
+        )
 
     for y_edge in y_edges:
-        canvas_y = page_height - y_edge
-        pdf.line(left_edge, canvas_y, right_edge, canvas_y)
-
-    pdf.restoreState()
+        page.draw_line(
+            fitz.Point(left_edge, y_edge),
+            fitz.Point(right_edge, y_edge),
+            color=stroke_color,
+            width=0.5,
+            lineJoin=1,
+            lineCap=1,
+            stroke_opacity=0.6,
+            overlay=True,
+        )
 
 
 def build_order_quote(album: Album, stickers: list[Sticker], db: Session, service_settings: ServiceSettings) -> dict:
@@ -5152,28 +5174,83 @@ def _store_cached_template_export_layouts(
         }
 
 
-def _render_sticker_export_image(
-    documents: dict[int, fitz.Document],
-    source_pdf_paths: dict[int, Path],
-    sticker: Sticker,
-    page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]],
+def _effective_export_render_scale() -> float:
+    return max(float(settings.export_render_scale or 0), 1.0)
+
+
+def _render_pdf_page_to_png_bytes(
+    page: fitz.Page,
+    *,
+    clip: fitz.Rect | None = None,
+    scale: float | None = None,
 ) -> bytes:
-    sticker_file = _sticker_asset_path_for_export(sticker)
-    if sticker.source_type == StickerSourceType.GENERATED or sticker_file is not None:
-        if not sticker_file:
-            raise FileNotFoundError(f"Arquivo da figurinha {sticker.name} nao encontrado.")
-        return sticker_file.read_bytes()
-
-    document = documents.get(sticker.collection_id)
-    if document is None:
-        document = fitz.open(source_pdf_paths[sticker.collection_id])
-        documents[sticker.collection_id] = document
-
-    page = document.load_page(sticker.page.page_number - 1)
-    x_pt, y_pt, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes_by_collection)
-    clip = fitz.Rect(x_pt, y_pt, x_pt + width_pt, y_pt + height_pt)
-    pixmap = page.get_pixmap(matrix=fitz.Matrix(settings.export_render_scale, settings.export_render_scale), clip=clip, alpha=False)
+    render_scale = max(float(scale if scale is not None else _effective_export_render_scale()), 1.0)
+    pixmap = page.get_pixmap(
+        matrix=fitz.Matrix(render_scale, render_scale),
+        clip=clip,
+        alpha=False,
+    )
     return pixmap.tobytes("png")
+
+
+def _draw_sticker_on_export_page(
+    export_page: fitz.Page,
+    documents: dict[tuple[str, int], fitz.Document],
+    source_pdf_paths: dict[int, Path],
+    source_document_pdf_paths: dict[int, Path],
+    source_document_page_numbers: dict[int, int],
+    sticker: Sticker,
+    slot: dict,
+    page_sizes_by_collection: dict[int, dict[int, tuple[float, float]]],
+) -> None:
+    target_rect = fitz.Rect(
+        float(slot["x_pt"]),
+        float(slot["y_pt"]),
+        float(slot["x_pt"] + slot["width_pt"]),
+        float(slot["y_pt"] + slot["height_pt"]),
+    )
+    source_pdf_path = source_pdf_paths.get(sticker.collection_id)
+    source_page_number = sticker.page.page_number
+    document_key = ("collection", int(sticker.collection_id))
+    if source_pdf_path is None and sticker.source_document_id is not None and sticker.source_document_page_id is not None:
+        source_pdf_path = source_document_pdf_paths.get(int(sticker.source_document_id))
+        source_page_number = source_document_page_numbers.get(int(sticker.source_document_page_id), 0)
+        document_key = ("source_document", int(sticker.source_document_id))
+
+    if (
+        sticker.source_type != StickerSourceType.GENERATED
+        and source_pdf_path
+        and source_pdf_path.exists()
+        and source_page_number > 0
+    ):
+        document = documents.get(document_key)
+        if document is None:
+            document = fitz.open(source_pdf_path)
+            documents[document_key] = document
+
+        page = document.load_page(source_page_number - 1)
+        x_pt, y_pt, width_pt, height_pt, _, _ = _sticker_page_box_points(sticker, page_sizes_by_collection)
+        clip = fitz.Rect(x_pt, y_pt, x_pt + width_pt, y_pt + height_pt)
+        export_page.show_pdf_page(
+            target_rect,
+            document,
+            source_page_number - 1,
+            keep_proportion=False,
+            overlay=True,
+            clip=clip,
+        )
+        return
+
+    sticker_file = _sticker_asset_path_for_export(sticker)
+    if not sticker_file:
+        raise FileNotFoundError(f"Arquivo da figurinha {sticker.name} nao encontrado.")
+
+    export_page.insert_image(
+        target_rect,
+        stream=sticker_file.read_bytes(),
+        keep_proportion=False,
+        overlay=True,
+    )
 
 
 def load_collection_or_fail(db: Session, collection_id: int) -> Collection:
