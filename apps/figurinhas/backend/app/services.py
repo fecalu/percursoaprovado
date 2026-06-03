@@ -1617,12 +1617,37 @@ def normalize_collection_stickers_to_reference_grid(db: Session, collection: Col
     if not all_stickers:
         raise ValueError("Essa colecao ainda nao tem figurinhas em PDF para normalizar.")
 
-    stickers_by_size: dict[tuple[float, float], list[Sticker]] = defaultdict(list)
+    # Some PDFs yield tiny height/width variations between rows due to rasterization
+    # or detection rounding. For grid normalization, treat near-identical sizes as the
+    # same group so a 16-slot page is not accidentally split into two 8-slot groups.
+    size_groups: list[dict[str, object]] = []
     for sticker in all_stickers:
-        stickers_by_size[_sticker_size_key(sticker, page_sizes_by_collection)].append(sticker)
+        size_key = _sticker_size_key(sticker, page_sizes_by_collection)
+        matched_group: dict[str, object] | None = None
+        for group in size_groups:
+            group_width_pt, group_height_pt = group["size_key"]  # type: ignore[index]
+            if (
+                abs(float(size_key[0]) - float(group_width_pt)) <= 1
+                and abs(float(size_key[1]) - float(group_height_pt)) <= 1
+            ):
+                matched_group = group
+                break
+        if matched_group is None:
+            matched_group = {
+                "size_key": size_key,
+                "stickers": [],
+            }
+            size_groups.append(matched_group)
+        matched_group["stickers"].append(sticker)  # type: ignore[index]
 
     dominant_size_key, dominant_group = max(
-        stickers_by_size.items(),
+        (
+            (
+                group["size_key"],  # type: ignore[index]
+                group["stickers"],  # type: ignore[index]
+            )
+            for group in size_groups
+        ),
         key=lambda item: (len(item[1]), -item[0][1], -item[0][0]),
     )
 
@@ -3010,6 +3035,49 @@ def load_latest_public_access_payment(db: Session, user_id: int) -> PublicAccess
     )
 
 
+def reconcile_public_access_for_user(
+    db: Session,
+    user: PublicUser,
+    *,
+    max_pending_payments_to_sync: int = 5,
+) -> PublicAccessPayment | None:
+    payments = (
+        db.execute(
+            select(PublicAccessPayment)
+            .where(PublicAccessPayment.user_id == user.id)
+            .order_by(PublicAccessPayment.created_at.desc(), PublicAccessPayment.id.desc())
+        )
+        .scalars()
+        .all()
+    )
+    if not payments:
+        return None
+
+    latest_payment = payments[0]
+    if user.is_active:
+        ensure_public_user_credit_balance(user)
+        return latest_payment
+
+    latest_paid_payment = next((payment for payment in payments if payment.status == PublicAccessPaymentStatus.PAGO), None)
+    if latest_paid_payment is not None:
+        activate_public_user_from_payment(user, latest_paid_payment)
+        return latest_paid_payment
+
+    synced_pending = 0
+    for payment in payments:
+        if payment.status != PublicAccessPaymentStatus.PENDENTE or not payment.mp_payment_id:
+            continue
+        sync_public_access_payment_status(payment)
+        synced_pending += 1
+        if payment.status == PublicAccessPaymentStatus.PAGO:
+            activate_public_user_from_payment(user, payment)
+            return payment
+        if synced_pending >= max_pending_payments_to_sync:
+            break
+
+    return latest_payment
+
+
 def sync_public_access_payment_status(payment: PublicAccessPayment) -> PublicAccessPayment:
     if not payment.mp_payment_id:
         return payment
@@ -3028,6 +3096,7 @@ def sync_public_access_payment_status(payment: PublicAccessPayment) -> PublicAcc
 
 
 def create_public_access_payment(db: Session, user: PublicUser) -> PublicAccessPayment:
+    reconcile_public_access_for_user(db, user)
     if user.is_active:
         raise ValueError("Esse email ja possui acesso liberado.")
     if not public_access_payments_enabled():
@@ -3103,6 +3172,7 @@ def public_access_payment_to_response(
 
 
 def create_public_magic_link(db: Session, user: PublicUser) -> PublicMagicLink:
+    reconcile_public_access_for_user(object_session(user) or db, user)
     if not user.is_active:
         raise ValueError("Esse email ainda nao tem acesso liberado.")
     token = uuid.uuid4().hex + uuid.uuid4().hex
@@ -3117,6 +3187,7 @@ def create_public_magic_link(db: Session, user: PublicUser) -> PublicMagicLink:
 
 
 def create_public_password_reset_token(db: Session, user: PublicUser) -> PublicPasswordResetToken:
+    reconcile_public_access_for_user(db, user)
     if not user.is_active:
         raise ValueError("Esse email ainda nao tem acesso liberado.")
     token = uuid.uuid4().hex + uuid.uuid4().hex
@@ -3221,6 +3292,7 @@ def authenticate_public_user(db: Session, *, email: str, password: str) -> tuple
     user = db.execute(select(PublicUser).where(PublicUser.email == normalized_email)).scalars().first()
     if not user or not _verify_public_password(password, user.password_hash):
         raise ValueError("Email ou senha invalidos.")
+    reconcile_public_access_for_user(db, user)
     if not user.is_active:
         raise ValueError("Seu pagamento ainda nao foi confirmado.")
     ensure_public_user_credit_balance(user)

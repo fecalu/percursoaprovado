@@ -10,7 +10,6 @@ const PUBLIC_JOB_POLL_SLOW_DELAY_MS = 2500
 const QUOTE_REQUEST_DEBOUNCE_MS = 900
 const SUPPORT_AMOUNT_OPTIONS = [100, 300, 500, 1000, 2000, 5000]
 const SUPPORT_RECOMMENDED_AMOUNT = 500
-const PUBLIC_ACCESS_CHANGE_NOTICE_STORAGE_KEY = 'figurinhas_public_access_change_notice_v1'
 
 const categoryOptions = [
   { value: 'JOGADOR', label: 'Jogador' },
@@ -1399,7 +1398,6 @@ function PublicPage() {
   const [publicFlowProgress, setPublicFlowProgress] = useState(null)
   const [publicAccount, setPublicAccount] = useState(null)
   const [publicAccessModalOpen, setPublicAccessModalOpen] = useState(false)
-  const [publicAccessAnnouncementOpen, setPublicAccessAnnouncementOpen] = useState(false)
   const [publicAccessStep, setPublicAccessStep] = useState('register')
   const [publicAccessEmail, setPublicAccessEmail] = useState('')
   const [publicAccessEmailConfirm, setPublicAccessEmailConfirm] = useState('')
@@ -1908,13 +1906,6 @@ function PublicPage() {
   const publicAccessEntryLabel =
     serviceConfig?.public_access_enabled && !publicAccount?.has_access ? 'Liberar PDF completo' : 'Gerar PDF'
 
-  function dismissPublicAccessAnnouncement() {
-    setPublicAccessAnnouncementOpen(false)
-    try {
-      window.localStorage.setItem(PUBLIC_ACCESS_CHANGE_NOTICE_STORAGE_KEY, '1')
-    } catch {}
-  }
-
   async function refreshPublicAccount(activeToken = publicAccessToken, { silent = false } = {}) {
     const normalizedToken = (activeToken || '').trim()
     if (!normalizedToken) {
@@ -1955,20 +1946,6 @@ function PublicPage() {
     setPublicAccessStep('reset-password')
     setPublicAccessModalOpen(true)
   }, [location.search])
-
-  useEffect(() => {
-    if (!serviceConfig?.public_access_enabled || publicAccount?.has_access || publicAccessToken) {
-      setPublicAccessAnnouncementOpen(false)
-      return
-    }
-    if (publicAccessModalOpen) return
-    try {
-      if (window.localStorage.getItem(PUBLIC_ACCESS_CHANGE_NOTICE_STORAGE_KEY) === '1') {
-        return
-      }
-    } catch {}
-    setPublicAccessAnnouncementOpen(true)
-  }, [serviceConfig?.public_access_enabled, publicAccount?.has_access, publicAccessModalOpen, publicAccessToken])
 
   useEffect(() => {
     if (!serviceConfig?.public_access_enabled || !myStickerModalOpen || publicAccount?.has_access) return
@@ -3102,7 +3079,6 @@ function PublicPage() {
   }
 
   function openPublicAccessModal({ email = publicAccount?.email || publicAccessEmail || '', step = null } = {}) {
-    setPublicAccessAnnouncementOpen(false)
     setPublicAccessError('')
     setPublicAccessPayment(null)
     setPublicAccessEmail(email)
@@ -3146,24 +3122,79 @@ function PublicPage() {
     }
   }
 
+  async function fetchPublicAccessPaymentStatus() {
+    if (!publicAccessPayment?.id || !publicAccessEmail.trim()) return null
+    const data = await apiFetch(
+      `/public/access/payments/${publicAccessPayment.id}?email=${encodeURIComponent(publicAccessEmail)}`
+    )
+    setPublicAccessPayment(data)
+    if (data.access_granted) {
+      setPublicAccessStep('login')
+    }
+    return data
+  }
+
   async function handleCheckPublicAccessPayment() {
     if (!publicAccessPayment?.id) return
     setPublicAccessBusy(true)
     setPublicAccessError('')
     try {
-      const data = await apiFetch(
-        `/public/access/payments/${publicAccessPayment.id}?email=${encodeURIComponent(publicAccessEmail)}`
-      )
-      setPublicAccessPayment(data)
-      if (data.access_granted) {
-        setPublicAccessStep('login')
-      }
+      await fetchPublicAccessPaymentStatus()
     } catch (err) {
       setPublicAccessError(err.message)
     } finally {
       setPublicAccessBusy(false)
     }
   }
+
+  useEffect(() => {
+    if (
+      !serviceConfig?.public_access_enabled ||
+      !publicAccessModalOpen ||
+      publicAccessStep !== 'payment' ||
+      !publicAccessPayment?.id ||
+      !publicAccessEmail.trim()
+    ) {
+      return undefined
+    }
+
+    let cancelled = false
+    let timerId = 0
+
+    const pollPayment = async () => {
+      try {
+        const data = await apiFetch(
+          `/public/access/payments/${publicAccessPayment.id}?email=${encodeURIComponent(publicAccessEmail)}`
+        )
+        if (cancelled) return
+        setPublicAccessPayment(data)
+        if (data.access_granted) {
+          setPublicAccessStep('login')
+          return
+        }
+      } catch {
+        // Mantemos o botao manual como fallback se uma verificacao automatica falhar.
+      }
+      if (!cancelled) {
+        timerId = window.setTimeout(pollPayment, 5000)
+      }
+    }
+
+    timerId = window.setTimeout(pollPayment, 5000)
+
+    return () => {
+      cancelled = true
+      if (timerId) {
+        window.clearTimeout(timerId)
+      }
+    }
+  }, [
+    serviceConfig?.public_access_enabled,
+    publicAccessModalOpen,
+    publicAccessStep,
+    publicAccessPayment?.id,
+    publicAccessEmail
+  ])
 
   async function handlePublicLogin() {
     setPublicAccessBusy(true)
@@ -5246,36 +5277,6 @@ function PublicPage() {
                   </div>
                 </>
               )}
-            </section>
-          </div>
-        </div>
-      ) : null}
-
-      {publicAccessAnnouncementOpen && serviceConfig?.public_access_enabled ? (
-        <div className="fig-modal-backdrop" onClick={dismissPublicAccessAnnouncement}>
-          <div
-            className="fig-modal-shell fig-modal-shell--public-access fig-modal-shell--public-announcement"
-            onClick={event => event.stopPropagation()}
-          >
-	            <div className="fig-modal-header">
-	              <div>
-	                <p className="fig-kicker">Aviso importante</p>
-	              </div>
-	              <button
-                  type="button"
-                  className="fig-modal-close fig-modal-close--icon"
-                  onClick={dismissPublicAccessAnnouncement}
-                  aria-label="Fechar aviso"
-                >
-	                ×
-              </button>
-            </div>
-
-	            <section className="fig-form-card fig-public-access-card fig-public-announcement-card fig-public-announcement-card--simple">
-	              <p className="fig-public-announcement-text">
-                  Lamentamos, mas não conseguimos cobrir os custos para manter o Figurinhas gratuito. Para manter o site
-                  no ar, o acesso agora tem valor mínimo de R$ 3,00.
-                </p>
             </section>
           </div>
         </div>

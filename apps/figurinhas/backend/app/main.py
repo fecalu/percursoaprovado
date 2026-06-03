@@ -206,6 +206,7 @@ from .services import (
     print_order_to_response,
     public_access_payment_to_response,
     public_user_to_response,
+    reconcile_public_access_for_user,
     refresh_sticker_ocr,
     revoke_public_user_session,
     save_public_user_last_export,
@@ -2623,6 +2624,7 @@ def start_public_access(
             password=payload.password,
             confirm_password=payload.confirm_password,
         )
+        reconcile_public_access_for_user(db, user)
         if user.is_active:
             db.commit()
             return public_access_payment_to_response(user, None, already_active=True)
