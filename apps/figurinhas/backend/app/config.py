@@ -33,7 +33,7 @@ class Settings:
     public_catalog_limit = int(os.getenv("FIGURINHAS_PUBLIC_CATALOG_RATE_LIMIT", "120"))
     public_service_config_limit = int(os.getenv("FIGURINHAS_PUBLIC_SERVICE_CONFIG_RATE_LIMIT", "60"))
     public_public_job_status_limit = int(os.getenv("FIGURINHAS_PUBLIC_JOB_STATUS_RATE_LIMIT", "90"))
-    public_public_file_limit = int(os.getenv("FIGURINHAS_PUBLIC_FILE_RATE_LIMIT", "120"))
+    public_public_file_limit = int(os.getenv("FIGURINHAS_PUBLIC_FILE_RATE_LIMIT", "600"))
     public_unlock_read_limit = int(os.getenv("FIGURINHAS_PUBLIC_UNLOCK_READ_RATE_LIMIT", "60"))
     public_download_limit = int(os.getenv("FIGURINHAS_PUBLIC_DOWNLOAD_RATE_LIMIT", "20"))
     public_job_worker_count = int(os.getenv("FIGURINHAS_PUBLIC_JOB_WORKER_COUNT", "3"))

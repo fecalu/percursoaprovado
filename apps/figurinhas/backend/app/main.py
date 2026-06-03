@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import logging
 import math
+import mimetypes
 import time
 import traceback
 import uuid
@@ -254,6 +255,7 @@ settings = get_settings()
 PUBLIC_FILE_PREFIXES = (
     "pages/",
     "crops/",
+    "public_previews/",
     "custom_stickers/",
     "custom_portraits/",
     "custom_bases/",
@@ -1345,7 +1347,21 @@ def download_public_file(request: Request, relative_path: str) -> FileResponse:
         limit=settings.public_public_file_limit,
     )
     file_path = _resolve_public_storage_path_or_404(relative_path)
-    return FileResponse(path=file_path, filename=file_path.name)
+    guessed_media_type, _ = mimetypes.guess_type(str(file_path))
+    if not guessed_media_type:
+        extension = file_path.suffix.lower()
+        if extension == ".webp":
+            guessed_media_type = "image/webp"
+        elif extension == ".png":
+            guessed_media_type = "image/png"
+        elif extension in {".jpg", ".jpeg"}:
+            guessed_media_type = "image/jpeg"
+    return FileResponse(
+        path=file_path,
+        filename=file_path.name,
+        media_type=guessed_media_type or "application/octet-stream",
+        headers={"Cache-Control": "public, max-age=86400, stale-while-revalidate=86400"},
+    )
 
 
 @app.get("/service-config", response_model=PublicServiceConfigResponse)
@@ -1390,7 +1406,10 @@ def list_public_albums(request: Request, db: Session = Depends(get_db)) -> list[
     _track_public_catalog_access(request)
     albums = db.execute(
         select(Album)
-        .options(selectinload(Album.collections).selectinload(Collection.album))
+        .options(
+            selectinload(Album.collections).selectinload(Collection.album),
+            selectinload(Album.collections).selectinload(Collection.pages),
+        )
         .order_by(Album.sort_order.asc(), Album.name.asc(), Album.id.asc())
     ).scalars().all()
 
@@ -1446,7 +1465,7 @@ def list_public_collections(
     )
     collections = db.execute(
         select(Collection)
-        .options(selectinload(Collection.album))
+        .options(selectinload(Collection.album), selectinload(Collection.pages))
         .where(Collection.status == CollectionStatus.PUBLICADA, Collection.is_system.is_(False))
         .order_by(Collection.sort_order.asc(), Collection.name.asc(), Collection.id.asc())
         .limit(limit)

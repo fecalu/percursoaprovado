@@ -95,6 +95,9 @@ _extra_pdf_page_count_cache: dict[int, dict] = {}
 SUPPORT_PROMPT_HIDE_DAYS = 90
 SUPPORT_PAYMENT_ALLOWED_AMOUNTS = (100, 300, 500, 1000, 2000, 5000)
 SUPPORT_PAYMENT_RECOMMENDED_AMOUNT = 500
+PUBLIC_COLLECTION_PREVIEW_MAX_LONGEST_SIDE = 480
+PUBLIC_STICKER_PREVIEW_MAX_LONGEST_SIDE = 320
+PUBLIC_PREVIEW_WEBP_QUALITY = 82
 
 
 def _log_export_plan_performance(event: str, **fields) -> None:
@@ -676,6 +679,49 @@ def _crop_sticker_image_from_page(sticker: Sticker, page_image: Image.Image, col
     relative = str(crop_path.relative_to(settings.storage_root).as_posix())
     sticker.crop_path = relative
     sticker.preview_path = relative
+
+
+def _public_preview_variant_relative_path(relative_path: str, *, longest_side: int) -> str:
+    normalized = Path(relative_path)
+    return str((Path("public_previews") / str(longest_side) / normalized).with_suffix(".webp").as_posix())
+
+
+def _ensure_public_preview_variant(relative_path: str | None, *, longest_side: int) -> str | None:
+    normalized = (relative_path or "").strip()
+    if not normalized:
+        return None
+
+    source_path = settings.storage_root / normalized
+    if not source_path.exists():
+        return normalized
+
+    target_relative = _public_preview_variant_relative_path(normalized, longest_side=longest_side)
+    target_path = settings.storage_root / target_relative
+
+    try:
+        if target_path.exists() and target_path.stat().st_mtime >= source_path.stat().st_mtime:
+            return target_relative
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        with Image.open(source_path) as opened_image:
+            preview = ImageOps.exif_transpose(opened_image)
+            longest_current_side = max(preview.width, preview.height)
+            if longest_current_side > longest_side:
+                preview.thumbnail((longest_side, longest_side), Image.Resampling.LANCZOS)
+            if "A" in preview.getbands():
+                preview = preview.convert("RGBA")
+            else:
+                preview = preview.convert("RGB")
+            preview.save(
+                target_path,
+                format="WEBP",
+                quality=PUBLIC_PREVIEW_WEBP_QUALITY,
+                method=6,
+            )
+        return target_relative
+    except Exception:
+        logger.exception("Nao foi possivel gerar preview publico otimizado para %s", normalized)
+        return normalized
 
 
 def refresh_sticker_ocr(sticker: Sticker, update_name: bool = False) -> None:
@@ -5254,7 +5300,11 @@ def _draw_sticker_on_export_page(
 
 
 def load_collection_or_fail(db: Session, collection_id: int) -> Collection:
-    statement = select(Collection).options(selectinload(Collection.album)).where(Collection.id == collection_id)
+    statement = (
+        select(Collection)
+        .options(selectinload(Collection.album), selectinload(Collection.pages))
+        .where(Collection.id == collection_id)
+    )
     collection = db.execute(statement).scalar_one_or_none()
     if not collection:
         raise LookupError("Colecao nao encontrada.")
@@ -5264,7 +5314,7 @@ def load_collection_or_fail(db: Session, collection_id: int) -> Collection:
 def load_collection_by_slug_or_fail(db: Session, slug: str, public_only: bool = False) -> Collection:
     statement = (
         select(Collection)
-        .options(selectinload(Collection.album))
+        .options(selectinload(Collection.album), selectinload(Collection.pages))
         .where(Collection.slug == slug, Collection.is_system.is_(False))
     )
     if public_only:
@@ -5388,6 +5438,11 @@ def collection_to_response(collection: Collection, stats: dict[str, int], *, inc
     if collection.pages:
         first_page = min(collection.pages, key=lambda page: (page.page_number, page.id))
         preview_image_path = first_page.image_path or None
+        if preview_image_path and not include_sensitive:
+            preview_image_path = _ensure_public_preview_variant(
+                preview_image_path,
+                longest_side=PUBLIC_COLLECTION_PREVIEW_MAX_LONGEST_SIDE,
+            )
     return {
         "id": collection.id,
         "album_id": collection.album_id,
@@ -5564,6 +5619,15 @@ def source_document_to_detail_response(document: SourceDocument) -> dict:
 
 
 def sticker_to_response(sticker: Sticker, *, include_sensitive: bool = True) -> dict:
+    preview_path = sticker.preview_path
+    if not include_sensitive and sticker.source_type == StickerSourceType.PDF:
+        preview_path = (
+            _ensure_public_preview_variant(
+                sticker.preview_path,
+                longest_side=PUBLIC_STICKER_PREVIEW_MAX_LONGEST_SIDE,
+            )
+            or sticker.preview_path
+        )
     return {
         "id": sticker.id,
         "collection_id": sticker.collection_id,
@@ -5593,7 +5657,7 @@ def sticker_to_response(sticker: Sticker, *, include_sensitive: bool = True) -> 
         "y_ratio": sticker.y_ratio,
         "width_ratio": sticker.width_ratio,
         "height_ratio": sticker.height_ratio,
-        "preview_path": sticker.preview_path,
+        "preview_path": preview_path,
         "crop_path": sticker.crop_path if include_sensitive else None,
         "active": sticker.active,
         "detected_automatically": sticker.detected_automatically,
