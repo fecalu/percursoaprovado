@@ -26,19 +26,18 @@ class ExportFile:
 
 @dataclass(frozen=True)
 class ProtectedPaths:
-    last_export_paths: set[str]
     order_paths: set[str]
 
     @property
     def all_paths(self) -> set[str]:
-        return self.last_export_paths | self.order_paths
+        return self.order_paths
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Limpa PDFs antigos de apps/figurinhas/storage/exports sem apagar "
-            "o ultimo PDF salvo nas contas nem PDFs referenciados por pedidos."
+            "PDFs referenciados por pedidos."
         )
     )
     parser.add_argument(
@@ -97,18 +96,12 @@ def load_protected_paths(database_path: Path) -> ProtectedPaths:
     connection = sqlite3.connect(str(database_path))
     try:
         cursor = connection.cursor()
-        last_export_paths = query_existing_column_values(
-            cursor,
-            table_name="figurinhas_public_user_last_exports",
-            column_name="file_path",
-        )
         order_paths = query_existing_column_values(
             cursor,
             table_name="figurinhas_print_orders",
             column_name="export_file_path",
         )
         return ProtectedPaths(
-            last_export_paths=last_export_paths,
             order_paths=order_paths,
         )
     finally:
@@ -205,7 +198,6 @@ def print_report(
     protected = plan["protected"]
     kept_by_policy = plan["kept_by_policy"]
     deletion_candidates = plan["deletion_candidates"]
-    protected_last = {item.relative_path for item in protected if item.relative_path in protected_paths.last_export_paths}
     protected_orders = {item.relative_path for item in protected if item.relative_path in protected_paths.order_paths}
 
     print(f"Modo: {'EXECUTE' if execute else 'DRY-RUN'}")
@@ -215,7 +207,6 @@ def print_report(
     print(f"Manter nao protegidos mais recentes: {keep_recent}")
     print()
     print(f"PDFs encontrados: {len(files)}")
-    print(f"Protegidos por ultimo PDF da conta: {len(protected_last)}")
     print(f"Protegidos por pedidos: {len(protected_orders)}")
     print(f"Protegidos no total: {len(protected)} ({human_size(sum(item.size_bytes for item in protected))})")
     print(

@@ -65,7 +65,6 @@ from .models import (
     PublicPasswordResetToken,
     PublicUser,
     PublicUserCredit,
-    PublicUserLastExport,
     PublicUserSession,
     ServiceSettings,
     SupportPayment,
@@ -3439,48 +3438,8 @@ def revoke_public_user_session(db: Session, session_token: str) -> None:
         db.delete(session)
 
 
-def save_public_user_last_export(db: Session, user: PublicUser, export_record: Export) -> PublicUserLastExport:
-    if not user.is_active:
-        raise ValueError("O usuario precisa estar com o acesso ativo para guardar o ultimo PDF.")
-
-    last_export = user.last_export
-    previous_file_path = (last_export.file_path if last_export else "").strip()
-
-    if last_export is None:
-        last_export = PublicUserLastExport(
-            user=user,
-            export_id=export_record.id,
-            file_path=export_record.file_path,
-            sheet_count=max(int(export_record.sheet_count or 1), 1),
-        )
-        db.add(last_export)
-    else:
-        last_export.export_id = export_record.id
-        last_export.file_path = export_record.file_path
-        last_export.sheet_count = max(int(export_record.sheet_count or 1), 1)
-
-    db.flush()
-
-    normalized_previous = previous_file_path
-    normalized_current = (export_record.file_path or "").strip()
-    if normalized_previous and normalized_previous != normalized_current:
-        previous_file = settings.storage_root / normalized_previous
-        try:
-            if previous_file.exists() and previous_file.is_file():
-                previous_file.unlink()
-        except OSError:
-            logger.warning("Nao foi possivel apagar o export antigo da conta: %s", previous_file)
-
-    return last_export
-
-
 def public_user_to_response(user: PublicUser) -> dict:
     balance = ensure_public_user_credit_balance(user) if user.is_active else user.credit_balance
-    last_export = user.last_export
-    if last_export:
-        export_file = settings.storage_root / last_export.file_path
-        if not export_file.exists() or not export_file.is_file():
-            last_export = None
     return {
         "email": user.email,
         "is_active": user.is_active,
@@ -3489,10 +3448,10 @@ def public_user_to_response(user: PublicUser) -> dict:
         "activated_at": user.activated_at,
         "ai_credits_total": balance.ai_credits_total if balance else 0,
         "ai_credits_remaining": balance.ai_credits_remaining if balance else 0,
-        "last_export_id": last_export.export_id if last_export else None,
-        "last_export_file_name": Path(last_export.file_path).name if last_export and last_export.file_path else None,
-        "last_export_sheet_count": last_export.sheet_count if last_export else None,
-        "last_export_created_at": last_export.updated_at if last_export else None,
+        "last_export_id": None,
+        "last_export_file_name": None,
+        "last_export_sheet_count": None,
+        "last_export_created_at": None,
     }
 
 

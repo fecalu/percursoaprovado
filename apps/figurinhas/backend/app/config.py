@@ -40,7 +40,7 @@ class Settings:
     public_job_queue_limit = int(os.getenv("FIGURINHAS_PUBLIC_JOB_QUEUE_LIMIT", "20"))
     public_access_enabled = os.getenv("FIGURINHAS_PUBLIC_ACCESS_ENABLED", "false").lower() == "true"
     public_access_price_cents = int(os.getenv("FIGURINHAS_PUBLIC_ACCESS_PRICE_CENTS", "300"))
-    public_access_ai_credits = int(os.getenv("FIGURINHAS_PUBLIC_ACCESS_AI_CREDITS", "5"))
+    public_access_ai_credits = int(os.getenv("FIGURINHAS_PUBLIC_ACCESS_AI_CREDITS", "3"))
     public_magic_link_ttl_minutes = int(os.getenv("FIGURINHAS_PUBLIC_MAGIC_LINK_TTL_MINUTES", "30"))
     public_user_session_ttl_hours = int(os.getenv("FIGURINHAS_PUBLIC_USER_SESSION_TTL_HOURS", "720"))
     public_magic_link_base_url = os.getenv("FIGURINHAS_PUBLIC_MAGIC_LINK_BASE_URL", "").strip()

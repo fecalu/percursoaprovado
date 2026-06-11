@@ -210,7 +210,6 @@ from .services import (
     reconcile_public_access_for_user,
     refresh_sticker_ocr,
     revoke_public_user_session,
-    save_public_user_last_export,
     save_prepared_cutout_assets,
     save_custom_base_image,
     save_custom_template_layer_image,
@@ -2382,10 +2381,6 @@ def create_export_job(
                 extra_selections=[item.model_dump() for item in payload.extras],
                 progress_callback=reporter,
             )
-            if public_user_id:
-                worker_user = worker_db.get(PublicUser, public_user_id)
-                if worker_user:
-                    save_public_user_last_export(worker_db, worker_user, export_record)
             if generated_sticker_requires_manual_unlock(generated_sticker, service_settings):
                 consume_custom_sticker_unlock_use(
                     worker_db,
@@ -2512,8 +2507,6 @@ def create_export(
         db,
         extra_selections=[item.model_dump() for item in payload.extras],
     )
-    if public_user:
-        save_public_user_last_export(db, public_user, export_record)
     if generated_sticker_requires_manual_unlock(generated_sticker, service_settings):
         consume_custom_sticker_unlock_use(
             db,
@@ -2863,21 +2856,7 @@ def get_public_me(user: PublicUser = Depends(require_public_user)) -> dict:
 
 @app.get("/public/last-export", response_model=PublicLastExportResponse | None)
 def get_public_last_export(user: PublicUser = Depends(require_public_user)) -> dict | None:
-    last_export = user.last_export
-    if not last_export:
-        return None
-
-    file_path = settings.storage_root / last_export.file_path
-    if not file_path.exists() or not file_path.is_file():
-        return None
-
-    return {
-        "export_id": last_export.export_id,
-        "file_name": Path(last_export.file_path).name,
-        "sheet_count": last_export.sheet_count,
-        "created_at": last_export.updated_at,
-        "download_path": _build_export_download_path(last_export.export_id),
-    }
+    return None
 
 
 @app.post("/public/logout", status_code=status.HTTP_204_NO_CONTENT)

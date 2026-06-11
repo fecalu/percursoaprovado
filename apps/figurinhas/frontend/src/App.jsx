@@ -3318,28 +3318,6 @@ function PublicPage() {
     }
   }
 
-  async function handleDownloadLastPublicExport() {
-    if (!publicAccessToken) return
-    setPublicAccessBusy(true)
-    setPublicAccessError('')
-    try {
-      const data = await apiFetch('/public/last-export', {
-        headers: buildPublicAuthHeaders(publicAccessToken)
-      })
-      if (!data?.download_path) {
-        setPublicAccessError('Você ainda não tem um PDF salvo na conta.')
-        await refreshPublicAccount(publicAccessToken, { silent: true })
-        return
-      }
-      triggerFileDownload(data.download_path)
-      await refreshPublicAccount(publicAccessToken, { silent: true })
-    } catch (err) {
-      setPublicAccessError(err.message)
-    } finally {
-      setPublicAccessBusy(false)
-    }
-  }
-
   async function handleOpenMySticker() {
     if (!(await ensurePublicAccessOrPrompt())) return
     setMyStickerModalOpen(true)
@@ -3718,7 +3696,7 @@ function PublicPage() {
                 </strong>
                 <span>
                   {publicAccount?.has_access
-                    ? 'Abra sua conta para ver seus créditos de IA e o último PDF.'
+                    ? 'Abra sua conta para ver seus créditos de IA e o status do seu acesso.'
                     : `Libere PDFs, Minha Figurinha manual e ${serviceConfig.public_access_ai_credits} créditos de IA por ${publicAccessPriceLabel}.`}
                 </span>
               </div>
@@ -5313,7 +5291,7 @@ function PublicPage() {
 	                  <div className="fig-public-access-account-hero">
 	                    <span className="fig-public-access-eyebrow">Conta ativa</span>
 	                    <strong>Sua conta está liberada</strong>
-	                    <p>Confira seus dados, seus créditos de IA e o último PDF salvo na conta.</p>
+	                    <p>Confira seus dados, o status do seu acesso e seus créditos de IA.</p>
 	                  </div>
 	                  <div className="fig-public-access-account-grid">
 	                    <div className="fig-form-card fig-public-access-account-card fig-public-access-account-card--email">
@@ -5329,30 +5307,6 @@ function PublicPage() {
 	                      <strong>{publicAccount.ai_credits_remaining} / {publicAccount.ai_credits_total}</strong>
 	                    </div>
 	                  </div>
-	                  <div className="fig-form-card fig-public-access-account-card fig-public-access-account-card--export">
-                      <span>Último PDF</span>
-                      {publicAccount.last_export_id ? (
-                        <>
-                          <strong>{publicAccount.last_export_file_name || 'PDF pronto para baixar'}</strong>
-                          <small>
-                            {publicAccount.last_export_sheet_count || 1} folha(s) ·{' '}
-                            {formatDateTime(publicAccount.last_export_created_at)}
-                          </small>
-                          <div className="fig-public-access-account-actions">
-                            <button
-                              type="button"
-                              className="fig-primary-button"
-                              onClick={handleDownloadLastPublicExport}
-                              disabled={publicAccessBusy}
-                            >
-                              {publicAccessBusy ? 'Preparando...' : 'Baixar novamente'}
-                            </button>
-                          </div>
-                        </>
-                      ) : (
-                        <small>Você ainda não gerou nenhum PDF nesta conta.</small>
-                      )}
-                    </div>
                     <div className="fig-public-access-account-actions">
                       <button
                         type="button"
@@ -5376,11 +5330,6 @@ function PublicPage() {
 	                    Gere seus PDFs, use a Minha Figurinha manual sem taxa extra e receba {serviceConfig.public_access_ai_credits}{' '}
 	                    créditos de IA.
 	                  </p>
-	                </div>
-
-	                <div className="fig-public-access-note-list fig-public-access-note-list--compact">
-	                  <p>Você pode montar antes de pagar. O acesso só é solicitado quando for gerar o PDF ou usar os recursos.</p>
-	                  <p>Não se trata da liberação de um único PDF: o pagamento ativa o acesso permanente da sua conta.</p>
 	                </div>
 
 	                <div className="fig-public-access-feature-grid">
