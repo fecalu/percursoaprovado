@@ -2297,7 +2297,7 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
   pointer-events: none;
-  font-family: 'Ebrima', 'Segoe UI', sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .fig-range-field {
