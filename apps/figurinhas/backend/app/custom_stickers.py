@@ -37,18 +37,12 @@ PROFILE_THEMES = {
 
 CUSTOM_FONT_SEARCH = {
     True: [
-        Path(__file__).resolve().parent / "fonts" / "ebrimabd.ttf",
-        Path("C:/Windows/Fonts/ebrimabd.ttf"),
-        Path("/usr/share/fonts/truetype/msttcorefonts/Ebrima Bold.ttf"),
-        Path("/usr/share/fonts/truetype/msttcorefonts/ebrimabd.ttf"),
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        Path("C:/Windows/Fonts/arialbd.ttf"),
     ],
     False: [
-        Path(__file__).resolve().parent / "fonts" / "ebrima.ttf",
-        Path("C:/Windows/Fonts/ebrima.ttf"),
-        Path("/usr/share/fonts/truetype/msttcorefonts/Ebrima.ttf"),
-        Path("/usr/share/fonts/truetype/msttcorefonts/ebrima.ttf"),
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+        Path("C:/Windows/Fonts/arial.ttf"),
     ],
 }
 

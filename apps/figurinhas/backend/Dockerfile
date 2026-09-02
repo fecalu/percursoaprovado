@@ -7,6 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    fonts-dejavu-core \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
