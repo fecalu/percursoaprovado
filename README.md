@@ -1,91 +1,61 @@
-# EduPercurso — Projeto Completo
+# Percurso Aprovado
 
-Plataforma de estudo por vídeo para preparação na prova prática de habilitação.
+Monorepo com duas aplicações:
 
-Stack: **Java 17 + Spring Boot 3 · React 18 + Vite · PostgreSQL 16 · Docker**
+- `edu-percurso`: plataforma de estudos para preparação da prova prática de habilitação.
+- `figurinhas`: ferramenta web para montar seleções de figurinhas e gerar PDFs de impressão.
 
----
+## Stack
 
-## Como rodar (um único comando)
+- Backend principal: Java 17 + Spring Boot 3
+- Frontend principal: React + Vite
+- Banco principal: PostgreSQL 16
+- App Figurinhas: FastAPI + SQLite + React + Vite
+- Infra local: Docker e Docker Compose
 
-### Pré-requisito
-Ter o **Docker Desktop** instalado e aberto.
-→ https://www.docker.com/products/docker-desktop/
+## Como Rodar Localmente
 
-### Passos
+Pré-requisito: Docker Desktop instalado e aberto.
 
 ```bash
-# 1. Entre na pasta do projeto
-cd edu-percurso-completo
-
-# 2. Suba tudo
 docker compose up --build
 ```
 
-Aguarde o build (primeira vez demora ~3 min). Quando aparecer:
+Depois do build, acesse:
 
-```
-edu_backend  | Started EduPercursoApplication
-```
-
-Acesse: **http://localhost**
-
----
-
-## Credenciais padrão
-
-| Perfil | E-mail                  | Senha    |
-|--------|-------------------------|----------|
-| Admin  | suporte@percursoaprovado.com.br | admin123 |
-| Aluno  | crie uma conta nova     | —        |
-
----
-
-## O que está rodando
-
-| Container      | O que faz                          | Porta interna |
-|----------------|------------------------------------|---------------|
-| `edu_db`       | PostgreSQL com as tabelas criadas  | 5432          |
-| `edu_backend`  | API REST Spring Boot               | 8080          |
-| `edu_frontend` | React servido pelo Nginx           | 80 → localhost|
-
-O banco é criado e populado automaticamente pelo Flyway na primeira vez.
-
----
-
-## Parar / reiniciar
-
-```bash
-# Parar (mantém os dados do banco)
-docker compose down
-
-# Reiniciar sem rebuild
-docker compose up
-
-# Rebuild após mudança de código
-docker compose up --build
-
-# Apagar tudo incluindo banco (dados zerados)
-docker compose down -v
+```text
+http://localhost
 ```
 
----
+## Configuração
 
-## Estrutura do projeto
+Este projeto usa variáveis de ambiente. Arquivos reais como `.env`, `.env.hostinger` e bancos locais não devem ser commitados.
 
+Use os arquivos de exemplo como base:
+
+```text
+.env.example
+.env.hostinger.example
+.env.hostinger.homolog.example
+apps/figurinhas/.env.example
 ```
-edu-percurso-completo/
-├── edu-percurso-backend/      Java 17 + Spring Boot 3
-│   ├── pom.xml
-│   └── src/
-├── edu-percurso-frontend/     React 18 + Vite
-│   ├── package.json
-│   └── src/
-├── nginx/
-│   └── nginx.conf             proxy /api → backend
-├── Dockerfile.backend
-├── Dockerfile.frontend
+
+Nunca publique senhas, tokens, chaves de API, dumps de banco, backups ou arquivos gerados em produção.
+
+## Estrutura
+
+```text
+.
+├── edu-percurso-backend/
+├── edu-percurso-frontend/
+├── apps/
+│   └── figurinhas/
+├── deploy/
+├── docs/
 ├── docker-compose.yml
-├── .env                       senhas (não commitar)
-└── .env.example
+└── README.md
 ```
+
+## Observação Sobre Conteúdo
+
+O código deste repositório é voltado à implementação técnica da plataforma. Arquivos gerados por usuários, bancos locais, PDFs, imagens de coleções e backups devem permanecer fora do Git.
