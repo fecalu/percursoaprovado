@@ -2,6 +2,16 @@
 .env.hostinger
 .env.hostinger.homolog
 *.log
+*.tar
+*.tar.gz
+*.zip
+*.bak
+*.backup
+*.dump
+*.sql
+backups/
+.codex-tmp/
+test-results/
 
 # Backend
 edu-percurso-backend/target/
@@ -12,12 +22,8 @@ edu-percurso-frontend/dist/
 apps/figurinhas/frontend/node_modules/
 apps/figurinhas/frontend/dist/
 apps/figurinhas/backend/.venv/
-apps/figurinhas/storage/originals/
-apps/figurinhas/storage/pages/
-apps/figurinhas/storage/crops/
-apps/figurinhas/storage/exports/
-apps/figurinhas/storage/*.db
-apps/figurinhas/storage/*.sqlite3
+apps/figurinhas/storage/*
+!apps/figurinhas/storage/.gitkeep
 
 # Editor / OS
 .DS_Store

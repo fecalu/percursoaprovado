@@ -1471,6 +1471,24 @@ a {
   gap: 1rem;
 }
 
+.fig-modal-shell--public-access .fig-support-helper-strip {
+  margin-top: 0;
+}
+
+.fig-modal-shell--public-access .fig-support-helper-strip > div {
+  min-width: 0;
+  width: 100%;
+}
+
+.fig-modal-shell--public-access .fig-support-code-block {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .fig-public-access-account-hero {
   display: flex;
   flex-direction: column;
@@ -1609,6 +1627,25 @@ a {
   .fig-public-access-account-actions {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .fig-modal-shell--public-access .fig-support-helper-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.58rem;
+  }
+
+  .fig-modal-shell--public-access .fig-support-helper-strip .fig-secondary-button {
+    width: 100%;
+    min-height: 40px;
+  }
+
+  .fig-modal-shell--public-access .fig-support-code-block {
+    padding: 0.55rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.68rem !important;
+    line-height: 1.42;
+    overflow-x: auto;
   }
 
   .fig-modal-shell--public-access {
